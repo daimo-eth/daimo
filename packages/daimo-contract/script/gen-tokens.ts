@@ -15,7 +15,7 @@ const tokenListURLs = [
   "https://tokens.coingecko.com/arbitrum-one/all.json",
   "https://tokens.coingecko.com/base/all.json",
   "https://tokens.coingecko.com/polygon-pos/all.json",
-  "https://tokens.coingecko.com/avalanche/all.json",
+  // "https://tokens.coingecko.com/avalanche/all.json",
 ];
 
 interface TokenListResponse {

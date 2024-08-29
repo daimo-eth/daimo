@@ -1,1409 +1,2120 @@
 [
   {
-    "chainId": 43114,
-    "feedAddress": "0x4F3ddF9378a4865cf4f28BE51E10AECb83B7daeE",
-    "tokenSymbol": "SPELL",
-    "tokenAddress": "0xCE1bFFBD5374Dac86a2893119683F4911a2F7814",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x02D35d3a8aC3e1626d3eE09A78Dd87286F5E8e3a",
-    "tokenSymbol": "JOE",
-    "tokenAddress": "0x6e84a6216eA6dACC71eE8E6b0a5B7322EEbC0fDd",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x4Cf57DC9028187b9DAaF773c8ecA941036989238",
-    "tokenSymbol": "XAVA",
-    "tokenAddress": "0xd1c3f94DE7e5B45fa4eDBBA472491a9f4B166FC4",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x2854Ca10a54800e15A2a25cFa52567166434Ff0a",
-    "tokenSymbol": "SAVAX",
-    "tokenAddress": "0x2b2C81e08f1Af8835a78Bb2A90AE924ACE0eA4bE",
-    "decimals": 18
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x28043B1Ebd41860B93EC1F1eC19560760B6dB556",
-    "tokenSymbol": "YFI",
-    "tokenAddress": "0x9eAaC1B23d935365bD7b542Fe22cEEe2922f52dc",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x9Cf3Ef104A973b351B2c032AA6793c3A6F76b448",
-    "tokenSymbol": "TUSD",
-    "tokenAddress": "0x1C20E891Bab6b1727d14Da358FAe2984Ed9B59EB",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x3F968A21647d7ca81Fb8A5b69c0A452701d5DCe8",
-    "tokenSymbol": "GMX",
-    "tokenAddress": "0x62edc0692BD897D2295872a9FFCac5425011c661",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x9D6AA0AC8c4818433bEA7a74F49C73B57BcEC4Ec",
-    "tokenSymbol": "COMP",
-    "tokenAddress": "0xc3048E19E76CB9a3Aa9d77D8C03c29Fc906e2437",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x36E039e6391A5E7A7267650979fdf613f659be5D",
-    "tokenSymbol": "QI",
-    "tokenAddress": "0x8729438EB15e2C8B576fCc6AeCdA6A148776C0F5",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x9df2195dc96e6Ef983B1aAC275649F3f28F82Aa1",
-    "tokenSymbol": "KNC",
-    "tokenAddress": "0x39fC9e94Caeacb435842FADeDeCB783589F50f5f",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0xe89B3CE86D25599D1e615C0f6a353B4572FF868D",
-    "tokenSymbol": "BAT",
-    "tokenAddress": "0x98443B96EA4b0858FDF3219Cd13e98C7A4690588",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x5D1F504211c17365CA66353442a74D4435A8b778",
-    "tokenSymbol": "MIMATIC",
-    "tokenAddress": "0x5c49b268c9841AFF1Cc3B0a418ff5c3442eE3F3b",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0xbBa56eF1565354217a3353a466edB82E8F25b08e",
-    "tokenSymbol": "FRAX",
-    "tokenAddress": "0xD24C2Ad096400B6FBcd2ad8B24E7acBc21A1da64",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x5B4712ce553E94d9b22bA3CfA10CB6F32fb828E0",
-    "tokenSymbol": "COQ",
-    "tokenAddress": "0x420FcA0121DC28039145009570975747295f2329",
-    "decimals": 18
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x12Af94c3716bbf339Aa26BfD927DDdE63B27D50C",
-    "tokenSymbol": "FXS",
-    "tokenAddress": "0x214DB107654fF987AD859F34125307783fC8e387",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x54EdAB30a7134A16a54218AE64C73e1DAf48a8Fb",
-    "tokenSymbol": "MIM",
-    "tokenAddress": "0x130966628846BFd36ff31a822705796e8cb8C18D",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x9a1372f9b1B71B3A5a72E092AE67E172dBd7Daaa",
-    "tokenSymbol": "UNI",
-    "tokenAddress": "0x8eBAf22B6F053dFFeaf46f4Dd9eFA95D89ba8580",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x49ccd9ca821EfEab2b98c60dC60F518E765EDe9a",
-    "tokenSymbol": "LINK",
-    "tokenAddress": "0x5947BB275c521040051D82396192181b413227A3",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x3E54eB0475051401D093702A5DB84EFa1Ab77b14",
-    "tokenSymbol": "MKR",
-    "tokenAddress": "0x88128fd4b259552A9A1D457f435a6527AAb72d42",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x51D7180edA2260cc4F6e4EebB82FEF5c3c2B8300",
-    "tokenSymbol": "DAI",
-    "tokenAddress": "0xd586E7F844cEa2F87f50152665BCbc2C279D8d70",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x976B3D034E162d8bD72D6b9C989d545b839003b0",
-    "tokenSymbol": "ETH",
-    "tokenAddress": "0x8b82A291F83ca07Af22120ABa21632088fC92931",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x01752eAAB988ECb0ceBa2C8FC97c4f1d38Bf246D",
-    "tokenSymbol": "SNX",
-    "tokenAddress": "0xBeC243C995409E6520D7C41E404da5dEba4b209B",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0xf58B78581c480caFf667C63feDd564eCF01Ef86b",
-    "tokenSymbol": "UST",
-    "tokenAddress": "0xb599c3590F42f8F995ECfa0f85D2980B76862fc1",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x86442E3a98558357d46E6182F4b262f76c4fa26F",
-    "tokenSymbol": "WBTC",
-    "tokenAddress": "0x50b7545627a5162F82A992c33b87aDc75187B218",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0xEBE676ee90Fe1112671f19b6B7459bC678B67e8a",
-    "tokenSymbol": "USDT",
-    "tokenAddress": "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x3CA13391E9fb38a75330fb28f8cc2eB3D9ceceED",
-    "tokenSymbol": "AAVE",
-    "tokenAddress": "0x63a72806098Bd3D9520cC43356dD78afe5D386D9",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x3368310bC4AeE5D96486A73bae8E6b49FcDE62D3",
-    "tokenSymbol": "EURC",
-    "tokenAddress": "0xC891EB4cbdEFf6e073e859e987815Ed1505c2ACD",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0x449A373A090d8A1e5F74c63Ef831Ceff39E94563",
-    "tokenSymbol": "SUSHI",
-    "tokenAddress": "0x37B608519F91f70F2EeB0e5Ed9AF4061722e4F76",
-    "decimals": 8
-  },
-  {
-    "chainId": 43114,
-    "feedAddress": "0xF096872672F44d6EBA71458D74fe67F9a77a23B9",
-    "tokenSymbol": "USDC",
-    "tokenAddress": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
-    "decimals": 8
-  },
-  {
     "chainId": 42161,
-    "feedAddress": "0x87121F6c9A9F6E90E59591E4Cf4804873f54A95b",
-    "tokenSymbol": "MIM",
-    "tokenAddress": "0xFEa7a6a0B346362BF88A9e4A88416B77a57D6c2A",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xbF539d4c2106dd4D9AB6D56aed3d9023529Db145",
-    "tokenSymbol": "KNC",
-    "tokenAddress": "0xe4DDDfe67E7164b0FE14E218d80dC4C08eDC01cB",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x0411D28c94d85A36bC72Cb0f875dfA8371D8fFfF",
-    "tokenSymbol": "LUSD",
-    "tokenAddress": "0x93b346b6BC2548dA6A1E7d98E9a421B42541425b",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xc373B9DB0707fD451Bc56bA5E9b029ba26629DF0",
-    "tokenSymbol": "DPX",
-    "tokenAddress": "0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3",
-    "tokenSymbol": "USDC",
-    "tokenAddress": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x6548a81E640C000150e06AB413fB3F772682e9c5",
-    "tokenSymbol": "USD+",
-    "tokenAddress": "0xe80772Eaf6e2E18B651F160Bc9158b2A5caFCA65",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xF0b7159BbFc341Cc41E7Cb182216F62c6d40533D",
-    "tokenSymbol": "RPL",
-    "tokenAddress": "0xB766039cc6DB368759C1E56B79AFfE831d0Cc507",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xb2A824043730FE05F3DA2efaFa1CBbe83fa548D6",
-    "tokenSymbol": "ARB",
-    "tokenAddress": "0x912CE59144191C1204E64559FE8253a0e49E6548",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xe74d69E233faB0d8F48921f2D93aDfDe44cEb3B7",
-    "tokenSymbol": "STG",
-    "tokenAddress": "0x6694340fc020c5E6B96567843da2df01b2CE1eb6",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x66853E19d73c0F9301fe099c324A1E9726953433",
-    "tokenSymbol": "PENDLE",
-    "tokenAddress": "0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xE89E98CE4E19071E59Ed4780E0598b541CE76486",
-    "tokenSymbol": "GNS",
-    "tokenAddress": "0x18c11FD286C5EC11c3b683Caa813B77f5163A122",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xe7C53FFd03Eb6ceF7d208bC4C13446c76d1E5884",
-    "tokenSymbol": "COMP",
-    "tokenAddress": "0x354A6dA3fcde098F8389cad84b0182725c6C91dE",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xBE5eA816870D11239c543F84b71439511D70B94f",
-    "tokenSymbol": "BAL",
-    "tokenAddress": "0x040d1EdC9569d4Bab2D15287Dc5A4F10F56a56B8",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xcfF9349ec6d027f20fC9360117fef4a1Ad38B488",
-    "tokenSymbol": "RSR",
-    "tokenAddress": "0xCa5Ca9083702c56b481D1eec86F1776FDbd2e594",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x0809E3d38d1B4214958faf06D8b1B1a2b73f2ab8",
-    "tokenSymbol": "FRAX",
-    "tokenAddress": "0x17FC002b466eEc40DaE837Fc4bE5c67993ddBd6F",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x47E55cCec6582838E173f252D08Afd8116c2202d",
-    "tokenSymbol": "MAGIC",
-    "tokenAddress": "0x539bdE0d7Dbd336b79148AA742883198BBF60342",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x745Ab5b69E01E2BE1104Ca84937Bb71f96f5fB21",
-    "tokenSymbol": "YFI",
-    "tokenAddress": "0x82e3A8F066a6989666b031d916c43672085b1582",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x02DEd5a7EDDA750E3Eb240b54437a54d57b74dBE",
-    "tokenSymbol": "PEPE",
-    "tokenAddress": "0x25d887Ce7a35172C62FeBFD67a1856F20FaEbB00",
-    "decimals": 18
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x84e8237CC1418Ea1B4A1e0C3e7F48c3A5fbC81AF",
-    "tokenSymbol": "AXL",
-    "tokenAddress": "0x23ee2343B892b1BB63503a4FAbc840E0e2C6810f",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x0F38D86FceF4955B705F35c9e41d1A16e0637c73",
-    "tokenSymbol": "GRT",
-    "tokenAddress": "0x9623063377AD1B27544C965cCd7342f7EA7e88C7",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xaebDA2c976cfd1eE1977Eac079B4382acb849325",
-    "tokenSymbol": "CRV",
-    "tokenAddress": "0x11cDb42B0EB46D95f990BeDD4695A6e3fA034978",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x5e2b5C5C07cCA3437c4D724225Bb42c7E55d1597",
-    "tokenSymbol": "WOO",
-    "tokenAddress": "0xcAFcD85D8ca7Ad1e1C6F82F651fA15E33AEfD07b",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x300b0990Ba191a1AeBef6e5Ed8B5B308C0B2d0c9",
-    "tokenSymbol": "XVS",
-    "tokenAddress": "0xc1Eb7689147C81aC840d4FF0D298489fc7986d52",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x20d0Fcab0ECFD078B036b6CAf1FaC69A6453b352",
-    "tokenSymbol": "RDNT",
-    "tokenAddress": "0x3082CC23568eA640225c2467653dB90e9250AaA0",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x86E53CF1B870786351Da77A57575e79CB55812CB",
-    "tokenSymbol": "LINK",
-    "tokenAddress": "0xf97f4df75117a78c1A5a0DBb814Af92458539FB4",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xA43A34030088E6510FecCFb77E88ee5e7ed0fE64",
-    "tokenSymbol": "LDO",
-    "tokenAddress": "0x13Ad51ed4F1B7e9Dc168d8a00cB3f4dDD85EfA60",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x1940fEd49cDBC397941f2D336eb4994D599e568B",
-    "tokenSymbol": "ZRO",
-    "tokenAddress": "0x6985884C4392D348587B19cb9eAAf157F13271cd",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7",
-    "tokenSymbol": "USDT",
-    "tokenAddress": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x6fAbee62266Da6686EE2744C6f15bb8352d2f28D",
-    "tokenSymbol": "TUSD",
-    "tokenAddress": "0x4D15a3A2286D883AF0AA1B3f21367843FAc63E07",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xDB98056FecFff59D032aB628337A4887110df3dB",
-    "tokenSymbol": "GMX",
-    "tokenAddress": "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB",
-    "tokenSymbol": "DAI",
-    "tokenAddress": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x806c532D543352e7C344ba6C7F3F00Bfbd309Af1",
-    "tokenSymbol": "XAI",
-    "tokenAddress": "0x4Cb9a7AE498CEDcBb5EAe9f25736aE7d428C9D66",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x04180965a782E487d0632013ABa488A472243542",
-    "tokenSymbol": "JOE",
-    "tokenAddress": "0x371c7ec6D8039ff7933a2AA28EB827Ffe1F52f07",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xd0C7101eACbB49F3deCcCc166d238410D6D46d57",
-    "tokenSymbol": "WBTC",
-    "tokenAddress": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xA33a06c119EC08F92735F9ccA37e07Af08C4f281",
-    "tokenSymbol": "DODO",
-    "tokenAddress": "0x69Eb4FA4a2fbd498C257C57Ea8b7655a2559A581",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x59644ec622243878d1464A9504F9e9a31294128a",
-    "tokenSymbol": "MIMATIC",
-    "tokenAddress": "0x3F56e0c36d275367b8C502090EDF38289b3dEa0d",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x4Ee1f9ec1048979930aC832a3C1d18a0b4955a02",
-    "tokenSymbol": "USDD",
-    "tokenAddress": "0x680447595e8b7b3Aa1B43beB9f6098C79ac2Ab3f",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0xb2A8BA74cbca38508BA1632761b56C897060147C",
-    "tokenSymbol": "SUSHI",
-    "tokenAddress": "0xd4d42F0b6DEF4CE0383636770eF773390d85c61A",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x9C917083fDb403ab5ADbEC26Ee294f6EcAda2720",
-    "tokenSymbol": "UNI",
-    "tokenAddress": "0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x383b3624478124697BEF675F07cA37570b73992f",
-    "tokenSymbol": "SPELL",
-    "tokenAddress": "0x3E6648C5a70A150A88bCE65F4aD4d506Fe15d2AF",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x36a121448D74Fa81450c992A1a44B9b7377CD3a5",
-    "tokenSymbol": "FXS",
-    "tokenAddress": "0x9d2F299715D94d8A7E6F5eaa8E654E8c74a988A7",
-    "decimals": 8
-  },
-  {
-    "chainId": 42161,
-    "feedAddress": "0x7Fa028B87e73deb66DcFf9Fa40f4C7C6Dd2Fd254",
-    "tokenSymbol": "USDV",
-    "tokenAddress": "0x323665443CEf804A3b5206103304BD4872EA4253",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0x676C4C6C31D97A5581D3204C04A8125B350E2F9D",
-    "tokenSymbol": "AXL",
-    "tokenAddress": "0x23ee2343B892b1BB63503a4FAbc840E0e2C6810f",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0x7e860098F58bBFC8648a4311b374B1D669a2bc6B",
-    "tokenSymbol": "USDC",
-    "tokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0xEf2E24ba6def99B5e0b71F6CDeaF294b02163094",
-    "tokenSymbol": "RDNT",
-    "tokenAddress": "0xd722E55C1d9D9fA0021A5215Cbb904b92B3dC5d4",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0x591e79239a7d679378eC8c847e5038150364C78F",
-    "tokenSymbol": "DAI",
-    "tokenAddress": "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0xd7818272B9e248357d13057AAb0B417aF31E817d",
-    "tokenSymbol": "CBETH",
-    "tokenAddress": "0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0x674940e1dBf7FD841b33156DA9A88afbD95AaFBa",
-    "tokenSymbol": "WIF",
-    "tokenAddress": "0x7f6F6720a73C0f54f95AB343D7eFeB1FA991F4F7",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0x63Af8341b62E683B87bB540896bF283D96B4D385",
-    "tokenSymbol": "STG",
-    "tokenAddress": "0xE3B53AF74a4BF62Ae5511055290838050bf764Df",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0xd5Ec94430eF4170D819E0996BC53ed40d31638d8",
-    "tokenSymbol": "USD+",
-    "tokenAddress": "0xB79DD08EA68A908A97220C76d19A6aA9cBDE4376",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0x979447581b39caCA33EF0CA8208592393D16cc13",
-    "tokenSymbol": "MAVIA",
-    "tokenAddress": "0x24fcFC492C1393274B6bcd568ac9e225BEc93584",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0xdc31a4CCfCA039BeC6222e20BE7770E12581bfEB",
-    "tokenSymbol": "ZRO",
-    "tokenAddress": "0x6985884C4392D348587B19cb9eAAf157F13271cd",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0x4EC5970fC728C5f65ba413992CD5fF6FD70fcfF0",
-    "tokenSymbol": "AERO",
-    "tokenAddress": "0x940181a94A35A4569E4529A3CDfB74e38FD98631",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0xE62BcE5D7CB9d16AB8b4D622538bc0A50A5799c2",
-    "tokenSymbol": "DEGEN",
-    "tokenAddress": "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0xD40e758b5eC80820B68DFC302fc5Ce1239083548",
-    "tokenSymbol": "YFI",
-    "tokenAddress": "0x9EaF8C1E34F05a589EDa6BAfdF391Cf6Ad3CB239",
-    "decimals": 8
-  },
-  {
-    "chainId": 8453,
-    "feedAddress": "0xAa98aE504658766Dfe11F31c5D95a0bdcABDe0b1",
-    "tokenSymbol": "RSR",
-    "tokenAddress": "0xaB36452DbAC151bE02b16Ca17d8919826072f64a",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x698B585CbC4407e2D54aa898B2600B53C68958f7",
-    "tokenSymbol": "WSTETH",
-    "tokenAddress": "0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x7f99817d87baD03ea21E05112Ca799d715730efe",
-    "tokenSymbol": "SUSD",
-    "tokenAddress": "0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x9dfc79Aaeb5bb0f96C6e9402671981CdFc424052",
-    "tokenSymbol": "LUSD",
-    "tokenAddress": "0xc40F949F8a4e094D1b49a23ea9241D289B7b2819",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x73A3919a69eFCd5b19df8348c6740bB1446F5ed0",
-    "tokenSymbol": "MIMATIC",
-    "tokenAddress": "0xdFA46478F9e5EA86d57387849598dbFB2e964b02",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x0f2Ed59657e391746C1a097BDa98F2aBb94b1120",
-    "tokenSymbol": "VELO",
-    "tokenAddress": "0x9560e827aF36c94D2Ac33a39bCE1Fe78631088Db",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0xaE2f8ca8d89c3E4521B918D9D5F5bB30e937d68a",
-    "tokenSymbol": "ANKR",
-    "tokenAddress": "0xAeAeeD23478c3a4b798e4ed40D8B7F41366Ae861",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x30D9d31C1ac29Bc2c2c312c1bCa9F8b3D60e2376",
-    "tokenSymbol": "BAL",
-    "tokenAddress": "0xFE8B128bA8C78aabC59d4c64cEE7fF28e9379921",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x0D276FC14719f9292D5C1eA2198673d1f4269246",
     "tokenSymbol": "OP",
-    "tokenAddress": "0x4200000000000000000000000000000000000042",
-    "decimals": 8
+    "feedAddress": "0x205aaD468a11fd5D34fA7211bC6Bad5b3deB9b98",
+    "feedDecimals": 8
   },
   {
-    "chainId": 10,
-    "feedAddress": "0x2FCF37343e916eAEd1f1DdaaF84458a359b53877",
-    "tokenSymbol": "SNX",
-    "tokenAddress": "0x8700dAec35aF8Ff88c16BdF0418774CB3D7599B4",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0xCc232dcFAAE6354cE191Bd574108c1aD03f86450",
-    "tokenSymbol": "LINK",
-    "tokenAddress": "0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x718A5788b89454aAE3A028AE9c111A29Be6c2a6F",
-    "tokenSymbol": "WBTC",
-    "tokenAddress": "0x68f180fcCe6836688e9084f035309E29Bf0A2095",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x5cdC797acCBf57EE2363Fed9701262Abc87a232e",
-    "tokenSymbol": "YFI",
-    "tokenAddress": "0x9046D36440290FfDE54FE0DD84Db8b1CfEE9107B",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0xbD92C6c284271c227a1e0bF1786F468b539f51D9",
-    "tokenSymbol": "CRV",
-    "tokenAddress": "0x0994206dfE8De6Ec6920FF4D779B0d950605Fb53",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x338ed6787f463394D24813b297401B9F05a8C9d1",
-    "tokenSymbol": "AAVE",
-    "tokenAddress": "0x76FB31fb4af56892A25e32cFC43De717950c9278",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x11429eE838cC01071402f21C219870cbAc0a59A0",
-    "tokenSymbol": "UNI",
-    "tokenAddress": "0x6fd9d7AD17242c41f7131d257212c54A0e816691",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x58F23F80bF389DB1af9e3aA8c59679806749A8a4",
-    "tokenSymbol": "PENDLE",
-    "tokenAddress": "0xBC7B1Ff1c6989f006a1185318eD4E7b5796e66E1",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0xECef79E109e997bCA29c1c0897ec9d7b03647F5E",
-    "tokenSymbol": "USDT",
-    "tokenAddress": "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x4e1C6B168DCFD7758bC2Ab9d2865f1895813D236",
-    "tokenSymbol": "WLD",
-    "tokenAddress": "0xdC6fF44d5d932Cbd77B52E5612Ba0529DC6226F1",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x221618871470f78D8a3391d35B77dFb3C0fbc383",
-    "tokenSymbol": "LDO",
-    "tokenAddress": "0xFdb794692724153d1488CcdBE0C56c252596735F",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0xA12CDDd8e986AF9288ab31E58C60e65F2987fB13",
-    "tokenSymbol": "PERP",
-    "tokenAddress": "0x9e1028F5F1D5eDE59748FFceE5532509976840E0",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0xc7D132BeCAbE7Dcc4204841F33bae45841e41D9C",
-    "tokenSymbol": "FRAX",
-    "tokenAddress": "0x2E3D870790dC77A83DD1d18184Acc7439A53f475",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x8dBa75e83DA73cc766A7e5a0ee71F656BAb470d6",
-    "tokenSymbol": "DAI",
-    "tokenAddress": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x5A9072a995E072fD06D8f1EB95933955FDa53C0a",
-    "tokenSymbol": "CELO",
-    "tokenAddress": "0x9b88D293b7a791E40d36A39765FFd5A1B9b5c349",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3",
-    "tokenSymbol": "USDC",
-    "tokenAddress": "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0xCB24d22aF35986aC1feb8874AdBbDF68f6dC2e96",
-    "tokenSymbol": "KNC",
-    "tokenAddress": "0xa00E3A3511aAC35cA78530c85007AFCd31753819",
-    "decimals": 8
-  },
-  {
-    "chainId": 10,
-    "feedAddress": "0x3FF5BDB2bB6E3f946d9485De6c591c93B4179ae7",
-    "tokenSymbol": "TRB",
-    "tokenAddress": "0xaf8cA653Fa2772d58f4368B0a71980e9E3cEB888",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xfAA9147190c2C2cc5B8387B4f49016bDB3380572",
-    "tokenSymbol": "FDUSD",
-    "tokenAddress": "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x3E7d1eAB13ad0104d2750B8863b489D65364e32D",
-    "tokenSymbol": "USDT",
-    "tokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xf8fF43E991A81e6eC886a3D281A2C6cC19aE70Fc",
-    "tokenSymbol": "KNC",
-    "tokenAddress": "0xdeFA4e8a7bcBA345F687a2f1456F5Edd9CE97202",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xFF3EEb22B5E3dE6e705b44749C2559d704923FD7",
-    "tokenSymbol": "AVAX",
-    "tokenAddress": "0x85f138bfEE4ef8e540890CFb48F620571d67Eda3",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x2c1d072e956AFFC0D435Cb7AC38EF18d24d9127c",
-    "tokenSymbol": "LINK",
-    "tokenAddress": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8",
-    "tokenSymbol": "STETH",
-    "tokenAddress": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xD2A593BF7594aCE1faD597adb697b5645d5edDB2",
-    "tokenSymbol": "DPI",
-    "tokenAddress": "0x1494CA1F11D487c2bBe4543E90080AeBa4BA3C2b",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xdF2917806E30300537aEB49A7663062F4d1F2b5F",
-    "tokenSymbol": "BAL",
-    "tokenAddress": "0xba100000625a3754423978a60c9317c58a424e3D",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xF05D9B6C08757EAcb1fbec18e36A1B7566a13DEB",
-    "tokenSymbol": "XSUSHI",
-    "tokenAddress": "0x8798249c2E607446EfB7Ad49eC89dD1865Ff4272",
-    "decimals": 18
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x29d26C008e8f201eD0D864b1Fd9392D29d0C8e96",
-    "tokenSymbol": "MAVIA",
-    "tokenAddress": "0x24fcFC492C1393274B6bcd568ac9e225BEc93584",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x8f1dF6D7F2db73eECE86a18b4381F4707b918FB1",
-    "tokenSymbol": "PYUSD",
-    "tokenAddress": "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xCc70F09A6CC17553b2E31954cD36E4A2d89501f7",
-    "tokenSymbol": "SUSHI",
-    "tokenAddress": "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xeb988B77b94C186053282BfcD8B7ED55142D3cAB",
-    "tokenSymbol": "XCN",
-    "tokenAddress": "0xA2cd3D43c775978A96BdBf12d733D5A1ED94fb18",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x759bBC1be8F90eE6457C44abc7d443842a976d02",
-    "tokenSymbol": "RSR",
-    "tokenAddress": "0x320623b8E4fF03373931769A31Fc52A4E78B5d70",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x0ed39A19D2a68b722408d84e4d970827f61E6c0A",
-    "tokenSymbol": "USDD",
-    "tokenAddress": "0x0C10bF8FcB7Bf5412187A595ab97a3609160b5c6",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9",
-    "tokenSymbol": "DAI",
-    "tokenAddress": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x2885d15b8Af22648b98B122b22FDF4D2a56c6023",
-    "tokenSymbol": "ZRX",
-    "tokenAddress": "0xE41d2489571d322189246DaFA5ebDe1F4699F498",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x7A364e8770418566e3eb2001A96116E6138Eb32F",
+    "chainId": 42161,
     "tokenSymbol": "MIM",
-    "tokenAddress": "0x99D8a9C45b2ecA8864373A26D1459e3Dff1e17F3",
-    "decimals": 8
+    "feedAddress": "0x87121F6c9A9F6E90E59591E4Cf4804873f54A95b",
+    "feedDecimals": 8
   },
   {
-    "chainId": 1,
-    "feedAddress": "0xdbd020CAeF83eFd542f4De03e3cF0C28A4428bd5",
-    "tokenSymbol": "COMP",
-    "tokenAddress": "0xc00e94Cb662C3520282E6f5717214004A7f26888",
-    "decimals": 8
+    "chainId": 42161,
+    "tokenSymbol": "OHMv2",
+    "feedAddress": "0x761aaeBf021F19F198D325D7979965D0c7C9e53b",
+    "feedDecimals": 8
   },
   {
-    "chainId": 1,
-    "feedAddress": "0xc929ad75B72593967DE83E7F7Cda0493458261D9",
-    "tokenSymbol": "1INCH",
-    "tokenAddress": "0x111111111117dC0aa78b770fA6A738034120C302",
-    "decimals": 8
+    "chainId": 42161,
+    "tokenSymbol": "XRP",
+    "feedAddress": "0xB4AD57B52aB9141de9926a3e0C8dc6264c2ef205",
+    "feedDecimals": 8
   },
   {
-    "chainId": 1,
-    "feedAddress": "0x35E3f7E558C04cE7eEE1629258EcbbA03B36Ec56",
-    "tokenSymbol": "SAND",
-    "tokenAddress": "0x3845badAde8e6dFF049820680d1F14bD3903a5d0",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x5C00128d4d1c2F4f652C267d7bcdD7aC99C16E16",
-    "tokenSymbol": "ENS",
-    "tokenAddress": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xec1D1B3b0443256cc3860e24a46F108e699484Aa",
-    "tokenSymbol": "MKR",
-    "tokenAddress": "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x833D8Eb16D306ed1FbB5D7A2E019e106B960965A",
-    "tokenSymbol": "BUSD",
-    "tokenAddress": "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x547a514d5e3769680Ce22B2361c10Ea13619e8a9",
-    "tokenSymbol": "AAVE",
-    "tokenAddress": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xB9E1E3A9feFf48998E45Fa90847ed4D467E8BcfD",
-    "tokenSymbol": "FRAX",
-    "tokenAddress": "0x853d955aCEf822Db058eb8505911ED77F175b99e",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x5C8D8AaB4ffa4652753Df94f299330Bb4479bF85",
-    "tokenSymbol": "HIGH",
-    "tokenAddress": "0x71Ab77b7dbB4fa7e017BC15090b2163221420282",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x393CC05baD439c9B36489384F11487d9C8410471",
-    "tokenSymbol": "RDNT",
-    "tokenAddress": "0x137dDB47Ee24EaA998a535Ab00378d6BFa84F893",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x4E155eD98aFE9034b7A5962f6C84c86d869daA9d",
-    "tokenSymbol": "RPL",
-    "tokenAddress": "0xD33526068D116cE69F19A9ee46F0bd304F21A51f",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x86cF33a451dE9dc61a2862FD94FF4ad4Bd65A5d2",
-    "tokenSymbol": "GRT",
-    "tokenAddress": "0xc944E90C64B2c07662A292be6244BDf05Cda44a7",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x9441D7556e7820B5ca42082cfa99487D56AcA958",
-    "tokenSymbol": "BAT",
-    "tokenAddress": "0x0D8775F648430679A709E98d2b0Cb6250d2887EF",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x8c110B94C5f1d347fAcF5E1E938AB2db60E3c9a8",
-    "tokenSymbol": "SPELL",
-    "tokenAddress": "0x090185f2135308BaD17527004364eBcC2D37e5F6",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x7bAC85A8a13A4BcD8abb3eB7d6b4d632c5a57676",
-    "tokenSymbol": "MATIC",
-    "tokenAddress": "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xd962fC30A72A84cE50161031391756Bf2876Af5D",
-    "tokenSymbol": "CVX",
-    "tokenAddress": "0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
-    "tokenSymbol": "ETH",
-    "tokenAddress": "0x5e21D1EE5cf0077B314c381720273ae82378D613",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x7A9f34a0Aa917D438e9b6E630067062B7F8f6f3d",
-    "tokenSymbol": "STG",
-    "tokenAddress": "0xAf5191B0De278C7286d6C7CC6ab6BB8A73bA2Cd6",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x4ffC43a60e009B551865A93d232E33Fce9f01507",
-    "tokenSymbol": "SOL",
-    "tokenAddress": "0xD31a59c85aE9D8edEFeC411D448f90841571b89c",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x09023c0DA49Aaf8fc3fA3ADF34C6A7016D38D5e3",
-    "tokenSymbol": "USDP",
-    "tokenAddress": "0x8E870D67F660D95d5be530380D0eC0bd388289E1",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xFb0CfD6c19e25DB4a08D8a204a387cEa48Cc138f",
-    "tokenSymbol": "SXP",
-    "tokenAddress": "0x8CE9137d39326AD0cD6491fb5CC0CbA0e089b6A9",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x6Ebc52C8C1089be9eB3945C4350B68B8E4C2233f",
-    "tokenSymbol": "FXS",
-    "tokenAddress": "0x3432B6A60D23Ca0dFCa7761B7ab56459D9C964D0",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xBAEbEFc1D023c0feCcc047Bff42E75F15Ff213E6",
-    "tokenSymbol": "IMX",
-    "tokenAddress": "0xF57e7e7C23978C3cAEC3C3548E3D615c346e79fF",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xDC3EA94CD0AC27d9A86C180091e7f78C683d3699",
-    "tokenSymbol": "SNX",
-    "tokenAddress": "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6",
-    "tokenSymbol": "USDC",
-    "tokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xA027702dbb89fbd58938e4324ac03B58d812b0E1",
-    "tokenSymbol": "YFI",
-    "tokenAddress": "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xe20CA8D7546932360e37E9D72c1a47334af57706",
-    "tokenSymbol": "AMPL",
-    "tokenAddress": "0xD46bA6D942050d489DBd938a2C909A5d5039A161",
-    "decimals": 18
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xCd627aA160A6fA45Eb793D19Ef54f5062F20f33f",
-    "tokenSymbol": "CRV",
-    "tokenAddress": "0xD533a949740bb3306d119CC777fa900bA034cd52",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xFF3BC18cCBd5999CE63E788A1c250a88626aD099",
-    "tokenSymbol": "SUSDE",
-    "tokenAddress": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x5b563107C8666d2142C216114228443B94152362",
-    "tokenSymbol": "METH",
-    "tokenAddress": "0xd5F7838F5C461fefF7FE49ea5ebaF7728bB0ADfa",
-    "decimals": 18
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0x31697852a68433DbCc2Ff612c516d69E3D9bd08F",
-    "tokenSymbol": "ARB",
-    "tokenAddress": "0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1",
-    "decimals": 8
-  },
-  {
-    "chainId": 1,
-    "feedAddress": "0xec746eCF986E2927Abd291a2A1716c940100f8Ba",
-    "tokenSymbol": "TUSD",
-    "tokenAddress": "0x0000000000085d4780B73119b644AE5ecd22b376",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xDE31F8bFBD8c84b5360CFACCa3539B938dd78ae6",
-    "tokenSymbol": "WBTC",
-    "tokenAddress": "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x2251169D32E7538652a9a8c86bf0c43bFcd956f1",
-    "tokenSymbol": "QUICK",
-    "tokenAddress": "0xB5C064F955D8e7F38fE0460C556a72987494eE17",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xA1CbF3Fe43BC3501e3Fc4b573e822c70e76A7512",
-    "tokenSymbol": "MANA",
-    "tokenAddress": "0xA1c57f48F0Deb89f569dFbE6E2B7f46D33606fD4",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
-    "tokenSymbol": "MATIC",
-    "tokenAddress": "0x0000000000000000000000000000000000001010",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x59161117086a4C7A9beDA16C66e40Bdaa1C5a8B6",
-    "tokenSymbol": "DODO",
-    "tokenAddress": "0xe4Bf2864ebeC7B7fDf6Eeca9BaCAe7cDfDAffe78",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x6a99EC84819FB7007dd5D032068742604E755c56",
-    "tokenSymbol": "WOO",
-    "tokenAddress": "0x1B815d120B3eF02039Ee11dC2d33DE7aA4a8C603",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xc86105DccF9BD629Cea7Fd41f94c6050bF96D57F",
-    "tokenSymbol": "OM",
-    "tokenAddress": "0xC3Ec80343D2bae2F8E680FDADDe7C17E71E114ea",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x7C5D415B64312D38c56B54358449d0a4058339d2",
-    "tokenSymbol": "TUSD",
-    "tokenAddress": "0x2e1AD108fF1D8C782fcBbB89AAd783aC49586756",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x67935f65D1577ced9f4929D3679A157E95C1c02c",
-    "tokenSymbol": "ETH",
-    "tokenAddress": "0x11CD37bb86F65419713f30673A480EA33c826872",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x82a6c4AF830caa6c97bb504425f6A66165C2c26e",
-    "tokenSymbol": "BNB",
-    "tokenAddress": "0xeCDCB5B88F8e3C15f95c720C51c71c9E2080525d",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x10C8264C0935b3B9870013e057f330Ff3e9C56dC",
-    "tokenSymbol": "SOL",
-    "tokenAddress": "0xd93f7E271cB87c23AaA73edC008A79646d1F9912",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xd9FFdb71EbE7496cC440152d43986Aae0AB76665",
-    "tokenSymbol": "LINK",
-    "tokenAddress": "0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x2e48b7924FBe04d575BA229A59b64547d9da16e9",
-    "tokenSymbol": "DPI",
-    "tokenAddress": "0x85955046DF4668e1DD369D2DE9f3AEB98DD2A369",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x9cb43aa3D036Cb035a694Ba0AAa91f8875B16cE1",
-    "tokenSymbol": "GNS",
-    "tokenAddress": "0xE5417Af564e4bFDA1c483642db72007871397896",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x3FabBfb300B1e2D7c9B84512fe9D30aeDF24C410",
-    "tokenSymbol": "GRT",
-    "tokenAddress": "0x5fe2B58c013d7601147DcdD68C143A77499f5531",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xDD229Ce42f11D8Ee7fFf29bDB71C7b81352e11be",
-    "tokenSymbol": "GHST",
-    "tokenAddress": "0x385Eeac5cB85A38A9a07A70c73e0a3271CfB54A7",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x10e5f3DFc81B3e5Ef4e648C4454D04e79E1E41E2",
+    "chainId": 42161,
     "tokenSymbol": "KNC",
-    "tokenAddress": "0x1C954E8fe737F99f68Fa1CCda3e51ebDB291948C",
-    "decimals": 8
+    "feedAddress": "0xbF539d4c2106dd4D9AB6D56aed3d9023529Db145",
+    "feedDecimals": 8
   },
   {
-    "chainId": 137,
-    "feedAddress": "0xF9680D99D6C9589e2a93a78A04A279e509205945",
-    "tokenSymbol": "ETH",
-    "tokenAddress": "0x11CD37bb86F65419713f30673A480EA33c826872",
-    "decimals": 8
+    "chainId": 42161,
+    "tokenSymbol": "LUSD",
+    "feedAddress": "0x0411D28c94d85A36bC72Cb0f875dfA8371D8fFfF",
+    "feedDecimals": 8
   },
   {
-    "chainId": 137,
-    "feedAddress": "0x2A8758b7257102461BC958279054e372C2b1bDE6",
-    "tokenSymbol": "COMP",
-    "tokenAddress": "0x8505b9d2254A7Ae468c0E9dd10Ccea3A837aef5c",
-    "decimals": 8
+    "chainId": 42161,
+    "tokenSymbol": "DPX",
+    "feedAddress": "0xc373B9DB0707fD451Bc56bA5E9b029ba26629DF0",
+    "feedDecimals": 8
   },
   {
-    "chainId": 137,
-    "feedAddress": "0x9d3A43c111E7b2C6601705D9fcF7a70c95b1dc55",
-    "tokenSymbol": "YFI",
-    "tokenAddress": "0xDA537104D6A5edd53c6fBba9A898708E465260b6",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xd8d483d813547CfB624b8Dc33a00F2fcbCd2D428",
-    "tokenSymbol": "MIMATIC",
-    "tokenAddress": "0xa3Fa99A148fA48D14Ed51d610c367C61876997F1",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x0A6513e40db6EB1b165753AD52E80663aeA50545",
-    "tokenSymbol": "USDT",
-    "tokenAddress": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xD106B538F2A868c28Ca1Ec7E298C3325E0251d66",
-    "tokenSymbol": "BAL",
-    "tokenAddress": "0x9a71012B13CA4d3D0Cdc72A177DF3ef03b0E76A3",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xa070427bF5bA5709f70e98b94Cb2F435a242C46C",
-    "tokenSymbol": "MKR",
-    "tokenAddress": "0x6f7C932e7684666C9fd1d44527765433e01fF61d",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C",
-    "tokenSymbol": "UNI",
-    "tokenAddress": "0xb33EaAd8d922B1083446DC23f610c2567fB5180f",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xbF90A5D9B6EE9019028dbFc2a9E50056d5252894",
-    "tokenSymbol": "SNX",
-    "tokenAddress": "0x50B728D8D964fd00C2d0AAD81718b71311feF68a",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x6C0fe985D3cAcbCdE428b84fc9431792694d0f51",
-    "tokenSymbol": "FXS",
-    "tokenAddress": "0x1a3acf6D19267E2d3e7f898f42803e90C9219062",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x2Ac3F3Bfac8fC9094BC3f0F9041a51375235B992",
-    "tokenSymbol": "APE",
-    "tokenAddress": "0xB7b31a6BC18e48888545CE79e83E06003bE70930",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x72484B12719E23115761D5DA1646945632979bB6",
-    "tokenSymbol": "AAVE",
-    "tokenAddress": "0xD6DF932A45C0f255f85145f286eA0b292B21C90B",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x49B0c695039243BBfEb8EcD054EB70061fd54aa0",
-    "tokenSymbol": "SUSHI",
-    "tokenAddress": "0x0b3F868E0BE5597D5DB7fEB59E1CADBb0fdDa50a",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x336584C8E6Dc19637A5b36206B1c79923111b405",
-    "tokenSymbol": "CRV",
-    "tokenAddress": "0x172370d5Cd63279eFa6d502DAB29171933a610AF",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x97371dF4492605486e23Da797fA68e55Fc38a13f",
-    "tokenSymbol": "STMATIC",
-    "tokenAddress": "0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x00DBeB1e45485d53DF7C2F0dF1Aa0b6Dc30311d3",
-    "tokenSymbol": "FRAX",
-    "tokenAddress": "0x45c32fA6DF82ead1e2EF74d17b76547EDdFaFF89",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x3D49406EDd4D52Fb7FFd25485f32E073b529C924",
-    "tokenSymbol": "SAND",
-    "tokenAddress": "0xBbba073C31bF03b8ACf7c28EF0738DeCF3695683",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x2346Ce62bd732c62618944E51cbFa09D985d86D2",
-    "tokenSymbol": "BAT",
-    "tokenAddress": "0x3Cef98bb43d732E2F285eE605a8158cDE967D219",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xe01eA2fbd8D76ee323FbEd03eB9a8625EC981A10",
-    "tokenSymbol": "AVAX",
-    "tokenAddress": "0x7Bb11E7f8b10E9e571E5d8Eace04735fDFB2358a",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0x443C5116CdF663Eb387e72C688D276e702135C87",
-    "tokenSymbol": "1INCH",
-    "tokenAddress": "0x9c2C5fd7b07E95EE044DDeba0E97a665F142394f",
-    "decimals": 8
-  },
-  {
-    "chainId": 137,
-    "feedAddress": "0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7",
+    "chainId": 42161,
     "tokenSymbol": "USDC",
-    "tokenAddress": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
-    "decimals": 8
+    "feedAddress": "0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3",
+    "feedDecimals": 8
   },
   {
-    "chainId": 137,
-    "feedAddress": "0x4746DeC9e833A82EC7C2C1356372CcF2cfcD2F3D",
+    "chainId": 42161,
+    "tokenSymbol": "APE",
+    "feedAddress": "0x221912ce795669f628c51c69b7d0873eDA9C03bB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "DOT",
+    "feedAddress": "0xa6bC5bAF2000424e90434bA7104ee399dEe80DEc",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "PAXG",
+    "feedAddress": "0x2BA975D4D7922cD264267Af16F3bD177F206FE3c",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "USD+",
+    "feedAddress": "0x6548a81E640C000150e06AB413fB3F772682e9c5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "ETH",
+    "feedAddress": "0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "SUSDE",
+    "feedAddress": "0xf2215b9c35b1697B5f47e407c917a40D055E68d7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "SNX",
+    "feedAddress": "0x054296f0D036b95531B4E14aFB578B80CFb41252",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "AAVE",
+    "feedAddress": "0xaD1d5344AaDE45F43E596773Bcc4c423EAbdD034",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "CVX",
+    "feedAddress": "0x851175a919f36c8e30197c09a9A49dA932c2CC00",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "RPL",
+    "feedAddress": "0xF0b7159BbFc341Cc41E7Cb182216F62c6d40533D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "ARB",
+    "feedAddress": "0xb2A824043730FE05F3DA2efaFa1CBbe83fa548D6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "CAKE",
+    "feedAddress": "0x256654437f1ADA8057684b18d742eFD14034C400",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "gmARB",
+    "feedAddress": "0x5d046567b97B0d7322F2402e3b34Bf789cE329f5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "STG",
+    "feedAddress": "0xe74d69E233faB0d8F48921f2D93aDfDe44cEb3B7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "PENDLE",
+    "feedAddress": "0x66853E19d73c0F9301fe099c324A1E9726953433",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "GNS",
+    "feedAddress": "0xE89E98CE4E19071E59Ed4780E0598b541CE76486",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "COMP",
+    "feedAddress": "0xe7C53FFd03Eb6ceF7d208bC4C13446c76d1E5884",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "BAL",
+    "feedAddress": "0xBE5eA816870D11239c543F84b71439511D70B94f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "MKR",
+    "feedAddress": "0xdE9f0894670c4EFcacF370426F10C3AD2Cdf147e",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "RSR",
+    "feedAddress": "0xcfF9349ec6d027f20fC9360117fef4a1Ad38B488",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "FRAX",
+    "feedAddress": "0x0809E3d38d1B4214958faf06D8b1B1a2b73f2ab8",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "MAGIC",
+    "feedAddress": "0x47E55cCec6582838E173f252D08Afd8116c2202d",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "YFI",
+    "feedAddress": "0x745Ab5b69E01E2BE1104Ca84937Bb71f96f5fB21",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "PEPE",
+    "feedAddress": "0x02DEd5a7EDDA750E3Eb240b54437a54d57b74dBE",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "AXL",
+    "feedAddress": "0x84e8237CC1418Ea1B4A1e0C3e7F48c3A5fbC81AF",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "IOTX",
+    "feedAddress": "0x484A1b29ED1Ea038dBd75D7c7293714343363122",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "MVI",
+    "feedAddress": "0x87B679C03e9672Af516a9E08085e1F4FA1722A3D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "WIF",
+    "feedAddress": "0xF7Ee427318d2Bd0EEd3c63382D0d52Ad8A68f90D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "FTM",
+    "feedAddress": "0xFeaC1A3936514746e70170c0f539e70b23d36F19",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "GRT",
+    "feedAddress": "0x0F38D86FceF4955B705F35c9e41d1A16e0637c73",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "ATOM",
+    "feedAddress": "0xCDA67618e51762235eacA373894F0C79256768fa",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "CRV",
+    "feedAddress": "0xaebDA2c976cfd1eE1977Eac079B4382acb849325",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "TIA",
+    "feedAddress": "0x4096b9bfB4c34497B7a3939D4f629cf65EBf5634",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "gmBTC",
+    "feedAddress": "0x395D5c5D552Df670dc4B2B1cef0c4EABfFba492f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "WOO",
+    "feedAddress": "0x5e2b5C5C07cCA3437c4D724225Bb42c7E55d1597",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "SOL",
+    "feedAddress": "0x24ceA4b8ce57cdA5058b924B9B9987992450590c",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "XVS",
+    "feedAddress": "0x300b0990Ba191a1AeBef6e5Ed8B5B308C0B2d0c9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "BTC",
+    "feedAddress": "0x6ce185860a4963106506C203335A2910413708e9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "RDNT",
+    "feedAddress": "0x20d0Fcab0ECFD078B036b6CAf1FaC69A6453b352",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "LINK",
+    "feedAddress": "0x86E53CF1B870786351Da77A57575e79CB55812CB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "BNB",
+    "feedAddress": "0x6970460aabF80C5BE983C6b74e5D06dEDCA95D4A",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "weETH",
+    "feedAddress": "0xE141425bc1594b8039De6390db1cDaf4397EA22b",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "AXS",
+    "feedAddress": "0x5B58aA6E0651Ae311864876A55411F481aD86080",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "MATIC",
+    "feedAddress": "0x52099D4523531f678Dfc568a7B1e5038aadcE1d6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "TAO",
+    "feedAddress": "0x6aCcBB82aF71B8a576B4C05D4aF92A83A035B991",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "MNT",
+    "feedAddress": "0x37DDEE84dE03d039e1Bf809b7a01EDd2c4665771",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "USDE",
+    "feedAddress": "0x88AC7Bca36567525A866138F03a6F6844868E0Bc",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "LDO",
+    "feedAddress": "0xA43A34030088E6510FecCFb77E88ee5e7ed0fE64",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "ZRO",
+    "feedAddress": "0x1940fEd49cDBC397941f2D336eb4994D599e568B",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "tBTC",
+    "feedAddress": "0xE808488e8627F6531bA79a13A9E0271B39abEb1C",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "USDT",
+    "feedAddress": "0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "STETH",
+    "feedAddress": "0x07C5b924399cc23c24a95c8743DE4006a32b7f2a",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "TUSD",
+    "feedAddress": "0x6fAbee62266Da6686EE2744C6f15bb8352d2f28D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "GMX",
+    "feedAddress": "0xDB98056FecFff59D032aB628337A4887110df3dB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
     "tokenSymbol": "DAI",
-    "tokenAddress": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
-    "decimals": 8
+    "feedAddress": "0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "XAI",
+    "feedAddress": "0x806c532D543352e7C344ba6C7F3F00Bfbd309Af1",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "JOE",
+    "feedAddress": "0x04180965a782E487d0632013ABa488A472243542",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "1INCH",
+    "feedAddress": "0x4bC735Ef24bf286983024CAd5D03f0738865Aaef",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "WBTC",
+    "feedAddress": "0xd0C7101eACbB49F3deCcCc166d238410D6D46d57",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "NEAR",
+    "feedAddress": "0xBF5C3fB2633e924598A46B9D07a174a9DBcF57C0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "DOGE",
+    "feedAddress": "0x9A7FB1b3950837a8D9b40517626E11D4127C098C",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "DODO",
+    "feedAddress": "0xA33a06c119EC08F92735F9ccA37e07Af08C4f281",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "MIMATIC",
+    "feedAddress": "0x59644ec622243878d1464A9504F9e9a31294128a",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "AVAX",
+    "feedAddress": "0x8bf61728eeDCE2F32c456454d87B5d6eD6150208",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "USDD",
+    "feedAddress": "0x4Ee1f9ec1048979930aC832a3C1d18a0b4955a02",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "SUSHI",
+    "feedAddress": "0xb2A8BA74cbca38508BA1632761b56C897060147C",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "DPI",
+    "feedAddress": "0x1e431E56118bE414bD91f6392414ad3833d21B0D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "gmETH",
+    "feedAddress": "0xfB3264D1129824933a52374c2C1696F4470D041e",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "ADA",
+    "feedAddress": "0xD9f615A9b820225edbA2d821c4A696a0924051c6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "UNI",
+    "feedAddress": "0x9C917083fDb403ab5ADbEC26Ee294f6EcAda2720",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "SPELL",
+    "feedAddress": "0x383b3624478124697BEF675F07cA37570b73992f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "FXS",
+    "feedAddress": "0x36a121448D74Fa81450c992A1a44B9b7377CD3a5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "WEMIX",
+    "feedAddress": "0x6FfBc6339DD46a7e0513D4887106349214C05505",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "USDV",
+    "feedAddress": "0x7Fa028B87e73deb66DcFf9Fa40f4C7C6Dd2Fd254",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "AXL",
+    "feedAddress": "0x676C4C6C31D97A5581D3204C04A8125B350E2F9D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "tBTC",
+    "feedAddress": "0x6D75BFB5A5885f841b132198C9f0bE8c872057BF",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "USDC",
+    "feedAddress": "0x7e860098F58bBFC8648a4311b374B1D669a2bc6B",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "RDNT",
+    "feedAddress": "0xEf2E24ba6def99B5e0b71F6CDeaF294b02163094",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "DAI",
+    "feedAddress": "0x591e79239a7d679378eC8c847e5038150364C78F",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "OP",
+    "feedAddress": "0x3E3A6bD129A63564FE7abde85FA67c3950569060",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "USDE",
+    "feedAddress": "0x790181e93e9F4Eedb5b864860C12e4d2CffFe73B",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "CBETH",
+    "feedAddress": "0xd7818272B9e248357d13057AAb0B417aF31E817d",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "weETH",
+    "feedAddress": "0xFC1415403EbB0c693f9a7844b92aD2Ff24775C65",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "ETH",
+    "feedAddress": "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "COMP",
+    "feedAddress": "0x9DDa783DE64A9d1A60c49ca761EbE528C35BA428",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "SUSDE",
+    "feedAddress": "0x79cf4a31B29D69191f0b6E97916eB93FEB81E533",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "WIF",
+    "feedAddress": "0x674940e1dBf7FD841b33156DA9A88afbD95AaFBa",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "STG",
+    "feedAddress": "0x63Af8341b62E683B87bB540896bF283D96B4D385",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "LINK",
+    "feedAddress": "0x17CAb8FE31E32f08326e5E27412894e49B0f9D65",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "SNX",
+    "feedAddress": "0xe3971Ed6F1A5903321479Ef3148B5950c0612075",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "PEPE",
+    "feedAddress": "0xB48ac6409C0c3718b956089b0fFE295A10ACDdad",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "AVAX",
+    "feedAddress": "0xE70f2D34Fd04046aaEC26a198A35dD8F2dF5cd92",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "MATIC",
+    "feedAddress": "0x12129aAC52D6B0f0125677D4E1435633E61fD25f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "BTC",
+    "feedAddress": "0x64c911996D3c6aC71f9b455B1E8E7266BcbD848F",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "USD+",
+    "feedAddress": "0xd5Ec94430eF4170D819E0996BC53ed40d31638d8",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "SHIB",
+    "feedAddress": "0xC8D5D660bb585b68fa0263EeD7B4224a5FC99669",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "MAVIA",
+    "feedAddress": "0x979447581b39caCA33EF0CA8208592393D16cc13",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "ZRO",
+    "feedAddress": "0xdc31a4CCfCA039BeC6222e20BE7770E12581bfEB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "APT",
+    "feedAddress": "0x88a98431C25329AA422B21D147c1518b34dD36F4",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "AERO",
+    "feedAddress": "0x4EC5970fC728C5f65ba413992CD5fF6FD70fcfF0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "USDT",
+    "feedAddress": "0xf19d560eB8d2ADf07BD6D13ed03e1D11215721F9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "WBTC",
+    "feedAddress": "0xCCADC697c55bbB68dc5bCdf8d3CBe83CdD4E071E",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "SOL",
+    "feedAddress": "0x975043adBb80fc32276CbF9Bbcfd4A601a12462D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "DOGE",
+    "feedAddress": "0x8422f3d3CAFf15Ca682939310d6A5e619AE08e57",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "DEGEN",
+    "feedAddress": "0xE62BcE5D7CB9d16AB8b4D622538bc0A50A5799c2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "BNB",
+    "feedAddress": "0x4b7836916781CAAfbb7Bd1E5FDd20ED544B453b1",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "YFI",
+    "feedAddress": "0xD40e758b5eC80820B68DFC302fc5Ce1239083548",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "RSR",
+    "feedAddress": "0xAa98aE504658766Dfe11F31c5D95a0bdcABDe0b1",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ETH",
+    "feedAddress": "0x13e3Ee699D1909E989722E753853AE30b17e08c5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "FLOW",
+    "feedAddress": "0x2fF1EB7D0ceC35959F0248E9354c3248c6683D9b",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "tBTC",
+    "feedAddress": "0x5a61374950D4BFa5a3D4f2CA36FC1d23A92b6f21",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SUSDE",
+    "feedAddress": "0x05950959B6d876ae0fed1BBe5Caa2d74d8659D59",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "BTC",
+    "feedAddress": "0xD702DD976Fb76Fffc2D3963D037dfDae5b04E593",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "WSTETH",
+    "feedAddress": "0x698B585CbC4407e2D54aa898B2600B53C68958f7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "GMX",
+    "feedAddress": "0x62f42f70ba85De1086476bB6BADE926d0E0b8a4C",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "UMA",
+    "feedAddress": "0xeEC819b2e155CC8FEae194F5129f767409e2327c",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "STETH",
+    "feedAddress": "0x41878779a388585509657CE5Fb95a80050502186",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "FTM",
+    "feedAddress": "0xc19d58652d6BfC6Db6FB3691eDA6Aa7f3379E4E9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SUSD",
+    "feedAddress": "0x7f99817d87baD03ea21E05112Ca799d715730efe",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "DYDX",
+    "feedAddress": "0xee35A95c9a064491531493D8b380bC40A4CCd0Da",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "LUSD",
+    "feedAddress": "0x9dfc79Aaeb5bb0f96C6e9402671981CdFc424052",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "STX",
+    "feedAddress": "0x602eB777BE29Fbe63349A33306bD73Ff333D02bB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "MIMATIC",
+    "feedAddress": "0x73A3919a69eFCd5b19df8348c6740bB1446F5ed0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "MATIC",
+    "feedAddress": "0x0ded608AFc23724f614B76955bbd9dFe7dDdc828",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "RUNE",
+    "feedAddress": "0x372cc5e685115A56F14fa7e4716F1294e04c278A",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ZRX",
+    "feedAddress": "0xBfbb4fE2fB71022DbFE0D4232c8C528bddf9c57f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "TRX",
+    "feedAddress": "0x0E09921cf7801A5aD47B892C8727593275625a9f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "BNB",
+    "feedAddress": "0xD38579f7cBD14c22cF1997575eA8eF7bfe62ca2c",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ORDI",
+    "feedAddress": "0x30795BeACc0f43920EF1288dB6676B5e205AE288",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ALGO",
+    "feedAddress": "0xBf5384854988939729E8B76b8AeCe7d8D930F9f3",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "APT",
+    "feedAddress": "0x48f2EcF0Bd180239AEF474a9da945F2e2d41daA3",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "VELO",
+    "feedAddress": "0x0f2Ed59657e391746C1a097BDa98F2aBb94b1120",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "APE",
+    "feedAddress": "0x89178957E9bD07934d7792fFc0CF39f11c8C2B1F",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ZIL",
+    "feedAddress": "0x1520874FC216f5F07E03607303Df2Fda6C3Fc203",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "FLOKI",
+    "feedAddress": "0x34E0E85CeEc6be6146c4f0115769a29a9539222e",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ANKR",
+    "feedAddress": "0xaE2f8ca8d89c3E4521B918D9D5F5bB30e937d68a",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "GRT",
+    "feedAddress": "0xfa042d5F474d7A39454C594CCfE014Ea011495f2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "BAL",
+    "feedAddress": "0x30D9d31C1ac29Bc2c2c312c1bCa9F8b3D60e2376",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "MKR",
+    "feedAddress": "0x607b417DF51e0E1ed3A12fDb7FC0e8307ED250F3",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "OP",
+    "feedAddress": "0x0D276FC14719f9292D5C1eA2198673d1f4269246",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "XLM",
+    "feedAddress": "0x799A346e7dBfa0f66Ad0961259366F93A1ee34C4",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ETC",
+    "feedAddress": "0xb7B9A39CC63f856b90B364911CC324dC46aC1770",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "JUP",
+    "feedAddress": "0x5eb9F7baCd59C886fBD9aa2C0a891223482a1ed4",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SNX",
+    "feedAddress": "0x2FCF37343e916eAEd1f1DdaaF84458a359b53877",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "IMX",
+    "feedAddress": "0x26Fce884555FAe5F0E4701cc976FE8D8bB111A38",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "LINK",
+    "feedAddress": "0xCc232dcFAAE6354cE191Bd574108c1aD03f86450",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SAND",
+    "feedAddress": "0xAE33e077a02071E62d342E449Afd9895b016d541",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "TIA",
+    "feedAddress": "0xD7bC56BBF8D555936cb5121f38d1d362c586776A",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "WIF",
+    "feedAddress": "0x75c3bF05EeF2c1966D6d5890Def3DbE640627642",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "EOS",
+    "feedAddress": "0x8E8E6C8c4942e4963C682fF54A0d058458393DCC",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "WBTC",
+    "feedAddress": "0x718A5788b89454aAE3A028AE9c111A29Be6c2a6F",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "RNDR",
+    "feedAddress": "0x53623FD50C5Fd8788746af00F088FD7f06fD4116",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ONE",
+    "feedAddress": "0x7CFB4fac1a2FDB1267F8bc17FADc12804AC13CFE",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "YFI",
+    "feedAddress": "0x5cdC797acCBf57EE2363Fed9701262Abc87a232e",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ENJ",
+    "feedAddress": "0x0cD83cC474e69E611d240f0d35D5794361F5e5C2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "USDE",
+    "feedAddress": "0xEEDF0B095B5dfe75F3881Cb26c19DA209A27463a",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "XTZ",
+    "feedAddress": "0xeA2aeD0087A620995Bf609D1bCD76Ea099905138",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "INJ",
+    "feedAddress": "0x90CC16F5493894eff84a5Fedd1dcE297d174fEEf",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "AXS",
+    "feedAddress": "0x805a61D54bb686e57F02D1EC96A1491C7aF40893",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ARB",
+    "feedAddress": "0x8f14546d0B960793180ee355B73fA55041a4a356",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "CRV",
+    "feedAddress": "0xbD92C6c284271c227a1e0bF1786F468b539f51D9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "weETH",
+    "feedAddress": "0xb4479d436DDa5c1A79bD88D282725615202406E3",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "AAVE",
+    "feedAddress": "0x338ed6787f463394D24813b297401B9F05a8C9d1",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ATOM",
+    "feedAddress": "0xEF89db2eA46B4aD4E333466B6A486b809e613F39",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SUSHI",
+    "feedAddress": "0x72155D46FD9f03AF1739637F9E7Db8A87C40A730",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "UNI",
+    "feedAddress": "0x11429eE838cC01071402f21C219870cbAc0a59A0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "DOGE",
+    "feedAddress": "0xC6066533917f034Cf610c08e1fe5e9c7eADe0f54",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "PEPE",
+    "feedAddress": "0x64Ecf089a6594Be781908D5a26FC8fA6CB08A2C7",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SOL",
+    "feedAddress": "0xC663315f7aF904fbbB0F785c32046dFA03e85270",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "BCH",
+    "feedAddress": "0x33E047119359161288bcB143e0C15467C7151d4c",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "FET",
+    "feedAddress": "0xf37c76163b2918bB4533579D449524F8542E64AD",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "PENDLE",
+    "feedAddress": "0x58F23F80bF389DB1af9e3aA8c59679806749A8a4",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "USDT",
+    "feedAddress": "0xECef79E109e997bCA29c1c0897ec9d7b03647F5E",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "RPL",
+    "feedAddress": "0xADE082c91A6AeCC86fC11704a830e933e1b382eA",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "WLD",
+    "feedAddress": "0x4e1C6B168DCFD7758bC2Ab9d2865f1895813D236",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "FIL",
+    "feedAddress": "0x66F61FEe824c1dF059BccCC5F21ca39e083EefDf",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SHIB",
+    "feedAddress": "0xd1e56e7657C0E0d20c0e11C2B6ae0D90932d5665",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "LDO",
+    "feedAddress": "0x221618871470f78D8a3391d35B77dFb3C0fbc383",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ADA",
+    "feedAddress": "0x43dEa17DeE1ca50c6266acb59b32659E44D3ee5D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "XMR",
+    "feedAddress": "0x2a8D91686A048E98e6CCF1A89E82f40D14312672",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "BONK",
+    "feedAddress": "0xec236454209A76a6deCdf5C1183aE2Eb5e82a829",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "PERP",
+    "feedAddress": "0xA12CDDd8e986AF9288ab31E58C60e65F2987fB13",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "NEAR",
+    "feedAddress": "0xca6fa4b8CB365C02cd3Ba70544EFffe78f63ac82",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "PYTH",
+    "feedAddress": "0x0838cFe6A97C9CE1611a6Ed17252477a3c71eBEb",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "MAV",
+    "feedAddress": "0x51E06250C8E46c8E5DE41ac8B917a47D706128C2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "DOT",
+    "feedAddress": "0x28e67BAeEB5dE7A788f3Dde6CF6ee491369Bb3Fa",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SEI",
+    "feedAddress": "0x6f6cED6B096708C1276056fdBdb7BbDe07Ca462C",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "JTO",
+    "feedAddress": "0xFC3b7bd4368b2919f67E437f8c6Ca42C7FD55dd5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "AVAX",
+    "feedAddress": "0x5087Dc69Fd3907a016BD42B38022F7f024140727",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "COMP",
+    "feedAddress": "0xe1011160d78a80E2eEBD60C228EEf7af4Dfcd4d7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "FRAX",
+    "feedAddress": "0xc7D132BeCAbE7Dcc4204841F33bae45841e41D9C",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "XRP",
+    "feedAddress": "0x8788F0DBDa7678244Ac7FF09d963d7696D56A8a0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ZEC",
+    "feedAddress": "0x2FF8822F371b283604369700d6F06da3fBb31064",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "BLUR",
+    "feedAddress": "0x517C2557c29F7c53Aa5F97a1DAE465E0d5C174AA",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "DAI",
+    "feedAddress": "0x8dBa75e83DA73cc766A7e5a0ee71F656BAb470d6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "1INCH",
+    "feedAddress": "0x9fCe737834500045FB07AD158991BCAC3b05D5A6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "STRK",
+    "feedAddress": "0x8814dEC83E2862A3792A0D6aDFC48CF76Add1890",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "CELO",
+    "feedAddress": "0x5A9072a995E072fD06D8f1EB95933955FDa53C0a",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "FXS",
+    "feedAddress": "0xB9B16330671067B1b062B9aC2eFd2dB75F03436E",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "CVX",
+    "feedAddress": "0x955b05dD4573dDFAfB47cb78db16B1Fa127E6e71",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "ICP",
+    "feedAddress": "0xe98290265E4aE3758503a03e937F381A2A7aFB57",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "USDC",
+    "feedAddress": "0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SUI",
+    "feedAddress": "0xEaf1a9fe242aa9928faedc6CE7e09aD4875f7133",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "KNC",
+    "feedAddress": "0xCB24d22aF35986aC1feb8874AdBbDF68f6dC2e96",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "MEME",
+    "feedAddress": "0xC6884869673a6960486FE0f6B0E775A53521e433",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "LTC",
+    "feedAddress": "0x45954efBD01f5A12428A09E4C38b8434C3dD4Ac3",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "TRB",
+    "feedAddress": "0x3FF5BDB2bB6E3f946d9485De6c591c93B4179ae7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "FDUSD",
+    "feedAddress": "0xfAA9147190c2C2cc5B8387B4f49016bDB3380572",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "weETH",
+    "feedAddress": "0x5c9C449BbC9a6075A2c061dF312a35fd1E05fF22",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "USDT",
+    "feedAddress": "0x3E7d1eAB13ad0104d2750B8863b489D65364e32D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "KNC",
+    "feedAddress": "0xf8fF43E991A81e6eC886a3D281A2C6cC19aE70Fc",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "AVAX",
+    "feedAddress": "0xFF3EEb22B5E3dE6e705b44749C2559d704923FD7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "LINK",
+    "feedAddress": "0x2c1d072e956AFFC0D435Cb7AC38EF18d24d9127c",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "STETH",
+    "feedAddress": "0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "DPI",
+    "feedAddress": "0xD2A593BF7594aCE1faD597adb697b5645d5edDB2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "BAL",
+    "feedAddress": "0xdF2917806E30300537aEB49A7663062F4d1F2b5F",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "XSUSHI",
+    "feedAddress": "0xF05D9B6C08757EAcb1fbec18e36A1B7566a13DEB",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "MAVIA",
+    "feedAddress": "0x29d26C008e8f201eD0D864b1Fd9392D29d0C8e96",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "LUSD",
+    "feedAddress": "0x3D7aE7E594f2f2091Ad8798313450130d0Aba3a0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "UNI",
+    "feedAddress": "0x553303d460EE0afB37EdFf9bE42922D8FF63220e",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "TAO",
+    "feedAddress": "0x1c88503c9A52aE6aaE1f9bb99b3b7e9b8Ab35459",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "PYUSD",
+    "feedAddress": "0x8f1dF6D7F2db73eECE86a18b4381F4707b918FB1",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "SUSHI",
+    "feedAddress": "0xCc70F09A6CC17553b2E31954cD36E4A2d89501f7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "XCN",
+    "feedAddress": "0xeb988B77b94C186053282BfcD8B7ED55142D3cAB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "RSR",
+    "feedAddress": "0x759bBC1be8F90eE6457C44abc7d443842a976d02",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "DAI",
+    "feedAddress": "0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "ZRX",
+    "feedAddress": "0x2885d15b8Af22648b98B122b22FDF4D2a56c6023",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "MIM",
+    "feedAddress": "0x7A364e8770418566e3eb2001A96116E6138Eb32F",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "COMP",
+    "feedAddress": "0xdbd020CAeF83eFd542f4De03e3cF0C28A4428bd5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "1INCH",
+    "feedAddress": "0xc929ad75B72593967DE83E7F7Cda0493458261D9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "SAND",
+    "feedAddress": "0x35E3f7E558C04cE7eEE1629258EcbbA03B36Ec56",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "ENS",
+    "feedAddress": "0x5C00128d4d1c2F4f652C267d7bcdD7aC99C16E16",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "MKR",
+    "feedAddress": "0xec1D1B3b0443256cc3860e24a46F108e699484Aa",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "USDV",
+    "feedAddress": "0x925B831EB4c9fFA7e384254fb2cd508c65FAe3FE",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "BUSD",
+    "feedAddress": "0x833D8Eb16D306ed1FbB5D7A2E019e106B960965A",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "AAVE",
+    "feedAddress": "0x547a514d5e3769680Ce22B2361c10Ea13619e8a9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "APE",
+    "feedAddress": "0xD10aBbC76679a20055E167BB80A24ac851b37056",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "FRAX",
+    "feedAddress": "0xB9E1E3A9feFf48998E45Fa90847ed4D467E8BcfD",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "HIGH",
+    "feedAddress": "0x5C8D8AaB4ffa4652753Df94f299330Bb4479bF85",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "RDNT",
+    "feedAddress": "0x393CC05baD439c9B36489384F11487d9C8410471",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "RPL",
+    "feedAddress": "0x4E155eD98aFE9034b7A5962f6C84c86d869daA9d",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "GRT",
+    "feedAddress": "0x86cF33a451dE9dc61a2862FD94FF4ad4Bd65A5d2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "BAT",
+    "feedAddress": "0x9441D7556e7820B5ca42082cfa99487D56AcA958",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "SPELL",
+    "feedAddress": "0x8c110B94C5f1d347fAcF5E1E938AB2db60E3c9a8",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "BNB",
+    "feedAddress": "0x14e613AC84a31f709eadbdF89C6CC390fDc9540A",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "MATIC",
+    "feedAddress": "0x7bAC85A8a13A4BcD8abb3eB7d6b4d632c5a57676",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "CVX",
+    "feedAddress": "0xd962fC30A72A84cE50161031391756Bf2876Af5D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "tBTC",
+    "feedAddress": "0x8350b7De6a6a2C1368E7D4Bd968190e13E354297",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "ETH",
+    "feedAddress": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "STG",
+    "feedAddress": "0x7A9f34a0Aa917D438e9b6E630067062B7F8f6f3d",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "SOL",
+    "feedAddress": "0x4ffC43a60e009B551865A93d232E33Fce9f01507",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "USDP",
+    "feedAddress": "0x09023c0DA49Aaf8fc3fA3ADF34C6A7016D38D5e3",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "SXP",
+    "feedAddress": "0xFb0CfD6c19e25DB4a08D8a204a387cEa48Cc138f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "FXS",
+    "feedAddress": "0x6Ebc52C8C1089be9eB3945C4350B68B8E4C2233f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "IMX",
+    "feedAddress": "0xBAEbEFc1D023c0feCcc047Bff42E75F15Ff213E6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "SNX",
+    "feedAddress": "0xDC3EA94CD0AC27d9A86C180091e7f78C683d3699",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "USDC",
+    "feedAddress": "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "USDE",
+    "feedAddress": "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "YFI",
+    "feedAddress": "0xA027702dbb89fbd58938e4324ac03B58d812b0E1",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "AMPL",
+    "feedAddress": "0xe20CA8D7546932360e37E9D72c1a47334af57706",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "CRV",
+    "feedAddress": "0xCd627aA160A6fA45Eb793D19Ef54f5062F20f33f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "BTC",
+    "feedAddress": "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "SUSDE",
+    "feedAddress": "0xFF3BC18cCBd5999CE63E788A1c250a88626aD099",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "METH",
+    "feedAddress": "0x5b563107C8666d2142C216114228443B94152362",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "ARB",
+    "feedAddress": "0x31697852a68433DbCc2Ff612c516d69E3D9bd08F",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "TUSD",
+    "feedAddress": "0xec746eCF986E2927Abd291a2A1716c940100f8Ba",
+    "feedDecimals": 8
   },
   {
     "chainId": 137,
-    "feedAddress": "0x5d37E4b374E6907de8Fc7fb33EE3b0af403C7403",
+    "tokenSymbol": "BTC",
+    "feedAddress": "0xc907E116054Ad103354f2D350FD2514433D57F6f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "WBTC",
+    "feedAddress": "0xDE31F8bFBD8c84b5360CFACCa3539B938dd78ae6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "QUICK",
+    "feedAddress": "0x2251169D32E7538652a9a8c86bf0c43bFcd956f1",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "CVX",
+    "feedAddress": "0x5ec151834040B4D453A1eA46aA634C1773b36084",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "MANA",
+    "feedAddress": "0xA1CbF3Fe43BC3501e3Fc4b573e822c70e76A7512",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "MATIC",
+    "feedAddress": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "DODO",
+    "feedAddress": "0x59161117086a4C7A9beDA16C66e40Bdaa1C5a8B6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "WOO",
+    "feedAddress": "0x6a99EC84819FB7007dd5D032068742604E755c56",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "OM",
+    "feedAddress": "0xc86105DccF9BD629Cea7Fd41f94c6050bF96D57F",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "KAVA",
+    "feedAddress": "0x7899dd75C329eFe63e35b02bC7d60D3739FB23c5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "TUSD",
+    "feedAddress": "0x7C5D415B64312D38c56B54358449d0a4058339d2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "AGEUR",
+    "feedAddress": "0x9b88d07B2354eF5f4579690356818e07371c7BeD",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "DOGE",
+    "feedAddress": "0xbaf9327b6564454F4a3364C33eFeEf032b4b4444",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "BNB",
+    "feedAddress": "0x82a6c4AF830caa6c97bb504425f6A66165C2c26e",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "FIL",
+    "feedAddress": "0xa07703E5C2eD1516107c7c72A494493Dcb99C676",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "SOL",
+    "feedAddress": "0x10C8264C0935b3B9870013e057f330Ff3e9C56dC",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "CHZ",
+    "feedAddress": "0x2409987e514Ad8B0973C2b90ee1D95051DF0ECB9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "QNT",
+    "feedAddress": "0xF7F291042F6Cbc4deC0Ad75c17786511a530dbe8",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "LINK",
+    "feedAddress": "0xd9FFdb71EbE7496cC440152d43986Aae0AB76665",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "DPI",
+    "feedAddress": "0x2e48b7924FBe04d575BA229A59b64547d9da16e9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "GNS",
+    "feedAddress": "0x9cb43aa3D036Cb035a694Ba0AAa91f8875B16cE1",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "TRX",
+    "feedAddress": "0x307cCF7cBD17b69A487b9C3dbe483931Cf3E1833",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "GRT",
+    "feedAddress": "0x3FabBfb300B1e2D7c9B84512fe9D30aeDF24C410",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "GHST",
+    "feedAddress": "0xDD229Ce42f11D8Ee7fFf29bDB71C7b81352e11be",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "KNC",
+    "feedAddress": "0x10e5f3DFc81B3e5Ef4e648C4454D04e79E1E41E2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "LTC",
+    "feedAddress": "0xEB99F173cf7d9a6dC4D889C2Ad7103e8383b6Efa",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "KLAY",
+    "feedAddress": "0x86F87CB74238a6f24606534A2fCc05469Eb2bcF5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "ETH",
+    "feedAddress": "0xF9680D99D6C9589e2a93a78A04A279e509205945",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "COMP",
+    "feedAddress": "0x2A8758b7257102461BC958279054e372C2b1bDE6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "YFI",
+    "feedAddress": "0x9d3A43c111E7b2C6601705D9fcF7a70c95b1dc55",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "PAXG",
+    "feedAddress": "0x0f6914d8e7e1214CDb3A4C6fbf729b75C69DF608",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "MIMATIC",
+    "feedAddress": "0xd8d483d813547CfB624b8Dc33a00F2fcbCd2D428",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "DOT",
+    "feedAddress": "0xacb51F1a83922632ca02B25a8164c10748001BdE",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "XMR",
+    "feedAddress": "0xBE6FB0AB6302B693368D0E9001fAF77ecc6571db",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "FTM",
+    "feedAddress": "0x58326c0F831b2Dbf7234A4204F28Bba79AA06d5f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "USDT",
+    "feedAddress": "0x0A6513e40db6EB1b165753AD52E80663aeA50545",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "BAL",
+    "feedAddress": "0xD106B538F2A868c28Ca1Ec7E298C3325E0251d66",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "XTZ",
+    "feedAddress": "0x691e26AB58ff05800E028b0876A41B720b26FC65",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "OMG",
+    "feedAddress": "0x93FfEE768F74208a7b9f2a4426f0F6BCbb1D09de",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "XRP",
+    "feedAddress": "0x785ba89291f676b5386652eB12b30cF361020694",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "MKR",
+    "feedAddress": "0xa070427bF5bA5709f70e98b94Cb2F435a242C46C",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "UNI",
+    "feedAddress": "0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "EOS",
+    "feedAddress": "0xd6285F06203D938ab713Fa6A315e7d23247DDE95",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "SNX",
+    "feedAddress": "0xbF90A5D9B6EE9019028dbFc2a9E50056d5252894",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "FXS",
+    "feedAddress": "0x6C0fe985D3cAcbCdE428b84fc9431792694d0f51",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "APE",
+    "feedAddress": "0x2Ac3F3Bfac8fC9094BC3f0F9041a51375235B992",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "AXS",
+    "feedAddress": "0x9c371aE34509590E10aB98205d2dF5936A1aD875",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "AAVE",
+    "feedAddress": "0x72484B12719E23115761D5DA1646945632979bB6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "SUSHI",
+    "feedAddress": "0x49B0c695039243BBfEb8EcD054EB70061fd54aa0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "CRV",
+    "feedAddress": "0x336584C8E6Dc19637A5b36206B1c79923111b405",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "THETA",
+    "feedAddress": "0x38611b09F8f2D520c14eA973765C225Bf57B9Eac",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "OGN",
+    "feedAddress": "0x8Ec0eC2e0F26D8253ABf39Db4B1793D76B49C6D5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "BCH",
+    "feedAddress": "0x327d9822e9932996f55b39F557AEC838313da8b7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "FTT",
+    "feedAddress": "0x817A7D43f0277Ca480AE03Ec76Fc63A2EC7114bA",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "STMATIC",
+    "feedAddress": "0x97371dF4492605486e23Da797fA68e55Fc38a13f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "DASH",
+    "feedAddress": "0xD94427eDee70E4991b4b8DdCc848f2B58ED01C0b",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "FRAX",
+    "feedAddress": "0x00DBeB1e45485d53DF7C2F0dF1Aa0b6Dc30311d3",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "SLP",
+    "feedAddress": "0xBB3eF70953fC3766bec4Ab7A9BF05B6E4caf89c6",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "SHIB",
+    "feedAddress": "0x3710abeb1A0Fc7C2EC59C26c8DAA7a448ff6125A",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "SAND",
+    "feedAddress": "0x3D49406EDd4D52Fb7FFd25485f32E073b529C924",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "BAT",
+    "feedAddress": "0x2346Ce62bd732c62618944E51cbFa09D985d86D2",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "AVAX",
+    "feedAddress": "0xe01eA2fbd8D76ee323FbEd03eB9a8625EC981A10",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "1INCH",
+    "feedAddress": "0x443C5116CdF663Eb387e72C688D276e702135C87",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "USDE",
+    "feedAddress": "0x5c3890e86f3E7Ed7F5390532De147953580f1605",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "BADGER",
+    "feedAddress": "0xF626964Ba5e81405f47e8004F0b276Bb974742B5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "XLM",
+    "feedAddress": "0x692AE5510cA9070095A496dbcFBCDA99D4024Cd9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "ETC",
+    "feedAddress": "0xDf3f72Be10d194b58B1BB56f2c4183e661cB2114",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "ALGO",
+    "feedAddress": "0x03Bc6D9EFed65708D35fDaEfb25E87631a0a3437",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "STORJ",
+    "feedAddress": "0x0F1d5Bd7be9B30Fc09E110cd6504Bd450e53cb0E",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "HBAR",
+    "feedAddress": "0xC5878bDf8a89FA3bF0DC8389ae8EE6DE601D01bC",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "USDC",
+    "feedAddress": "0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "ALCX",
+    "feedAddress": "0x5DB6e61B6159B20F068dc15A47dF2E5931b14f29",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "ADA",
+    "feedAddress": "0x882554df528115a743c4537828DA8D5B58e52544",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "DAI",
+    "feedAddress": "0x4746DeC9e833A82EC7C2C1356372CcF2cfcD2F3D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "DGB",
+    "feedAddress": "0x4205eC5fd179A843caa7B0860a8eC7D980013359",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "ZEC",
+    "feedAddress": "0xBC08c639e579a391C4228F20d0C29d0690092DF0",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "UMA",
+    "feedAddress": "0x33D9B1BAaDcF4b26ab6F8E83e9cb8a611B2B3956",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
     "tokenSymbol": "MATICX",
-    "tokenAddress": "0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6",
-    "decimals": 8
+    "feedAddress": "0x5d37E4b374E6907de8Fc7fb33EE3b0af403C7403",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 137,
+    "tokenSymbol": "ICP",
+    "feedAddress": "0x84227A76a04289473057BEF706646199D7C58c34",
+    "feedDecimals": 8
   }
 ]

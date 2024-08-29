@@ -5,9 +5,10 @@
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "scripts": {
+    "fetch": "npm run fetch:tokens && npm run fetch:feeds",
+    "fetch:tokens": "tsx ./script/gen-tokens.ts",
+    "fetch:feeds": "tsx ./script/gen-feeds.ts",
     "codegen": "wagmi -v && wagmi generate",
-    "codegen:tokens": "tsx ./script/gen-tokens.ts",
-    "codegen:feeds": "tsx ./script/gen-feeds.ts",
     "build": "tsc"
   },
   "author": "",

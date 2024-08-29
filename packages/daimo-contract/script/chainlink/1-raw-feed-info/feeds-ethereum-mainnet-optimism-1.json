@@ -2063,35 +2063,6 @@
   },
   {
     "compareOffchain": "",
-    "contractAddress": "0x595b2be06DA2E773D5fb9Ac2D1fB6444BB7FB6aA",
-    "contractType": "",
-    "contractVersion": 4,
-    "decimalPlaces": null,
-    "ens": "sats-usd",
-    "formatDecimalPlaces": null,
-    "healthPrice": "",
-    "heartbeat": 86400,
-    "history": null,
-    "multiply": "100000000",
-    "name": "SATS / USD",
-    "pair": [
-      "",
-      ""
-    ],
-    "path": "sats-usd",
-    "proxyAddress": "0x1b428a1d55D506103D32f4a1e81bE95f3604601A",
-    "threshold": 0.5,
-    "valuePrefix": "",
-    "assetName": "",
-    "feedCategory": "",
-    "feedType": "",
-    "docs": {
-      "hidden": true
-    },
-    "decimals": 8
-  },
-  {
-    "compareOffchain": "",
     "contractAddress": "0x596246c4A55E5666312Fae266DbA826458C159Ef",
     "contractType": "",
     "contractVersion": 4,
