@@ -43,15 +43,13 @@ contract SwapperTest is Test {
             _wrappedNativeToken: weth,
             _hopTokens: hopTokens,
             _outputTokens: outputTokens,
-            _stablecoins: new IERC20[](0),
             _oracleFeeTiers: oracleFeeTiers,
             _oraclePeriod: 1 minutes,
             _oraclePoolFactory: IUniswapV3Factory(
                 0x33128a8fC17869897dcE68Ed026d694621f6FDfD
             ),
-            _feedTokens: new IERC20[](0),
-            _feedAggregators: new AggregatorV2V3Interface[](0),
-            _maxFeedRoundAge: 0
+            _knownTokenAddrs: new IERC20[](0),
+            _knownTokens: new DaimoFlexSwapper.KnownToken[](0)
         });
     }
 
@@ -134,10 +132,9 @@ contract SwapperTest is Test {
         uint256 amountOut = _swapETHAsAlice(1 ether, swapPath);
         assertEq(amountOut, 3035722236);
 
-        // Next, swap a larger amount. Hit the 1% slippage limit.
-        // Actual output: $2,993,949 USDC = 1.4% slippage.
+        // Next, swap a larger amount. Hit the 2% slippage limit.
         vm.expectRevert("DFS: insufficient output");
-        _swapETHAsAlice(1000 ether, swapPath);
+        _swapETHAsAlice(5000 ether, swapPath);
 
         vm.stopPrank();
     }

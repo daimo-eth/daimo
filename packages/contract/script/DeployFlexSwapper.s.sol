@@ -15,7 +15,7 @@ contract DeployFlexSwapperScript is Script {
 
         DaimoFlexSwapper implementation = new DaimoFlexSwapper{salt: 0}();
         address swapper = CREATE3.deploy(
-            keccak256("DaimoFlexSwapper-11"),
+            keccak256("DaimoFlexSwapper-12"),
             abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(address(implementation), initCall)
@@ -39,26 +39,26 @@ contract DeployFlexSwapperScript is Script {
             IERC20 wrappedNative,
             IERC20[] memory hopTokens,
             IERC20[] memory outputTokens,
-            IERC20[] memory stablecoins,
             address oraclePoolFactory,
-            IERC20[] memory feedTokens,
-            AggregatorV2V3Interface[] memory feedAggregators
+            IERC20[] memory knownTokenAddrs,
+            DaimoFlexSwapper.KnownToken[] memory knownTokens
         ) = _getAddrs(block.chainid);
+
+        // initOwner = daimo.eth
+        address initOwner = 0xEEee8B1371f1664b7C2A8c111D6062b6576fA6f0;
 
         return
             abi.encodeWithSelector(
                 DaimoFlexSwapper.init.selector,
-                address(this) /* initialOwner */,
+                initOwner,
                 wrappedNative,
                 hopTokens,
                 outputTokens,
-                stablecoins,
                 oracleFeeTiers,
                 oraclePeriod,
                 oraclePoolFactory,
-                feedTokens,
-                feedAggregators,
-                maxFeedRoundAge
+                knownTokenAddrs,
+                knownTokens
             );
     }
 
@@ -71,9 +71,9 @@ contract DeployFlexSwapperScript is Script {
             IERC20 wrappedNative,
             IERC20[] memory hopTokens,
             IERC20[] memory outputTokens,
-            IERC20[] memory stablecoins,
-            address uniswapRouter,
-            address oraclePoolFactory
+            address oraclePoolFactory,
+            IERC20[] memory knownTokenAddrs,
+            DaimoFlexSwapper.KnownToken[] memory knownTokens
         )
     {
         wrappedNative = IERC20(_getWrappedNativeToken(chainId));
@@ -92,6 +92,7 @@ contract DeployFlexSwapperScript is Script {
         IERC20 dai = IERC20(_getDAIAddress(chainId));
         IERC20 usdt = IERC20(_getUSDTAddress(chainId));
 
+        IERC20[] memory stablecoins;
         if (_isTestnet(chainId)) {
             // There is no swapping liquidity on testnets so no need for
             // stablecoin options.
@@ -122,11 +123,11 @@ contract DeployFlexSwapperScript is Script {
             outputTokens[i + stablecoins.length] = hopTokens[i];
         }
 
-        uniswapRouter = _getUniswapSwapRouterAddress(chainId);
-
         oraclePoolFactory = _getUniswapFactoryAddress(chainId);
 
-        // Add Chainlink data feed oracles
+        // TODO: add stablecoins + Chainlink data feed oracles
+        knownTokenAddrs = new IERC20[](0);
+        knownTokens = new DaimoFlexSwapper.KnownToken[](0);
     }
 
     // Exclude from forge coverage

@@ -159,26 +159,6 @@ function _getUSDCAddress(uint256 chainId) pure returns (address) {
     revert("Unsupported chainID");
 }
 
-function _getUniswapSwapRouterAddress(uint256 chainId) pure returns (address) {
-    // Mainnets
-    if (chainId == ETH_MAINNET) return ETH_MAINNET_UNISWAP_ROUTER;
-    if (chainId == BASE_MAINNET) return BASE_MAINNET_UNISWAP_ROUTER;
-    if (chainId == OP_MAINNET) return OP_MAINNET_UNISWAP_ROUTER;
-    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_UNISWAP_ROUTER;
-    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_UNISWAP_ROUTER;
-    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_UNISWAP_ROUTER;
-
-    // Testnets
-    if (chainId == ETH_TESTNET) return ETH_TESTNET_UNISWAP_ROUTER;
-    if (chainId == BASE_TESTNET) return BASE_TESTNET_UNISWAP_ROUTER;
-    if (chainId == OP_TESTNET) return OP_TESTNET_UNISWAP_ROUTER;
-    if (chainId == ARBITRUM_TESTNET) return ARBITRUM_TESTNET_UNISWAP_ROUTER;
-    if (chainId == POLYGON_TESTNET) return POLYGON_TESTNET_UNISWAP_ROUTER;
-    if (chainId == AVAX_TESTNET) return AVAX_TESTNET_UNISWAP_ROUTER;
-
-    revert("Unsupported chainID");
-}
-
 function _getUniswapFactoryAddress(uint256 chainId) pure returns (address) {
     // Mainnets
     if (chainId == ETH_MAINNET) return ETH_MAINNET_UNISWAP_FACTORY;

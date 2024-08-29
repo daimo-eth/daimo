@@ -8,9 +8,5 @@
     "declaration": true,
     "esModuleInterop": true
   },
-  "include": [
-    "src/**/*.ts",
-    "../daimo-contract/src/foreignToken.ts",
-    "../daimo-contract/src/chain.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }

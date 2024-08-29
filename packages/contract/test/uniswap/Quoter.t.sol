@@ -20,30 +20,57 @@ contract QuoterTest is Test {
     DaimoFlexSwapper public swapper;
     uint256 private constant _DIRECT_ROUTE_SWAP_LENGTH = 43;
 
+    DaimoFlexSwapper.KnownToken private zeroToken =
+        DaimoFlexSwapper.KnownToken({
+            chainlinkFeedAddr: AggregatorV2V3Interface(address(0)),
+            isStablecoin: false,
+            skipUniswap: false
+        });
+
     function setUp() public {
         assert(block.chainid == 8453);
         assert(block.number == 15950101); // Block specific test
 
+        // Hop token
         IERC20[] memory hopTokens = new IERC20[](1);
         hopTokens[0] = weth;
 
-        IERC20[] memory stablecoins = new IERC20[](1);
-        stablecoins[0] = usdc;
+        // Output token
+        IERC20[] memory outputTokens = new IERC20[](1);
+        outputTokens[0] = usdc;
+
+        // Add stablecoins
+        IERC20[] memory knownTokenAddrs = new IERC20[](3);
+        DaimoFlexSwapper.KnownToken[]
+            memory knownTokens = new DaimoFlexSwapper.KnownToken[](3);
+        knownTokenAddrs[0] = usdc;
+        knownTokens[0] = DaimoFlexSwapper.KnownToken({
+            chainlinkFeedAddr: AggregatorV2V3Interface(address(0)),
+            isStablecoin: true,
+            skipUniswap: false
+        });
+
+        // ... then, add Chainlink priced tokens
+        knownTokenAddrs[1] = weth;
+        knownTokens[1] = DaimoFlexSwapper.KnownToken({
+            chainlinkFeedAddr: fakeFeedETHUSD,
+            isStablecoin: false,
+            skipUniswap: false
+        });
+        knownTokenAddrs[2] = degen;
+        knownTokens[2] = DaimoFlexSwapper.KnownToken({
+            chainlinkFeedAddr: fakeFeedDEGENUSD,
+            isStablecoin: false,
+            skipUniswap: false
+        });
+
+        // TODO: finally, add a skip-Uniswap stETH rebasing token
 
         uint24[] memory oracleFeeTiers = new uint24[](4);
         oracleFeeTiers[0] = 100;
         oracleFeeTiers[1] = 500;
         oracleFeeTiers[2] = 3000;
         oracleFeeTiers[3] = 10000;
-
-        IERC20[] memory feedTokens = new IERC20[](2);
-        feedTokens[0] = weth;
-        feedTokens[1] = degen;
-
-        AggregatorV2V3Interface[]
-            memory feedAggregators = new AggregatorV2V3Interface[](2);
-        feedAggregators[0] = fakeFeedETHUSD;
-        feedAggregators[1] = fakeFeedDEGENUSD;
 
         address swapperImpl = address(new DaimoFlexSwapper());
         swapper = DaimoFlexSwapper(address(new ERC1967Proxy(swapperImpl, "")));
@@ -52,23 +79,22 @@ contract QuoterTest is Test {
             _initialOwner: address(this),
             _wrappedNativeToken: weth,
             _hopTokens: hopTokens,
-            _outputTokens: stablecoins,
-            _stablecoins: stablecoins,
+            _outputTokens: outputTokens,
             _oracleFeeTiers: oracleFeeTiers,
             _oraclePeriod: 1 minutes,
             _oraclePoolFactory: IUniswapV3Factory(
                 0x33128a8fC17869897dcE68Ed026d694621f6FDfD
             ),
-            _feedTokens: feedTokens,
-            _feedAggregators: feedAggregators,
-            _maxFeedRoundAge: 0
+            _knownTokenAddrs: knownTokenAddrs,
+            _knownTokens: knownTokens
         });
     }
 
     function testChainlinkSanityCheckETH() public {
         // Use native ETH = quote WETH
         IERC20 eth = IERC20(address(0));
-        assertNotEq(address(swapper.feedRegistry(weth)), address(0));
+        (AggregatorV2V3Interface clFeed, , ) = swapper.knownTokens(weth);
+        assertNotEq(address(clFeed), address(0));
         vm.deal(address(this), 10 ether);
 
         // $3000.00 = 1 ETH, wrong price = block swap
@@ -87,7 +113,7 @@ contract QuoterTest is Test {
         swapper.swapToCoin{value: 1 ether}(eth, 1 ether, usdc, emptySwapData());
 
         // No price feed = OK, attempt swap
-        swapper.setFeedAggregator(weth, AggregatorV2V3Interface(address(0)));
+        swapper.setKnownToken(weth, zeroToken);
         vm.expectRevert(bytes("DFS: swap produced no output"));
         swapper.swapToCoin{value: 1 ether}(eth, 1 ether, usdc, emptySwapData());
     }
@@ -107,7 +133,7 @@ contract QuoterTest is Test {
         swapper.swapToCoin(degen, 1 ether, usdc, emptySwapData());
 
         // No price = OK, attempt swap
-        swapper.setFeedAggregator(degen, AggregatorV2V3Interface(address(0)));
+        swapper.setKnownToken(degen, zeroToken);
         vm.expectRevert(bytes("DFS: swap produced no output"));
         swapper.swapToCoin(degen, 1e18, usdc, emptySwapData());
     }

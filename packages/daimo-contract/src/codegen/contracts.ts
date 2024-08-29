@@ -1752,15 +1752,6 @@ export const daimoFlexSwapperABI = [
     outputs: [],
   },
   {
-    stateMutability: 'nonpayable',
-    type: 'function',
-    inputs: [
-      { name: 'token', internalType: 'contract IERC20', type: 'address' },
-    ],
-    name: 'addStablecoin',
-    outputs: [],
-  },
-  {
     stateMutability: 'view',
     type: 'function',
     inputs: [
@@ -1793,19 +1784,6 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'extraDataStruct',
     outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    name: 'feedRegistry',
-    outputs: [
-      {
-        name: '',
-        internalType: 'contract AggregatorV2V3Interface',
-        type: 'address',
-      },
-    ],
   },
   {
     stateMutability: 'view',
@@ -1882,11 +1860,6 @@ export const daimoFlexSwapperABI = [
         internalType: 'contract IERC20[]',
         type: 'address[]',
       },
-      {
-        name: '_stablecoins',
-        internalType: 'contract IERC20[]',
-        type: 'address[]',
-      },
       { name: '_oracleFeeTiers', internalType: 'uint24[]', type: 'uint24[]' },
       { name: '_oraclePeriod', internalType: 'uint32', type: 'uint32' },
       {
@@ -1895,16 +1868,24 @@ export const daimoFlexSwapperABI = [
         type: 'address',
       },
       {
-        name: '_feedTokens',
+        name: '_knownTokenAddrs',
         internalType: 'contract IERC20[]',
         type: 'address[]',
       },
       {
-        name: '_feedAggregators',
-        internalType: 'contract AggregatorV2V3Interface[]',
-        type: 'address[]',
+        name: '_knownTokens',
+        internalType: 'struct DaimoFlexSwapper.KnownToken[]',
+        type: 'tuple[]',
+        components: [
+          {
+            name: 'chainlinkFeedAddr',
+            internalType: 'contract AggregatorV2V3Interface',
+            type: 'address',
+          },
+          { name: 'isStablecoin', internalType: 'bool', type: 'bool' },
+          { name: 'skipUniswap', internalType: 'bool', type: 'bool' },
+        ],
       },
-      { name: '_maxFeedRoundAge', internalType: 'uint32', type: 'uint32' },
     ],
     name: 'init',
     outputs: [],
@@ -1921,18 +1902,17 @@ export const daimoFlexSwapperABI = [
   {
     stateMutability: 'view',
     type: 'function',
-    inputs: [
-      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+    inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    name: 'knownTokens',
+    outputs: [
+      {
+        name: 'chainlinkFeedAddr',
+        internalType: 'contract AggregatorV2V3Interface',
+        type: 'address',
+      },
+      { name: 'isStablecoin', internalType: 'bool', type: 'bool' },
+      { name: 'skipUniswap', internalType: 'bool', type: 'bool' },
     ],
-    name: 'isStablecoin',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [],
-    name: 'maxFeedRoundAge',
-    outputs: [{ name: '', internalType: 'uint32', type: 'uint32' }],
   },
   {
     stateMutability: 'view',
@@ -2038,22 +2018,24 @@ export const daimoFlexSwapperABI = [
     stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
-      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+      { name: 'tokenAddr', internalType: 'contract IERC20', type: 'address' },
       {
-        name: 'aggregator',
-        internalType: 'contract AggregatorV2V3Interface',
-        type: 'address',
+        name: 'token',
+        internalType: 'struct DaimoFlexSwapper.KnownToken',
+        type: 'tuple',
+        components: [
+          {
+            name: 'chainlinkFeedAddr',
+            internalType: 'contract AggregatorV2V3Interface',
+            type: 'address',
+          },
+          { name: 'isStablecoin', internalType: 'bool', type: 'bool' },
+          { name: 'skipUniswap', internalType: 'bool', type: 'bool' },
+        ],
       },
     ],
-    name: 'setFeedAggregator',
+    name: 'setKnownToken',
     outputs: [],
-  },
-  {
-    stateMutability: 'view',
-    type: 'function',
-    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    name: 'stablecoins',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
   },
   {
     stateMutability: 'payable',
