@@ -28,3 +28,4 @@ export * from "./retryBackoff";
 export * from "./cctp";
 export * from "./sendPair";
 export * from "./viemClient";
+export * from "./landline";

@@ -29,7 +29,7 @@ import {
 } from "../../../common/nav";
 import { env } from "../../../env";
 import { i18NLocale, i18n } from "../../../i18n";
-import { getCachedEAccount } from "../../../logic/addr";
+import { getCachedEAccount } from "../../../logic/eAccountCache";
 import { shareURL } from "../../../logic/externalAction";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../storage/account";

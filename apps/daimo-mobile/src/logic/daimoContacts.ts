@@ -1,8 +1,8 @@
-import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import {
   EAccount,
   EAccountSearchResult,
   EmailAddress,
+  LandlineAccount,
   PhoneNumber,
   getAccountName,
   zEmailAddress,
@@ -11,7 +11,7 @@ import {
 import { daimoChainFromId } from "@daimo/contract";
 import { Address } from "viem";
 
-import { getCachedEAccount } from "./addr";
+import { getCachedEAccount } from "./eAccountCache";
 import { useSystemContactsSearch } from "./systemContacts";
 import { getRpcHook } from "./trpc";
 import IconDepositWallet from "../../assets/icon-deposit-wallet.png";

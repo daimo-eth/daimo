@@ -26,7 +26,7 @@ import { SetBottomSheetDetailHeight } from "./HistoryOpBottomSheet";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
 import { i18NLocale, i18n } from "../../../i18n";
-import { getCachedEAccount } from "../../../logic/addr";
+import { getCachedEAccount } from "../../../logic/eAccountCache";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";

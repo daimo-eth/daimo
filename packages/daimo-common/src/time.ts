@@ -41,6 +41,10 @@ export function timeString(s: number) {
   });
 }
 
+export function dateStringToUnixSeconds(date: string): number {
+  return Math.floor(new Date(date).getTime() / 1000);
+}
+
 /** Returns eg "Aug 2023" */
 export function timeMonth(s: number) {
   const date = new Date(s * 1000);
@@ -53,13 +57,27 @@ export function timeMonth(s: number) {
 export function guessTimestampFromNum(
   blockNum: number | bigint,
   chain: DaimoChain
-) {
+): number {
   if (typeof blockNum === "bigint") blockNum = Number(blockNum);
   switch (chain) {
     case "baseSepolia":
       return 1695768288 + blockNum * 2;
     case "base":
       return 1686789347 + blockNum * 2;
+    default:
+      throw new Error(`Unsupported network: ${chain}`);
+  }
+}
+
+export function guessNumFromTimestamp(
+  timestamp: number,
+  chain: DaimoChain
+): number {
+  switch (chain) {
+    case "baseSepolia":
+      return Math.floor((timestamp - 1695768288) / 2);
+    case "base":
+      return Math.floor((timestamp - 1686789347) / 2);
     default:
       throw new Error(`Unsupported network: ${chain}`);
   }

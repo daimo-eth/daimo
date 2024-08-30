@@ -6,6 +6,7 @@ import {
   DaimoRequestV2Status,
   EAccount,
   KeyData,
+  LandlineAccount,
   LinkedAccount,
   ProposedSwap,
   RecommendedExchange,
@@ -15,6 +16,7 @@ import {
   assert,
   daimoDomainAddress,
   formatDaimoLink,
+  getLandlineAccountName,
   guessTimestampFromNum,
   hasAccountName,
 } from "@daimo/common";
@@ -37,11 +39,12 @@ import { ExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
 import { i18n } from "../i18n";
 import {
-  LandlineAccount,
   getLandlineAccounts,
   getLandlineSession,
+  getLandlineTransfers,
   getLandlineURL,
 } from "../landline/connector";
+import { addLandlineTransfers } from "../landline/landlineClogMatcher";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
@@ -135,15 +138,12 @@ export async function getAccountHistory(
   // TODO: get userops, including reverted ones. Show failed sends.
 
   // Get successful transfers since sinceBlockNum
-  const transferClogs = homeCoinIndexer.filterTransfers({
+  let transferClogs = homeCoinIndexer.filterTransfers({
     addr: address,
     sinceBlockNum: BigInt(sinceBlockNum),
   });
   let elapsedMs = (performance.now() - startMs) | 0;
   console.log(`${log}: ${elapsedMs}ms ${transferClogs.length} logs`);
-
-  // Get named accounts
-  const namedAccounts = await getNamedAccountsFromClogs(transferClogs, nameReg);
 
   // Get account keys
   const accountKeys = keyReg.resolveAddressKeys(address);
@@ -198,7 +198,23 @@ export async function getAccountHistory(
     const landlineSessionKey = (await getLandlineSession(address)).key;
     landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts(address);
+    // Note: this does not filter out Landline transfers created after
+    // sinceBlockNum. We would be unable to match existing Landline transfers
+    // to new on-chain transfers.
+    const landlineTransfers = await getLandlineTransfers(address);
+    transferClogs = addLandlineTransfers(
+      landlineTransfers,
+      transferClogs,
+      chainConfig.daimoChain
+    );
   }
+
+  // Get named accounts
+  const namedAccounts = await getNamedAccountsFromClogs(
+    transferClogs,
+    landlineAccounts,
+    nameReg
+  );
 
   const ret: AccountHistoryResult = {
     address,
@@ -238,6 +254,7 @@ export async function getAccountHistory(
 
 async function getNamedAccountsFromClogs(
   clogs: TransferClog[],
+  landlineAccounts: LandlineAccount[],
   nameReg: NameRegistry
 ): Promise<EAccount[]> {
   const addrs = new Set<Address>();
@@ -252,6 +269,14 @@ async function getNamedAccountsFromClogs(
   const namedAccounts = (
     await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
   ).filter((acc) => hasAccountName(acc));
+
+  // Map Landline liquidation addresses to the corresponding bank account
+  for (const landlineAccount of landlineAccounts) {
+    namedAccounts.push({
+      addr: landlineAccount.liquidationAddress,
+      name: getLandlineAccountName(landlineAccount),
+    });
+  }
 
   return namedAccounts;
 }

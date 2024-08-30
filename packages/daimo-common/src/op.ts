@@ -8,9 +8,9 @@ import { i18n } from "./i18n";
 import { BigIntStr } from "./model";
 
 /**
- * An Clog is an onchain event affecting a Daimo account. Each Clog
- * corresponds to an Ethereum event log. Usually--but not always--it is also
- * 1:1 with a Daimo userop.
+ * A Clog (combined log) is an onchain event affecting a Daimo account. Each
+ * Clog corresponds to an Ethereum event log. Usually--but not always--it is
+ * also 1:1 with a Daimo userop.
  *
  * In the pending state, we don't have an event log yet--instead we have an
  * opHash &/or a txHash, and a future event log which we're expecting.
@@ -110,6 +110,9 @@ export interface TransferSwapClog extends ClogBase {
 
   /** Output amount after swap from home coin */
   postSwapTransfer?: PostSwapTransfer;
+
+  /** Remote transfer data associated with this transfer. e.g. Landline, Tron */
+  offchainTransfer?: OffchainTransfer;
 }
 
 export interface PaymentLinkClog extends ClogBase {
@@ -128,6 +131,27 @@ export interface PaymentLinkClog extends ClogBase {
 
   /** Memo from the sender, if present */
   memo?: string;
+}
+
+/** A transfer that happens offchain or on a non-Daimo chain (e.g. TRON). */
+export interface OffchainTransfer {
+  type: "landline"; // future: "tron-bridge", ...
+
+  transferType: "deposit" | "withdrawal";
+  status: "processing" | "completed" | "failed" | "returned";
+  statusMessage?: string;
+
+  /** Remote account ID */
+  accountID: string;
+  /** Remote transfer ID, if available */
+  transferID?: string;
+
+  /** Unix seconds. Time the remote transfer was initiated */
+  timeStart: number;
+  /** Unix seconds. Time the remote transfer was expected to complete */
+  timeExpected?: number;
+  /** Unix seconds. Time the remote transfer was completed */
+  timeFinish?: number;
 }
 
 /**

@@ -24,9 +24,9 @@ import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, Hex } from "viem";
 
+import { cacheEAccounts } from "./eAccountCache";
 import { getRpcFunc } from "./trpc";
 import { ActHandle } from "../action/actStatus";
-import { cacheEAccounts } from "../logic/addr";
 import {
   EnclaveKeyInfo,
   deleteEnclaveKey,

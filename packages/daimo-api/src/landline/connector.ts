@@ -1,3 +1,4 @@
+import { LandlineAccount, LandlineTransfer } from "@daimo/common";
 import { Address } from "viem";
 
 import { landlineTrpc } from "./trpc";
@@ -5,20 +6,6 @@ import { getEnvApi } from "../env";
 
 export interface LandlineSessionKey {
   key: string;
-}
-
-export interface LandlineAccount {
-  daimoAddress: Address;
-  landlineAccountUuid: string;
-  bankName: string;
-  bankLogo: string | null;
-  accountName: string;
-  accountNumberLastFour: string;
-  bankCurrency: string;
-  liquidationAddress: Address;
-  liquidationChain: string;
-  liquidationCurrency: string;
-  createdAt: string;
 }
 
 export interface LandlineDepositResponse {
@@ -75,6 +62,24 @@ export async function getLandlineAccounts(
     // Gracefully return empty array
     return [];
   }
+}
+
+export async function getLandlineTransfers(
+  daimoAddress: Address,
+  createdAfter?: number
+): Promise<LandlineTransfer[]> {
+  // Convert createdAfter from Unix seconds to a Date object if it's provided
+  const createdAfterDate = createdAfter
+    ? new Date(createdAfter * 1000)
+    : undefined;
+
+  const transfers =
+    // @ts-ignore
+    await landlineTrpc.getAllLandlineTransfers.query({
+      daimoAddress,
+      createdAfter: createdAfterDate,
+    });
+  return transfers;
 }
 
 export async function landlineDeposit(
