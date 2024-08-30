@@ -160,8 +160,9 @@ export class HomeCoinIndexer extends Indexer {
     txHashes?: Hex[];
   }): TransferClog[] {
     let filtered = this.allTransfers.filter(
-      (log) => log.from === addr || log.to === addr
+      (log) => (log.from === addr || log.to === addr) && log.value > 0n
     );
+
     if (sinceBlockNum) {
       filtered = filtered.filter(
         (log) => (log.blockNumber || 0n) >= sinceBlockNum
