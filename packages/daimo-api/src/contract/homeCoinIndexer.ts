@@ -162,6 +162,9 @@ export class HomeCoinIndexer extends Indexer {
     let filtered = this.allTransfers.filter(
       (log) => log.from === addr || log.to === addr
     );
+
+    filtered = filtered.filter((log) => log.value > 0n); // ignore zero transfers
+
     if (sinceBlockNum) {
       filtered = filtered.filter(
         (log) => (log.blockNumber || 0n) >= sinceBlockNum
