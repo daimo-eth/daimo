@@ -184,12 +184,12 @@ export class DB {
         -- DaimoDB Index setup (filtered)
         --
 
-        CREATE TABLE IF NOT EXISTS index.blocks (
-          chain_id bigint NOT NULL,
-          number bigint NOT NULL,
-          hash bytea NOT NULL,
-          parent_hash bytea NOT NULL,
-          timestamp bigint NOT NULL,
+        CREATE TABLE IF NOT EXISTS index.daimo_block (
+          chain_id NUMERIC NOT NULL,
+          number NUMERIC NOT NULL,
+          hash BYTEA NOT NULL,
+          parent_hash BYTEA NOT NULL,
+          timestamp NUMERIC NOT NULL,
           PRIMARY KEY (chain_id, number, hash)
         );
 
