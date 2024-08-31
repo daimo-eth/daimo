@@ -21,6 +21,7 @@ import {
 import { navToAccountPage, useNav } from "../../common/nav";
 import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
+import { eAccToContact } from "../../logic/daimoContacts";
 import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
 import { TokenBubble } from "../shared/Bubble";
@@ -99,7 +100,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
       />
       <Spacer h={32} />
       <AccountRow
-        acc={swap.fromAcc}
+        contact={eAccToContact(swap.fromAcc)}
         timestamp={swap.receivedAt}
         viewAccount={() => navToAccountPage(swap.fromAcc!, nav)}
       />

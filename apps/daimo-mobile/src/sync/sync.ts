@@ -170,7 +170,7 @@ async function fetchSync(
     landlineSessionURL: result.landlineSessionURL,
     numLandlineAccounts: (result.landlineAccounts || []).length,
   };
-  console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
+  // console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
   // Validation
   assert(result.address === account.address, "wrong address");

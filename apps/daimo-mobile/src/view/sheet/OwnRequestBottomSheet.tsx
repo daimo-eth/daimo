@@ -16,6 +16,7 @@ import { useNav } from "../../common/nav";
 import { env } from "../../env";
 import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
+import { eAccToContact } from "../../logic/daimoContacts";
 import { AccountRow } from "../shared/AccountRow";
 import { TitleAmount } from "../shared/Amount";
 import { ButtonMed } from "../shared/Button";
@@ -109,7 +110,7 @@ export function OwnRequestBottomSheet({
       <Spacer h={32} />
       {reqStatus.expectedFulfiller && (
         <AccountRow
-          acc={reqStatus.expectedFulfiller}
+          contact={eAccToContact(reqStatus.expectedFulfiller)}
           timestamp={reqStatus.createdAt}
           viewAccount={undefined}
         />

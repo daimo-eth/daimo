@@ -260,6 +260,42 @@ export function getDisplayFromTo(op: TransferClog): [Address, Address] {
   }
 }
 
+export type TransferClogType =
+  | "transfer"
+  | "createLink"
+  | "claimLink"
+  | "landline";
+
+export function getTransferClogType(clog: TransferClog): TransferClogType {
+  if (clog.type === "createLink" || clog.type === "claimLink") {
+    return clog.type;
+  } else if (clog.type === "transfer") {
+    return clog.offchainTransfer ? clog.offchainTransfer.type : "transfer";
+  } else {
+    throw Error(`Unknown clog type: ${clog.type}`);
+  }
+}
+
+export type TransferClogStatus =
+  | "pending"
+  | "processing"
+  | "confirmed"
+  | "finalized"
+  | "failed"
+  | "expired";
+
+export function getTransferClogStatus(clog: TransferClog): TransferClogStatus {
+  const clogType = getTransferClogType(clog);
+  if (clogType === "landline") {
+    const landlineStatus = (clog as TransferSwapClog).offchainTransfer!.status;
+    if (landlineStatus === "returned") return "failed";
+    if (landlineStatus === "completed") return "finalized";
+    return landlineStatus;
+  } else {
+    return clog.status;
+  }
+}
+
 // Get memo text for an op
 // Either uses the memo field for standard transfers, e.g. "for ice cream"
 // Or generates a synthetic one for swaps, e.g. "5 USDT -> USDC" if short

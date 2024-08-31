@@ -4,11 +4,13 @@ import {
   EmailAddress,
   LandlineAccount,
   PhoneNumber,
+  canSendTo,
   getAccountName,
   zEmailAddress,
   zPhoneNumber,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
+import { Locale } from "expo-localization";
 import { Address } from "viem";
 
 import { getCachedEAccount } from "./eAccountCache";
@@ -91,8 +93,8 @@ export function addLastTransferTimes(
   return { type: "eAcc", ...otherEAcc, lastSendTime, lastRecvTime };
 }
 
-export function getContactName(r: DaimoContact) {
-  if (r.type === "eAcc") return getAccountName(r);
+export function getContactName(r: DaimoContact, locale?: Locale) {
+  if (r.type === "eAcc") return getAccountName(r, locale);
   else if (r.type === "email") return r.name ? r.name : r.email;
   else if (r.type === "phoneNumber") return r.name ? r.name : r.phoneNumber;
   else if (r.type === "landlineBankAccount")
@@ -114,6 +116,16 @@ export function getContactProfilePicture(
     return logo;
   } else {
     return undefined;
+  }
+}
+
+export function canSendToContact(otherContact: DaimoContact): boolean {
+  if (otherContact.type === "landlineBankAccount") {
+    return true;
+  } else if (otherContact.type === "eAcc") {
+    return canSendTo(otherContact as EAccount);
+  } else {
+    return false;
   }
 }
 
@@ -218,6 +230,10 @@ export function useContactSearch(
     status: res.status,
     error: res.error,
   };
+}
+
+export function eAccToContact(eAcc: EAccount): EAccountContact {
+  return { type: "eAcc", ...eAcc };
 }
 
 export function landlineAccountToContact(

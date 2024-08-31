@@ -12,6 +12,10 @@ import {
   getSynthesizedMemo,
   getDAv2Chain,
   tryOrNull,
+  getTransferClogType,
+  TransferSwapClog,
+  EAccount,
+  getTransferClogStatus,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -29,8 +33,14 @@ import {
 } from "../../../common/nav";
 import { env } from "../../../env";
 import { i18NLocale, i18n } from "../../../i18n";
+import {
+  canSendToContact,
+  eAccToContact,
+  landlineAccountToContact,
+} from "../../../logic/daimoContacts";
 import { getCachedEAccount } from "../../../logic/eAccountCache";
 import { shareURL } from "../../../logic/externalAction";
+import { getCachedLandlineAccount } from "../../../logic/landlineAccountCache";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../storage/account";
 import { syncFindSameOp } from "../../../sync/sync";
@@ -76,6 +86,7 @@ function HistoryOpInner({ account, route }: Props & { account: Account }) {
   // A pending op always has an opHash (since its initiated by the user's
   // account).
   const { opHash, txHash } = route.params.op;
+  // TODO: make this work for landline transfers
   const foundOp = syncFindSameOp({ opHash, txHash }, account.recentTransfers);
   const op = foundOp || route.params.op;
 
@@ -103,7 +114,7 @@ function HistoryOpInner({ account, route }: Props & { account: Account }) {
         onExit={leaveScreen}
         hideOfflineHeader
       />
-      <TransferBody account={account} op={op} />
+      <TransferBody account={account} transferClog={op} />
       <Spacer h={36} />
       <View style={ss.container.padH16}>
         {op.txHash && !shareLinkAgain && (
@@ -182,12 +193,33 @@ function LinkToExplorer({
   );
 }
 
-function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
+function TransferBody({
+  account,
+  transferClog,
+}: {
+  account: Account;
+  transferClog: TransferClog;
+}) {
   const nav = useNav();
+  const address = account.address;
 
-  const sentByUs = op.from === account.address;
-  const [displayFrom, displayTo] = getDisplayFromTo(op);
-  const other = getCachedEAccount(sentByUs ? displayTo : displayFrom);
+  const sentByUs = transferClog.from === address;
+  const [from, to] = getDisplayFromTo(transferClog);
+
+  const transferClogType = getTransferClogType(transferClog);
+  const otherContact = (() => {
+    const landlineAccount =
+      transferClogType === "landline"
+        ? getCachedLandlineAccount(
+            (transferClog as TransferSwapClog).offchainTransfer!.accountID
+          )
+        : undefined;
+    if (landlineAccount) {
+      return landlineAccountToContact(landlineAccount);
+    }
+
+    return eAccToContact(getCachedEAccount(from === address ? to : from));
+  })();
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   let coinName = chainConfig.tokenSymbol;
@@ -195,8 +227,9 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
 
   // Special case: if this transfer is from or to a different coin
   let foreignChainName: string | undefined = undefined;
-  if (op.type === "transfer") {
-    const coin = op.preSwapTransfer?.coin || op.postSwapTransfer?.coin;
+  if (transferClog.type === "transfer") {
+    const coin =
+      transferClog.preSwapTransfer?.coin || transferClog.postSwapTransfer?.coin;
     if (coin != null) {
       coinName = coin.symbol;
       const chain = tryOrNull(() => getDAv2Chain(coin.chainId));
@@ -221,7 +254,9 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
     <React.Fragment key="coin">{coinName}</React.Fragment>,
     <React.Fragment key="chain">{chainName}</React.Fragment>,
     <React.Fragment key="fees">
-      <TextBodyCaps color={col}>{getFeeText(op.feeAmount)}</TextBodyCaps>
+      <TextBodyCaps color={col}>
+        {getFeeText(transferClog.feeAmount)}
+      </TextBodyCaps>
       <Spacer w={8} />
       <Octicons size={16} name="info" color={col} />
     </React.Fragment>,
@@ -234,15 +269,23 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
   }
 
   const memoText = getSynthesizedMemo(
-    op,
+    transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
     i18NLocale
   );
 
+  const viewAccount = () => {
+    // TODO: Temporarily disallow landline bank accounts
+    if (otherContact.type === "landlineBankAccount") return false;
+    // TODO: change `navToAccountPage` to accept `DaimoContact`
+    if (canSendToContact(otherContact))
+      navToAccountPage(otherContact as EAccount, nav);
+  };
+
   return (
     <View>
       <TitleAmount
-        amount={BigInt(op.amount)}
+        amount={BigInt(transferClog.amount)}
         preSymbol={sentByUs ? "-" : "+"}
         style={sentByUs ? { color: "black" } : { color: color.success }}
       />
@@ -262,10 +305,10 @@ function TransferBody({ account, op }: { account: Account; op: TransferClog }) {
       )}
       <Spacer h={32} />
       <AccountRow
-        acc={other}
-        timestamp={op.timestamp}
-        viewAccount={() => navToAccountPage(other, nav)}
-        pending={op.status === "pending"}
+        contact={otherContact}
+        timestamp={transferClog.timestamp}
+        viewAccount={viewAccount}
+        status={getTransferClogStatus(transferClog)}
       />
     </View>
   );
