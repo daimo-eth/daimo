@@ -220,8 +220,18 @@ export class IndexWatcher {
   private async migrateDBInner() {
     await this.pg.query(`
       --
-      -- DaimoDB Index setup (filtered from Jumbo)
+      -- DaimoDB Index setup (filtered)
       --
+
+      CREATE TABLE IF NOT EXISTS index.daimo_block (
+        chain_id NUMERIC NOT NULL,
+        number NUMERIC NOT NULL,
+        hash BYTEA NOT NULL,
+        parent_hash BYTEA NOT NULL,
+        timestamp NUMERIC NOT NULL,
+        PRIMARY KEY (chain_id, number, hash)
+      );
+
       CREATE TABLE IF NOT EXISTS index.daimo_index (
         chain_id NUMERIC NOT NULL PRIMARY KEY,
         latest_block_num NUMERIC NOT NULL 
