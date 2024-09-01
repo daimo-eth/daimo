@@ -105,7 +105,10 @@ export async function getAccountHistory(
   blockNumber: number
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
-  assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
+  assert(
+    eAcc != null && eAcc.name != null,
+    `${address} is not a Daimo account`
+  );
   const startMs = performance.now();
   const log = `[API] getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
   console.log(`${log}: starting`);
@@ -144,7 +147,7 @@ export async function getAccountHistory(
 
   // Get account keys
   const accountKeys = keyReg.resolveAddressKeys(address);
-  assert(accountKeys != null);
+  assert(accountKeys != null, `${address} has no account keys`);
 
   // Prefetch info required to send operations > fast at time of sending.
   const chainGasConstants = await paymaster.calculateChainGasConstants(eAcc);
