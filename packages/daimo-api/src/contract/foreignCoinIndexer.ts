@@ -12,7 +12,6 @@ import {
 } from "@daimo/common";
 import { zeroAddr } from "@daimo/contract";
 import { Kysely } from "kysely";
-import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Transfer } from "./homeCoinIndexer";
@@ -60,7 +59,7 @@ export class ForeignCoinIndexer extends Indexer {
     super("FOREIGN-COIN");
   }
 
-  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
     const startMs = performance.now();
 
     const result = await retryBackoff(

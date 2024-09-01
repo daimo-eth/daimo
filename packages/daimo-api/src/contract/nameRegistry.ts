@@ -5,15 +5,13 @@ import {
   EAccount,
   assertEqual,
   assertNotNull,
-  guessTimestampFromNum,
   isValidName,
   now,
-  validateName,
   retryBackoff,
+  validateName,
 } from "@daimo/common";
 import { nameRegistryProxyConfig, teamDaimoFaucetAddr } from "@daimo/contract";
 import { Kysely } from "kysely";
-import { Pool } from "pg";
 import {
   Address,
   bytesToHex,
@@ -109,26 +107,27 @@ export class NameRegistry extends Indexer {
     return { numAccounts: this.accounts.length, numLogs: this.logs.length };
   }
 
-  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
-    const startTime = Date.now();
-    const result = await retryBackoff(
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
+    const startMs = performance.now();
+    const rows = await retryBackoff(
       `nameRegistry-logs-query-${from}-${to}`,
       () =>
-        pg.query(
-          `select block_num, addr, name
-          from names
-          where block_num >= $1
-          and block_num <= $2
-          and chain_id = $3`,
-          [from, to, chainConfig.chainL2.id]
-        )
+        kdb
+          .selectFrom("index.daimo_name")
+          .selectAll()
+          .where("chain_id", "=", "" + chainConfig.chainL2.id)
+          .where((eb) => eb.between("block_num", "" + from, "" + to))
+          .orderBy("block_num")
+          .orderBy("tx_idx")
+          .orderBy("log_idx")
+          .execute()
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    const names = result.rows.map((r: any) => {
+    const names = rows.map((r) => {
       return {
-        timestamp: guessTimestampFromNum(r.block_num, chainConfig.daimoChain),
+        timestamp: Number(r.block_ts),
         name: bytesToString(r.name, { size: 32 }),
         addr: getAddress(bytesToHex(r.addr, { size: 20 })),
       };
@@ -136,7 +135,7 @@ export class NameRegistry extends Indexer {
     this.logs.push(...names);
     names.forEach(this.cacheAccount);
 
-    const elapsedMs = (Date.now() - startTime) | 0;
+    const elapsedMs = (performance.now() - startMs) | 0;
     console.log(`[NAME-REG] loaded ${names.length} names in ${elapsedMs}ms`);
   }
 

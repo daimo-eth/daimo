@@ -1,5 +1,4 @@
 import { Kysely } from "kysely";
-import { Pool } from "pg";
 
 import { DB as IndexDB } from "../codegen/dbIndex";
 
@@ -14,7 +13,6 @@ export abstract class Indexer {
 
   // Loads a batch of blocks from the database.
   public abstract load(
-    pg: Pool,
     kdb: Kysely<IndexDB>,
     from: number,
     to: number

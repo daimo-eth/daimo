@@ -166,7 +166,7 @@ export class IndexWatcher {
     console.log(`[WATCHER] loading ${start} to ${start + limit}`);
     for (const [, layer] of this.indexerLayers.entries()) {
       await Promise.all(
-        layer.map((i) => i.load(this.pg, this.kdb, start, start + limit))
+        layer.map((i) => i.load(this.kdb, start, start + limit))
       );
     }
     console.log(

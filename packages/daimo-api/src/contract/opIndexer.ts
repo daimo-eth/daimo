@@ -1,7 +1,6 @@
 import { assertNotNull, retryBackoff } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
-import { Pool } from "pg";
 import { Hex, bytesToHex, numberToHex } from "viem";
 
 import { Indexer } from "./indexer";
@@ -44,7 +43,7 @@ export class OpIndexer extends Indexer {
     this.callbacks.delete(userOp.hash);
   }
 
-  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
     const startTime = Date.now();
 
     const result = await retryBackoff(

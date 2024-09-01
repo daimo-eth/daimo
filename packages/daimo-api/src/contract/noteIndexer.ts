@@ -9,7 +9,6 @@ import {
   retryBackoff,
 } from "@daimo/common";
 import { Kysely } from "kysely";
-import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
@@ -18,7 +17,7 @@ import { OpIndexer } from "./opIndexer";
 import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
-import { senderIdKey, logCoordinateKey } from "../utils/indexing";
+import { logCoordinateKey, senderIdKey } from "../utils/indexing";
 
 interface NoteLog {
   blockNum: number;
@@ -55,13 +54,13 @@ export class NoteIndexer extends Indexer {
     super("NOTE");
   }
 
-  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
     // Load notes contract event logs
-    const startMs = Date.now();
-    const logs = await this.loadNoteLogs(pg, from, to);
+    const startMs = performance.now();
+    const logs = await this.loadNoteLogs(kdb, from, to);
     if (logs.length === 0) return;
 
-    const elapsedMs = (Date.now() - startMs) | 0;
+    const elapsedMs = (performance.now() - startMs) | 0;
     console.log(`[NOTE] ${elapsedMs}ms: loaded ${logs.length} logs`);
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -78,52 +77,35 @@ export class NoteIndexer extends Indexer {
   }
 
   private async loadNoteLogs(
-    pg: Pool,
+    kdb: Kysely<IndexDB>,
     from: number,
     to: number
   ): Promise<NoteLog[]> {
-    const result = await retryBackoff(
+    const rows = await retryBackoff(
       `noteIndexer-logs-query-${from}-${to}`,
       () =>
-        pg.query(
-          `
-      select * from (
-        select
-          block_num,
-          tx_idx,
-          log_idx,
-          tx_hash,
-          f,
-          null as redeemer,
-          ephemeral_owner,
-          amount,
-          log_addr
-        from note_created
-        where block_num >= $1
-        and block_num <= $2
-        and chain_id = $3
-        union 
-        select
-          block_num,
-          tx_idx,
-          log_idx,
-          tx_hash,
-          f,
-          redeemer,
-          ephemeral_owner,
-          amount,
-          log_addr
-        from note_redeemed
-        where block_num >= $1
-        and block_num <= $2
-        and chain_id = $3
-      ) as notelogs
-      order by block_num asc, tx_idx asc, log_idx asc
-    `,
-          [from, to, chainConfig.chainL2.id]
-        )
+        kdb
+          .selectFrom("index.daimo_note")
+          .selectAll()
+          .where("chain_id", "=", "" + chainConfig.chainL2.id)
+          .where((eb) => eb.between("block_num", "" + from, "" + to))
+          .orderBy("block_num")
+          .orderBy("tx_idx")
+          .orderBy("log_idx")
+          .execute()
     );
-    return result.rows.map(rowToNoteLog);
+
+    return rows.map((r) => ({
+      blockNum: Number(r.block_num),
+      transactionIndex: Number(r.tx_idx),
+      logIndex: Number(r.log_idx),
+      transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+      from: getAddress(bytesToHex(r.creator, { size: 20 })),
+      redeemer: r.redeemer && getAddress(bytesToHex(r.redeemer, { size: 20 })),
+      ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
+      amount: BigInt(r.amount),
+      logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
+    }));
   }
 
   async handleNoteLogs(logs: NoteLog[]): Promise<DaimoNoteStatus[]> {
@@ -257,18 +239,4 @@ export class NoteIndexer extends Indexer {
   getClaimLog(ephemeralOwner: Address) {
     return this.noteLogs.get(ephemeralOwner)?.claim;
   }
-}
-
-function rowToNoteLog(r: any): NoteLog {
-  return {
-    blockNum: r.block_num,
-    transactionIndex: r.tx_idx,
-    logIndex: r.log_idx,
-    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
-    from: getAddress(bytesToHex(r.f, { size: 20 })),
-    redeemer: r.redeemer && getAddress(bytesToHex(r.redeemer, { size: 20 })),
-    ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
-    amount: BigInt(r.amount),
-    logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
-  };
 }

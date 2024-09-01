@@ -11,7 +11,6 @@ import {
 } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
-import { Pool } from "pg";
 import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
 import { ForeignCoinIndexer } from "./foreignCoinIndexer";
@@ -62,7 +61,7 @@ export class HomeCoinIndexer extends Indexer {
     return { numTransfers: this.allTransfers.length };
   }
 
-  async load(pg: Pool, kdb: Kysely<IndexDB>, from: number, to: number) {
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
     const startTime = Date.now();
 
     const result = await retryBackoff(
