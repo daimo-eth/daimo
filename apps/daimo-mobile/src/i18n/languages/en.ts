@@ -493,6 +493,10 @@ export const en = {
       cta: () => `Withdraw`,
       title: () => `Withdraw to any wallet or exchange`,
     },
+    bitrefill: {
+      cta: () => `Withdraw with Bitrefill`,
+      title: () => `Buy gift cards with USDC`,
+    },
   },
   // errorScreens.tsx
   error: {

@@ -21,7 +21,6 @@ import { useEffect } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
-import DepositScreen from "./screen/DepositScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
 import LandlineTransferScreen from "./screen/LandlineBankTransfer";
@@ -30,6 +29,8 @@ import { QRScreen } from "./screen/QRScreen";
 import { SeedPhraseScreen } from "./screen/SeedPhraseScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import { YourInvitesScreen } from "./screen/YourInvitesScreen";
+import { BitrefillWebView } from "./screen/deposit/BitrefillWebview";
+import DepositScreen from "./screen/deposit/DepositScreen";
 import { ErrorScreen } from "./screen/errorScreens";
 import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
 import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
@@ -343,6 +344,10 @@ function DepositTab() {
       <DepositStack.Screen
         name="LandlineTransfer"
         component={LandlineTransferScreen}
+      />
+      <DepositStack.Screen
+        name="BitrefillWebView"
+        component={BitrefillWebView}
       />
     </DepositStack.Navigator>
   );

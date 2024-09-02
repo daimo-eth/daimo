@@ -17,10 +17,12 @@ export function ContactDisplay({
   contact,
   isRequest,
   requestMemo,
+  onPress,
 }: {
   contact: DaimoContact;
   isRequest?: boolean;
   requestMemo?: string;
+  onPress?: () => void;
 }) {
   // Show who we're sending to
   const isAccount = contact.type === "eAcc";
@@ -59,7 +61,7 @@ export function ContactDisplay({
 
   return (
     <View style={styles.recipientDisp}>
-      <ButtonCircle size={64} onPress={goToAccount}>
+      <ButtonCircle size={64} onPress={onPress ?? goToAccount}>
         <ContactBubble contact={contact} size={64} transparent />
       </ButtonCircle>
       <Spacer h={8} />

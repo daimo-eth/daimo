@@ -104,6 +104,7 @@ export type ParamListSend = {
 export type ParamListDeposit = {
   Deposit: undefined;
   LandlineTransfer: LandlineTransferNavProp;
+  BitrefillWebView: undefined;
 };
 
 export type ParamListInvite = {

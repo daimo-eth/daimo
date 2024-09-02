@@ -17,29 +17,29 @@ import {
   useWindowDimensions,
 } from "react-native";
 
-import IconDepositWallet from "../../../assets/icon-deposit-wallet.png";
-import IconWithdrawWallet from "../../../assets/icon-withdraw-wallet.png";
-import LandlineLogo from "../../../assets/logos/landline-logo.png";
-import { DispatcherContext } from "../../action/dispatch";
-import { useNav } from "../../common/nav";
-import { env } from "../../env";
-import { i18NLocale, i18n } from "../../i18n";
-import { useAccount } from "../../logic/accountManager";
+import IconDepositWallet from "../../../../assets/icon-deposit-wallet.png";
+import IconWithdrawWallet from "../../../../assets/icon-withdraw-wallet.png";
+import LandlineLogo from "../../../../assets/logos/landline-logo.png";
+import { DispatcherContext } from "../../../action/dispatch";
+import { useNav } from "../../../common/nav";
+import { env } from "../../../env";
+import { i18NLocale, i18n } from "../../../i18n";
+import { useAccount } from "../../../logic/accountManager";
 import {
   DaimoContact,
   getContactProfilePicture,
   landlineAccountToContact,
-} from "../../logic/daimoContacts";
-import { useTime } from "../../logic/time";
-import { getRpcFunc } from "../../logic/trpc";
-import { Account } from "../../storage/account";
-import { CoverGraphic } from "../shared/CoverGraphic";
-import { InfoBox } from "../shared/InfoBox";
-import { ScreenHeader } from "../shared/ScreenHeader";
-import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
-import { TextBody, TextMeta } from "../shared/text";
-import { useWithAccount } from "../shared/withAccount";
+} from "../../../logic/daimoContacts";
+import { useTime } from "../../../logic/time";
+import { getRpcFunc } from "../../../logic/trpc";
+import { Account } from "../../../storage/account";
+import { CoverGraphic } from "../../shared/CoverGraphic";
+import { InfoBox } from "../../shared/InfoBox";
+import { ScreenHeader } from "../../shared/ScreenHeader";
+import Spacer from "../../shared/Spacer";
+import { color, ss, touchHighlightUnderlay } from "../../shared/style";
+import { TextBody, TextMeta } from "../../shared/text";
+import { useWithAccount } from "../../shared/withAccount";
 
 const i18 = i18n.deposit;
 
@@ -62,7 +62,7 @@ function DepositScreenInner({ account }: { account: Account }) {
         <Spacer h={24} />
         <DepositList account={account} />
         <Spacer h={16} />
-        <WithdrawList />
+        <WithdrawList account={account} />
       </ScrollView>
     </View>
   );
@@ -182,7 +182,9 @@ function getOnDemandExchanges(
     {
       cta: i18.binance.cta(),
       title: i18.binance.title(),
-      logo: `${daimoDomainAddress}/assets/deposit/binance.png` as any,
+      logo: {
+        uri: `${daimoDomainAddress}/assets/deposit/binance.png`,
+      },
       loadingId: progressId,
       isExternal: true,
       sortId: 2,
@@ -258,14 +260,23 @@ function DepositList({ account }: { account: Account }) {
   );
 }
 
-function WithdrawList() {
+function WithdrawList({ account }: { account: Account }) {
+  const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const dispatcher = useContext(DispatcherContext);
+  const nav = useNav();
 
   const openAddressWithdraw = () => {
     dispatcher.dispatch({ name: "withdrawInstructions" });
   };
 
   const defaultLogo = IconWithdrawWallet;
+  const isTestnet = chainConfig.chainL2.testnet;
+
+  const openBitrefill = () => {
+    nav.navigate("DepositTab", {
+      screen: "BitrefillWebView",
+    });
+  };
 
   return (
     <View style={styles.section}>
@@ -277,6 +288,14 @@ function WithdrawList() {
         logo={defaultLogo}
         onClick={openAddressWithdraw}
       />
+      {!isTestnet && (
+        <OptionRow
+          cta={i18.bitrefill.cta()}
+          title={i18.bitrefill.title()}
+          logo={{ uri: `${daimoDomainAddress}/assets/deposit/bitrefill.png` }}
+          onClick={openBitrefill}
+        />
+      )}
     </View>
   );
 }
