@@ -57,6 +57,7 @@ export function ContactBubble({
         case AddrLabel.Coinbase:
         case AddrLabel.Binance:
           return <Octicons name="plus" size={fontSize} color={color.primary} />;
+        case AddrLabel.FastCCTP:
         case AddrLabel.UniswapETHPool:
         case AddrLabel.Relay:
         case AddrLabel.LiFi:
