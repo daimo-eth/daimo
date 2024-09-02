@@ -10,6 +10,7 @@ export interface LandlineSessionKey {
 
 export interface LandlineDepositResponse {
   status: string;
+  transfer?: LandlineTransfer;
   error?: string;
 }
 

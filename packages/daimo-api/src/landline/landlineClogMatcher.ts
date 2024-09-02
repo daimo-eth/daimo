@@ -1,6 +1,6 @@
 import {
   LandlineTransfer,
-  OffchainTransfer,
+  landlineTransferToOffchainTransfer,
   OpStatus,
   TransferClog,
   TransferSwapClog,
@@ -59,7 +59,7 @@ export function addLandlineTransfers(
     );
   }
 
-  return fullTransferClogs.sort((a, b) => b.timestamp - a.timestamp);
+  return fullTransferClogs.sort((a, b) => a.timestamp - b.timestamp);
 }
 
 function landlineTransferToClog(
@@ -80,13 +80,11 @@ function landlineTransferToClog(
       status: OpStatus.confirmed,
       txHash: landlineTransfer.txHash || undefined,
       // Old versions of the mobile app use blockNumber and logIndex to sort
-      // TransferClogs
+      // TransferClogs. Block number is also used to determine finalized transfers.
       blockNumber: guessNumFromTimestamp(timestamp, chain),
       logIndex: 0,
 
       type: "transfer",
-      // Default to liquidation address because "namedAccounts" will map
-      // the liquidation address to the bank account name
       from: landlineTransfer.fromAddress || DEFAULT_LANDLINE_ADDRESS,
       to: landlineTransfer.toAddress || DEFAULT_LANDLINE_ADDRESS,
       amount: Number(parseUnits(landlineTransfer.amount, 6)),
@@ -96,25 +94,4 @@ function landlineTransferToClog(
 
   newTransferClog.offchainTransfer = offchainTransfer;
   return newTransferClog;
-}
-
-function landlineTransferToOffchainTransfer(
-  landlineTransfer: LandlineTransfer
-): OffchainTransfer {
-  const offchainTransfer: OffchainTransfer = {
-    type: "landline",
-    transferType: landlineTransfer.type,
-    status: landlineTransfer.status,
-    accountID: landlineTransfer.landlineAccountUuid,
-    transferID: landlineTransfer.transferUuid,
-    timeStart: dateStringToUnixSeconds(landlineTransfer.createdAt),
-    timeExpected: landlineTransfer.estimatedClearingDate
-      ? dateStringToUnixSeconds(landlineTransfer.estimatedClearingDate)
-      : undefined,
-    timeFinish: landlineTransfer.completedAt
-      ? dateStringToUnixSeconds(landlineTransfer.completedAt)
-      : undefined,
-  };
-
-  return offchainTransfer;
 }

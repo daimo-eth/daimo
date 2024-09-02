@@ -1,5 +1,8 @@
 import { Address, Hex } from "viem";
 
+import { OffchainTransfer } from "./op";
+import { dateStringToUnixSeconds } from "./time";
+
 export interface LandlineAccount {
   daimoAddress: Address;
   landlineAccountUuid: string;
@@ -60,4 +63,25 @@ export function getLandlineAccountName(
   landlineAccount: LandlineAccount
 ): string {
   return `${landlineAccount.bankName} ****${landlineAccount.accountNumberLastFour}`;
+}
+
+export function landlineTransferToOffchainTransfer(
+  landlineTransfer: LandlineTransfer
+): OffchainTransfer {
+  const offchainTransfer: OffchainTransfer = {
+    type: "landline",
+    transferType: landlineTransfer.type,
+    status: landlineTransfer.status,
+    accountID: landlineTransfer.landlineAccountUuid,
+    transferID: landlineTransfer.transferUuid,
+    timeStart: dateStringToUnixSeconds(landlineTransfer.createdAt),
+    timeExpected: landlineTransfer.estimatedClearingDate
+      ? dateStringToUnixSeconds(landlineTransfer.estimatedClearingDate)
+      : undefined,
+    timeFinish: landlineTransfer.completedAt
+      ? dateStringToUnixSeconds(landlineTransfer.completedAt)
+      : undefined,
+  };
+
+  return offchainTransfer;
 }

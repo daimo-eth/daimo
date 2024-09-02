@@ -198,9 +198,6 @@ export async function getAccountHistory(
     const landlineSessionKey = (await getLandlineSession(address)).key;
     landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts(address);
-    // Note: this does not filter out Landline transfers created after
-    // sinceBlockNum. We would be unable to match existing Landline transfers
-    // to new on-chain transfers.
     const landlineTransfers = await getLandlineTransfers(address);
     transferClogs = addLandlineTransfers(
       landlineTransfers,
