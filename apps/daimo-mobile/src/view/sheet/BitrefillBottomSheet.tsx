@@ -3,6 +3,7 @@ import { useState } from "react";
 import { View } from "react-native";
 import { Address } from "viem";
 
+import { i18n } from "../../i18n";
 import { EAccountContact } from "../../logic/daimoContacts";
 import { usdEntry } from "../../logic/moneyEntry";
 import { Account } from "../../storage/account";
@@ -83,7 +84,7 @@ function BitrefillBottomSheetInner({
         <IconRow
           icon="check-circle"
           color={color.successDark}
-          title="success, waiting for confirmation"
+          title={i18n.deposit.bitrefill.success()}
         />
       )}
       <Spacer h={48} />

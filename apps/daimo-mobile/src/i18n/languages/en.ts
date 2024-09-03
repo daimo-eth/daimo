@@ -496,6 +496,7 @@ export const en = {
     bitrefill: {
       cta: () => `Withdraw with Bitrefill`,
       title: () => `Buy gift cards with USDC`,
+      success: () => `success, waiting for confirmation`,
     },
   },
   // errorScreens.tsx

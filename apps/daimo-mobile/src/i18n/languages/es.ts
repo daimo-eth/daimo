@@ -498,6 +498,7 @@ export const es: LanguageDefinition = {
     bitrefill: {
       cta: () => `Retire con Bitrefill`,
       title: () => `Compre tarjetas de regalo con USDC`,
+      success: () => `éxitoso, esperando confirmación`,
     },
   },
   // errorScreens.tsx
