@@ -83,8 +83,8 @@ export class HomeCoinIndexer extends Indexer {
           .where("chain_id", "=", "" + chainConfig.chainL2.id)
           .where((e) => e.between("block_num", "" + from, "" + to))
           .where("token", "=", hexToBuffer(chainConfig.tokenAddress))
-          .orderBy("block_num", "asc")
-          .orderBy("sort_idx", "asc")
+          .orderBy("block_num")
+          .orderBy("sort_idx")
           .execute()
     );
 

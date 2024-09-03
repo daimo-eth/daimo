@@ -80,8 +80,8 @@ export class ForeignCoinIndexer extends Indexer {
           ])
           .where("chain_id", "=", "" + chainConfig.chainL2.id)
           .where((eb) => eb.between("block_num", "" + from, "" + to))
-          .orderBy("block_num", "asc")
-          .orderBy("sort_idx", "asc")
+          .orderBy("block_num")
+          .orderBy("sort_idx")
           .execute()
     );
 
@@ -200,15 +200,12 @@ export class ForeignCoinIndexer extends Indexer {
       this.pendingSwapsByAddr.set(addr, newPendingSwaps);
     } else {
       // inbound transfer, add as a pending swap
+      const pending = this.pendingSwapsByAddr.get(addr) || [];
+      pending.push(log);
+      this.pendingSwapsByAddr.set(addr, pending);
       console.log(
-        `[FOREIGN-COIN] inbound token transfer to ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+        `[FOREIGN-COIN] inbound token transfer to ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}, new bal ${newBal}, # swaps pending: ${pending.length}`
       );
-      const pending = this.pendingSwapsByAddr.get(addr);
-      if (pending != null) {
-        pending.push(log);
-      } else {
-        this.pendingSwapsByAddr.set(addr, [log]);
-      }
     }
   }
 

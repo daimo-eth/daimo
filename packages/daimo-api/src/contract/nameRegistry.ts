@@ -118,7 +118,6 @@ export class NameRegistry extends Indexer {
           .where("chain_id", "=", "" + chainConfig.chainL2.id)
           .where((eb) => eb.between("block_num", "" + from, "" + to))
           .orderBy("block_num")
-          .orderBy("tx_idx")
           .orderBy("log_idx")
           .execute()
     );
