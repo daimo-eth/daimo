@@ -85,7 +85,7 @@ export function useLandlineDeposit({
   return { ...as, exec };
 }
 
-export function depositAccountTransform(
+function depositAccountTransform(
   account: Account,
   landlineTransfer: LandlineTransfer
 ): Account {
