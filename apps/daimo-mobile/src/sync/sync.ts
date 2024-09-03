@@ -13,6 +13,7 @@ import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
+import { addLandlineTransfers } from "./syncLandline";
 import { i18NLocale } from "../i18n";
 import { getAccountManager } from "../logic/accountManager";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
@@ -170,7 +171,7 @@ async function fetchSync(
     landlineSessionURL: result.landlineSessionURL,
     numLandlineAccounts: (result.landlineAccounts || []).length,
   };
-  // console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
+  console.log(`[SYNC] got history ${JSON.stringify(syncSummary)}`);
 
   // Validation
   assert(result.address === account.address, "wrong address");
@@ -335,15 +336,17 @@ function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
 
 /** Add transfers based on new Transfer event logs */
 function addTransfers(
-  old: TransferClog[],
-  logs: TransferClog[]
+  oldLogs: TransferClog[],
+  newLogs: TransferClog[]
 ): TransferClog[] {
-  // Sort new logs
+  const { logs, remaining } = addLandlineTransfers(oldLogs, newLogs);
+
+  logs.push(...remaining);
+
+  // Sort logs
   logs.sort((a, b) => {
-    if (a.blockNumber !== b.blockNumber) return a.blockNumber! - b.blockNumber!;
-    return a.logIndex! - b.logIndex!;
+    return a.timestamp - b.timestamp;
   });
 
-  // old finalized logs + new logs
-  return [...old, ...logs];
+  return logs;
 }
