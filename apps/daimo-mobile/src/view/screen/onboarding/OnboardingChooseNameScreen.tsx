@@ -1,6 +1,5 @@
 import { validateName } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
-import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -27,16 +26,12 @@ import { generateRandomName } from "../../../logic/name";
 import { getRpcHook } from "../../../logic/trpc";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
-import { InputBig, OctName } from "../../shared/InputBig";
+import { IconRow } from "../../shared/IconRow";
+import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
 import image from "../../shared/image";
 import { color, ss } from "../../shared/style";
-import {
-  TextBody,
-  TextBodyMedium,
-  TextBtnCaps,
-  TextCenter,
-} from "../../shared/text";
+import { TextBodyMedium, TextBtnCaps, TextCenter } from "../../shared/text";
 
 const i18 = i18n.onboardingChooseName;
 
@@ -93,17 +88,6 @@ function Instructions() {
         {i18.instructions()}
       </TextBodyMedium>
     </TextCenter>
-  );
-}
-
-function IconRow(props: { icon?: OctName; color?: string; title: string }) {
-  const { icon, title } = props;
-  const col = props.color || color.grayMid;
-  return (
-    <View style={styles.iconRow}>
-      {icon && <Octicons {...{ name: icon, size: 20, color: col }} />}
-      <TextBody color={col}>{title}</TextBody>
-    </View>
   );
 }
 
@@ -204,12 +188,5 @@ function NamePicker({
 const styles = StyleSheet.create({
   namePickerWrap: {
     height: 168,
-  },
-  iconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    height: 40,
   },
 });

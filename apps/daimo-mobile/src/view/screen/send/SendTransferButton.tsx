@@ -45,6 +45,7 @@ export function SendTransferButton({
   memo,
   minTransferAmount = 0,
   route,
+  onSuccess,
 }: {
   account: Account;
   recipient: EAccountContact | LandlineBankAccountContact;
@@ -54,6 +55,7 @@ export function SendTransferButton({
   memo?: string;
   minTransferAmount?: number;
   route?: ProposedSwap | null;
+  onSuccess?: () => void;
 }) {
   console.log(`[SEND] rendering SendButton ${dollars}`);
 
@@ -212,8 +214,12 @@ export function SendTransferButton({
   const goHome = useExitToHome();
   useEffect(() => {
     if (status !== "success") return;
-    goHome();
-  }, [status]);
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      goHome();
+    }
+  }, [status, onSuccess, goHome]);
 
   return <ButtonWithStatus button={button} status={statusMessage} />;
 }

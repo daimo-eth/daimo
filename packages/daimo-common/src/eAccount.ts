@@ -59,7 +59,11 @@ export function canSendTo(acc: EAccount): boolean {
   // Daimo accounts, ENS & bare addresses can receive funds.
   if (acc.label == null) return true;
   // Certain labelled accounts cannot.
-  return ![AddrLabel.PaymentLink, AddrLabel.Paymaster].includes(acc.label);
+  return ![
+    AddrLabel.PaymentLink,
+    AddrLabel.Paymaster,
+    AddrLabel.FastCCTP,
+  ].includes(acc.label);
 }
 
 export function canRequestFrom(acc: EAccount): boolean {
