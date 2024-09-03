@@ -53,6 +53,7 @@ export interface LandlineTransfer {
 
   txHash: Hex | null;
   status: LandlineTransferStatus;
+  statusMessage: string | null;
 
   createdAt: string;
   estimatedClearingDate: string | null;
@@ -72,6 +73,7 @@ export function landlineTransferToOffchainTransfer(
     type: "landline",
     transferType: landlineTransfer.type,
     status: landlineTransfer.status,
+    statusMessage: landlineTransfer.statusMessage ?? undefined,
     accountID: landlineTransfer.landlineAccountUuid,
     transferID: landlineTransfer.transferUuid,
     timeStart: dateStringToUnixSeconds(landlineTransfer.createdAt),

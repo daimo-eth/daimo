@@ -27,9 +27,9 @@ import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
 import { i18NLocale, i18n } from "../../../i18n";
 import {
-  canSendToContact,
   DaimoContact,
   EAccountContact,
+  canSendToContact,
   eAccToContact,
   getContactName,
   landlineAccountToContact,
@@ -39,8 +39,8 @@ import { getCachedLandlineAccount } from "../../../logic/landlineAccountCache";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";
-import { PendingDot, ProcessingDot } from "../../shared/PendingDot";
 import Spacer from "../../shared/Spacer";
+import { FailedDot, PendingDot, ProcessingDot } from "../../shared/StatusDot";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import {
   DaimoText,
@@ -310,6 +310,7 @@ function TransferClogRow({
             </View>
             {transferClogStatus === "pending" && <PendingDot />}
             {transferClogStatus === "processing" && <ProcessingDot />}
+            {transferClogStatus === "failed" && <FailedDot />}
           </View>
           <TransferAmountDate
             amount={amountDelta}

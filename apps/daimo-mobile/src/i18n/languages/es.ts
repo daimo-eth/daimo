@@ -58,10 +58,12 @@ export const es: LanguageDefinition = {
       cancelledLink: () => `Link cancelado`,
       sent: () => `Enviado`,
       received: () => `Recibida`,
+      deposited: () => `Depositado`,
+      withdrew: () => `Retirado`,
     },
-    whyNoFees: {
+    help: {
       title: () => `Sobre esta transferencia`,
-      description: {
+      whyNoFees: {
         firstPara: (chainName: string) =>
           `Esta transacción fue resuelta en ${chainName}, un rollup de Ethereum.`,
         firstPara2Chain: (chainA: string, chainB: string) =>
@@ -71,11 +73,31 @@ export const es: LanguageDefinition = {
         thirdPara: () =>
           `Las transacciones cuestan unos centimos. Daimo patrocinó esta transferencia, haciéndola gratuita.`,
       },
+      landlineDeposit: {
+        firstPara: () =>
+          "Esta transacción transfiere fondos desde tu cuenta bancaria vinculada a tu cuenta Daimo.",
+        secondPara: () =>
+          "Una vez que nuestro socio reciba los fondos, realizaremos una transferencia en cadena para depositar los fondos en tu cuenta Daimo.",
+        thirdPara: () =>
+          "Las transferencias bancarias normalmente cuestan unos dólares. Daimo ha patrocinado esta transferencia, haciéndola gratuita.",
+      },
+      landlineWithdrawal: {
+        firstPara: () =>
+          "Esta transacción transfiere fondos desde tu cuenta Daimo a tu cuenta bancaria vinculada.",
+        secondPara: () =>
+          "Los fondos se transfieren en cadena a la dirección de nuestro socio. Una vez recibidos los fondos, iniciamos una transferencia bancaria a tu cuenta bancaria.",
+        thirdPara: () =>
+          "Las transferencias bancarias normalmente cuestan unos dólares. Daimo patrocinó esta transferencia, haciéndola gratuita.",
+      },
     },
     feeText: {
       free: () => `GRATIS`,
       pending: () => `PENDIENTE`,
       fee: (amount: string) => `${amount} TASA`,
+    },
+    fundArrivalTime: {
+      deposit: () => `Sus fondos llegarán a su cuenta Daimo`,
+      withdrawal: () => `Sus fondos llegarán a su cuenta bancaria`,
     },
   },
 

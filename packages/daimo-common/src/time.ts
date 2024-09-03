@@ -14,7 +14,7 @@ export function timeAgo(
   locale?: Locale,
   nowS?: number,
   long?: boolean
-) {
+): string {
   const i18 = i18n(locale).time;
   if (nowS == null) nowS = now();
 
@@ -26,6 +26,24 @@ export function timeAgo(
   if (hours < 24) return i18.hoursAgo(hours, long);
   const days = Math.floor(hours / 24);
   return `${days}d` + (long ? ` ago` : ``);
+}
+
+/** Returns "soon", "1d", "2d", etc. Long form: "in 1d", "in 2d", ... */
+export function daysUntil(
+  untilS: number,
+  locale?: Locale,
+  nowS?: number,
+  long?: boolean
+): string {
+  const i18 = i18n(locale).time;
+  if (nowS == null) nowS = now();
+
+  const seconds = Math.floor(untilS - nowS);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  if (days < 1) return i18.soon();
+  return i18.inDays(days, long);
 }
 
 /** Returns eg "12/11/2023, 10:44" */

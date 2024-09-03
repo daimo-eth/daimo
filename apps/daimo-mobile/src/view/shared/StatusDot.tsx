@@ -10,6 +10,10 @@ export function ProcessingDot({ size }: { size?: number }) {
   return <View style={styles(size || 12).processingDot} />;
 }
 
+export function FailedDot({ size }: { size?: number }) {
+  return <View style={styles(size || 12).failedDot} />;
+}
+
 const styles = (size: number) =>
   StyleSheet.create({
     pendingDot: {
@@ -23,5 +27,11 @@ const styles = (size: number) =>
       height: size,
       borderRadius: size,
       backgroundColor: color.lightBlue,
+    },
+    failedDot: {
+      width: size,
+      height: size,
+      borderRadius: size,
+      backgroundColor: color.danger,
     },
   });

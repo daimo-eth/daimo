@@ -16,6 +16,8 @@ import {
   TransferSwapClog,
   EAccount,
   getTransferClogStatus,
+  assert,
+  daysUntil,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -50,11 +52,13 @@ import { ButtonBig } from "../../shared/Button";
 import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
+import { FailedDot, PendingDot, ProcessingDot } from "../../shared/StatusDot";
 import { color, ss } from "../../shared/style";
 import {
   TextBodyCaps,
   TextCenter,
   TextError,
+  TextH3,
   TextPara,
 } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
@@ -107,6 +111,18 @@ function HistoryOpInner({ account, route }: Props & { account: Account }) {
     account.sentPaymentLinks.find((p) => p.id === op.noteStatus.id);
   const shareLinkAgain = sentPaymentLink && (() => shareURL(sentPaymentLink));
 
+  const showOffchainOpArrivalTime =
+    op.type === "transfer" &&
+    op.offchainTransfer &&
+    op.offchainTransfer.status === "processing" &&
+    op.offchainTransfer.timeExpected;
+  const showOffchainOpStatus =
+    op.type === "transfer" &&
+    op.offchainTransfer &&
+    op.offchainTransfer.status === "failed" &&
+    op.offchainTransfer.statusMessage;
+  const showLinkToExplorer = op.txHash && !shareLinkAgain;
+
   return (
     <View style={ss.container.padH16}>
       <ScreenHeader
@@ -117,9 +133,9 @@ function HistoryOpInner({ account, route }: Props & { account: Account }) {
       <TransferBody account={account} transferClog={op} />
       <Spacer h={36} />
       <View style={ss.container.padH16}>
-        {op.txHash && !shareLinkAgain && (
-          <LinkToExplorer {...{ chainConfig }} op={op} />
-        )}
+        {showOffchainOpArrivalTime && <OffchainOpArrivalTime op={op} />}
+        {showOffchainOpStatus && <OffchainOpStatus op={op} />}
+        {showLinkToExplorer && <LinkToExplorer {...{ chainConfig }} op={op} />}
         {shareLinkAgain && (
           <ButtonBig
             type="subtle"
@@ -193,6 +209,62 @@ function LinkToExplorer({
   );
 }
 
+function OffchainOpArrivalTime({ op }: { op: TransferSwapClog }) {
+  assert(op.offchainTransfer != null);
+  assert(op.offchainTransfer.timeExpected != null);
+
+  const arrivalTime = op.offchainTransfer.timeExpected;
+  const arrivalTimeString = daysUntil(arrivalTime, i18NLocale, undefined, true);
+  const text =
+    op.offchainTransfer.transferType === "deposit"
+      ? i18.fundArrivalTime.deposit()
+      : i18.fundArrivalTime.withdrawal();
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingHorizontal: 8,
+        paddingBottom: 16,
+      }}
+    >
+      <ProcessingDot />
+      <TextH3 style={{ marginLeft: 8 }}>
+        {text} {arrivalTimeString}
+      </TextH3>
+    </View>
+  );
+}
+
+function OffchainOpStatus({ op }: { op: TransferSwapClog }) {
+  assert(op.offchainTransfer != null);
+  if (!op.offchainTransfer.statusMessage) {
+    return null;
+  }
+
+  const transferClogStatus = getTransferClogStatus(op);
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingHorizontal: 8,
+        paddingBottom: 16,
+      }}
+    >
+      {transferClogStatus === "pending" && <PendingDot />}
+      {transferClogStatus === "processing" && <ProcessingDot />}
+      {transferClogStatus === "failed" && <FailedDot />}
+      <TextH3 style={{ marginLeft: 8 }}>
+        {op.offchainTransfer.statusMessage}
+      </TextH3>
+    </View>
+  );
+}
+
 function TransferBody({
   account,
   transferClog,
@@ -242,11 +314,19 @@ function TransferBody({
 
   // Help button to explain fees, chain, etc
   const dispatcher = useContext(DispatcherContext);
-  const onShowHelp = useCallback(
-    () =>
-      showHelpWhyNoFees(dispatcher, chainConfig.chainL2.name, foreignChainName),
-    []
-  );
+  const onShowHelp = useCallback(() => {
+    let transferType: string = getTransferClogType(transferClog);
+    if (transferType === "landline") {
+      transferType = (transferClog as TransferSwapClog).offchainTransfer!
+        .transferType;
+    }
+    showHelpWhyNoFees(
+      dispatcher,
+      transferType,
+      chainConfig.chainL2.name,
+      foreignChainName
+    );
+  }, [transferClog]);
 
   // Generate subtitle = fees, chain, other details
   const col = color.grayMid;
@@ -255,7 +335,9 @@ function TransferBody({
     <React.Fragment key="chain">{chainName}</React.Fragment>,
     <React.Fragment key="fees">
       <TextBodyCaps color={col}>
-        {getFeeText(transferClog.feeAmount)}
+        {transferClog.status === "pending"
+          ? i18.feeText.pending()
+          : getFeeText(transferClog.feeAmount)}
       </TextBodyCaps>
       <Spacer w={8} />
       <Octicons size={16} name="info" color={col} />
@@ -315,9 +397,11 @@ function TransferBody({
 }
 
 function getOpVerb(op: TransferClog, accountAddress: Address) {
+  const transferType = getTransferClogType(op);
   const isPayLink = op.type === "createLink" || op.type === "claimLink";
   const sentByUs = op.from === accountAddress;
   const isRequestResponse = op.type === "transfer" && op.requestStatus != null;
+  const isLandline = transferType === "landline";
 
   if (isPayLink) {
     if (sentByUs) return i18.opVerb.createdLink();
@@ -327,6 +411,12 @@ function getOpVerb(op: TransferClog, accountAddress: Address) {
     return sentByUs
       ? i18.opVerb.fulfilledRequest()
       : i18.opVerb.receivedRequest();
+  } else if (isLandline) {
+    const landlineTransferType = (op as TransferSwapClog).offchainTransfer!
+      .transferType;
+    return landlineTransferType === "deposit"
+      ? i18.opVerb.deposited()
+      : i18.opVerb.withdrew();
   } else {
     return sentByUs ? i18.opVerb.sent() : i18.opVerb.received();
   }
@@ -334,32 +424,60 @@ function getOpVerb(op: TransferClog, accountAddress: Address) {
 
 function showHelpWhyNoFees(
   dispatcher: Dispatcher,
+  transferType: string,
   chainName: string,
   foreignChainName?: string
 ) {
-  const i1 = i18.whyNoFees;
+  const i1 = i18.help;
+
+  const content = () => {
+    if (transferType === "deposit") {
+      return (
+        <View style={ss.container.padH8}>
+          <TextPara>{i1.landlineDeposit.firstPara()}</TextPara>
+          <Spacer h={24} />
+          <TextPara>{i1.landlineDeposit.secondPara()}</TextPara>
+          <Spacer h={24} />
+          <TextPara>{i1.landlineDeposit.thirdPara()}</TextPara>
+        </View>
+      );
+    } else if (transferType === "withdrawal") {
+      return (
+        <View style={ss.container.padH8}>
+          <TextPara>{i1.landlineWithdrawal.firstPara()}</TextPara>
+          <Spacer h={24} />
+          <TextPara>{i1.landlineWithdrawal.secondPara()}</TextPara>
+          <Spacer h={24} />
+          <TextPara>{i1.landlineWithdrawal.thirdPara()}</TextPara>
+        </View>
+      );
+    } else {
+      return (
+        <View style={ss.container.padH8}>
+          <TextPara>
+            {foreignChainName
+              ? i1.whyNoFees.firstPara2Chain(chainName, foreignChainName)
+              : i1.whyNoFees.firstPara(chainName)}
+          </TextPara>
+          <Spacer h={24} />
+          <TextPara>{i1.whyNoFees.secondPara()}</TextPara>
+          <Spacer h={24} />
+          <TextPara>{i1.whyNoFees.thirdPara()}</TextPara>
+        </View>
+      );
+    }
+  };
+
   dispatcher.dispatch({
     name: "helpModal",
     title: i1.title(),
-    content: (
-      <View style={ss.container.padH8}>
-        <TextPara>
-          {foreignChainName
-            ? i1.description.firstPara2Chain(chainName, foreignChainName)
-            : i1.description.firstPara(chainName)}
-        </TextPara>
-        <Spacer h={24} />
-        <TextPara>{i1.description.secondPara()}</TextPara>
-        <Spacer h={24} />
-        <TextPara>{i1.description.thirdPara()}</TextPara>
-      </View>
-    ),
+    content: content(),
   });
 }
 
 function getFeeText(amount?: number) {
   if (amount == null) {
-    return i18.feeText.pending();
+    return i18.feeText.free();
   }
 
   let feeStr = "$" + amountToDollars(amount);

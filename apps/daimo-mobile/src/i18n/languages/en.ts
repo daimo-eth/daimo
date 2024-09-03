@@ -56,10 +56,12 @@ export const en = {
       cancelledLink: () => `Cancelled link`,
       sent: () => `Sent`,
       received: () => `Received`,
+      deposited: () => `Deposited`,
+      withdrew: () => `Withdrew`,
     },
-    whyNoFees: {
+    help: {
       title: () => `About this transfer`,
-      description: {
+      whyNoFees: {
         firstPara: (chainName: string) =>
           `This transaction settled on ${chainName}, an Ethereum rollup.`,
         firstPara2Chain: (chainA: string, chainB: string) =>
@@ -69,11 +71,31 @@ export const en = {
         thirdPara: () =>
           `Transactions cost a few cents. Daimo sponsored this transfer, making it free.`,
       },
+      landlineDeposit: {
+        firstPara: () =>
+          "This transaction transfers funds from your connected bank account to your Daimo account.",
+        secondPara: () =>
+          "Once the funds are received by our partner, we will make an on-chain transfer to deposit the funds to your Daimo account.",
+        thirdPara: () =>
+          "Bank transfers normally cost a few dollars. Daimo sponsored this transfer, making it free.",
+      },
+      landlineWithdrawal: {
+        firstPara: () =>
+          "This transaction transfers funds from your Daimo account to your connected bank account.",
+        secondPara: () =>
+          "The funds are transferred on-chain to our partner's address. Upon receiving the funds, we initiate a bank transfer to your bank account.",
+        thirdPara: () =>
+          "Bank transfers normally cost a few dollars. Daimo sponsored this transfer, making it free.",
+      },
     },
     feeText: {
       free: () => `FREE`,
       pending: () => `PENDING`,
       fee: (amount: string) => `${amount} FEE`,
+    },
+    fundArrivalTime: {
+      deposit: () => `Your funds will arrive to your Daimo account`,
+      withdrawal: () => `Your funds will arrive to your bank account`,
     },
   },
 

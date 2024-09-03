@@ -2,7 +2,7 @@ import { timeString, TransferClogStatus } from "@daimo/common";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { ContactBubble } from "./Bubble";
-import { PendingDot, ProcessingDot } from "./PendingDot";
+import { FailedDot, PendingDot, ProcessingDot } from "./StatusDot";
 import { color, touchHighlightUnderlay } from "./style";
 import { TextBody, TextPara } from "./text";
 import { i18NLocale } from "../../i18n";
@@ -48,6 +48,7 @@ export function AccountRow({
             </TextBody>
             {status === "pending" && <PendingDot />}
             {status === "processing" && <ProcessingDot />}
+            {status === "failed" && <FailedDot />}
           </View>
           <TextPara color={textLight}>{date}</TextPara>
         </View>
