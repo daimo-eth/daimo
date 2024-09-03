@@ -66,6 +66,9 @@ export function BitrefillWebView() {
     }
   };
 
+  // Bitrefill only supports a few language codes, so we check if the user's
+  // language code is supported and use that, otherwise we default to English.
+  // If we don't do this, Bitrefill will show the user an ugly error.
   const availableBitrefillLanguages = [
     "en",
     "ru",
