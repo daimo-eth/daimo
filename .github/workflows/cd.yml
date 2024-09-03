@@ -90,41 +90,6 @@ jobs:
       - name: Deploy to ECS
         run: aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment > /dev/null
 
-  bot-deploy:
-    if: github.ref == 'refs/heads/master'
-    name: Bot Deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          mask-aws-account-id: true
-
-      - id: login-ecr
-        name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build, tag, and push docker image to Amazon ECR
-        uses: docker/build-push-action@v5
-        with:
-          cache-from: type=gha
-          cache-to: type=gha
-          context: .
-          file: ./apps/daimo-bot/Dockerfile
-          platforms: linux/arm64
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_BOT_REPO }}:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_BOT_REPO }}:latest
-
   clippy-deploy:
     if: github.ref == 'refs/heads/master'
     name: Clippy Deploy
@@ -160,22 +125,7 @@ jobs:
             ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_CLIPPY_REPO }}:${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/${{ vars.AWS_ECR_CLIPPY_REPO }}:latest
 
-  update-bot-clippy-service:
-    name: "Update Bot & Clippy service"
-    needs:
-      - bot-deploy
-      - clippy-deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          mask-aws-account-id: true
-
-      - name: Update ECS Bot/Clippy Service
+      - name: Update ECS Clippy Service
         run: aws ecs update-service --cluster ${{ vars.AWS_ECS_INTERNAL_CLUSTER_PROD }} --service ${{ vars.AWS_ECS_INTERNAL_SERVICE_PROD }} --force-new-deployment
 
   eas-deploy:
