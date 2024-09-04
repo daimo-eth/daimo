@@ -1,4 +1,9 @@
-import { OpStatus, SuggestedAction, amountToDollars } from "@daimo/common";
+import {
+  SuggestedAction,
+  TransferClogStatus,
+  amountToDollars,
+  getTransferClogStatus,
+} from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
 import {
@@ -115,10 +120,11 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
 
   // Re-render HistoryListSwipe only transfer count or status changes.
   const statusCountsStr = JSON.stringify(
-    Object.keys(OpStatus).map((key) => [
-      key,
-      account.recentTransfers.filter(({ status }) => status === key).length,
-    ])
+    account.recentTransfers.reduce((counts, transfer) => {
+      const status = getTransferClogStatus(transfer);
+      counts[status] = (counts[status] || 0) + 1;
+      return counts;
+    }, {} as Record<TransferClogStatus, number>)
   );
   const histListMini = useMemo(
     () => <HistoryListSwipe account={account} showDate={false} maxToShow={5} />,
