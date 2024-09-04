@@ -8,6 +8,16 @@ import {
 import { DaimoChain } from "@daimo/contract";
 import { Hex } from "viem";
 
+/**
+ * Matches and merges landline transfers its corresponding transfer clog, so
+ * that the off-chain and on-chain parts of the landline transfer are
+ * represented by a single clog.
+ *
+ * Matching strategy:
+ * - If a landline transfer has a tx hash which matches a TransferSwapClog,
+ *   the transfer clog will be merged with the landline transfer.
+ * - Otherwise, a new TransferClog will be created for the landline transfer.
+ */
 export function addLandlineTransfers(
   landlineTransfers: LandlineTransfer[],
   transferClogs: TransferClog[],

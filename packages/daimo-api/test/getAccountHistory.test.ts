@@ -12,6 +12,7 @@ import { addLandlineTransfers } from "../src/landline/landlineClogMatcher";
 
 test("addLandlineTransfers", (t) => {
   test("should match landline transfer to transfer clog", (t) => {
+    // Create two on-chain transfer clogs
     const transferClogs: TransferClog[] = [
       {
         type: "transfer",
@@ -20,6 +21,7 @@ test("addLandlineTransfers", (t) => {
         amount: 1000000,
         timestamp: 1234567890,
         status: OpStatus.confirmed,
+        // txHash matches the landline transfer
         txHash:
           "0x1d6e083a6009de3dc3672f2dd799e52604d819c5b98e3beb77c50ec259630060",
       },
@@ -77,7 +79,7 @@ test("addLandlineTransfers", (t) => {
     );
 
     assert.strictEqual(result.length, 2);
-    // The second transfer clog should be unmodified
+    // The second transfer clog should be unmodified, since it didn't match
     assert.deepStrictEqual(result[1], transferClogs[1]);
 
     // The first transfer clog should be merged with the landline transfer
@@ -110,6 +112,7 @@ test("addLandlineTransfers", (t) => {
   t.test(
     "landlineTransfers should not get matched if txHash does not match",
     (t) => {
+      // Create two on-chain transfer clogs which don't match any landline transfer
       const transferClogs: TransferClog[] = [
         {
           type: "transfer",
@@ -133,6 +136,7 @@ test("addLandlineTransfers", (t) => {
         },
       ];
 
+      // Create two landline transfers which don't match any transfer clog
       const landlineTransfers: LandlineTransfer[] = [
         {
           daimoAddress: "0x6af35dF65594398726140cf1bf0339e94c7A817F",
@@ -205,6 +209,8 @@ test("addLandlineTransfers", (t) => {
         "base"
       );
 
+      // The two on-chain transfer clogs and two landline transfers should all
+      // be included in the result
       assert.strictEqual(result.length, 4);
       assert.deepStrictEqual(result[0], transferClogs[0]);
       assert.deepStrictEqual(result[1], transferClogs[1]);

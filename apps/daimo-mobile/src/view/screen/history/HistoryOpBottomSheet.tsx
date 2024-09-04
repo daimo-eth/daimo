@@ -2,22 +2,21 @@ import {
   DaimoLinkNoteV2,
   DaimoNoteState,
   DaimoNoteStatus,
+  EAccount,
   OpStatus,
   PaymentLinkClog,
   TransferClog,
-  amountToDollars,
-  getAccountName,
-  getChainDisplayName,
-  getDisplayFromTo,
-  getSynthesizedMemo,
-  getDAv2Chain,
-  tryOrNull,
-  getTransferClogType,
   TransferSwapClog,
-  EAccount,
-  getTransferClogStatus,
+  amountToDollars,
   assert,
   daysUntil,
+  getAccountName,
+  getChainDisplayName,
+  getDAv2Chain,
+  getSynthesizedMemo,
+  getTransferClogStatus,
+  getTransferClogType,
+  tryOrNull,
 } from "@daimo/common";
 import { ChainConfig, daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -37,12 +36,9 @@ import { env } from "../../../env";
 import { i18NLocale, i18n } from "../../../i18n";
 import {
   canSendToContact,
-  eAccToContact,
-  landlineAccountToContact,
+  getTransferClogContact,
 } from "../../../logic/daimoContacts";
-import { getCachedEAccount } from "../../../logic/eAccountCache";
 import { shareURL } from "../../../logic/externalAction";
-import { getCachedLandlineAccount } from "../../../logic/landlineAccountCache";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { Account } from "../../../storage/account";
 import { syncFindSameOp } from "../../../sync/sync";
@@ -276,22 +272,8 @@ function TransferBody({
   const address = account.address;
 
   const sentByUs = transferClog.from === address;
-  const [from, to] = getDisplayFromTo(transferClog);
 
-  const transferClogType = getTransferClogType(transferClog);
-  const otherContact = (() => {
-    const landlineAccount =
-      transferClogType === "landline"
-        ? getCachedLandlineAccount(
-            (transferClog as TransferSwapClog).offchainTransfer!.accountID
-          )
-        : undefined;
-    if (landlineAccount) {
-      return landlineAccountToContact(landlineAccount);
-    }
-
-    return eAccToContact(getCachedEAccount(from === address ? to : from));
-  })();
+  const otherContact = getTransferClogContact(transferClog, address);
 
   const chainConfig = env(daimoChainFromId(account.homeChainId)).chainConfig;
   let coinName = chainConfig.tokenSymbol;

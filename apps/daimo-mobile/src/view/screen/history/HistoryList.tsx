@@ -1,13 +1,12 @@
 import {
   AddrLabel,
   EAccount,
+  OpStatus,
   TransferClog,
-  TransferSwapClog,
   assert,
   getDisplayFromTo,
   getSynthesizedMemo,
   getTransferClogStatus,
-  getTransferClogType,
   now,
   timeAgo,
 } from "@daimo/common";
@@ -30,12 +29,9 @@ import {
   DaimoContact,
   EAccountContact,
   canSendToContact,
-  eAccToContact,
   getContactName,
-  landlineAccountToContact,
+  getTransferClogContact,
 } from "../../../logic/daimoContacts";
-import { getCachedEAccount } from "../../../logic/eAccountCache";
-import { getCachedLandlineAccount } from "../../../logic/landlineAccountCache";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";
@@ -217,20 +213,7 @@ function TransferClogRow({
   assert([from, to].includes(getAddress(address)));
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
-  const transferClogType = getTransferClogType(transferClog);
-  const otherContact = (() => {
-    const landlineAccount =
-      transferClogType === "landline"
-        ? getCachedLandlineAccount(
-            (transferClog as TransferSwapClog).offchainTransfer!.accountID
-          )
-        : undefined;
-    if (landlineAccount) {
-      return landlineAccountToContact(landlineAccount);
-    }
-
-    return eAccToContact(getCachedEAccount(from === address ? to : from));
-  })();
+  const otherContact = getTransferClogContact(transferClog, address);
 
   const amountDelta =
     from === address ? -transferClog.amount : transferClog.amount;
@@ -254,8 +237,8 @@ function TransferClogRow({
   };
 
   const transferClogStatus = getTransferClogStatus(transferClog);
-  const textCol =
-    transferClogStatus === "pending" ? color.gray3 : color.midnight;
+  const isPending = transferClogStatus === OpStatus.pending;
+  const textCol = isPending ? color.gray3 : color.midnight;
 
   // Title = counterparty name
   let opTitle = getContactName(otherContact, i18NLocale);
@@ -275,8 +258,7 @@ function TransferClogRow({
     i18NLocale,
     true
   );
-  const memoCol =
-    transferClogStatus === "pending" ? color.gray3 : color.grayDark;
+  const memoCol = isPending ? color.gray3 : color.grayDark;
 
   return (
     <View style={styles.transferBorder}>
@@ -296,7 +278,7 @@ function TransferClogRow({
               <ContactBubble
                 contact={otherContact}
                 size={36}
-                {...{ isPending: transferClogStatus === "pending" }}
+                {...{ isPending }}
               />
             </TouchableOpacity>
             <View style={{ flexDirection: "column" }}>
@@ -308,7 +290,7 @@ function TransferClogRow({
                 </>
               )}
             </View>
-            {transferClogStatus === "pending" && <PendingDot />}
+            {isPending && <PendingDot />}
             {transferClogStatus === "processing" && <ProcessingDot />}
             {transferClogStatus === "failed" && <FailedDot />}
           </View>
@@ -316,7 +298,7 @@ function TransferClogRow({
             amount={amountDelta}
             timestamp={transferClog.timestamp}
             showDate={showDate}
-            {...{ isPending: transferClogStatus === "pending" }}
+            {...{ isPending }}
           />
         </View>
       </TouchableHighlight>

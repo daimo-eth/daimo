@@ -66,6 +66,7 @@ export interface LandlineTransfer {
   completedAt: string | null;
 }
 
+/** Returns eg "Chase ****1234" */
 export function getLandlineAccountName(
   landlineAccount: LandlineAccount
 ): string {

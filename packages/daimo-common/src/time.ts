@@ -87,6 +87,7 @@ export function guessTimestampFromNum(
   }
 }
 
+/** @deprecated */
 export function guessNumFromTimestamp(
   timestamp: number,
   chain: DaimoChain

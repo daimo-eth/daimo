@@ -4,8 +4,12 @@ import {
   EmailAddress,
   LandlineAccount,
   PhoneNumber,
+  TransferClog,
+  TransferSwapClog,
   canSendTo,
   getAccountName,
+  getDisplayFromTo,
+  getTransferClogType,
   zEmailAddress,
   zPhoneNumber,
 } from "@daimo/common";
@@ -14,6 +18,7 @@ import { Locale } from "expo-localization";
 import { Address } from "viem";
 
 import { getCachedEAccount } from "./eAccountCache";
+import { getCachedLandlineAccount } from "./landlineAccountCache";
 import { useSystemContactsSearch } from "./systemContacts";
 import { getRpcHook } from "./trpc";
 import IconDepositWallet from "../../assets/icon-deposit-wallet.png";
@@ -236,6 +241,11 @@ export function eAccToContact(eAcc: EAccount): EAccountContact {
   return { type: "eAcc", ...eAcc };
 }
 
+export function eAccAddrToContact(addr: Address): EAccountContact {
+  const eAcc = getCachedEAccount(addr);
+  return eAccToContact(eAcc);
+}
+
 export function landlineAccountToContact(
   landlineAccount: LandlineAccount
 ): LandlineBankAccountContact {
@@ -247,4 +257,26 @@ export function landlineAccountToContact(
     accountNumberLastFour: landlineAccount.accountNumberLastFour,
     bankLogo: landlineAccount.bankLogo,
   };
+}
+
+export function landlineAccountUuidToContact(
+  landlineAccountUuid: string
+): LandlineBankAccountContact | null {
+  const account = getCachedLandlineAccount(landlineAccountUuid);
+  if (!account) return null;
+  return landlineAccountToContact(account);
+}
+
+export function getTransferClogContact(
+  transferClog: TransferClog,
+  accountAddress: Address
+): LandlineBankAccountContact | EAccountContact {
+  if (getTransferClogType(transferClog) === "landline") {
+    const { accountID } = (transferClog as TransferSwapClog).offchainTransfer!;
+    const llContact = landlineAccountUuidToContact(accountID);
+    if (llContact) return llContact;
+  }
+
+  const [from, to] = getDisplayFromTo(transferClog);
+  return eAccAddrToContact(from === accountAddress ? to : from);
 }
