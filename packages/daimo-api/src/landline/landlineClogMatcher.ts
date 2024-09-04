@@ -1,18 +1,12 @@
 import {
   LandlineTransfer,
   landlineTransferToOffchainTransfer,
-  OpStatus,
+  landlineTransferToTransferClog,
   TransferClog,
   TransferSwapClog,
-  dateStringToUnixSeconds,
-  guessNumFromTimestamp,
 } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
-import { Hex, parseUnits } from "viem";
-
-// Use a coinbase address so that old versions of the mobile app will show
-// coinbase as the sender for landline deposits
-const DEFAULT_LANDLINE_ADDRESS = "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87";
+import { Hex } from "viem";
 
 export function addLandlineTransfers(
   landlineTransfers: LandlineTransfer[],
@@ -21,6 +15,7 @@ export function addLandlineTransfers(
 ): TransferClog[] {
   const fullTransferClogs: TransferClog[] = [];
 
+  // Create a map from tx hash to landline transfer
   const hashToLandlineTransfer = new Map<Hex, LandlineTransfer>();
   for (const landlineTransfer of landlineTransfers) {
     if (landlineTransfer.txHash) {
@@ -29,7 +24,7 @@ export function addLandlineTransfers(
       // No tx hash, so it can't be matched to a transfer clog.
       // Create a new TransferClog for it.
       fullTransferClogs.push(
-        landlineTransferToClog(landlineTransfer, chain, undefined)
+        landlineTransferToTransferClog(landlineTransfer, chain)
       );
     }
   }
@@ -39,12 +34,14 @@ export function addLandlineTransfers(
     if (transfer.txHash && hashToLandlineTransfer.has(transfer.txHash)) {
       // Landline transfers can only be matched to TransferSwapClogs
       if (transfer.type !== "transfer") {
-        throw new Error("Expected transfer to be of type 'transfer'");
+        throw new Error(
+          `${transfer.txHash} matched with Landline tx hash. Expected clog to be of type "transfer"`
+        );
       }
 
       const landlineTransfer = hashToLandlineTransfer.get(transfer.txHash);
       fullTransferClogs.push(
-        landlineTransferToClog(landlineTransfer!, chain, undefined)
+        mergeLandlineTransfer(landlineTransfer!, transfer)
       );
       hashToLandlineTransfer.delete(transfer.txHash);
     } else {
@@ -55,43 +52,20 @@ export function addLandlineTransfers(
   // Add the un-matched landline transfers in hashToLandlineTransfer
   for (const [, landlineTransfer] of hashToLandlineTransfer.entries()) {
     fullTransferClogs.push(
-      landlineTransferToClog(landlineTransfer, chain, undefined)
+      landlineTransferToTransferClog(landlineTransfer, chain)
     );
   }
 
   return fullTransferClogs.sort((a, b) => a.timestamp - b.timestamp);
 }
 
-function landlineTransferToClog(
+function mergeLandlineTransfer(
   landlineTransfer: LandlineTransfer,
-  chain: DaimoChain,
-  transferClog?: TransferSwapClog
+  transferClog: TransferSwapClog
 ): TransferClog {
   const offchainTransfer = landlineTransferToOffchainTransfer(landlineTransfer);
-  let newTransferClog = transferClog;
-
-  // Create a new TransferSwapClog from the landline transfer data
-  if (!newTransferClog) {
-    const timestamp = dateStringToUnixSeconds(landlineTransfer.createdAt);
-    newTransferClog = {
-      timestamp,
-      // Set status as confirmed otherwise old versions of the app will
-      // clear the pending transfer after a while
-      status: OpStatus.confirmed,
-      txHash: landlineTransfer.txHash || undefined,
-      // Old versions of the mobile app use blockNumber and logIndex to sort
-      // TransferClogs. Block number is also used to determine finalized transfers.
-      blockNumber: guessNumFromTimestamp(timestamp, chain),
-      logIndex: 0,
-
-      type: "transfer",
-      from: landlineTransfer.fromAddress || DEFAULT_LANDLINE_ADDRESS,
-      to: landlineTransfer.toAddress || DEFAULT_LANDLINE_ADDRESS,
-      amount: Number(parseUnits(landlineTransfer.amount, 6)),
-      memo: landlineTransfer.memo || undefined,
-    };
-  }
-
-  newTransferClog.offchainTransfer = offchainTransfer;
-  return newTransferClog;
+  return {
+    ...transferClog,
+    offchainTransfer,
+  };
 }

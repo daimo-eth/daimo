@@ -1,7 +1,13 @@
-import { Address, Hex } from "viem";
+import { DaimoChain } from "@daimo/contract";
+import { Address, Hex, parseUnits } from "viem";
 
-import { OffchainTransfer } from "./op";
-import { dateStringToUnixSeconds } from "./time";
+import {
+  OffchainTransfer,
+  OpStatus,
+  TransferClog,
+  TransferSwapClog,
+} from "./op";
+import { dateStringToUnixSeconds, guessNumFromTimestamp } from "./time";
 
 export interface LandlineAccount {
   daimoAddress: Address;
@@ -86,4 +92,38 @@ export function landlineTransferToOffchainTransfer(
   };
 
   return offchainTransfer;
+}
+
+export function landlineTransferToTransferClog(
+  landlineTransfer: LandlineTransfer,
+  chain: DaimoChain
+): TransferClog {
+  // Default to a Coinbase address so that old versions of the mobile app will
+  // show coinbase as the sender for landline deposits
+  const DEFAULT_LANDLINE_ADDRESS = "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87";
+
+  const timestamp = dateStringToUnixSeconds(landlineTransfer.createdAt);
+  const offchainTransfer = landlineTransferToOffchainTransfer(landlineTransfer);
+
+  const transferClog: TransferSwapClog = {
+    timestamp,
+    // Set status as confirmed otherwise old versions of the app will
+    // clear the pending transfer after a while
+    status: OpStatus.confirmed,
+    txHash: landlineTransfer.txHash || undefined,
+    // blockNumber and logIndex need to be set because old versions of the
+    // mobile app use blockNumber and logIndex to sort TransferClogs. Block
+    // number is also used to determine finalized transfers.
+    blockNumber: guessNumFromTimestamp(timestamp, chain),
+    logIndex: 0,
+
+    type: "transfer",
+    from: landlineTransfer.fromAddress || DEFAULT_LANDLINE_ADDRESS,
+    to: landlineTransfer.toAddress || DEFAULT_LANDLINE_ADDRESS,
+    amount: Number(parseUnits(landlineTransfer.amount, 6)),
+    memo: landlineTransfer.memo || undefined,
+    offchainTransfer,
+  };
+
+  return transferClog;
 }
