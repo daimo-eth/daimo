@@ -241,7 +241,7 @@ export function eAccToContact(eAcc: EAccount): EAccountContact {
   return { type: "eAcc", ...eAcc };
 }
 
-export function eAccAddrToContact(addr: Address): EAccountContact {
+function eAccAddrToContact(addr: Address): EAccountContact {
   const eAcc = getCachedEAccount(addr);
   return eAccToContact(eAcc);
 }
@@ -259,7 +259,7 @@ export function landlineAccountToContact(
   };
 }
 
-export function landlineAccountUuidToContact(
+function landlineAccountUuidToContact(
   landlineAccountUuid: string
 ): LandlineBankAccountContact | null {
   const account = getCachedLandlineAccount(landlineAccountUuid);

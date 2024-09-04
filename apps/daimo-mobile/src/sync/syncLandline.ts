@@ -5,6 +5,24 @@ import {
 } from "@daimo/common";
 
 /**
+ * Landline deposit lifecycle:
+ * 1. User initiates a landline deposit
+ * 2. Landline clog comes in from API with `transferID` but no `txHash`
+ * 3. On-chain transfer clog comes in with `txHash`
+ * 4. Landline transfer comes in with `transferUuid`, `txHash`, and status change
+ *   a. This clog needs to get merged with both the clog in step 2 and the on-chain
+ *      transfer clog in step 3
+ *
+ * Landline withdrawal lifecycle:
+ * 1. User initiates a landline withdrawal
+ * 2. On-chain transfer clog comes in with `txHash`
+ * 3. Landline transfer comes in with `transferUuid` and `txHash`
+ *   a. This clog needs to get merged with the on-chain transfer clog in step 2
+ * 4. Landline transfer comes in with status update
+ *   a. This clog needs to get merged with the clog in step 3
+ */
+
+/**
  * All old landline clogs should be bundled into a single clog with the most
  * up-to-date offchainTransfer.
  *
