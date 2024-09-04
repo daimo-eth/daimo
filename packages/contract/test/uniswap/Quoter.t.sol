@@ -9,7 +9,6 @@ import "../../src/DaimoFlexSwapper.sol";
 
 // Test onchain route-finder and quoter.
 contract QuoterTest is Test {
-    IERC20 public tokenIn;
     IERC20 public usdc = IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
     IERC20 public weth = IERC20(0x4200000000000000000000000000000000000006);
     IERC20 public degen = IERC20(0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed);
@@ -63,8 +62,6 @@ contract QuoterTest is Test {
             isStablecoin: false,
             skipUniswap: false
         });
-
-        // TODO: finally, add a skip-Uniswap stETH rebasing token
 
         uint24[] memory oracleFeeTiers = new uint24[](4);
         oracleFeeTiers[0] = 100;
@@ -138,20 +135,49 @@ contract QuoterTest is Test {
         swapper.swapToCoin(degen, 1e18, usdc, emptySwapData());
     }
 
-    function testFlexSwapperQuote() public {
-        tokenIn = IERC20(0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb); // DAI
+    function testFlexSwapperQuote() public view {
+        IERC20 dai = IERC20(0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb);
         uint128 amountIn = 15990000000000000000000; // $15,990 DAI
 
-        (, bytes memory swapPath) = swapper.quote(tokenIn, amountIn, usdc);
+        (, bytes memory swapPath) = swapper.quote(dai, amountIn, usdc);
 
         // Quoter should return the direct route.
         (address tokenInAddress, address tokenOutAddress, uint24 fee) = Path
             .decodeFirstPool(swapPath);
 
-        assertEq(tokenInAddress, address(tokenIn));
+        assertEq(tokenInAddress, address(dai));
         assertEq(tokenOutAddress, address(usdc));
         assertEq(fee, 100);
         assertEq(swapPath.length, _DIRECT_ROUTE_SWAP_LENGTH); // direct route swap path length
+    }
+
+    function testRebasingToken() public {
+        IERC20 usdm = IERC20(0x28eD8909de1b3881400413Ea970ccE377a004ccA);
+        deal(address(usdm), address(this), 123e18);
+        usdm.approve(address(swapper), 123e18);
+
+        // Protocol lets you unwrap 123 USDM for 122 USDC = within 1% of 1:1
+        bytes memory callData = fakeSwapData(usdm, usdc, 123e18, 122e6);
+
+        // Initially, swap fails because USDM is a rebasing token, no Uni price.
+        vm.expectRevert(bytes("DFS: no path found, amountOut 0"));
+        swapper.swapToCoin(usdm, 123e18, usdc, callData);
+
+        // Give USDM a price feed + skip Uniswap. Swap should succeed.
+        FakeAggregator fakeFeedUSDM = new FakeAggregator();
+        fakeFeedUSDM.setPrice(1, 0); // Price = $1.00
+        swapper.setKnownToken(
+            usdm,
+            DaimoFlexSwapper.KnownToken({
+                chainlinkFeedAddr: fakeFeedUSDM,
+                isStablecoin: false,
+                skipUniswap: true
+            })
+        );
+        swapper.swapToCoin(usdm, 123e18, usdc, callData);
+
+        assertEq(usdm.balanceOf(address(this)), 0);
+        assertEq(usdc.balanceOf(address(this)), 122e6);
     }
 
     function emptySwapData() private pure returns (bytes memory) {
@@ -162,6 +188,47 @@ contract QuoterTest is Test {
                     callData: ""
                 })
             );
+    }
+
+    function fakeSwapData(
+        IERC20 tokenIn,
+        IERC20 tokenOut,
+        uint256 amountIn,
+        uint256 amountOut
+    ) private returns (bytes memory) {
+        FakeDefi defi = new FakeDefi(tokenIn, tokenOut, amountIn, amountOut);
+        deal(address(tokenOut), address(defi), amountOut);
+        return
+            abi.encode(
+                DaimoFlexSwapper.DaimoFlexSwapperExtraData({
+                    callDest: address(defi),
+                    callData: ""
+                })
+            );
+    }
+}
+
+contract FakeDefi {
+    IERC20 private tokenIn;
+    IERC20 private tokenOut;
+    uint256 private amountIn;
+    uint256 private amountOut;
+
+    constructor(
+        IERC20 _tokenIn,
+        IERC20 _tokenOut,
+        uint256 _amountIn,
+        uint256 _amountOut
+    ) {
+        tokenIn = _tokenIn;
+        tokenOut = _tokenOut;
+        amountIn = _amountIn;
+        amountOut = _amountOut;
+    }
+
+    fallback() external {
+        tokenIn.transfer(0xdeaDDeADDEaDdeaDdEAddEADDEAdDeadDEADDEaD, amountIn);
+        tokenOut.transfer(msg.sender, amountOut);
     }
 }
 
