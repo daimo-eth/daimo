@@ -73,20 +73,32 @@ export const es: LanguageDefinition = {
         thirdPara: () =>
           `Las transacciones cuestan unos centimos. Daimo patrocinó esta transferencia, haciéndola gratuita.`,
       },
-      landlineDeposit: {
+      landlineDepositProcessing: {
         firstPara: () =>
           "Esta transacción transfiere fondos desde tu cuenta bancaria vinculada a tu cuenta Daimo.",
         secondPara: () =>
           "Una vez que nuestro socio reciba los fondos, realizaremos una transferencia en cadena para depositar los fondos en tu cuenta Daimo.",
         thirdPara: () =>
-          "Las transferencias bancarias normalmente cuestan unos dólares. Daimo ha patrocinado esta transferencia, haciéndola gratuita.",
+          "Las transferencias bancarias normalmente cuestan unos dólares. Daimo patrocinó esta transferencia, haciéndola gratuita.",
       },
-      landlineWithdrawal: {
+      landlineDepositCompleted: {
+        firstPara: () =>
+          "Esta transacción transfirió fondos desde tu cuenta bancaria vinculada a tu cuenta Daimo.",
+        secondPara: () =>
+          "Las transferencias bancarias normalmente cuestan unos dólares. Daimo patrocinó esta transferencia, haciéndola gratuita.",
+      },
+      landlineWithdrawalProcessing: {
         firstPara: () =>
           "Esta transacción transfiere fondos desde tu cuenta Daimo a tu cuenta bancaria vinculada.",
         secondPara: () =>
           "Los fondos se transfieren en cadena a la dirección de nuestro socio. Una vez recibidos los fondos, iniciamos una transferencia bancaria a tu cuenta bancaria.",
         thirdPara: () =>
+          "Las transferencias bancarias normalmente cuestan unos dólares. Daimo patrocinó esta transferencia, haciéndola gratuita.",
+      },
+      landlineWithdrawalCompleted: {
+        firstPara: () =>
+          "Esta transacción transfirió fondos desde tu cuenta Daimo a tu cuenta bancaria vinculada.",
+        secondPara: () =>
           "Las transferencias bancarias normalmente cuestan unos dólares. Daimo patrocinó esta transferencia, haciéndola gratuita.",
       },
     },

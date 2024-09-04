@@ -315,14 +315,9 @@ function TransferBody({
   // Help button to explain fees, chain, etc
   const dispatcher = useContext(DispatcherContext);
   const onShowHelp = useCallback(() => {
-    let transferType: string = getTransferClogType(transferClog);
-    if (transferType === "landline") {
-      transferType = (transferClog as TransferSwapClog).offchainTransfer!
-        .transferType;
-    }
     showHelpWhyNoFees(
       dispatcher,
-      transferType,
+      transferClog,
       chainConfig.chainL2.name,
       foreignChainName
     );
@@ -424,33 +419,65 @@ function getOpVerb(op: TransferClog, accountAddress: Address) {
 
 function showHelpWhyNoFees(
   dispatcher: Dispatcher,
-  transferType: string,
+  transferClog: TransferClog,
   chainName: string,
   foreignChainName?: string
 ) {
   const i1 = i18.help;
 
+  const transferType = getTransferClogType(transferClog);
+
   const content = () => {
-    if (transferType === "deposit") {
-      return (
-        <View style={ss.container.padH8}>
-          <TextPara>{i1.landlineDeposit.firstPara()}</TextPara>
-          <Spacer h={24} />
-          <TextPara>{i1.landlineDeposit.secondPara()}</TextPara>
-          <Spacer h={24} />
-          <TextPara>{i1.landlineDeposit.thirdPara()}</TextPara>
-        </View>
-      );
-    } else if (transferType === "withdrawal") {
-      return (
-        <View style={ss.container.padH8}>
-          <TextPara>{i1.landlineWithdrawal.firstPara()}</TextPara>
-          <Spacer h={24} />
-          <TextPara>{i1.landlineWithdrawal.secondPara()}</TextPara>
-          <Spacer h={24} />
-          <TextPara>{i1.landlineWithdrawal.thirdPara()}</TextPara>
-        </View>
-      );
+    if (transferType === "landline") {
+      const landlineTransferType = (transferClog as TransferSwapClog)
+        .offchainTransfer!.transferType;
+      const isCompleted =
+        (transferClog as TransferSwapClog).offchainTransfer!.status ===
+        "completed";
+
+      if (landlineTransferType === "deposit") {
+        if (isCompleted) {
+          return (
+            <View style={ss.container.padH8}>
+              <TextPara>{i1.landlineDepositCompleted.firstPara()}</TextPara>
+              <Spacer h={24} />
+              <TextPara>{i1.landlineDepositCompleted.secondPara()}</TextPara>
+            </View>
+          );
+        } else {
+          return (
+            <View style={ss.container.padH8}>
+              <TextPara>{i1.landlineDepositProcessing.firstPara()}</TextPara>
+              <Spacer h={24} />
+              <TextPara>{i1.landlineDepositProcessing.secondPara()}</TextPara>
+              <Spacer h={24} />
+              <TextPara>{i1.landlineDepositProcessing.thirdPara()}</TextPara>
+            </View>
+          );
+        }
+      } else {
+        if (isCompleted) {
+          return (
+            <View style={ss.container.padH8}>
+              <TextPara>{i1.landlineWithdrawalCompleted.firstPara()}</TextPara>
+              <Spacer h={24} />
+              <TextPara>{i1.landlineWithdrawalCompleted.secondPara()}</TextPara>
+            </View>
+          );
+        } else {
+          return (
+            <View style={ss.container.padH8}>
+              <TextPara>{i1.landlineWithdrawalProcessing.firstPara()}</TextPara>
+              <Spacer h={24} />
+              <TextPara>
+                {i1.landlineWithdrawalProcessing.secondPara()}
+              </TextPara>
+              <Spacer h={24} />
+              <TextPara>{i1.landlineWithdrawalProcessing.thirdPara()}</TextPara>
+            </View>
+          );
+        }
+      }
     } else {
       return (
         <View style={ss.container.padH8}>

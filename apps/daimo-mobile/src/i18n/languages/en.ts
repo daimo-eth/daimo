@@ -71,7 +71,7 @@ export const en = {
         thirdPara: () =>
           `Transactions cost a few cents. Daimo sponsored this transfer, making it free.`,
       },
-      landlineDeposit: {
+      landlineDepositProcessing: {
         firstPara: () =>
           "This transaction transfers funds from your connected bank account to your Daimo account.",
         secondPara: () =>
@@ -79,12 +79,24 @@ export const en = {
         thirdPara: () =>
           "Bank transfers normally cost a few dollars. Daimo sponsored this transfer, making it free.",
       },
-      landlineWithdrawal: {
+      landlineDepositCompleted: {
+        firstPara: () =>
+          "This transaction transferred funds from your connected bank account to your Daimo account.",
+        secondPara: () =>
+          "Bank transfers normally cost a few dollars. Daimo sponsored this transfer, making it free.",
+      },
+      landlineWithdrawalProcessing: {
         firstPara: () =>
           "This transaction transfers funds from your Daimo account to your connected bank account.",
         secondPara: () =>
           "The funds are transferred on-chain to our partner's address. Upon receiving the funds, we initiate a bank transfer to your bank account.",
         thirdPara: () =>
+          "Bank transfers normally cost a few dollars. Daimo sponsored this transfer, making it free.",
+      },
+      landlineWithdrawalCompleted: {
+        firstPara: () =>
+          "This transaction transferred funds from your Daimo account to your connected bank account.",
+        secondPara: () =>
           "Bank transfers normally cost a few dollars. Daimo sponsored this transfer, making it free.",
       },
     },

@@ -343,9 +343,12 @@ function addTransfers(
 
   logs.push(...remaining);
 
-  // Sort logs
+  // Sort logs. Timestamp is determined by block number for on-chain txs.
+  // If timestamp is the same, sort by log index to ensure determinism.
   logs.sort((a, b) => {
-    return a.timestamp - b.timestamp;
+    const diff = a.timestamp - b.timestamp;
+    if (diff !== 0) return diff;
+    return (a.logIndex || 0) - (b.logIndex || 0);
   });
 
   return logs;
