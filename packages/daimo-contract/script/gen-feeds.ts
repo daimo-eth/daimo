@@ -73,7 +73,7 @@ async function main() {
   // extract valid Chainlink feeds
   const feeds = parseChainlinkFeeds(rawJsons);
   console.log(`2-feeds.json: ${feeds.length} valid token price feeds`);
-  await fs.writeFile(`${clDir}/2-feeds.json`, JSON.stringify(feeds, null, 2));
+  await fs.writeFile(`${clDir}/2-feeds.json`, toJSON(feeds));
 
   // merge feeds and tokens
   const tokensJson = await fs.readFile("src/codegen/tokens.json");
@@ -81,11 +81,49 @@ async function main() {
   tokens.push(...getWETHAndWMATIC());
   const tokenFeeds = mergeTokensWithFeeds(tokens, feeds);
 
-  // price, validate, write to 3-priced-tokens.json
+  // price, write to 3-priced-tokens.json, validate
   const pricedTokens = await priceTokens(tokenFeeds);
   await fs.writeFile(`${clDir}/3-priced-tokens.csv`, toCSV(pricedTokens));
 
-  // TODO: output in a format friendly for the DAv2 deploy script;
+  // finally, output validated feeds.
+  // - automatic validation. Uniswap price matches Chainlink price:
+  const validFeeds = pricedTokens
+    .filter((pt) => pt.status === "ok")
+    .map(({ chainId, tokenSymbol, tokenAddress, chainlinkFeedAddress }) => ({
+      chainId,
+      tokenSymbol,
+      tokenAddress,
+      chainlinkFeedAddress,
+      skipUniswap: false,
+    }));
+  const tokenToFeed = new Map(
+    pricedTokens
+      .filter((pt) => pt.chainlinkFeedAddress != null)
+      .map(({ tokenAddress, chainlinkFeedAddress }) => [
+        tokenAddress,
+        chainlinkFeedAddress,
+      ])
+  );
+
+  // - manual validation for rebasing tokens, etc.
+  const chainlinkOnlyTokens = [
+    [1, "USDV", "0x0E573Ce2736Dd9637A0b21058352e1667925C7a8"],
+    [1, "FRAX", "0x853d955aCEf822Db058eb8505911ED77F175b99e"],
+    [1, "FDUSD", "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409"],
+    [1, "PYUSD", "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8"],
+  ] as [number, string, Address][];
+  validFeeds.push(
+    ...chainlinkOnlyTokens.map(([chainId, tokenSymbol, tokenAddress]) => ({
+      chainId,
+      tokenSymbol,
+      tokenAddress,
+      chainlinkFeedAddress: tokenToFeed.get(tokenAddress),
+      skipUniswap: true,
+    }))
+  );
+
+  // write 4-valid-feeds.json
+  await fs.writeFile(`${clDir}/4-valid-feeds.json`, toJSONL(validFeeds));
 }
 
 function downloadFiles(dir: string, urls: string[]) {
@@ -407,6 +445,14 @@ function getPublicClient(chainId: number): PublicClient {
     chain,
     transport: http(chain.rpcUrls.alchemy.http[0] + "/" + alchemyKey),
   });
+}
+
+function toJSON(obj: any): string {
+  return JSON.stringify(obj, null, 2);
+}
+
+function toJSONL(arr: any[]): string {
+  return arr.map((o) => JSON.stringify(o)).join("\n");
 }
 
 function toCSV(tokensWithFeeds: PricedToken[]): string {

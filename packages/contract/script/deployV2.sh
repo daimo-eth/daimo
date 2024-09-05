@@ -1,13 +1,17 @@
 #!/bin/bash
 set -e
 
+
+# If necessary, run `npm run fetch` first in daimo-contract
+cp ../daimo-contract/script/chainlink/4-valid-feeds.jsonl chainlink-feeds.jsonl
+
 # Requirements:
 # ALCHEMY_API_KEY
 # PRIVATE_KEY for the deployer
 # ETHERSCAN_API_KEY_... for each target chain
 
 SCRIPTS=(
-    # "script/DeployFastCCTP.s.sol"
+    "script/DeployFastCCTP.s.sol"
     "script/DeployFlexSwapper.s.sol"
     "script/DeployCCTPBridger.s.sol"
     "script/DeployAccountFactoryV2.s.sol"
@@ -22,12 +26,15 @@ CHAINS=(
     # "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    # "verifyContract,https://avalanche-c-chain-rpc.publicnode.com"  # No Alchemy for Avalanche, Etherscan key is "verifyContract"
     # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
 
+    # Not supporting Avalanche, skip.
+    # No Alchemy for Avalanche, Etherscan key is "verifyContract"
+    # "verifyContract,https://avalanche-c-chain-rpc.publicnode.com"  
+
     # TESTNETS
-    "$ETHERSCAN_API_KEY_L1,wss://ethereum-sepolia-rpc.publicnode.com"
-    "$ETHERSCAN_API_KEY_BASE,https://sepolia.base.org"
+    # "$ETHERSCAN_API_KEY_L1,wss://ethereum-sepolia-rpc.publicnode.com"
+    # "$ETHERSCAN_API_KEY_BASE,https://sepolia.base.org"
  
 )
 

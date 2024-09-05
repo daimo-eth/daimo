@@ -9,7 +9,7 @@ import "openzeppelin-contracts/contracts/utils/Create2.sol";
 contract ManagePaymasterScript is Script {
     // From https://docs.stackup.sh/docs/entity-addresses#entrypoint
     IEntryPoint public entryPoint =
-        IEntryPoint(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789);
+        IEntryPoint(0x0000000071727De22E5E9d8BAf0edAc6f37da032);
 
     function deploy() public {
         vm.startBroadcast();

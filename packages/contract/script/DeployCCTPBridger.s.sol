@@ -17,23 +17,24 @@ contract DeployCCTPBridgerScript is Script {
             address[] memory tokens
         ) = _getChains();
 
-        address fastCCTP = 0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B;
+        address fastCCTP = 0x92275f59CEB72DD132de54F726f767ab6ba9559f;
 
         vm.startBroadcast();
 
         DaimoCCTPBridger implementation = new DaimoCCTPBridger{salt: 0}();
 
-        address initialOwner = address(this);
+        // initOwner = daimo.eth
+        address initOwner = 0xEEee8B1371f1664b7C2A8c111D6062b6576fA6f0;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoCCTPBridger-6"),
+            keccak256("DaimoCCTPBridger-9"),
             abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(
                     address(implementation),
                     abi.encodeWithSelector(
                         DaimoCCTPBridger.init.selector,
-                        initialOwner,
+                        initOwner,
                         tokenMessenger,
                         fastCCTP,
                         chainIDs,

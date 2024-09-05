@@ -418,7 +418,7 @@ export const daimoAccountFactoryV2ABI = [
 ] as const
 
 export const daimoAccountFactoryV2Address =
-  '0xa8b9CF45bDB1a0CD84c548F8735D3ee257328623' as const
+  '0x6391426be3228106f8576550D25b54bcB1306f30' as const
 
 export const daimoAccountFactoryV2Config = {
   address: daimoAccountFactoryV2Address,
@@ -1713,14 +1713,6 @@ export const daimoFastCctpABI = [
     name: 'SafeERC20FailedOperation',
   },
 ] as const
-
-export const daimoFastCctpAddress =
-  '0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B' as const
-
-export const daimoFastCctpConfig = {
-  address: daimoFastCctpAddress,
-  abi: daimoFastCctpABI,
-} as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoFlexSwapper

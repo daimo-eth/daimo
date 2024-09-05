@@ -40,18 +40,20 @@ export {
   daimoCctpBridgerABI,
   daimoFlexSwapperABI,
   daimoFastCctpABI,
-  daimoFastCctpAddress,
   entryPointABI,
   erc20ABI,
   swapbotLpABI,
   aggregatorV2V3InterfaceABI,
 } from "./codegen/contracts";
 
-// TODO: don't hard code these
+// CREATE3 addresses
+export const daimoFastCctpAddress =
+  "0x92275f59CEB72DD132de54F726f767ab6ba9559f";
 export const daimoFlexSwapperAddress =
-  "0xB500c071ADcD7bdCC34770958dDB7328F0154869";
+  "0x52A7Fb58f1F26fd57B4a3aAE55d6c51a38A73610";
 export const daimoCctpBridgerAddress =
-  "0x9066407f4C4d0c189688cC56eCa8A4a733Febd8D";
+  "0x97DA4FaA21DA8bab9b0724B854Bd43250F25FF58";
+
 export const nameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
   abi: daimoNameRegistryABI,

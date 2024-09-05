@@ -121,6 +121,12 @@
   },
   {
     "chainId": 42161,
+    "tokenSymbol": "ULTI",
+    "feedAddress": "0x8883045300Eaf3b1Bb1b3b17F9B4d70EfF50212a",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
     "tokenSymbol": "gmARB",
     "feedAddress": "0x5d046567b97B0d7322F2402e3b34Bf789cE329f5",
     "feedDecimals": 8
@@ -283,6 +289,12 @@
   },
   {
     "chainId": 42161,
+    "tokenSymbol": "MLN",
+    "feedAddress": "0xD07de6e37A011CCAfD375d7eb130205E0fa24d69",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
     "tokenSymbol": "LINK",
     "feedAddress": "0x86E53CF1B870786351Da77A57575e79CB55812CB",
     "feedDecimals": 8
@@ -433,6 +445,12 @@
   },
   {
     "chainId": 42161,
+    "tokenSymbol": "ASTR",
+    "feedAddress": "0x70E48a135F76bA31B47FE944e769E052A8FeB849",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
     "tokenSymbol": "USDD",
     "feedAddress": "0x4Ee1f9ec1048979930aC832a3C1d18a0b4955a02",
     "feedDecimals": 8
@@ -547,6 +565,12 @@
   },
   {
     "chainId": 8453,
+    "tokenSymbol": "OGN",
+    "feedAddress": "0x91D7AEd72bF772A0DA30199B925aCB866ACD3D9e",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
     "tokenSymbol": "ETH",
     "feedAddress": "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70",
     "feedDecimals": 8
@@ -592,6 +616,12 @@
     "tokenSymbol": "PEPE",
     "feedAddress": "0xB48ac6409C0c3718b956089b0fFE295A10ACDdad",
     "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "MEW",
+    "feedAddress": "0x9FB8b5A4b3FE655564f0c76616ae79DE90Cc7382",
+    "feedDecimals": 18
   },
   {
     "chainId": 8453,
@@ -685,9 +715,21 @@
   },
   {
     "chainId": 8453,
+    "tokenSymbol": "EURC",
+    "feedAddress": "0xDAe398520e2B67cd3f27aeF9Cf14D93D927f8250",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
     "tokenSymbol": "YFI",
     "feedAddress": "0xD40e758b5eC80820B68DFC302fc5Ce1239083548",
     "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "MOG",
+    "feedAddress": "0x4aeb6D15769EaD32D0c5Be2940F40c7CFf53801d",
+    "feedDecimals": 18
   },
   {
     "chainId": 8453,
@@ -1120,6 +1162,12 @@
     "tokenSymbol": "ADA",
     "feedAddress": "0x43dEa17DeE1ca50c6266acb59b32659E44D3ee5D",
     "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "SATS",
+    "feedAddress": "0x50f8cf458E7334Be143f3c9F1f1577EE37A45653",
+    "feedDecimals": 18
   },
   {
     "chainId": 10,
@@ -1869,12 +1917,6 @@
     "chainId": 137,
     "tokenSymbol": "XTZ",
     "feedAddress": "0x691e26AB58ff05800E028b0876A41B720b26FC65",
-    "feedDecimals": 8
-  },
-  {
-    "chainId": 137,
-    "tokenSymbol": "OMG",
-    "feedAddress": "0x93FfEE768F74208a7b9f2a4426f0F6BCbb1D09de",
     "feedDecimals": 8
   },
   {

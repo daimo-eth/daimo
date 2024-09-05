@@ -3,19 +3,26 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
 import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {stdJson} from "forge-std/StdJson.sol";
 
 import "../src/DaimoFlexSwapper.sol";
 import "./Constants.s.sol";
 
+using stdJson for string;
+
 contract DeployFlexSwapperScript is Script {
+    IERC20[] _knownTokenAddrs;
+    DaimoFlexSwapper.KnownToken[] private _knownTokens;
+
     function run() public {
+        _loadKnownTokens();
         bytes memory initCall = _getInitCall();
 
         vm.startBroadcast();
 
         DaimoFlexSwapper implementation = new DaimoFlexSwapper{salt: 0}();
         address swapper = CREATE3.deploy(
-            keccak256("DaimoFlexSwapper-12"),
+            keccak256("DaimoFlexSwapper-13"),
             abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(address(implementation), initCall)
@@ -24,6 +31,76 @@ contract DeployFlexSwapperScript is Script {
         console2.log("swapper deployed at address:", swapper);
 
         vm.stopBroadcast();
+    }
+
+    function _loadKnownTokens() private {
+        IERC20 usdc = IERC20(_getUSDCAddress(block.chainid));
+        IERC20 dai = IERC20(_getDAIAddress(block.chainid));
+        IERC20 usdt = IERC20(_getUSDTAddress(block.chainid));
+        IERC20 bridgedUsdc = IERC20(address(0));
+        if (!_isTestnet(block.chainid) && !_isL1(block.chainid)) {
+            bridgedUsdc = IERC20(_getBridgedUSDCAddress(block.chainid));
+        }
+
+        // Add priced tokens with Chainlink feeds
+        string memory file = "./chainlink-feeds.jsonl";
+        while (true) {
+            string memory vector = vm.readLine(file);
+            if (bytes(vector).length == 0) {
+                break;
+            }
+
+            uint256 chainId = uint256(vector.readUint(".chainId"));
+            address tokenAddr = vector.readAddress(".tokenAddress");
+            address feedAddr = vector.readAddress(".chainlinkFeedAddress");
+            bool skipUniswap = vector.readBool(".skipUniswap");
+
+            if (chainId != block.chainid) {
+                continue;
+            }
+
+            bool isStablecoin = tokenAddr == address(usdc) ||
+                tokenAddr == address(dai) ||
+                tokenAddr == address(usdt) ||
+                tokenAddr == address(bridgedUsdc);
+            if (isStablecoin) {
+                continue;
+            }
+
+            DaimoFlexSwapper.KnownToken memory knownToken = DaimoFlexSwapper
+                .KnownToken({
+                    chainlinkFeedAddr: AggregatorV2V3Interface(feedAddr),
+                    skipUniswap: skipUniswap,
+                    isStablecoin: false
+                });
+
+            // Add to storage
+            _knownTokenAddrs.push(IERC20(tokenAddr));
+            _knownTokens.push(knownToken);
+        }
+        uint256 numChainlinkTokens = _knownTokens.length;
+
+        // Add known good stablecoins
+        assert(usdc != IERC20(address(0)));
+        _knownTokenAddrs.push(usdc);
+        if (dai != IERC20(address(0))) {
+            _knownTokenAddrs.push(dai);
+        }
+        if (usdt != IERC20(address(0))) {
+            _knownTokenAddrs.push(usdt);
+        }
+        if (bridgedUsdc != IERC20(address(0))) {
+            _knownTokenAddrs.push(bridgedUsdc);
+        }
+        for (uint256 i = numChainlinkTokens; i < _knownTokenAddrs.length; i++) {
+            DaimoFlexSwapper.KnownToken memory knownToken = DaimoFlexSwapper
+                .KnownToken({
+                    chainlinkFeedAddr: AggregatorV2V3Interface(address(0)),
+                    skipUniswap: false,
+                    isStablecoin: true
+                });
+            _knownTokens.push(knownToken);
+        }
     }
 
     function _getInitCall() private view returns (bytes memory) {
@@ -66,7 +143,7 @@ contract DeployFlexSwapperScript is Script {
         uint256 chainId
     )
         private
-        pure
+        view
         returns (
             IERC20 wrappedNative,
             IERC20[] memory hopTokens,
@@ -125,9 +202,13 @@ contract DeployFlexSwapperScript is Script {
 
         oraclePoolFactory = _getUniswapFactoryAddress(chainId);
 
-        // TODO: add stablecoins + Chainlink data feed oracles
-        knownTokenAddrs = new IERC20[](0);
-        knownTokens = new DaimoFlexSwapper.KnownToken[](0);
+        // Add stablecoins + Chainlink data feed oracles
+        knownTokenAddrs = new IERC20[](_knownTokens.length);
+        knownTokens = new DaimoFlexSwapper.KnownToken[](_knownTokens.length);
+        for (uint256 i = 0; i < _knownTokens.length; i++) {
+            knownTokenAddrs[i] = _knownTokenAddrs[i];
+            knownTokens[i] = _knownTokens[i];
+        }
     }
 
     // Exclude from forge coverage

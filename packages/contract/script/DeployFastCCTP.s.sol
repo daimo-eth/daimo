@@ -12,9 +12,17 @@ contract DeployFastCCTPScript is Script {
 
         vm.startBroadcast();
 
-        new DaimoFastCCTP{salt: 0}(tokenMinter);
+        address fastCCTP = CREATE3.deploy(
+            keccak256("DaimoFastCCTP-1"),
+            abi.encodePacked(
+                type(DaimoFastCCTP).creationCode,
+                abi.encode(tokenMinter)
+            )
+        );
 
         vm.stopBroadcast();
+
+        console.log("fastcctp deployed at address:", fastCCTP);
     }
 
     // Exclude from forge coverage

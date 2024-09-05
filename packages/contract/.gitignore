@@ -14,3 +14,6 @@ docs/
 .env
 broadcast/*/*/*
 !broadcast/*/*/*-latest.json
+
+# Deployment script
+chainlink-feeds.jsonl
