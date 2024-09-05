@@ -1,5 +1,9 @@
-import { LandlineAccount } from "@daimo/api/src/landline/connector";
-import { PlatformType, daimoDomainAddress, timeAgo } from "@daimo/common";
+import {
+  LandlineAccount,
+  PlatformType,
+  daimoDomainAddress,
+  timeAgo,
+} from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";

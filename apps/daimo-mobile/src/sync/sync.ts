@@ -13,6 +13,7 @@ import { daimoChainFromId } from "@daimo/contract";
 import * as SplashScreen from "expo-splash-screen";
 
 import { getNetworkState, updateNetworkState } from "./networkState";
+import { addLandlineTransfers } from "./syncLandline";
 import { i18NLocale } from "../i18n";
 import { getAccountManager } from "../logic/accountManager";
 import { SEND_DEADLINE_SECS } from "../logic/opSender";
@@ -335,15 +336,20 @@ function addNamedAccounts(old: EAccount[], found: EAccount[]): EAccount[] {
 
 /** Add transfers based on new Transfer event logs */
 function addTransfers(
-  old: TransferClog[],
-  logs: TransferClog[]
+  oldLogs: TransferClog[],
+  newLogs: TransferClog[]
 ): TransferClog[] {
-  // Sort new logs
+  const { logs, remaining } = addLandlineTransfers(oldLogs, newLogs);
+
+  logs.push(...remaining);
+
+  // Sort logs. Timestamp is determined by block number for on-chain txs.
+  // If timestamp is the same, sort by log index to ensure determinism.
   logs.sort((a, b) => {
-    if (a.blockNumber !== b.blockNumber) return a.blockNumber! - b.blockNumber!;
-    return a.logIndex! - b.logIndex!;
+    const diff = a.timestamp - b.timestamp;
+    if (diff !== 0) return diff;
+    return (a.logIndex || 0) - (b.logIndex || 0);
   });
 
-  // old finalized logs + new logs
-  return [...old, ...logs];
+  return logs;
 }

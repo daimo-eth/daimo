@@ -1,13 +1,12 @@
 import {
   AddrLabel,
-  TransferClog,
   EAccount,
   OpStatus,
+  TransferClog,
   assert,
-  canSendTo,
-  getAccountName,
   getDisplayFromTo,
   getSynthesizedMemo,
+  getTransferClogStatus,
   now,
   timeAgo,
 } from "@daimo/common";
@@ -26,12 +25,18 @@ import { SetBottomSheetDetailHeight } from "./HistoryOpBottomSheet";
 import { navToAccountPage, useNav } from "../../../common/nav";
 import { env } from "../../../env";
 import { i18NLocale, i18n } from "../../../i18n";
-import { getCachedEAccount } from "../../../logic/addr";
+import {
+  DaimoContact,
+  EAccountContact,
+  canSendToContact,
+  getContactName,
+  getTransferClogContact,
+} from "../../../logic/daimoContacts";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";
-import { PendingDot } from "../../shared/PendingDot";
 import Spacer from "../../shared/Spacer";
+import { FailedDot, PendingDot, ProcessingDot } from "../../shared/StatusDot";
 import { color, ss, touchHighlightUnderlay } from "../../shared/style";
 import {
   DaimoText,
@@ -58,19 +63,27 @@ export function HistoryListSwipe({
   account,
   showDate,
   maxToShow,
-  otherAcc,
+  otherContact,
 }: {
   account: Account;
   showDate: boolean;
   maxToShow?: number;
-  otherAcc?: EAccount;
+  otherContact?: DaimoContact;
 }) {
+  assert(
+    !otherContact || otherContact.type === "eAcc",
+    "Unsupported DaimoContact in HistoryListSwipe"
+  );
+  const otherEAccContact = otherContact
+    ? (otherContact as EAccountContact)
+    : undefined;
+
   const ins = useSafeAreaInsets();
 
   // Get relevant transfers in reverse chronological order
   let ops = account.recentTransfers.slice().reverse();
-  if (otherAcc != null) {
-    const otherAddr = otherAcc.addr;
+  if (otherEAccContact != null) {
+    const otherAddr = otherEAccContact.addr;
     ops = ops.filter((op) => {
       const [from, to] = getDisplayFromTo(op);
       return from === otherAddr || to === otherAddr;
@@ -80,7 +93,7 @@ export function HistoryListSwipe({
 
   // Link to either the op (zoomed in) or the other account (zoomed out)
   // const linkTo = "op"; // Option to link to AccountPage instead.
-  const linkTo = otherAcc == null ? "account" : "op";
+  const linkTo = otherEAccContact == null ? "account" : "op";
 
   if (ops.length === 0) {
     return (
@@ -105,7 +118,9 @@ export function HistoryListSwipe({
   // Easy case: show a fixed, small preview list
   if (maxToShow != null) {
     const title =
-      otherAcc == null ? i18.screenHeader.default() : i18.screenHeader.other();
+      otherContact == null
+        ? i18.screenHeader.default()
+        : i18.screenHeader.other();
     return (
       <View style={styles.historyListBody}>
         <HeaderRow key="h0" title={title} />
@@ -190,6 +205,7 @@ function TransferClogRow({
   linkTo: "op" | "account";
   showDate?: boolean;
 }) {
+  const nav = useNav();
   const address = account.address;
 
   assert(transferClog.amount > 0);
@@ -197,12 +213,11 @@ function TransferClogRow({
   assert([from, to].includes(getAddress(address)));
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
-  const otherAddr = from === address ? to : from;
-  const otherAcc = getCachedEAccount(otherAddr);
+  const otherContact = getTransferClogContact(transferClog, address);
+
   const amountDelta =
     from === address ? -transferClog.amount : transferClog.amount;
 
-  const nav = useNav();
   const viewOp = () => {
     const height = transferClog.type === "createLink" ? 490 : 440;
     setBottomSheetDetailHeight(height);
@@ -211,16 +226,22 @@ function TransferClogRow({
       shouldAddInset: false,
     });
   };
+
   const viewAccount = () => {
-    if (canSendTo(otherAcc)) navToAccountPage(otherAcc, nav);
+    // TODO: Temporarily disallow landline bank accounts
+    if (otherContact.type === "landlineBankAccount") return false;
+    // TODO: change `navToAccountPage` to accept `DaimoContact`
+    if (canSendToContact(otherContact))
+      navToAccountPage(otherContact as EAccount, nav);
     else viewOp();
   };
 
-  const isPending = transferClog.status === OpStatus.pending;
+  const transferClogStatus = getTransferClogStatus(transferClog);
+  const isPending = transferClogStatus === OpStatus.pending;
   const textCol = isPending ? color.gray3 : color.midnight;
 
   // Title = counterparty name
-  let opTitle = getAccountName(otherAcc, i18NLocale);
+  let opTitle = getContactName(otherContact, i18NLocale);
   if (
     opTitle === AddrLabel.PaymentLink &&
     transferClog.type === "claimLink" &&
@@ -251,11 +272,11 @@ function TransferClogRow({
             <TouchableOpacity
               onPress={viewAccount}
               disabled={
-                linkTo === "op" || otherAcc.label === AddrLabel.PaymentLink
+                linkTo === "op" || otherContact.label === AddrLabel.PaymentLink
               }
             >
               <ContactBubble
-                contact={{ type: "eAcc", ...otherAcc }}
+                contact={otherContact}
                 size={36}
                 {...{ isPending }}
               />
@@ -270,6 +291,8 @@ function TransferClogRow({
               )}
             </View>
             {isPending && <PendingDot />}
+            {transferClogStatus === "processing" && <ProcessingDot />}
+            {transferClogStatus === "failed" && <FailedDot />}
           </View>
           <TransferAmountDate
             amount={amountDelta}

@@ -26,7 +26,7 @@ import {
   useNav,
 } from "../../common/nav";
 import { i18NLocale, i18n } from "../../i18n";
-import { addLastTransferTimes } from "../../logic/daimoContacts";
+import { addLastTransferTimes, eAccToContact } from "../../logic/daimoContacts";
 import { shareURL } from "../../logic/externalAction";
 import { useFetchLinkStatus } from "../../logic/linkStatus";
 import { Account } from "../../storage/account";
@@ -190,13 +190,17 @@ function ProfileScreenBody({
   const histListMini = (
     <HistoryListSwipe
       account={account}
-      otherAcc={eAcc}
+      otherContact={eAccToContact(eAcc)}
       showDate={false}
       maxToShow={5}
     />
   );
   const histListFull = (
-    <HistoryListSwipe account={account} otherAcc={eAcc} showDate />
+    <HistoryListSwipe
+      account={account}
+      otherContact={eAccToContact(eAcc)}
+      showDate
+    />
   );
   const { bottomSheet } = useSwipeUpDown({
     itemMini: histListMini,

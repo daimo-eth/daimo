@@ -20,12 +20,14 @@ export const es: LanguageDefinition = {
 
   // time.ts
   time: {
+    soon: () => `pronto`,
     now: () => `ahora`,
     minutesAgo: (minutes: number, long?: boolean) =>
       `${long ? "hace" : ""} ${minutes}m`,
     hoursAgo: (hours: number, long?: boolean) =>
       `${long ? "hace" : ""} ${hours}h`,
     daysAgo: (days: number, long?: boolean) => `${long ? "hace" : ""} ${days}d`,
+    inDays: (days: number, long?: boolean) => `${long ? "en" : ""} ${days}d`,
   },
 
   // AddrLabels for account history contacts

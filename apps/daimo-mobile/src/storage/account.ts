@@ -1,4 +1,3 @@
-import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import {
   ChainGasConstants,
   CurrencyExchangeRate,
@@ -8,6 +7,7 @@ import {
   EAccount,
   KeyData,
   KeyRotationClog,
+  LandlineAccount,
   LinkedAccount,
   ProposedSwap,
   RecommendedExchange,

@@ -1,4 +1,10 @@
-import { OffchainAction, now, zDollarStr } from "@daimo/common";
+import {
+  LandlineTransfer,
+  OffchainAction,
+  landlineTransferToTransferClog,
+  now,
+  zDollarStr,
+} from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import * as Haptics from "expo-haptics";
 import { useCallback } from "react";
@@ -7,6 +13,7 @@ import { stringToBytes } from "viem";
 import { signAsync } from "./sign";
 import { ActHandle, useActStatus } from "../action/actStatus";
 import { i18n } from "../i18n";
+import { getAccountManager } from "../logic/accountManager";
 import { getRpcFunc } from "../logic/trpc";
 import { Account } from "../storage/account";
 
@@ -57,6 +64,10 @@ export function useLandlineDeposit({
       if (response.status === "success") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         setAS("success", i18.depositStatus.success());
+        getAccountManager().transform((a) => {
+          // response.transfer guaranteed to be defined on success
+          return depositAccountTransform(a, response.transfer!);
+        });
       } else {
         console.error("[LANDLINE] Landline deposit error:", response.error);
         setAS("error", i18.depositStatus.failed());
@@ -68,4 +79,18 @@ export function useLandlineDeposit({
   }, [account, recipient, dollarsStr, memo, setAS]);
 
   return { ...as, exec };
+}
+
+function depositAccountTransform(
+  account: Account,
+  landlineTransfer: LandlineTransfer
+): Account {
+  const transferClog = landlineTransferToTransferClog(
+    landlineTransfer,
+    daimoChainFromId(account.homeChainId)
+  );
+  return {
+    ...account,
+    recentTransfers: [...account.recentTransfers, transferClog],
+  };
 }

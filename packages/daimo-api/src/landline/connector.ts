@@ -1,3 +1,4 @@
+import { LandlineAccount, LandlineTransfer } from "@daimo/common";
 import { Address } from "viem";
 
 import { landlineTrpc } from "./trpc";
@@ -7,22 +8,9 @@ export interface LandlineSessionKey {
   key: string;
 }
 
-export interface LandlineAccount {
-  daimoAddress: Address;
-  landlineAccountUuid: string;
-  bankName: string;
-  bankLogo: string | null;
-  accountName: string;
-  accountNumberLastFour: string;
-  bankCurrency: string;
-  liquidationAddress: Address;
-  liquidationChain: string;
-  liquidationCurrency: string;
-  createdAt: string;
-}
-
 export interface LandlineDepositResponse {
   status: string;
+  transfer?: LandlineTransfer;
   error?: string;
 }
 
@@ -66,7 +54,11 @@ export async function getLandlineAccounts(
         daimoAddress,
       });
     console.log(`[LANDLINE] got external accounts for ${daimoAddress}`);
-    return landlineAccounts;
+    // TODO: change to number. Currently a string for backcompat
+    return landlineAccounts.map((account: any) => ({
+      ...account,
+      createdAt: new Date(account.createdAt).toISOString(),
+    }));
   } catch (err: any) {
     console.error(
       `[LANDLINE] error getting external accounts for ${daimoAddress}`,
@@ -75,6 +67,24 @@ export async function getLandlineAccounts(
     // Gracefully return empty array
     return [];
   }
+}
+
+export async function getLandlineTransfers(
+  daimoAddress: Address,
+  createdAfter?: number
+): Promise<LandlineTransfer[]> {
+  // Convert createdAfter from Unix seconds to a Date object if it's provided
+  const createdAfterDate = createdAfter
+    ? new Date(createdAfter * 1000)
+    : undefined;
+
+  const transfers =
+    // @ts-ignore
+    await landlineTrpc.getAllLandlineTransfers.query({
+      daimoAddress,
+      createdAfter: createdAfterDate,
+    });
+  return transfers;
 }
 
 export async function landlineDeposit(
