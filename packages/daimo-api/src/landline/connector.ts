@@ -54,7 +54,11 @@ export async function getLandlineAccounts(
         daimoAddress,
       });
     console.log(`[LANDLINE] got external accounts for ${daimoAddress}`);
-    return landlineAccounts;
+    // TODO: change to number. Currently a string for backcompat
+    return landlineAccounts.map((account: any) => ({
+      ...account,
+      createdAt: new Date(account.createdAt).toISOString(),
+    }));
   } catch (err: any) {
     console.error(
       `[LANDLINE] error getting external accounts for ${daimoAddress}`,

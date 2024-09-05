@@ -20,7 +20,8 @@ export interface LandlineAccount {
   liquidationAddress: Address;
   liquidationChain: string;
   liquidationCurrency: string;
-  createdAt: number;
+  // TODO: change to number. Currently a string for backcompat
+  createdAt: string;
 }
 
 export enum LandlineTransferStatus {
