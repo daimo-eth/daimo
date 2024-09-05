@@ -59,10 +59,6 @@ export function timeString(s: number) {
   });
 }
 
-export function dateStringToUnixSeconds(date: string): number {
-  return Math.floor(new Date(date).getTime() / 1000);
-}
-
 /** Returns eg "Aug 2023" */
 export function timeMonth(s: number) {
   const date = new Date(s * 1000);
@@ -72,6 +68,9 @@ export function timeMonth(s: number) {
   });
 }
 
+/**
+ * Guesses the timestamp in unix seconds from a block number.
+ */
 export function guessTimestampFromNum(
   blockNum: number | bigint,
   chain: DaimoChain
@@ -87,7 +86,11 @@ export function guessTimestampFromNum(
   }
 }
 
-/** @deprecated */
+/**
+ * @deprecated
+ *
+ * Guesses the Base block number from a unix timestamp in seconds.
+ * */
 export function guessNumFromTimestamp(
   timestamp: number,
   chain: DaimoChain

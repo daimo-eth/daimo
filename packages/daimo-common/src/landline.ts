@@ -7,7 +7,7 @@ import {
   TransferClog,
   TransferSwapClog,
 } from "./op";
-import { dateStringToUnixSeconds, guessNumFromTimestamp } from "./time";
+import { guessNumFromTimestamp } from "./time";
 
 export interface LandlineAccount {
   daimoAddress: Address;
@@ -20,7 +20,7 @@ export interface LandlineAccount {
   liquidationAddress: Address;
   liquidationChain: string;
   liquidationCurrency: string;
-  createdAt: string;
+  createdAt: number;
 }
 
 export enum LandlineTransferStatus {
@@ -61,9 +61,9 @@ export interface LandlineTransfer {
   status: LandlineTransferStatus;
   statusMessage: string | null;
 
-  createdAt: string;
-  estimatedClearingDate: string | null;
-  completedAt: string | null;
+  createdAt: number;
+  estimatedClearingDate: number | null;
+  completedAt: number | null;
 }
 
 /** Returns eg "Chase ****1234" */
@@ -83,12 +83,12 @@ export function landlineTransferToOffchainTransfer(
     statusMessage: landlineTransfer.statusMessage ?? undefined,
     accountID: landlineTransfer.landlineAccountUuid,
     transferID: landlineTransfer.transferUuid,
-    timeStart: dateStringToUnixSeconds(landlineTransfer.createdAt),
+    timeStart: landlineTransfer.createdAt / 1000,
     timeExpected: landlineTransfer.estimatedClearingDate
-      ? dateStringToUnixSeconds(landlineTransfer.estimatedClearingDate)
+      ? landlineTransfer.estimatedClearingDate / 1000
       : undefined,
     timeFinish: landlineTransfer.completedAt
-      ? dateStringToUnixSeconds(landlineTransfer.completedAt)
+      ? landlineTransfer.completedAt / 1000
       : undefined,
   };
 
@@ -103,7 +103,7 @@ export function landlineTransferToTransferClog(
   // show coinbase as the sender for landline deposits
   const DEFAULT_LANDLINE_ADDRESS = "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87";
 
-  const timestamp = dateStringToUnixSeconds(landlineTransfer.createdAt);
+  const timestamp = landlineTransfer.createdAt / 1000;
   const offchainTransfer = landlineTransferToOffchainTransfer(landlineTransfer);
 
   const transferClog: TransferSwapClog = {

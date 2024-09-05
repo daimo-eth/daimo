@@ -506,7 +506,8 @@ export const en = {
     landline: {
       cta: () => `Connect with Landline`,
       title: () => `Deposit or withdraw directly from a US bank account`,
-      optionRowTitle: (timeAgo: string) => `Connected ${timeAgo} ago`,
+      optionRowTitle: (timeAgo: string) =>
+        `Connected ${timeAgo} ${timeAgo === "now" ? "" : "ago"}`,
       startTransfer: () => `Start transfer`,
     },
     binance: {
