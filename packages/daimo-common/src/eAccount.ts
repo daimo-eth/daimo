@@ -1,6 +1,8 @@
+import { Locale } from "expo-localization";
 import { Address } from "viem";
 import z from "zod";
 
+import { i18n } from "./i18n";
 import { AddrLabel, zAddress } from "./model";
 import { zLinkedAccount } from "./profileLink";
 
@@ -42,8 +44,11 @@ export function getAddressContraction(address: Address, length = 4): string {
 }
 
 /** Gets a display name or 0x... address contraction. */
-export function getAccountName(acc: EAccount): string {
-  const str = acc.name || acc.label || acc.ensName;
+export function getAccountName(acc: EAccount, locale?: Locale): string {
+  const i18 = i18n(locale);
+  if (acc.label) return i18.addrLabel.label(acc.label);
+
+  const str = acc.name || acc.ensName;
   if (str) return str;
 
   return getAddressContraction(acc.addr);
@@ -54,7 +59,11 @@ export function canSendTo(acc: EAccount): boolean {
   // Daimo accounts, ENS & bare addresses can receive funds.
   if (acc.label == null) return true;
   // Certain labelled accounts cannot.
-  return ![AddrLabel.PaymentLink, AddrLabel.Paymaster].includes(acc.label);
+  return ![
+    AddrLabel.PaymentLink,
+    AddrLabel.Paymaster,
+    AddrLabel.FastCCTP,
+  ].includes(acc.label);
 }
 
 export function canRequestFrom(acc: EAccount): boolean {

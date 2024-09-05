@@ -8,20 +8,27 @@ import Spacer from "./Spacer";
 import { color } from "./style";
 import { TextBtnCaps, TextH2, TextLight } from "./text";
 import { navToAccountPage, useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { DaimoContact, getContactName } from "../../logic/daimoContacts";
+
+const i18 = i18n.contactDisplay;
 
 export function ContactDisplay({
   contact,
   isRequest,
   requestMemo,
+  onPress,
 }: {
   contact: DaimoContact;
   isRequest?: boolean;
   requestMemo?: string;
+  onPress?: () => void;
 }) {
   // Show who we're sending to
   const isAccount = contact.type === "eAcc";
   const disp = getContactName(contact);
+
+  const isLandlineBankAccount = contact.type === "landlineBankAccount";
 
   const subtitle = (function () {
     switch (contact.type) {
@@ -54,11 +61,11 @@ export function ContactDisplay({
 
   return (
     <View style={styles.recipientDisp}>
-      <ButtonCircle size={64} onPress={goToAccount}>
+      <ButtonCircle size={64} onPress={onPress ?? goToAccount}>
         <ContactBubble contact={contact} size={64} transparent />
       </ButtonCircle>
       <Spacer h={8} />
-      {isRequest && <TextLight>Requested by</TextLight>}
+      {isRequest && <TextLight>{i18.requestedBy()}</TextLight>}
       {isRequest && <Spacer h={4} />}
       <View
         style={{
@@ -67,7 +74,7 @@ export function ContactDisplay({
           justifyContent: "center",
         }}
       >
-        <TextH2>{disp}</TextH2>
+        {!isLandlineBankAccount && <TextH2>{disp}</TextH2>}
         {showFarcaster && <Spacer w={8} />}
         {showFarcaster && (
           <FarcasterButton

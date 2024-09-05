@@ -1,9 +1,4 @@
-import {
-  BigIntStr,
-  DisplayOpEvent,
-  OpStatus,
-  ProposedSwap,
-} from "@daimo/common";
+import { BigIntStr, OpStatus, ProposedSwap } from "@daimo/common";
 import { Address, Hex } from "viem";
 
 import {
@@ -71,9 +66,10 @@ interface StoredV15ForeignCoin {
   address?: Address;
 }
 
-export function migrateV15Clog(clog: StoredV15Clog): DisplayOpEvent {
+export function migrateV15Clog(clog: StoredV15Clog): StoredV16Clog {
   if (clog.type === "transfer" && clog.preSwapTransfer) {
-    const { coin } = clog.preSwapTransfer;
+    // if preSwapTransfer is present for V15, the clog is an inbound swap.s
+    const { coin, amount, from } = clog.preSwapTransfer;
     const tokenAddress = coin.address || coin.token;
     if (tokenAddress == null) {
       return { ...clog, preSwapTransfer: undefined };
@@ -81,15 +77,16 @@ export function migrateV15Clog(clog: StoredV15Clog): DisplayOpEvent {
     return {
       ...clog,
       preSwapTransfer: {
-        ...clog.preSwapTransfer,
         coin: {
-          token: tokenAddress,
           chainId: coin.chainId,
           decimals: coin.decimals,
           name: coin.name,
           symbol: coin.symbol,
           logoURI: coin.logoURI,
+          token: tokenAddress,
         },
+        amount,
+        from,
       },
     };
   } else {

@@ -20,11 +20,12 @@ just outright bugs.
 - [ ] Create payment link with memo. Ensure memo appears.
 - [ ] Cancel payment link.
 - [ ] Create request link with memo. Ensure the memo appears.
-- [ ] Add device + Use existing onboarding (test transactions work on both devices)
+- [ ] Add device + Use existing onboarding
 - [ ] Remove device
 - [ ] Open History
 - [ ] Account screen: Send Debug Log
 - [ ] Debug log looks clean
+- [ ] Send to USDC Sepolia
 
 ### Android
 
@@ -54,6 +55,8 @@ Smoke test, particularly for visual regressions:
 - [ ] Prod website deploys correctly
 - [ ] Logs clean
 - [ ] Sentry clean
+- [ ] Send to USDC Arbitrum
+- [ ] Receive Base ETH, test inbox claim
 
 ### Prod smoke test
 

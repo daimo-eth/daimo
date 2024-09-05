@@ -1,6 +1,6 @@
 import { Buffer } from "@craftzdog/react-native-buffer";
 import { contractFriendlyKeyToDER } from "@daimo/common";
-import { CreateResult, SignResult } from "@daimo/expo-passkeys/build/utils";
+import { CreateResult, SignResult } from "@daimo/expo-passkeys";
 import { base64 } from "@scure/base";
 import { Hex, bytesToHex } from "viem";
 

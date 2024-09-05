@@ -18,6 +18,7 @@ import { DispatcherContext } from "../../action/dispatch";
 import { useNav } from "../../common/nav";
 import { useSendDebugLog } from "../../common/useSendDebugLog";
 import { env } from "../../env";
+import { i18NLocale, i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { useNotificationsAccess } from "../../logic/notify";
 import { useTime } from "../../logic/time";
@@ -34,9 +35,9 @@ import {
 import { FarcasterButton } from "../shared/FarcasterBubble";
 import { Icon } from "../shared/Icon";
 import { ClockIcon, PlusIcon } from "../shared/Icons";
-import { PendingDot } from "../shared/PendingDot";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
+import { PendingDot } from "../shared/StatusDot";
 import { openSupportTG } from "../shared/error";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
@@ -48,6 +49,8 @@ import {
   TextPara,
 } from "../shared/text";
 
+const i18 = i18n.settings;
+
 export function SettingsScreen() {
   const account = useAccount();
 
@@ -58,7 +61,7 @@ export function SettingsScreen() {
   return (
     <View style={styles.pageWrap}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title="Settings" />
+        <ScreenHeader title={i18n.settings.screenHeader()} />
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Spacer h={16} />
@@ -66,7 +69,11 @@ export function SettingsScreen() {
         <Spacer h={32} />
         <DevicesSection account={account} />
         <TextButton
-          title={showDetails ? "Hide details" : "Show details"}
+          title={
+            showDetails
+              ? i18n.settings.hideDetails()
+              : i18n.settings.showDetails()
+          }
           onPress={() => setShowDetails(!showDetails)}
         />
         <Spacer h={16} />
@@ -96,7 +103,7 @@ function AccountSection({ account }: { account: Account }) {
         <>
           <ButtonMed
             type="primary"
-            title="CONNECT FARCASTER"
+            title={i18.account.connectFarcaster()}
             onPress={connectFarc}
           />
           <Spacer h={16} />
@@ -104,7 +111,7 @@ function AccountSection({ account }: { account: Account }) {
       )}
       <ButtonMed
         type="subtle"
-        title="VIEW ACCOUNT ON EXPLORER"
+        title={i18.account.viewAccountOnExplorer()}
         onPress={linkToExplorer}
       />
     </View>
@@ -159,7 +166,12 @@ function LinkedAccountsRow({
   const connectFarc = () => dispatcher.dispatch({ name: "connectFarcaster" });
 
   if (linkedAccounts.length === 0) {
-    return <BadgeButton title="NO SOCIALS CONNECTED" onPress={connectFarc} />;
+    return (
+      <BadgeButton
+        title={i18.account.noSocialsConnected()}
+        onPress={connectFarc}
+      />
+    );
   }
 
   // Generalize once needed
@@ -206,18 +218,12 @@ function DevicesSection({ account }: { account: Account }) {
   const openHelpModal = () =>
     dispatcher.dispatch({
       name: "helpModal",
-      title: "What is a Passkey Backup?",
+      title: i18.devices.passkeys.title(),
       content: (
         <>
-          <TextPara>
-            Passkeys are a convenient and phishing-resistant alternative to seed
-            phrases.
-          </TextPara>
+          <TextPara>{i18.devices.passkeys.description.firstPara()}</TextPara>
           <Spacer h={16} />
-          <TextPara>
-            Passkeys are generated and stored in your password manager, and
-            allow you to recover your account even if you lose your device.
-          </TextPara>
+          <TextPara>{i18.devices.passkeys.description.secondPara()}</TextPara>
         </>
       ),
     });
@@ -225,7 +231,7 @@ function DevicesSection({ account }: { account: Account }) {
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.headerRow}>
-        <TextLight>My devices &amp; backups</TextLight>
+        <TextLight>{i18.devices.title()}</TextLight>
       </View>
       <Spacer h={8} />
       <View
@@ -234,23 +240,31 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <Spacer h={24} />
       <DescriptiveClickableRow
-        title="Create a Backup"
-        message="Passkey, security key, or seed phrase"
+        title={i18.devices.createBackup.title()}
+        message={i18.devices.createBackup.msg()}
         icon={<ClockIcon color={color.gray3} style={{ top: 7 }} />}
         onPressHelp={openHelpModal}
       />
-      <ButtonMed type="subtle" title="CREATE BACKUP" onPress={createBackup} />
+      <ButtonMed
+        type="subtle"
+        title={i18.devices.createBackup.button()}
+        onPress={createBackup}
+      />
       <View style={styles.separator} />
       <DescriptiveClickableRow
-        title="Add a Device"
-        message="Use your account on another device"
+        title={i18.devices.addDevice.title()}
+        message={i18.devices.addDevice.msg()}
         icon={<PlusIcon color={color.gray3} style={{ top: 7 }} />}
       />
-      <ButtonMed type="subtle" title="ADD DEVICE" onPress={addDevice} />
+      <ButtonMed
+        type="subtle"
+        title={i18.devices.addDevice.button()}
+        onPress={addDevice}
+      />
       <View style={styles.separator} />
       <DescriptiveClickableRow
-        title="Questions? Feedback?"
-        message="Contact us on Telegram"
+        title={i18.devices.contactSupport.title()}
+        message={i18.devices.contactSupport.msg()}
         icon={
           <Icon
             name="help-circle"
@@ -262,7 +276,7 @@ function DevicesSection({ account }: { account: Account }) {
       />
       <ButtonMed
         type="subtle"
-        title="CONTACT SUPPORT"
+        title={i18.devices.contactSupport.button()}
         onPress={openSupportTG}
       />
       <View style={styles.separator} />
@@ -296,8 +310,8 @@ function DeviceRow({
 
   const dispName = getSlotLabel(keyData.slot);
   const dispTime = pendingRemoval
-    ? "Pending"
-    : "Added " + timeAgo(addAtS, nowS, true);
+    ? i18.pending()
+    : i18.addedAgo(timeAgo(addAtS, i18NLocale, nowS, true));
   const textCol = pendingRemoval ? color.gray3 : color.midnight;
 
   return (
@@ -312,7 +326,7 @@ function DeviceRow({
             <TextBody color={textCol}>{dispName}</TextBody>
             {(isCurrentDevice || pendingRemoval) && <Spacer w={12} />}
             {isCurrentDevice && !pendingRemoval && (
-              <Badge color={color.grayMid}>THIS DEVICE</Badge>
+              <Badge color={color.grayMid}>{i18.devices.thisDevice()}</Badge>
             )}
             {pendingRemoval && <PendingDot />}
           </View>
@@ -322,8 +336,8 @@ function DeviceRow({
             )}
             {!isCurrentDevice && <Spacer w={16} />}
             <TextMeta color={pendingRemoval ? color.gray3 : color.primary}>
-              {isCurrentDevice && "Log out"}
-              {!isCurrentDevice && "Remove"}
+              {isCurrentDevice && i18.logOut()}
+              {!isCurrentDevice && i18.remove()}
             </TextMeta>
           </View>
         </View>
@@ -349,7 +363,7 @@ function PendingDeviceRow({ slot }: { slot: number }) {
             <PendingDot />
           </View>
           <View style={styles.rowRight}>
-            <TextMeta color={color.gray3}>Pending</TextMeta>
+            <TextMeta color={color.gray3}>{i18.pending()}</TextMeta>
           </View>
         </View>
       </TouchableHighlight>
@@ -365,7 +379,7 @@ function DetailsSection({ account }: { account: Account }) {
   return (
     <View style={styles.sectionWrap}>
       <View style={styles.headerRow}>
-        <TextLight>Device details</TextLight>
+        <TextLight>{i18.details.title()}</TextLight>
       </View>
       <Spacer h={4} />
       <View style={styles.kvList}>
@@ -375,10 +389,18 @@ function DetailsSection({ account }: { account: Account }) {
       </View>
       <Spacer h={24} />
       {!account.pushToken && (
-        <ButtonMed type="subtle" title="Enable notifications" onPress={ask} />
+        <ButtonMed
+          type="subtle"
+          title={i18.details.enableNotifications()}
+          onPress={ask}
+        />
       )}
       {!account.pushToken && <Spacer h={16} />}
-      <ButtonMed type="subtle" title="Send debug log" onPress={sendDebugLog} />
+      <ButtonMed
+        type="subtle"
+        title={i18.details.sendDebugLog()}
+        onPress={sendDebugLog}
+      />
       <Spacer h={32} />
     </View>
   );
@@ -394,7 +416,6 @@ function KV({ label, value }: { label: string; value: string }) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   pageWrap: {
     flex: 1,

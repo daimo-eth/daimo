@@ -7,14 +7,18 @@ import {
   DaimoLinkRequest,
   DaimoLinkRequestV2,
   DaimoLinkTag,
-  DisplayOpEvent,
   EAccount,
-  ForeignToken,
+  TransferClog,
   getEAccountStr,
   parseDaimoLink,
   parseInviteCodeOrLink,
 } from "@daimo/common";
-import { DaimoChain } from "@daimo/contract";
+import {
+  DAv2Chain,
+  DaimoChain,
+  ForeignToken,
+  daimoChainFromId,
+} from "@daimo/contract";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { URLListener, addEventListener } from "expo-linking";
@@ -23,17 +27,18 @@ import { Platform } from "react-native";
 import { Hex } from "viem";
 
 import { Dispatcher } from "../action/dispatch";
+import { BankTransferOptions } from "../logic/bankTransferOptions";
 import {
-  BridgeBankAccountContact,
   DaimoContact,
   EAccountContact,
+  LandlineBankAccountContact,
   MsgContact,
 } from "../logic/daimoContacts";
 import {
   getInitialDeepLink,
   markInitialDeepLinkHandled,
 } from "../logic/deeplink";
-import { fetchInviteLinkStatus } from "../logic/linkStatus";
+import { fetchInviteLinkStatus, fetchLinkStatus } from "../logic/linkStatus";
 import { MoneyEntry } from "../logic/moneyEntry";
 import { Account } from "../storage/account";
 
@@ -51,7 +56,7 @@ export type ParamListOnboarding = {
   Finish: undefined;
 };
 
-export type QRScreenOptions = "PAY ME" | "SCAN";
+export type QRScreenOptions = "PayMe" | "Scan";
 
 export type ParamListHome = {
   Home: undefined;
@@ -59,7 +64,7 @@ export type ParamListHome = {
   Profile:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount | DaimoLinkInviteCode };
-  HistoryOp: { op: DisplayOpEvent };
+  HistoryOp: { op: TransferClog };
   Receive: { autoFocus: boolean; fulfiller?: DaimoContact };
   Note: { link: DaimoLinkNote | DaimoLinkNoteV2 };
   ReceiveNav: undefined;
@@ -96,12 +101,13 @@ export type ParamListSend = {
   Profile:
     | { eAcc: EAccount; inviterEAcc: EAccount | undefined }
     | { link: DaimoLinkAccount };
-  HistoryOp: { op: DisplayOpEvent };
+  HistoryOp: { op: TransferClog };
 };
 
 export type ParamListDeposit = {
   Deposit: undefined;
   LandlineTransfer: LandlineTransferNavProp;
+  BitrefillWebView: undefined;
 };
 
 export type ParamListInvite = {
@@ -127,16 +133,18 @@ export interface SendNavProp {
     | DaimoLinkTag;
   recipient?: EAccountContact;
   money?: MoneyEntry;
-  coin?: ForeignToken;
+  toCoin?: ForeignToken;
+  toChain?: DAv2Chain;
   memo?: string;
   requestId?: `${bigint}`;
   autoFocus?: boolean;
 }
 
 export interface LandlineTransferNavProp {
-  recipient: BridgeBankAccountContact;
+  recipient: LandlineBankAccountContact;
   money?: MoneyEntry;
   memo?: string;
+  bankTransferOption?: BankTransferOptions;
 }
 
 export type ParamListTab = {
@@ -153,12 +161,12 @@ export const defaultError = {
   displayMessage:
     "Check if you have an old version of the app or if there are any errors in your URL",
   showDownloadButton: true,
-};
+}; // TODO: Implement i18n
 
 export type ParamListBottomSheet = {
   BottomSheetList: undefined;
   BottomSheetHistoryOp: {
-    op: DisplayOpEvent;
+    op: TransferClog;
     shouldAddInset: boolean;
   };
 };
@@ -212,13 +220,27 @@ export async function handleOnboardingDeepLink(
   nav: OnboardingNav,
   str: string
 ) {
-  const inviteLink = parseInviteCodeOrLink(str);
   console.log(`[INTRO] paste invite link: '${str}'`);
-  const isAndroid = Platform.OS === "android";
-  if (inviteLink && (await fetchInviteLinkStatus(dc, inviteLink))?.isValid) {
-    if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
-    else nav.navigate("CreateChooseName", { inviteLink });
-  } else {
+  try {
+    const inviteLink = parseInviteCodeOrLink(str);
+    if (!inviteLink) {
+      console.log(`[INTRO] skipping unparseable invite link/code ${str}`);
+      nav.navigate("CreateNew");
+      return;
+    }
+    console.log(`[INTRO] parsed invite link: ${JSON.stringify(inviteLink)}`);
+
+    const linkStatus = await fetchInviteLinkStatus(dc, inviteLink);
+    const isAndroid = Platform.OS === "android";
+    if (linkStatus?.isValid) {
+      if (isAndroid) nav.navigate("CreateSetupKey", { inviteLink });
+      else nav.navigate("CreateChooseName", { inviteLink });
+    } else {
+      console.log(`[INTRO] invite ${str} is no longer valid.`);
+      nav.navigate("CreateNew");
+    }
+  } catch (e) {
+    console.log(`[INTRO] error handling invite link: ${e}`);
     nav.navigate("CreateNew");
   }
 }
@@ -226,7 +248,8 @@ export async function handleOnboardingDeepLink(
 export function handleDeepLink(
   nav: MainNav,
   dispatcher: Dispatcher,
-  url: string
+  url: string,
+  homeChainId: number
 ) {
   const link = parseDaimoLink(url);
   if (link == null) {
@@ -236,10 +259,15 @@ export function handleDeepLink(
   }
 
   console.log(`[NAV] going to ${url}`);
-  goTo(nav, dispatcher, link);
+  goTo(nav, dispatcher, link, homeChainId);
 }
 
-async function goTo(nav: MainNav, dispatcher: Dispatcher, link: DaimoLink) {
+async function goTo(
+  nav: MainNav,
+  dispatcher: Dispatcher,
+  link: DaimoLink,
+  homeChainId: number
+) {
   const { type } = link;
   switch (type) {
     case "settings": {
@@ -271,7 +299,12 @@ async function goTo(nav: MainNav, dispatcher: Dispatcher, link: DaimoLink) {
       break;
     }
     case "tag": {
-      nav.navigate("SendTab", { screen: "SendTransfer", params: { link } });
+      // TODO: pass link status through so child pages don't need to fetch status again
+      const linkStatus = await fetchLinkStatus(
+        link,
+        daimoChainFromId(homeChainId)
+      );
+      goTo(nav, dispatcher, linkStatus.link, homeChainId);
       break;
     }
     case "invite": {

@@ -1,19 +1,27 @@
-import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import {
   EAccount,
   EAccountSearchResult,
   EmailAddress,
+  LandlineAccount,
   PhoneNumber,
+  TransferClog,
+  TransferSwapClog,
+  canSendTo,
   getAccountName,
+  getDisplayFromTo,
+  getTransferClogType,
   zEmailAddress,
   zPhoneNumber,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
+import { Locale } from "expo-localization";
 import { Address } from "viem";
 
-import { getCachedEAccount } from "./addr";
+import { getCachedEAccount } from "./eAccountCache";
+import { getCachedLandlineAccount } from "./landlineAccountCache";
 import { useSystemContactsSearch } from "./systemContacts";
 import { getRpcHook } from "./trpc";
+import IconDepositWallet from "../../assets/icon-deposit-wallet.png";
 import { Account } from "../storage/account";
 
 interface BaseDaimoContact {
@@ -38,11 +46,12 @@ export interface PhoneNumberContact extends BaseDaimoContact {
   name?: string;
 }
 
-export interface BridgeBankAccountContact extends EAccount, BaseDaimoContact {
-  type: "bridgeBankAccount";
+export interface LandlineBankAccountContact extends EAccount, BaseDaimoContact {
+  type: "landlineBankAccount";
+  landlineAccountUuid: string;
   bankName: string;
-  lastFour: string;
-  bankLogo: string | undefined;
+  bankLogo: string | null;
+  accountNumberLastFour: string;
 }
 
 // A DaimoContact is a "contact" of the user in the app.
@@ -52,7 +61,7 @@ export type DaimoContact =
   | EAccountContact
   | EmailContact
   | PhoneNumberContact
-  | BridgeBankAccountContact;
+  | LandlineBankAccountContact;
 
 // A MsgContact is a contact that is not a EAccount. (i.e. not an
 // on-chain account)
@@ -69,7 +78,7 @@ export function getDaimoContactKey(contact: DaimoContact): string {
       return contact.email;
     case "phoneNumber":
       return contact.phoneNumber;
-    case "bridgeBankAccount":
+    case "landlineBankAccount":
       return contact.addr;
   }
 }
@@ -89,12 +98,12 @@ export function addLastTransferTimes(
   return { type: "eAcc", ...otherEAcc, lastSendTime, lastRecvTime };
 }
 
-export function getContactName(r: DaimoContact) {
-  if (r.type === "eAcc") return getAccountName(r);
+export function getContactName(r: DaimoContact, locale?: Locale) {
+  if (r.type === "eAcc") return getAccountName(r, locale);
   else if (r.type === "email") return r.name ? r.name : r.email;
   else if (r.type === "phoneNumber") return r.name ? r.name : r.phoneNumber;
-  else if (r.type === "bridgeBankAccount")
-    return `${r.bankName} ****${r.lastFour}`;
+  else if (r.type === "landlineBankAccount")
+    return `${r.bankName} ****${r.accountNumberLastFour}`;
   else throw new Error(`Unknown recipient type ${r}`);
 }
 
@@ -103,11 +112,25 @@ export function getContactProfilePicture(
 ): string | { uri: string } | undefined {
   if (r.type === "eAcc") {
     return r.profilePicture;
-  } else if (r.type === "bridgeBankAccount") {
+  } else if (r.type === "landlineBankAccount") {
+    const defaultLogo = IconDepositWallet;
     // The bank logo is fetched as a base64 string for a png
-    return { uri: `data:image/png;base64,${r.bankLogo}` };
+    const logo = r.bankLogo
+      ? { uri: `data:image/png;base64,${r.bankLogo}` }
+      : defaultLogo;
+    return logo;
   } else {
     return undefined;
+  }
+}
+
+export function canSendToContact(otherContact: DaimoContact): boolean {
+  if (otherContact.type === "landlineBankAccount") {
+    return true;
+  } else if (otherContact.type === "eAcc") {
+    return canSendTo(otherContact as EAccount);
+  } else {
+    return false;
   }
 }
 
@@ -139,7 +162,7 @@ export function useContactSearch(
     if (onlyNamedEAccs && !acc.name) continue;
 
     // HACK: ignore transfers to specially labelled addresses like "payment link"
-    // TODO: label transfers by whether occured as part of a send or a different transaction; ignore the latter
+    // TODO: label transfers by whether occurred as part of a send or a different transaction; ignore the latter
     // TODO: show note claimer as recipient.
     if (acc.label != null) continue;
 
@@ -214,14 +237,46 @@ export function useContactSearch(
   };
 }
 
+export function eAccToContact(eAcc: EAccount): EAccountContact {
+  return { type: "eAcc", ...eAcc };
+}
+
+function eAccAddrToContact(addr: Address): EAccountContact {
+  const eAcc = getCachedEAccount(addr);
+  return eAccToContact(eAcc);
+}
+
 export function landlineAccountToContact(
   landlineAccount: LandlineAccount
-): BridgeBankAccountContact {
+): LandlineBankAccountContact {
   return {
-    type: "bridgeBankAccount",
+    type: "landlineBankAccount",
+    landlineAccountUuid: landlineAccount.landlineAccountUuid,
     addr: landlineAccount.liquidationAddress,
     bankName: landlineAccount.bankName,
-    lastFour: landlineAccount.lastFour,
+    accountNumberLastFour: landlineAccount.accountNumberLastFour,
     bankLogo: landlineAccount.bankLogo,
   };
+}
+
+function landlineAccountUuidToContact(
+  landlineAccountUuid: string
+): LandlineBankAccountContact | null {
+  const account = getCachedLandlineAccount(landlineAccountUuid);
+  if (!account) return null;
+  return landlineAccountToContact(account);
+}
+
+export function getTransferClogContact(
+  transferClog: TransferClog,
+  accountAddress: Address
+): LandlineBankAccountContact | EAccountContact {
+  if (getTransferClogType(transferClog) === "landline") {
+    const { accountID } = (transferClog as TransferSwapClog).offchainTransfer!;
+    const llContact = landlineAccountUuidToContact(accountID);
+    if (llContact) return llContact;
+  }
+
+  const [from, to] = getDisplayFromTo(transferClog);
+  return eAccAddrToContact(from === accountAddress ? to : from);
 }

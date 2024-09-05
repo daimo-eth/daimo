@@ -1,4 +1,12 @@
-import { Hex, getAddress, Address } from "viem";
+import {
+  base,
+  baseUSDC,
+  DAv2Chain,
+  ForeignToken,
+  getDAv2Chain,
+  getForeignCoinBySymbolAndChain,
+} from "@daimo/contract";
+import { Address, getAddress, Hex, isAddress } from "viem";
 
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
 
@@ -39,10 +47,12 @@ export type DaimoLinkAccount = {
 /** Represents a request for $x to be paid to y address. */
 export type DaimoLinkRequest = {
   type: "request";
-  requestId: BigIntStr;
+  requestId?: BigIntStr;
   /** Requester eAccountStr */
   recipient: string;
-  dollars: DollarStr;
+  dollars?: DollarStr;
+  toCoin: ForeignToken;
+  toChain: DAv2Chain;
 };
 
 /** Represents a request for $x to be paid to y address. */
@@ -113,13 +123,22 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
       return `${linkBase}/account/${link.account}`;
     }
     case "request": {
-      return [
-        linkBase,
-        "request",
-        link.recipient,
-        link.dollars,
-        link.requestId.toString(),
-      ].join("/");
+      const params = new URLSearchParams();
+
+      params.append("to", link.recipient);
+
+      if (link.dollars) {
+        params.append("n", link.dollars);
+      }
+
+      if (link.requestId) {
+        params.append("id", link.requestId.toString());
+      }
+
+      params.append("c", link.toChain.chainId.toString());
+      params.append("t", link.toCoin.symbol.toLowerCase());
+
+      return `${linkBase}/request?${params.toString()}`;
     }
     case "requestv2": {
       const base = [linkBase, "r", link.recipient, link.dollars, link.id].join(
@@ -180,7 +199,15 @@ export function parseDaimoLink(link: string): DaimoLink | null {
   }
 }
 
-function parseDaimoLinkInner(link: string): DaimoLink | null {
+export function parseDaimoLinkType(link: string): string | null {
+  const parsedLink = parseDaimoLinkUrl(link);
+  if (parsedLink == null) return null;
+
+  const { parts } = parsedLink;
+  return parts[0];
+}
+
+function parseDaimoLinkUrl(link: string): { url: URL; parts: string[] } | null {
   const prefixes = [
     `${daimoLinkBase}/`,
     `${daimoLinkBaseV2}/`, // New shorter link prefix
@@ -195,6 +222,14 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
   const suffix = url.pathname.substring(1);
   const parts = suffix.split("/");
 
+  return { url, parts };
+}
+
+function parseDaimoLinkInner(link: string): DaimoLink | null {
+  const parsedLink = parseDaimoLinkUrl(link);
+  if (parsedLink == null) return null;
+  const { url, parts } = parsedLink;
+
   switch (parts[0]) {
     case "account": {
       if (parts.length !== 2) return null;
@@ -202,15 +237,11 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
       return { type: "account", account };
     }
     case "request": {
-      if (parts.length !== 4) return null;
-      const recipient = parts[1];
-      const dollarNum = parseFloat(zDollarStr.parse(parts[2]));
-      if (!(dollarNum > 0)) return null;
-      const dollars = dollarNum.toFixed(2) as DollarStr;
-      const requestId = `${BigInt(parts[3])}` as BigIntStr;
-
-      if (dollars === "0.00") return null;
-      return { type: "request", requestId, recipient, dollars };
+      if (parts.length === 4) {
+        return parseOldDaimoLinkRequest(parts);
+      } else if (parts.length === 1) {
+        return parseNewDaimoLinkRequest(url);
+      } else return null;
     }
     case "r": {
       // new request links
@@ -300,4 +331,79 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
     default:
       return null;
   }
+}
+
+function parseOldDaimoLinkRequest(parts: string[]): DaimoLinkRequest | null {
+  if (parts.length !== 4) return null;
+  const recipient = parts[1];
+  const dollarNum = parseFloat(zDollarStr.parse(parts[2]));
+  if (!(dollarNum > 0)) return null;
+  const dollars = dollarNum.toFixed(2) as DollarStr;
+  const requestId = `${BigInt(parts[3])}` as BigIntStr;
+
+  if (dollars === "0.00") return null;
+
+  const toChain = base;
+  const toCoin = baseUSDC;
+
+  return { type: "request", requestId, recipient, dollars, toCoin, toChain };
+}
+
+/**
+ * Only allow bare addresses or ENS names when creating a
+ * DaimoRequestLink. Daimo accounts are not supported to prevent
+ * users from sending funds to the wrong chain.
+ */
+function isValidRequestAccountName(account: string): boolean {
+  if (isAddress(account)) return true;
+  if (account.includes(".")) return true;
+  return false;
+}
+
+function parseNewDaimoLinkRequest(url: URL): DaimoLinkRequest | null {
+  const id = url.searchParams.get("id");
+  const to = url.searchParams.get("to");
+  const n = url.searchParams.get("n");
+  const c = url.searchParams.get("c");
+  const t = url.searchParams.get("t");
+
+  if (!to || !c || !t) return null;
+  if (!isValidRequestAccountName(to)) return null;
+
+  let toChain: DAv2Chain;
+  try {
+    toChain = getDAv2Chain(parseInt(c, 10));
+  } catch (e) {
+    console.warn(`[LINK] ignoring invalid chain ${c}: ${e}`);
+    return null;
+  }
+
+  let toCoin: ForeignToken;
+  try {
+    toCoin = getForeignCoinBySymbolAndChain(t, toChain.chainId);
+  } catch (e) {
+    console.warn(`[LINK] ignoring invalid coin ${t}: ${e}`);
+    return null;
+  }
+
+  const result: DaimoLinkRequest = {
+    type: "request",
+    recipient: to,
+    toCoin,
+    toChain,
+  };
+
+  if (n) {
+    const dollarNum = parseFloat(zDollarStr.parse(n));
+    if (dollarNum <= 0) return null;
+    const dollars = dollarNum.toFixed(2) as DollarStr;
+    if (dollars === "0.00") return null;
+    result.dollars = dollars;
+  }
+
+  if (id) {
+    result.requestId = `${BigInt(id)}` as BigIntStr;
+  }
+
+  return result;
 }

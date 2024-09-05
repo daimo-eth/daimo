@@ -1,4 +1,5 @@
-import { AddrLabel, ForeignToken } from "@daimo/common";
+import { AddrLabel } from "@daimo/common";
+import { ForeignToken } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image, ImageStyle } from "expo-image";
 import { useMemo } from "react";
@@ -57,6 +58,7 @@ export function ContactBubble({
         case AddrLabel.Coinbase:
         case AddrLabel.Binance:
           return <Octicons name="plus" size={fontSize} color={color.primary} />;
+        case AddrLabel.FastCCTP:
         case AddrLabel.UniswapETHPool:
         case AddrLabel.Relay:
         case AddrLabel.LiFi:

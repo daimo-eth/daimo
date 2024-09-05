@@ -1,18 +1,18 @@
-import { LandlineAccount } from "@daimo/api/src/landline/connector";
 import {
   ChainGasConstants,
   CurrencyExchangeRate,
   DaimoInviteCodeStatus,
   DaimoLinkNoteV2,
   DaimoRequestV2Status,
-  DisplayOpEvent,
   EAccount,
   KeyData,
-  KeyRotationOpEvent,
+  KeyRotationClog,
+  LandlineAccount,
   LinkedAccount,
   ProposedSwap,
   RecommendedExchange,
   SuggestedAction,
+  TransferClog,
   assert,
   now,
 } from "@daimo/common";
@@ -67,13 +67,13 @@ export type Account = {
   /** The latest finalized block as of the most recent sync. */
   lastFinalizedBlock: number;
   /** Transfers to/from other Daimo accounts & other Ethereum accounts. */
-  recentTransfers: DisplayOpEvent[];
+  recentTransfers: TransferClog[];
   /** Names for each Daimo account we've interacted with. */
   namedAccounts: EAccount[];
   /** P-256 keys authorised by the Daimo account, in DER format */
   accountKeys: KeyData[];
   /** Pending changes to authorised keys  */
-  pendingKeyRotation: KeyRotationOpEvent[];
+  pendingKeyRotation: KeyRotationClog[];
 
   /** Current gas and paymaster related constants */
   chainGasConstants: ChainGasConstants;
@@ -116,8 +116,8 @@ export type Account = {
   /** Payment links sent, but not yet claimed */
   sentPaymentLinks: DaimoLinkNoteV2[];
 
-  /** Session key used to authenticate to the Landline onramp/offramp app **/
-  landlineSessionKey: string;
+  /** Session URL used to authenticate to the Landline onramp/offramp app **/
+  landlineSessionURL: string;
   /** Bank accounts connected to the Landline onramp/offramp app **/
   landlineAccounts: LandlineAccount[];
 };
@@ -191,7 +191,7 @@ export function parseAccount(accountJSON?: string): Account | null {
     exchangeRates: a.exchangeRates,
     sentPaymentLinks: a.sentPaymentLinks,
 
-    landlineSessionKey: a.landlineSessionKey,
+    landlineSessionURL: a.landlineSessionURL ?? "",
     landlineAccounts: a.landlineAccounts,
   };
 }
@@ -239,7 +239,7 @@ export function serializeAccount(account: Account | null): string {
     exchangeRates: account.exchangeRates,
     sentPaymentLinks: account.sentPaymentLinks,
 
-    landlineSessionKey: account.landlineSessionKey,
+    landlineSessionURL: account.landlineSessionURL,
     landlineAccounts: account.landlineAccounts,
   };
 
@@ -302,7 +302,7 @@ export function createEmptyAccount(
     exchangeRates: [],
     sentPaymentLinks: [],
 
-    landlineSessionKey: "",
+    landlineSessionURL: "",
     landlineAccounts: [],
   };
 }

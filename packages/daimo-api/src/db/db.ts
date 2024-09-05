@@ -5,6 +5,7 @@ import { Address, Hex, getAddress } from "viem";
 
 import { DB as ApiDB } from "../codegen/dbApi";
 import { getEnvApi } from "../env";
+import { PushNotification } from "../server/pushNotifier";
 
 /** Credentials come from env.PGURL, defaults to localhost & no auth. */
 function getApiDBPoolConfigFromEnv(): PoolConfig {
@@ -165,6 +166,19 @@ export class DB {
         );
 
         CREATE INDEX IF NOT EXISTS expires_at_idx ON external_api_cache (expires_at);
+
+        --
+        -- Never double-send a push notification
+        --
+        CREATE TABLE IF NOT EXISTS push_notification (
+          id SERIAL PRIMARY KEY,
+          created_at TIMESTAMP NOT NULL,
+          address CHAR(42) NOT NULL,
+          push_key TEXT NOT NULL,
+          push_json TEXT NOT NULL,
+
+          UNIQUE (address, push_key)
+        );
       `);
       success = true;
     } catch (e) {
@@ -172,7 +186,7 @@ export class DB {
       throw e;
     } finally {
       const status = success ? "success" : "error";
-      const elapsedMs = performance.now() - startMs;
+      const elapsedMs = (performance.now() - startMs) | 0;
       console.log(`[DB] migration ${status} in ${elapsedMs}ms`);
     }
   }
@@ -221,19 +235,37 @@ export class DB {
     }));
   }
 
-  async saveTagRedirect(tag: string, link: string) {
+  async saveTagRedirect(
+    tag: string,
+    link: string,
+    updateToken?: string
+  ): Promise<TagRedirectRow> {
     console.log(`[DB] inserting tag redirect: ${tag} -> ${link}`);
-    const res = await this.pool.query(
-      `INSERT INTO tag_redirect (tag, link) VALUES ($1, $2)
-       ON CONFLICT (tag) DO UPDATE SET link = $2`,
-      [tag, link]
-    );
-    if (res.rowCount && res.rowCount > 0) {
-      await this.pool.query(
-        `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`,
-        [tag, link]
-      );
+    const queryParams = [tag, link];
+    let query = `INSERT INTO tag_redirect (tag, link) VALUES ($1, $2)
+                 ON CONFLICT (tag) DO UPDATE SET link = $2
+                 RETURNING *`;
+
+    if (updateToken !== undefined) {
+      query = `INSERT INTO tag_redirect (tag, link, update_token) VALUES ($1, $2, $3)
+               ON CONFLICT (tag) DO UPDATE SET link = $2, update_token = $3
+               RETURNING *`;
+      queryParams.push(updateToken);
     }
+
+    const res = await this.pool.query(query, queryParams);
+
+    if (res.rowCount && res.rowCount > 0) {
+      let historyQuery = `INSERT INTO tag_redirect_history (tag, link) VALUES ($1, $2)`;
+
+      if (updateToken !== undefined) {
+        historyQuery = `INSERT INTO tag_redirect_history (tag, link, update_token) VALUES ($1, $2, $3)`;
+      }
+
+      await this.pool.query(historyQuery, queryParams);
+    }
+
+    return res.rows[0];
   }
 
   async saveOffchainAction(row: OffchainActionRow) {
@@ -460,13 +492,10 @@ export class DB {
 
   async loadPaymentMemos(): Promise<PaymentMemoRow[]> {
     console.log(`[DB] loading payment memos`);
-    const client = await this.pool.connect();
-    const result = await client.query<RawPaymentMemoRow>(
+    const result = await this.pool.query<RawPaymentMemoRow>(
       `SELECT ophash_hex, memo FROM payment_memo`
     );
-    client.release();
-
-    console.log(`[DB] ${result.rows.length} payment memo rows`);
+    console.log(`[DB] loaded ${result.rows.length} payment memo rows`);
     return result.rows.map((row) => ({
       opHash: row.ophash_hex as Hex,
       memo: row.memo,
@@ -475,23 +504,17 @@ export class DB {
 
   async insertPaymentMemo(row: PaymentMemoRow) {
     console.log(`[DB] inserting payment memos`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO payment_memo (ophash_hex, memo) VALUES ($1, $2)`,
       [row.opHash, row.memo]
     );
-    client.release();
-
-    console.log(`[DB] inserted payment memos`);
   }
 
   async loadDeclinedRequests(): Promise<DeclinedRequestRow[]> {
     console.log(`[DB] loading declined requests`);
-    const client = await this.pool.connect();
-    const result = await client.query<RawDeclinedRequestRow>(
+    const result = await this.pool.query<RawDeclinedRequestRow>(
       `SELECT request_id, decliner, created_at FROM declined_requests`
     );
-    client.release();
 
     console.log(`[DB] ${result.rows.length} declined request rows`);
     return result.rows.map((row) => ({
@@ -503,26 +526,34 @@ export class DB {
 
   async insertDeclinedRequest(requestId: bigint, decliner: string) {
     console.log(`[DB] inserting declined request`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO declined_requests (request_id, decliner) VALUES ($1, $2)`,
       [requestId.toString(), decliner]
     );
-    client.release();
-
-    console.log(`[DB] inserted declined request`);
   }
 
   async insertWaitlist(name: string, email: string, socials: string) {
     console.log(`[DB] inserting waitlist`);
-    const client = await this.pool.connect();
-    await client.query(
+    await this.pool.query(
       `INSERT INTO waitlist (name, email, socials) VALUES ($1, $2, $3)`,
       [name, email, socials]
     );
-    client.release();
+  }
 
-    console.log(`[DB] inserted waitlist`);
+  /// Inserts a new push notification. Returns rows affected = 1 or 0 if dupe.
+  async tryInsertPushNotification(push: PushNotification) {
+    console.log(`[DB] inserting push notif`);
+    const res = await this.kdb
+      .insertInto("push_notification")
+      .values({
+        created_at: new Date(),
+        address: push.address,
+        push_key: push.key,
+        push_json: JSON.stringify(push.expoPush),
+      })
+      .onConflict((b) => b.doNothing())
+      .executeTakeFirst();
+    return Number(res.numInsertedOrUpdatedRows || 0);
   }
 }
 

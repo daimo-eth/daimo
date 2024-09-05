@@ -3,7 +3,7 @@ import {
   DaimoLink,
   DaimoLinkNoteV2,
   DaimoNoteStatus,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
   OpStatus,
   assert,
@@ -24,9 +24,10 @@ import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, Hex } from "viem";
 
+import { cacheEAccounts } from "./eAccountCache";
+import { cacheLandlineAccounts } from "./landlineAccountCache";
 import { getRpcFunc } from "./trpc";
 import { ActHandle } from "../action/actStatus";
-import { cacheEAccounts } from "../logic/addr";
 import {
   EnclaveKeyInfo,
   deleteEnclaveKey,
@@ -163,7 +164,10 @@ class AccountManager {
 
     // Cache accounts so that addresses show up with correct display names.
     // Would be cleaner use a listener, but must run first.
-    if (account) cacheEAccounts(account.namedAccounts);
+    if (account) {
+      cacheEAccounts(account.namedAccounts);
+      cacheLandlineAccounts(account.landlineAccounts);
+    }
 
     this.currentAccount = account;
     this.mmkv.set("account", serializeAccount(account));
@@ -354,7 +358,7 @@ class AccountManager {
         noteStatus,
         to: address,
         txHash,
-      } as DisplayOpEvent;
+      } as TransferClog;
 
       this.transform((a) => ({
         ...a,

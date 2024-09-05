@@ -33,17 +33,37 @@ export function LinkSemiBold({
   );
 }
 
-export function TextSemiBold({ children }: { children: React.ReactNode }) {
+export function TextSemiBold({
+  children,
+  textColor,
+}: {
+  children: React.ReactNode;
+  textColor?: string;
+}) {
   return (
-    <p className="text-[16px] tracking-[1px] leading-[20.8px] font-semibold text-white">
+    <p
+      className={`text-[16px] tracking-[1px] leading-[20.8px] font-semibold ${
+        textColor || "text-white"
+      }`}
+    >
       {children}
     </p>
   );
 }
 
-export function TextBold({ children }: { children: React.ReactNode }) {
+export function TextBold({
+  children,
+  textColor,
+}: {
+  children: React.ReactNode;
+  textColor?: string;
+}) {
   return (
-    <p className="text-[16px] tracking-none leading-[20.8px] font-bold text-white">
+    <p
+      className={`text-[16px] tracking-none leading-[20.8px] font-bold ${
+        textColor || "text-white"
+      }`}
+    >
       {children}
     </p>
   );

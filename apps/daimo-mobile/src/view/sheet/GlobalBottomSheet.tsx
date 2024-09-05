@@ -14,7 +14,9 @@ import {
 } from "react";
 import { Keyboard, StyleSheet, View } from "react-native";
 import RNShake from "react-native-shake";
+import { Address } from "viem";
 
+import { BitrefillBottomSheet } from "./BitrefillBottomSheet";
 import { CreateBackupSheet } from "./CreateBackupSheet";
 import { DebugBottomSheet } from "./DebugBottomSheet";
 import { DepositAddressBottomSheet } from "./DepositAddressBottomSheet";
@@ -58,6 +60,9 @@ const bottomSheetSettings = {
   swap: {
     dismissable: true,
   },
+  bitrefill: {
+    dismissable: true,
+  },
 } as const;
 
 type DisplayedSheet =
@@ -81,7 +86,11 @@ type DisplayedSheet =
       action: "ownRequest";
       payload: { reqStatus: DaimoRequestV2Status };
     }
-  | { action: "swap"; payload: { swap: ProposedSwap } };
+  | { action: "swap"; payload: { swap: ProposedSwap } }
+  | {
+      action: "bitrefill";
+      payload: { address: Address; amount: `${number}` };
+    };
 
 // Shows the main, global bottom sheet. This ensures that only a single of
 // these sheets is visible at a time. The global sheet appears above any screen
@@ -163,6 +172,11 @@ export function GlobalBottomSheet() {
         openBottomSheet({ action: "swap", payload: { swap } });
         break;
       }
+      case "bitrefill": {
+        const { address, amount } = action;
+        openBottomSheet({ action: "bitrefill", payload: { address, amount } });
+        break;
+      }
       case "hideBottomSheet": {
         setSheet(null);
         break;
@@ -185,6 +199,7 @@ export function GlobalBottomSheet() {
     dispatcher.register("hideBottomSheet", handleDispatch);
     dispatcher.register("createBackup", handleDispatch);
     dispatcher.register("swap", handleDispatch);
+    dispatcher.register("bitrefill", handleDispatch);
   }, []);
 
   console.log(`[APP] rendering bottomSheet=${sheet?.action}`);
@@ -243,6 +258,12 @@ export function GlobalBottomSheet() {
           {sheet?.action === "depositAddress" && <DepositAddressBottomSheet />}
           {sheet?.action === "swap" && (
             <SwapBottomSheet swap={sheet.payload.swap} />
+          )}
+          {sheet?.action === "bitrefill" && (
+            <BitrefillBottomSheet
+              address={sheet.payload.address}
+              amount={sheet.payload.amount}
+            />
           )}
         </BottomSheetView>
       </BottomSheet>

@@ -2,12 +2,15 @@ import { EAccount, timeAgo } from "@daimo/common";
 import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { navToAccountPage, useNav } from "../../common/nav";
+import { i18NLocale, i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+
+const i18 = i18n.yourInvites;
 
 export function YourInvitesScreen() {
   const Inner = useWithAccount(YourInvitesScreenInner);
@@ -21,7 +24,7 @@ function YourInvitesScreenInner({ account }: { account: Account }) {
 
   return (
     <View style={ss.container.screen}>
-      <ScreenHeader title="Your Invites" onBack={nav.goBack} />
+      <ScreenHeader title={i18.screenHeader()} onBack={nav.goBack} />
       <ScrollView style={styles.list}>
         {invitees.map((invitee) => (
           <InviteeRow key={invitee.addr} invitee={invitee} />
@@ -49,7 +52,7 @@ function InviteeRow({ invitee }: { invitee: EAccount }) {
           <View style={styles.inviteeRowRight}>
             {invitee.timestamp && (
               <TextBody color={color.gray3}>
-                Joined {timeAgo(invitee.timestamp)} ago
+                {i18.joinedAgo(timeAgo(invitee.timestamp, i18NLocale))}
               </TextBody>
             )}
           </View>

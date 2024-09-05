@@ -1,6 +1,6 @@
 <img alt="Screenshot" src="https://github.com/daimo-eth/daimo/assets/169280/3207b2bf-f93d-4c26-b56f-1545e4e7c182">
 
-### Daimo is a stablecoin personal bank
+### Daimo is a universal cash app
 
 Today, we run on USDC on Base. Cross-chain transfers and more coming soon.
 
@@ -61,9 +61,10 @@ The mission is to make an excellent experience. Sound assets, secure cryptograph
 
 Past audits of the Daimo codebase can be found in the `audits` folder:
 
-- [Veridise audit 2023 Oct: Daimo](./audits/2023-10-veridise-daimo.pdf)
-- [Veridise audit 2023 Oct: P-256 verifier](./audits/2023-10-veridise-p256.pdf)
+- **Coming soon: OpenZeppelin audit 2024 Aug**
 - [Veridise audit 2023 Nov: WebAuthn verifier](./audits/2023-11-veridise-webauthn.pdf)
+- [Veridise audit 2023 Oct: P-256 verifier](./audits/2023-10-veridise-p256.pdf)
+- [Veridise audit 2023 Oct: Daimo](./audits/2023-10-veridise-daimo.pdf)
 
 #### Bug Bounty Program
 
@@ -215,10 +216,10 @@ In the cloud, these tests are run on the master branch using the `maestro-ci` wo
 <details>
 <summary><strong>DB diagnostics</strong></summary>
 
-Shovel caught up?
+Indexer caught up?
 
 ```sql
-SELECT * FROM shovel.latest;
+SELECT * FROM index.daimo_index;
 ```
 
 Largest Postgres DB tables, disk usage:

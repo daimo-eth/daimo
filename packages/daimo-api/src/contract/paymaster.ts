@@ -1,4 +1,4 @@
-import { ChainGasConstants, EAccount } from "@daimo/common";
+import { ChainGasConstants, EAccount, retryBackoff } from "@daimo/common";
 import { daimoPaymasterV2Address } from "@daimo/contract";
 import { hexToBigInt } from "viem";
 
@@ -6,7 +6,6 @@ import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { BundlerClient } from "../network/bundlerClient";
 import { ViemClient } from "../network/viemClient";
-import { retryBackoff } from "../utils/retryBackoff";
 
 interface GasPrices {
   /// L2 fee

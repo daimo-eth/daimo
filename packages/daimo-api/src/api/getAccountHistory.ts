@@ -1,45 +1,50 @@
 import { generateOnRampURL } from "@coinbase/cbpay-js";
 import {
-  AddrLabel,
   ChainGasConstants,
   CurrencyExchangeRate,
   DaimoInviteCodeStatus,
   DaimoRequestV2Status,
-  DisplayOpEvent,
   EAccount,
   KeyData,
+  LandlineAccount,
   LinkedAccount,
   ProposedSwap,
   RecommendedExchange,
   SuggestedAction,
+  TransferClog,
   appStoreLinks,
   assert,
   daimoDomainAddress,
   formatDaimoLink,
+  getLandlineAccountName,
   guessTimestampFromNum,
   hasAccountName,
 } from "@daimo/common";
 import semverLt from "semver/functions/lt";
 import { Address } from "viem";
 
+import { FeatFlag } from "./featureFlag";
 import { getExchangeRates } from "./getExchangeRates";
 import { getLinkStatus } from "./getLinkStatus";
 import { ProfileCache } from "./profile";
 import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
-import { NameRegistry, specialAddrLabels } from "../contract/nameRegistry";
+import { NameRegistry } from "../contract/nameRegistry";
 import { NoteIndexer } from "../contract/noteIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
+import { i18n } from "../i18n";
 import {
-  LandlineAccount,
   getLandlineAccounts,
   getLandlineSession,
+  getLandlineTransfers,
+  getLandlineURL,
 } from "../landline/connector";
+import { addLandlineTransfers } from "../landline/landlineClogMatcher";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
@@ -58,7 +63,7 @@ export interface AccountHistoryResult {
   chainGasConstants: ChainGasConstants;
   recommendedExchanges: RecommendedExchange[];
 
-  transferLogs: DisplayOpEvent[];
+  transferLogs: TransferClog[];
   namedAccounts: EAccount[];
   accountKeys: KeyData[];
   linkedAccounts: LinkedAccount[];
@@ -72,7 +77,7 @@ export interface AccountHistoryResult {
 
   exchangeRates: CurrencyExchangeRate[];
 
-  landlineSessionKey: string;
+  landlineSessionURL: string;
   landlineAccounts: LandlineAccount[];
 }
 
@@ -86,6 +91,7 @@ export async function getAccountHistory(
   address: Address,
   inviteCode: string | undefined,
   sinceBlockNum: number,
+  lang: string | undefined,
   vc: ViemClient,
   homeCoinIndexer: HomeCoinIndexer,
   foreignCoinIndexer: ForeignCoinIndexer,
@@ -102,7 +108,10 @@ export async function getAccountHistory(
   blockNumber: number
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
-  assert(eAcc != null && eAcc.name != null, "Not a Daimo account");
+  assert(
+    eAcc != null && eAcc.name != null,
+    `${address} is not a Daimo account`
+  );
   const startMs = performance.now();
   const log = `[API] getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
   console.log(`${log}: starting`);
@@ -129,25 +138,22 @@ export async function getAccountHistory(
   // TODO: get userops, including reverted ones. Show failed sends.
 
   // Get successful transfers since sinceBlockNum
-  const transferLogs = homeCoinIndexer.filterTransfers({
+  let transferClogs = homeCoinIndexer.filterTransfers({
     addr: address,
     sinceBlockNum: BigInt(sinceBlockNum),
   });
-  let elapsedMs = performance.now() - startMs;
-  console.log(`${log}: ${elapsedMs}ms ${transferLogs.length} logs`);
-
-  // Get named accounts
-  const namedAccounts = await getNamedAccountsFromClogs(transferLogs, nameReg);
+  let elapsedMs = (performance.now() - startMs) | 0;
+  console.log(`${log}: ${elapsedMs}ms ${transferClogs.length} logs`);
 
   // Get account keys
   const accountKeys = keyReg.resolveAddressKeys(address);
-  assert(accountKeys != null);
+  assert(accountKeys != null, `${address} has no account keys`);
 
   // Prefetch info required to send operations > fast at time of sending.
   const chainGasConstants = await paymaster.calculateChainGasConstants(eAcc);
 
   // Prefetch info required to deposit to your Daimo account.
-  const recommendedExchanges = fetchRecommendedExchanges(eAcc);
+  const recommendedExchanges = fetchRecommendedExchanges(eAcc, lang);
 
   // Get linked accounts
   const linkedAccounts = profileCache.getLinkedAccounts(address);
@@ -166,7 +172,7 @@ export async function getAccountHistory(
   const invitees = inviteeAddrs
     .map((addr) => nameReg.getDaimoAccount(addr))
     .filter((acc) => acc != null) as EAccount[];
-  elapsedMs = performance.now() - startMs;
+  elapsedMs = (performance.now() - startMs) | 0;
   console.log(`${log}: ${elapsedMs}ms: ${invitees.length} invitees`);
 
   // Get pfps from linked accounts
@@ -177,23 +183,35 @@ export async function getAccountHistory(
 
   // Get proposed swaps of non-home coin tokens for address
   const swaps = await foreignCoinIndexer.getProposedSwapsForAddr(address);
-  elapsedMs = performance.now() - startMs;
+  elapsedMs = (performance.now() - startMs) | 0;
   console.log(`${log}: ${elapsedMs}: ${swaps.length} swaps`);
 
   // Get exchange rates
   const exchangeRates = await getExchangeRates(extApiCache);
 
   // Get landline session key and accounts
-  let landlineSessionKey = "";
+  let landlineSessionURL = "";
   let landlineAccounts: LandlineAccount[] = [];
 
-  const username = eAcc.name;
-  const isUserWhitelisted =
-    getEnvApi().LANDLINE_WHITELIST_USERNAMES.includes(username);
-  if (getEnvApi().LANDLINE_API_URL && isUserWhitelisted) {
-    landlineSessionKey = await getLandlineSession(address);
+  const showLandline = FeatFlag.landline(eAcc);
+  if (getEnvApi().LANDLINE_API_URL && showLandline) {
+    const landlineSessionKey = (await getLandlineSession(address)).key;
+    landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts(address);
+    const landlineTransfers = await getLandlineTransfers(address);
+    transferClogs = addLandlineTransfers(
+      landlineTransfers,
+      transferClogs,
+      chainConfig.daimoChain
+    );
   }
+
+  // Get named accounts
+  const namedAccounts = await getNamedAccountsFromClogs(
+    transferClogs,
+    landlineAccounts,
+    nameReg
+  );
 
   const ret: AccountHistoryResult = {
     address,
@@ -208,7 +226,7 @@ export async function getAccountHistory(
     recommendedExchanges,
     suggestedActions: [],
 
-    transferLogs,
+    transferLogs: transferClogs,
     namedAccounts,
     accountKeys,
     linkedAccounts,
@@ -219,20 +237,21 @@ export async function getAccountHistory(
     proposedSwaps: swaps,
     exchangeRates,
 
-    landlineSessionKey,
+    landlineSessionURL,
     landlineAccounts,
   };
 
   // Suggest an action to the user, like backing up their account
-  const suggestedActions = getSuggestedActions(eAcc, ret, ctx);
+  const suggestedActions = getSuggestedActions(eAcc, ret, ctx, lang);
 
-  elapsedMs = Date.now() - startMs;
-  console.log(`${log}: ${elapsedMs}: done, returning`);
+  elapsedMs = (performance.now() - startMs) | 0;
+  console.log(`${log}: ${elapsedMs}ms: done, returning`);
   return { ...ret, suggestedActions };
 }
 
 async function getNamedAccountsFromClogs(
-  clogs: DisplayOpEvent[],
+  clogs: TransferClog[],
+  landlineAccounts: LandlineAccount[],
   nameReg: NameRegistry
 ): Promise<EAccount[]> {
   const addrs = new Set<Address>();
@@ -242,13 +261,19 @@ async function getNamedAccountsFromClogs(
     if (clog.type === "claimLink" || clog.type === "createLink") {
       if (clog.noteStatus.claimer) addrs.add(clog.noteStatus.claimer.addr);
       addrs.add(clog.noteStatus.sender.addr);
-    } else if (clog.type === "transfer" && clog.preSwapTransfer) {
-      addrs.add(clog.preSwapTransfer.from);
     }
   });
   const namedAccounts = (
     await Promise.all([...addrs].map((addr) => nameReg.getEAccount(addr)))
   ).filter((acc) => hasAccountName(acc));
+
+  // Map Landline liquidation addresses to the corresponding bank account
+  for (const landlineAccount of landlineAccounts) {
+    namedAccounts.push({
+      addr: landlineAccount.liquidationAddress,
+      name: getLandlineAccountName(landlineAccount),
+    });
+  }
 
   return namedAccounts;
 }
@@ -256,9 +281,11 @@ async function getNamedAccountsFromClogs(
 function getSuggestedActions(
   eAcc: EAccount,
   hist: AccountHistoryResult,
-  ctx: TrpcRequestContext
+  ctx: TrpcRequestContext,
+  lang?: string
 ) {
   const ret: SuggestedAction[] = [];
+  const t = i18n(lang).suggestedActions;
 
   // Not on latest version? Ask them to upgrade.
   const latestVersion = getAppVersionTracker().getLatestVersion();
@@ -267,8 +294,8 @@ function getSuggestedActions(
   if (appVersion && latestVersion && semverLt(appVersion, latestVersion)) {
     ret.push({
       id: `2024-02-update-${appVersion}-to-${latestVersion}`,
-      title: "Upgrade Available",
-      subtitle: `Tap to update to ${latestVersion}`,
+      title: t.upgrade.title(),
+      subtitle: t.upgrade.subtitle(latestVersion),
       url: appStoreLinks[daimoPlatform.startsWith("ios") ? "ios" : "android"],
     });
   }
@@ -277,31 +304,9 @@ function getSuggestedActions(
   if (hist.accountKeys.length === 1) {
     ret.push({
       id: "2024-02-passkey-backup",
-      title: "Secure Your Account",
-      subtitle: "Keep your account safe with a passkey backup",
+      title: t.backup.title(),
+      subtitle: t.backup.subtitle(),
       url: `daimo://settings/add-passkey`,
-    });
-  }
-
-  // Active account: has recieved transfer from another user in "recent"
-  // transfer logs. The recency condition means that it will be dismissed
-  // automatically if transferLogs are empty (eg, user leaves app open for
-  // a while).
-  const hasReceived = hist.transferLogs.some((log) => {
-    return (
-      log.type === "transfer" &&
-      log.to === eAcc.addr &&
-      specialAddrLabels[log.from] !== AddrLabel.Faucet
-    );
-  });
-
-  if (hasReceived) {
-    ret.push({
-      id: "2023-12-join-tg-5",
-      icon: "comment-discussion",
-      title: "Feedback? Ideas?",
-      subtitle: "Join our Telegram group.",
-      url: `https://t.me/+to2ghQJfgic0YjA9`,
     });
   }
 
@@ -318,7 +323,7 @@ function getRampNetworkURL(account: EAccount) {
 }
 
 function getBridgeURL(account: EAccount) {
-  return `https://www.relay.link/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=${account.addr}`;
+  return `https://www.relay.link/app/daimo?toChainId=8453&toCurrency=0x833589fcd6edb6e08f4c7c32d4f71b54bda02913&lockToToken=true&toAddress=${account.addr}`;
 }
 
 function getCoinbaseURL(account: EAccount) {
@@ -335,26 +340,31 @@ function getCoinbaseURL(account: EAccount) {
   });
 }
 
-function fetchRecommendedExchanges(account: EAccount): RecommendedExchange[] {
+function fetchRecommendedExchanges(
+  account: EAccount,
+  lang?: string
+): RecommendedExchange[] {
+  const i18 = i18n(lang).recommendedExchange;
+
   return [
     {
-      title: "Transfer from another chain",
-      cta: "Bridge USDC from any wallet",
+      cta: i18.bridge.cta(),
+      title: i18.bridge.title(),
       url: getBridgeURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/ethereum.png`,
       sortId: 0,
     },
     {
-      title: "Send from Coinbase & other options",
-      cta: "Deposit from Coinbase",
+      cta: i18.coinbase.cta(),
+      title: i18.coinbase.title(),
       url: getCoinbaseURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/coinbase.png`,
       sortId: 1,
     },
     // 2 is Binance, loaded client-side on demand.
     {
-      title: "Cards, banks, & international options",
-      cta: "Buy USDC",
+      title: i18.ramp.title(),
+      cta: i18.ramp.cta(),
       url: getRampNetworkURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/usdc.png`,
       sortId: 3,

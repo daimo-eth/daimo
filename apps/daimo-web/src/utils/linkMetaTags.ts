@@ -6,6 +6,7 @@ import {
   getAccountName,
 } from "@daimo/common";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 
 import { getAbsoluteUrl } from "./getAbsoluteUrl";
 import { LinkStatusDesc } from "./linkStatus";
@@ -14,8 +15,11 @@ import {
   FrameMetadataType,
   getFrameMetadata,
 } from "../app/frame/frameUtils";
+import { getI18N } from "../i18n";
 
 export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
+  const i18n = getI18N(headers().get("accept-language"));
+  const i18 = i18n.utils.metaTags;
   const { name, action, dollars } = desc;
 
   // Create title
@@ -35,7 +39,7 @@ export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
   const meta = createMetadata(title, desc.description, previewURL);
 
   // If it's a request, make it frame with button to check status.
-  const frameMeta = getFrameForLinkStatus(desc, "Check Status");
+  const frameMeta = getFrameForLinkStatus(desc, i18.checkStatus());
   console.log(
     `[LINK] status ${JSON.stringify(desc)}, frame ${JSON.stringify(frameMeta)}`
   );
@@ -48,6 +52,8 @@ export function getFrameForLinkStatus(
   desc: LinkStatusDesc,
   recheckLabel: string
 ): FrameMetadataType | undefined {
+  const i18n = getI18N(headers().get("accept-language"));
+  const i18 = i18n.utils.metaTags;
   const { name, action, dollars, linkStatus } = desc;
 
   // If it's a request, make it frame with button to check status.
@@ -68,11 +74,21 @@ export function getFrameForLinkStatus(
 
     let buttons: [FrameButtonMetadata, ...FrameButtonMetadata[]];
     if (isFinalized) {
-      buttons = [{ label: "Open in Daimo", action: "link", target: linkUrl }];
+      buttons = [
+        {
+          label: i18.buttons.openInDaimo(),
+          action: "link",
+          target: linkUrl,
+        },
+      ];
     } else {
       buttons = [
         { label: recheckLabel },
-        { label: "Pay Request", action: "link", target: linkUrl },
+        {
+          label: i18.buttons.payRequest(),
+          action: "link",
+          target: linkUrl,
+        },
       ];
     }
 

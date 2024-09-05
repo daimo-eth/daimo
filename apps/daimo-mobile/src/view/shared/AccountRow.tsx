@@ -1,24 +1,30 @@
-import { EAccount, canSendTo, getAccountName, timeString } from "@daimo/common";
+import { timeString, TransferClogStatus } from "@daimo/common";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { ContactBubble } from "./Bubble";
-import { PendingDot } from "./PendingDot";
+import { FailedDot, PendingDot, ProcessingDot } from "./StatusDot";
 import { color, touchHighlightUnderlay } from "./style";
 import { TextBody, TextPara } from "./text";
+import { i18NLocale } from "../../i18n";
+import {
+  canSendToContact,
+  DaimoContact,
+  getContactName,
+} from "../../logic/daimoContacts";
 
 export function AccountRow({
-  acc,
+  contact,
   timestamp,
-  pending,
+  status,
   viewAccount,
 }: {
-  acc: EAccount;
+  contact: DaimoContact;
   timestamp: number;
   viewAccount?: () => void;
-  pending?: boolean;
+  status?: TransferClogStatus;
 }) {
-  const textDark = pending ? color.gray3 : color.midnight;
-  const textLight = pending ? color.gray3 : color.grayMid;
+  const textDark = status === "pending" ? color.gray3 : color.midnight;
+  const textLight = status === "pending" ? color.gray3 : color.grayMid;
 
   const date = timeString(timestamp);
 
@@ -26,19 +32,23 @@ export function AccountRow({
     <View style={styles.border}>
       <TouchableHighlight
         onPress={viewAccount}
-        disabled={!canSendTo(acc)}
+        disabled={!canSendToContact(contact)}
         {...touchHighlightUnderlay.subtle}
         style={styles.rowWrap}
       >
         <View style={styles.row}>
           <View style={styles.otherAccount}>
             <ContactBubble
-              contact={{ type: "eAcc", ...acc }}
+              contact={contact}
               size={36}
-              isPending={pending}
+              isPending={status === "pending"}
             />
-            <TextBody color={textDark}>{getAccountName(acc)}</TextBody>
-            {pending && <PendingDot />}
+            <TextBody color={textDark}>
+              {getContactName(contact, i18NLocale)}
+            </TextBody>
+            {status === "pending" && <PendingDot />}
+            {status === "processing" && <ProcessingDot />}
+            {status === "failed" && <FailedDot />}
           </View>
           <TextPara color={textLight}>{date}</TextPara>
         </View>

@@ -34,10 +34,17 @@ interface StoredV16TransferClog {
   nonceMetadata?: Hex;
   requestStatus?: StoredV15DaimoRequestV2Status;
   memo?: string;
+
   preSwapTransfer?: {
     coin: StoredV16ForeignCoin;
     amount: BigIntStr;
     from: Address;
+  };
+
+  postSwapTransfer?: {
+    coin: StoredV16ForeignCoin;
+    amount: BigIntStr;
+    to: Address;
   };
 }
 
@@ -234,12 +241,14 @@ interface StoredV16ForeignCoin {
 
 export interface StoredV15LandlineAccount {
   daimoAddress: Address;
+  landlineAccountUuid: string;
   bankName: string;
+  bankLogo: string | null;
   accountName: string;
-  lastFour: string;
+  accountNumberLastFour: string;
+  bankCurrency: string;
   liquidationAddress: Address;
-  chain: string;
-  destinationCurrency: string;
-  bankLogo?: string;
+  liquidationChain: string;
+  liquidationCurrency: string;
   createdAt: string;
 }

@@ -1,15 +1,9 @@
-import {
-  BigIntStr,
-  EAccount,
-  ProposedSwap,
-  assert,
-  isNativeETH,
-  isTestnetChain,
-  now,
-} from "@daimo/common";
+import { BigIntStr, EAccount, ProposedSwap, assert, now } from "@daimo/common";
 import {
   daimoFlexSwapperABI,
   daimoFlexSwapperAddress,
+  isNativeETH,
+  isTestnetChain,
   swapRouter02Abi,
   swapRouter02Address,
 } from "@daimo/contract";
@@ -24,21 +18,23 @@ const SINGLE_POOL_LENGTH_HEX = 88;
 // Given an exact amount input of tokenIn, retrieve the best-effort swap path
 // to get tokenOut.
 export async function getSwapQuote({
+  chainId,
+  receivedAt,
   amountInStr,
   tokenIn,
   tokenOut,
   fromAccount,
   toAddr,
-  chainId,
   vc,
   tokenReg,
 }: {
+  chainId: number;
+  receivedAt: number;
   amountInStr: BigIntStr;
   tokenIn: Address;
   tokenOut: Address;
   fromAccount: EAccount;
   toAddr: Address;
-  chainId: number;
   vc: ViemClient;
   tokenReg: TokenRegistry;
 }) {
@@ -49,6 +45,14 @@ export async function getSwapQuote({
   assert(amountIn > 0, "amountIn must be positive");
   assert(tokenIn !== tokenOut, "tokenIn == tokenOut");
 
+  // Only quote known tokens (that appear on CoinGecko etc) to avoid spam.
+  const fromCoin = tokenReg.getToken(tokenIn);
+  if (fromCoin == null) {
+    console.log(`[SWAP QUOTE] no quote, unknown token: ${tokenIn}`);
+    return null;
+  }
+
+  // Onchain Uniswap quoter.
   const swapQuote = await vc.publicClient.readContract({
     abi: daimoFlexSwapperABI,
     address: daimoFlexSwapperAddress,
@@ -57,6 +61,14 @@ export async function getSwapQuote({
   });
   const amountOut: bigint = swapQuote[0];
   const swapPath: Hex = swapQuote[1];
+
+  // No output = no quote.
+  if (amountOut === 0n) {
+    console.log(
+      `[SWAP QUOTE] no output for ${amountIn} ${fromCoin.symbol} ${tokenIn}: ${swapPath}`
+    );
+    return null;
+  }
 
   // By default, the router holds the funds until the last swap, then it is
   // sent to the recipient.
@@ -75,8 +87,6 @@ export async function getSwapQuote({
   const amountOutMinimum = amountOut - (maxSlippagePercent * amountOut) / 100n;
 
   // Special handling for fromCoin = native ETH
-  const fromCoin = tokenReg.getToken(tokenIn);
-  if (fromCoin == null) return null;
   const isFromETH = isNativeETH(fromCoin, chainId);
 
   let swapCallData;
@@ -139,7 +149,7 @@ export async function getSwapQuote({
     fromCoin,
     fromAmount: `${amountIn}` as BigIntStr,
     fromAcc: fromAccount,
-    receivedAt: t,
+    receivedAt,
     cacheUntil,
     execDeadline,
     toCoin: tokenOut,

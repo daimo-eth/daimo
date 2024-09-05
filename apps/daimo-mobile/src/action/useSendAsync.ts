@@ -1,12 +1,13 @@
 import {
   DaimoInviteCodeStatus,
-  DisplayOpEvent,
+  TransferClog,
   EAccount,
-  OpEvent,
-  PendingOpEvent,
+  Clog,
+  PendingOp,
   assert,
   dollarsToAmount,
   now,
+  debugJson,
 } from "@daimo/common";
 import { DaimoOpSender } from "@daimo/userop";
 import * as Haptics from "expo-haptics";
@@ -14,6 +15,7 @@ import { useCallback } from "react";
 import { Address } from "viem";
 
 import { ActHandle, SetActStatus, useActStatus } from "./actStatus";
+import { i18n } from "../i18n";
 import { getAccountManager, useAccount } from "../logic/accountManager";
 import { getWrappedDeviceKeySigner } from "../logic/key";
 import { NamedError } from "../logic/log";
@@ -22,7 +24,7 @@ import { DeviceKeySigner, Signer } from "../logic/signer";
 import { Account } from "../storage/account";
 
 /** Send a user op, returning the userOpHash. */
-type SendOpFn = (opSender: DaimoOpSender) => Promise<PendingOpEvent>;
+type SendOpFn = (opSender: DaimoOpSender) => Promise<PendingOp>;
 
 /** Progress & outcome of a userop. */
 interface UserOpHandle extends ActHandle {
@@ -42,14 +44,14 @@ type BaseUseSendArgs = {
   /** Custom handler that overrides sendAsync, used to claim
    *  ephemeral notes without requesting a user signature / face ID.
    */
-  customHandler?: (setAS: SetActStatus) => Promise<PendingOpEvent>;
+  customHandler?: (setAS: SetActStatus) => Promise<PendingOp>;
   signer?: Signer;
 };
 
 type UseSendWithPendingOpArgs = BaseUseSendArgs & {
-  pendingOp: OpEvent;
+  pendingOp: Clog;
   /** Runs on success, before the account is saved */
-  accountTransform?: (account: Account, pendingOp: OpEvent) => Account;
+  accountTransform?: (account: Account, pendingOp: Clog) => Account;
 };
 
 type UseSendWithoutPendingOpArgs = BaseUseSendArgs & {
@@ -107,7 +109,7 @@ export function useSendAsync({
     );
     assert(account != null, "No account");
 
-    const pendingOpEventData = customHandler
+    const pendingOpData = customHandler
       ? await customHandler(setAS)
       : await sendAsync(setAS, account, signer, sendFn);
 
@@ -116,14 +118,14 @@ export function useSendAsync({
 
     // Add pending op and named accounts to history
     if (pendingOp) {
-      pendingOp.opHash = pendingOpEventData.opHash;
-      pendingOp.txHash = pendingOpEventData.txHash;
+      pendingOp.opHash = pendingOpData.opHash;
+      pendingOp.txHash = pendingOpData.txHash;
       pendingOp.timestamp = now();
       pendingOp.feeAmount = Number(dollarsToAmount(feeDollars));
 
       getAccountManager().transform((a) => {
         if (accountTransform) a = accountTransform(a, pendingOp);
-        return addInviteLinkStatus(a, pendingOpEventData);
+        return addInviteLinkStatus(a, pendingOpData);
       });
 
       console.log(`[SEND] added pending op ${pendingOp.opHash}`);
@@ -139,8 +141,16 @@ export function useSendAsync({
 /** Regular transfer / payment link account transform. Adds pending
  *  transfer to history and merges any new named accounts. */
 export function transferAccountTransform(namedAccounts: EAccount[]) {
-  return (account: Account, pendingOp: OpEvent): Account => {
-    assert(["transfer", "createLink", "claimLink"].includes(pendingOp.type));
+  return (account: Account, pendingOp: Clog): Account => {
+    assert(
+      [
+        "transfer",
+        "createLink",
+        "claimLink",
+        "inboundSwap",
+        "outboundSwap",
+      ].includes(pendingOp.type)
+    );
     // Filter to new named accounts only
     const findAccount = (addr: Address) =>
       account.namedAccounts.find((a) => a.addr === addr);
@@ -149,10 +159,7 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
 
     return {
       ...account,
-      recentTransfers: [
-        ...account.recentTransfers,
-        pendingOp as DisplayOpEvent,
-      ],
+      recentTransfers: [...account.recentTransfers, pendingOp as TransferClog],
       namedAccounts: [...account.namedAccounts, ...namedAccounts],
     };
   };
@@ -161,23 +168,17 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
 // Adds invite link status to account
 // The invite link status is attached to sendUserOp since being able to send a
 // userop successfully authenticates the user to the API.
-function addInviteLinkStatus(
-  account: Account,
-  pendingOpEventData: PendingOpEvent
-): Account {
+function addInviteLinkStatus(account: Account, pendingOp: PendingOp): Account {
   console.log(
-    `[SEND] attaching authenticate invite link status: ${JSON.stringify(
-      pendingOpEventData
-    )}`
+    `[SEND] attaching authenticate invite link status: ${debugJson(pendingOp)}`
   );
-  const inviteLinkStatus: DaimoInviteCodeStatus | null =
-    pendingOpEventData.inviteCode
-      ? {
-          link: { type: "invite", code: pendingOpEventData.inviteCode },
-          isValid: false, // initialize false, filled on sync
-          createdAt: now(),
-        }
-      : null;
+  const inviteLinkStatus: DaimoInviteCodeStatus | null = pendingOp.inviteCode
+    ? {
+        link: { type: "invite", code: pendingOp.inviteCode },
+        isValid: false, // initialize false, filled on sync
+        createdAt: now(),
+      }
+    : null;
 
   return {
     ...account,
@@ -185,12 +186,14 @@ function addInviteLinkStatus(
   };
 }
 
+const i18 = i18n.sendUserOp;
+
 async function sendAsync(
   setAS: SetActStatus,
   account: Account,
   signer: Signer | undefined,
   sendFn: SendOpFn
-): Promise<PendingOpEvent> {
+): Promise<PendingOp> {
   try {
     const { address, homeChainId } = account;
 
@@ -199,18 +202,18 @@ async function sendAsync(
       throw new Error("Device removed from account");
     }
 
-    setAS("loading", "Loading account..."); // "account" is shown in the UI, internally it's the op sender.
+    setAS("loading", i18.loadingAccount());
     const opSender = await loadOpSender({
       address,
       signer,
       chainId: homeChainId,
     });
 
-    setAS("loading", "Authorizing...");
-    const pendingOpEventData = await sendFn(opSender);
-    setAS("success", "Accepted");
+    setAS("loading", i18.authorizing());
+    const pendingOp = await sendFn(opSender);
+    setAS("success", i18.accepted());
 
-    return pendingOpEventData;
+    return pendingOp;
   } catch (e: any) {
     if (
       e instanceof NamedError &&
@@ -220,9 +223,9 @@ async function sendAsync(
     ) {
       setAS("error", e.message);
     } else if (e.message === "Network request failed") {
-      setAS("error", "Request failed. Offline?");
+      setAS("error", i18.offline());
     } else {
-      setAS("error", "Error sending transaction");
+      setAS("error", i18.error());
     }
     console.error(`[SEND] error: ${e}`);
     throw e;

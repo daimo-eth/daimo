@@ -1,9 +1,5 @@
-import {
-  getAccountName,
-  getForeignCoinDisplayAmount,
-  now,
-  timeAgo,
-} from "@daimo/common";
+import { getAccountName, now, timeAgo } from "@daimo/common";
+import { getForeignCoinDisplayAmount } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import React, { useContext } from "react";
 import { ActivityIndicator, View, useWindowDimensions } from "react-native";
@@ -11,26 +7,22 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 
 import { NotificationRow } from "./NotificationRow";
 import { DispatcherContext } from "../../../action/dispatch";
+import { i18NLocale, i18n } from "../../../i18n";
 import { SwapNotification } from "../../../logic/inAppNotifications";
-import { Account } from "../../../storage/account";
 import { TokenBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextMeta } from "../../shared/text";
 
-export function SwapNotificationRow({
-  notif,
-  account,
-}: {
-  notif: SwapNotification;
-  account: Account;
-}) {
+const i18 = i18n.swapNotification;
+
+export function SwapNotificationRow({ notif }: { notif: SwapNotification }) {
   // should be very rare, but we write this defensively
   const isSwapPastDeadline = notif.swap.execDeadline < now();
 
   const dispatcher = useContext(DispatcherContext);
 
-  const ts = timeAgo(notif.timestamp, now(), true);
+  const ts = timeAgo(notif.timestamp, i18NLocale, now(), true);
 
   const coin = notif.swap.fromCoin;
   const width = useWindowDimensions().width;
@@ -44,7 +36,7 @@ export function SwapNotificationRow({
     });
   };
 
-  const accName = getAccountName(notif.swap.fromAcc);
+  const accName = getAccountName(notif.swap.fromAcc, i18NLocale);
 
   const readableAmount = getForeignCoinDisplayAmount(
     notif.swap.fromAmount,
@@ -54,7 +46,7 @@ export function SwapNotificationRow({
   const copy = (() => {
     return (
       <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-        Accept {readableAmount} {coin.name} from{" "}
+        {i18.msg(readableAmount, coin.name)}
         <TextBody color={color.midnight}>{accName}</TextBody>
       </TextBody>
     );

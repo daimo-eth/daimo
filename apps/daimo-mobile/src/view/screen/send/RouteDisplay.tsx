@@ -1,23 +1,35 @@
-import { ForeignToken, ProposedSwap, amountToDollars } from "@daimo/common";
-import { View, StyleSheet } from "react-native";
+import { ProposedSwap, amountToDollars } from "@daimo/common";
+import { DAv2Chain, ForeignToken, getChainDisplayName } from "@daimo/contract";
+import { StyleSheet, View } from "react-native";
 
+import { i18n } from "../../../i18n";
 import { TextLight } from "../../shared/text";
+
+const i18 = i18n.routeDisplay;
 
 export function RoutePellet({
   route,
   fromCoin,
+  fromAmount,
+  toChain,
   toCoin,
 }: {
-  route: ProposedSwap;
+  route: ProposedSwap | null;
   fromCoin: ForeignToken;
+  fromAmount: bigint;
+  toChain: DAv2Chain;
   toCoin: ForeignToken;
 }) {
-  const toAmount = amountToDollars(route.toAmount, toCoin.decimals);
+  const toAmount = route
+    ? amountToDollars(route.toAmount, toCoin.decimals)
+    : amountToDollars(fromAmount, fromCoin.decimals);
+
+  const chainName = getChainDisplayName(toChain);
 
   return (
     <View style={styles.route}>
       <TextLight>
-        They will receive {toAmount} {toCoin.symbol}
+        {i18.theyWillReceive(toAmount, toCoin.symbol, chainName)}
       </TextLight>
     </View>
   );

@@ -21,7 +21,6 @@ import { useEffect } from "react";
 import { Animated, Platform } from "react-native";
 import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
-import DepositScreen from "./screen/DepositScreen";
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
 import LandlineTransferScreen from "./screen/LandlineBankTransfer";
@@ -30,6 +29,8 @@ import { QRScreen } from "./screen/QRScreen";
 import { SeedPhraseScreen } from "./screen/SeedPhraseScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import { YourInvitesScreen } from "./screen/YourInvitesScreen";
+import { BitrefillWebView } from "./screen/deposit/BitrefillWebview";
+import DepositScreen from "./screen/deposit/DepositScreen";
 import { ErrorScreen } from "./screen/errorScreens";
 import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
 import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
@@ -68,11 +69,13 @@ import {
   useOnboardingDeepLinkHandler,
 } from "../common/nav";
 import { TAB_BAR_HEIGHT } from "../common/useTabBarHeight";
+import { i18n } from "../i18n";
 import { useAccountAndKeyInfo, useDaimoChain } from "../logic/accountManager";
 
 SplashScreen.preventAutoHideAsync();
 
 const { add, multiply } = Animated;
+const i18 = i18n.tabNav;
 
 // Onboarding navigator.
 const OnStack = createStackNavigator<ParamListOnboarding>();
@@ -289,21 +292,29 @@ function getTabOptions(
   };
   switch (route.name) {
     case "DepositTab":
-      return { title: "Deposit", tabBarIcon: getIcon("plus-circle"), ...opts };
+      return {
+        title: i18.deposit(),
+        tabBarIcon: getIcon("plus-circle"),
+        ...opts,
+      };
     case "InviteTab":
-      return { title: "Invite", tabBarIcon: getIcon("mail"), ...opts };
+      return { title: i18.invite(), tabBarIcon: getIcon("mail"), ...opts };
     case "HomeTab":
       return {
-        title: "Home",
+        title: i18.home(),
         tabBarIcon: ({ color }) => {
           return <IconHome color={color} />;
         },
         ...opts,
       };
     case "SendTab":
-      return { title: "Send", tabBarIcon: getIcon("paper-airplane"), ...opts };
+      return {
+        title: i18.send(),
+        tabBarIcon: getIcon("paper-airplane"),
+        ...opts,
+      };
     case "SettingsTab":
-      return { title: "Settings", tabBarIcon: getIcon("gear"), ...opts };
+      return { title: i18.settings(), tabBarIcon: getIcon("gear"), ...opts };
     default:
       assertUnreachable(route.name);
   }
@@ -333,6 +344,10 @@ function DepositTab() {
       <DepositStack.Screen
         name="LandlineTransfer"
         component={LandlineTransferScreen}
+      />
+      <DepositStack.Screen
+        name="BitrefillWebView"
+        component={BitrefillWebView}
       />
     </DepositStack.Navigator>
   );

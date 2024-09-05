@@ -3,9 +3,14 @@ import Image from "next/image";
 import React from "react";
 
 import { PrimaryButton } from "../../../components/buttons";
-import { downloadMetadata } from "../../../utils/platform";
+import { useI18N } from "../../../i18n/context";
+import { getDownloadMetadata } from "../../../utils/platform";
 
 export default function DownloadPage() {
+  const i18n = useI18N();
+  const i18 = i18n.download;
+  const downloadMetadata = getDownloadMetadata(i18n);
+
   return (
     <main className="max-w-2xl mx-auto px-4">
       <center>
@@ -13,7 +18,7 @@ export default function DownloadPage() {
         <Image src="/logo-web.png" alt="Daimo" width="96" height="96" />
         <div className="h-12" />
 
-        <div className="text-2xl font-semibold">Download Daimo</div>
+        <div className="text-2xl font-semibold">{i18.downloadDaimo()}</div>
         <div className="h-8" />
 
         <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-8">
@@ -32,7 +37,7 @@ export default function DownloadPage() {
                 window.open(downloadMetadata.ios.url, "_blank");
               }}
             >
-              IPHONE OR IPAD
+              {i18.iphoneOrIpad()}
             </PrimaryButton>
             <div className="h-4" />
             <PrimaryButton
@@ -40,20 +45,20 @@ export default function DownloadPage() {
                 window.open(downloadMetadata.android.url, "_blank");
               }}
             >
-              ANDROID
+              {i18.android()}
             </PrimaryButton>
             <div className="h-4" />
             <p className="text-xl font-semibold text-grayMid">
-              Or visit{" "}
+              {i18.orVisit()}{" "}
               <a href="https://daimo.com/download" className="text-royalblue">
                 daimo.com/download
               </a>{" "}
-              on your phone
+              {i18.onYourPhone()}
             </p>
           </div>
           <div className="flex flex-row w-1/6 justify-center">
             <div className="h-[350px] flex flex-row items-center justify-center">
-              <p className="text-xl font-semibold text-grayMid">OR</p>
+              <p className="text-xl font-semibold text-grayMid">{i18.OR()}</p>
             </div>
           </div>
           <div className="flex flex-col w-5/12">
@@ -71,7 +76,7 @@ export default function DownloadPage() {
                 window.open(downloadMetadata.mac.url, "_blank");
               }}
             >
-              MAC
+              {i18.mac()}
             </PrimaryButton>
           </div>
         </div>

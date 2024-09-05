@@ -7,6 +7,7 @@ import Link from "next/link";
 import { DownloadLink, DownloadLinkButtonMobileNav } from "./DownloadLink";
 import { Logo } from "./icons/Logo";
 import { LinkSemiBold } from "./typography";
+import { useI18N } from "../i18n/context";
 
 export function Header() {
   return (
@@ -21,19 +22,22 @@ export function Header() {
 }
 
 function HeaderNav() {
+  const i18n = useI18N();
+
   return (
     <nav className="gap-8 md:gap-16 items-center hidden lg:flex">
-      <LinkSemiBold href="/blog">Blog</LinkSemiBold>
+      <LinkSemiBold href="/blog">{i18n.misc.blog()}</LinkSemiBold>
       <LinkSemiBold href="https://github.com/daimo-eth/daimo" target="_blank">
         Github
       </LinkSemiBold>
-      <LinkSemiBold href="#faq">FAQ</LinkSemiBold>
+      <LinkSemiBold href="#faq">{i18n.misc.faq()}</LinkSemiBold>
       <DownloadLink />
     </nav>
   );
 }
 
 function MobileNav() {
+  const i18n = useI18N();
   return (
     <nav className="flex gap-8 md:gap-16 items-center lg:hidden ">
       <Popover className="lg:hidden z-50">
@@ -79,12 +83,14 @@ function MobileNav() {
                     </div>
                     <div className="space-y-4">
                       <MobileNavLink href="https://daimo.com/blog">
-                        Blog
+                        {i18n.misc.blog()}
                       </MobileNavLink>
                       <MobileNavLink href="https://github.com/daimo-eth/daimo">
                         Github
                       </MobileNavLink>
-                      <MobileNavLink href="/#faqs">FAQ</MobileNavLink>
+                      <MobileNavLink href="/#faq">
+                        {i18n.misc.faq()}
+                      </MobileNavLink>
                     </div>
                     <div className="mt-8 flex flex-col gap-4">
                       <DownloadLinkButtonMobileNav />

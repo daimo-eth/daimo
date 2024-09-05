@@ -20,11 +20,14 @@ import {
   useSendWithDeviceKeyAsync,
 } from "../../../action/useSendAsync";
 import { useExitToHome } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { Account } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
 import { TextError } from "../../shared/text";
+
+const i18 = i18n.fulfillRequest;
 
 export function FulfillRequestButton({
   account,
@@ -77,13 +80,13 @@ export function FulfillRequestButton({
 
   const sendDisabledReason = (() => {
     if (requestStatus.status === DaimoRequestState.Fulfilled)
-      return "Request already fulfilled";
+      return i18.disabledReason.fulfilled();
     else if (requestStatus.status === DaimoRequestState.Cancelled)
-      return "Request cancelled";
+      return i18.disabledReason.cancelled();
     else if (requestStatus.recipient.addr === account.address)
-      return "Can't send to yourself";
+      return i18.disabledReason.self();
     else if (account.lastBalance < dollarsToAmount(cost.totalDollars))
-      return "Insufficient funds";
+      return i18.disabledReason.insufficientFunds();
     else return undefined;
   })();
 
@@ -93,7 +96,7 @@ export function FulfillRequestButton({
       case "error":
         return (
           <LongPressBigButton
-            title="HOLD TO FULFILL"
+            title={i18.holdButton()}
             onPress={sendDisabledReason != null ? undefined : exec}
             type="primary"
             disabled={sendDisabledReason != null}
@@ -113,10 +116,12 @@ export function FulfillRequestButton({
       case "idle":
         if (sendDisabledReason != null)
           return <TextError>{sendDisabledReason}</TextError>;
-        if (dollars === 0) return "Payments are public";
-        return `Total incl. fees ${getAmountText({
-          dollars: cost.totalDollars,
-        })}`;
+        if (dollars === 0) return i18.statusMsg.paymentsPublic();
+        return i18.statusMsg.totalDollars(
+          getAmountText({
+            dollars: cost.totalDollars,
+          })
+        );
       case "loading":
         return message;
       case "error":

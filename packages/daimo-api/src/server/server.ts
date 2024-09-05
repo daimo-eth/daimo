@@ -22,8 +22,10 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
+import { SwapClogMatcher } from "../contract/SwapClogMatcher";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
+import { IndexWatcher } from "../db/indexWatcher";
 import { chainConfig, getEnvApi } from "../env";
 import { BinanceClient } from "../network/binanceClient";
 import { getBundlerClientFromEnv } from "../network/bundlerClient";
@@ -31,7 +33,6 @@ import { getViemClientFromEnv } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
-import { Watcher } from "../shovel/watcher";
 
 // Workaround viem bug
 (Error.prototype as any).walk = function () {
@@ -69,17 +70,20 @@ async function main() {
   const tokenReg = new TokenRegistry();
   await tokenReg.load();
 
-  const opIndexer = new OpIndexer();
+  const swapClogMatcher = new SwapClogMatcher(tokenReg);
+  const opIndexer = new OpIndexer(swapClogMatcher);
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
+
   const homeCoinIndexer = new HomeCoinIndexer(
     vc,
     opIndexer,
     noteIndexer,
     requestIndexer,
     foreignCoinIndexer,
-    paymentMemoTracker
+    paymentMemoTracker,
+    swapClogMatcher
   );
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
@@ -108,23 +112,21 @@ async function main() {
   );
 
   // Set up indexers
-  const shovelDbUrl = getEnvApi().SHOVEL_DATABASE_URL;
-  const shovelWatcher = new Watcher(vc.publicClient, shovelDbUrl);
-  shovelWatcher.add(
+  const indexDBUrl = getEnvApi().INDEX_DATABASE_URL;
+  const watcher = new IndexWatcher(vc.publicClient, indexDBUrl);
+  watcher.add(
     // Dependency order. Within each list, indexers are indexed in parallel.
     [nameReg, keyReg, opIndexer],
     [noteIndexer, requestIndexer, foreignCoinIndexer],
     [homeCoinIndexer]
   );
 
-  // ethIndexer can be spotty depending on RPC errors.
-  // shovelWatcher.slowAdd(ethIndexer);
-
   // Initialize in background
   (async () => {
     console.log(`[API] initializing indexers...`);
-    await shovelWatcher.init();
-    shovelWatcher.watch();
+    await watcher.migrateDB();
+    await watcher.init();
+    watcher.watch();
 
     await Promise.all([
       paymaster.init(),
@@ -145,7 +147,7 @@ async function main() {
 
   console.log(`[API] serving...`);
   const router = createRouter(
-    shovelWatcher,
+    watcher,
     vc,
     db,
     bundlerClient,

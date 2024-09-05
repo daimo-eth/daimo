@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 
-import { detectPlatform, downloadMetadata } from "../utils/platform";
+import { useI18N } from "../i18n/context";
+import { detectPlatform, getDownloadMetadata } from "../utils/platform";
 
 export function PrimaryOpenInAppButton({
   inviteDeepLink,
@@ -11,11 +12,14 @@ export function PrimaryOpenInAppButton({
   inviteDeepLink?: string;
   disabled?: boolean;
 }) {
+  const i18n = useI18N();
+  const i18 = i18n.callToAction;
+
   const [justCopied, setJustCopied] = useState(false);
 
   const onClick = async () => {
     const platform = detectPlatform(navigator.userAgent);
-    const { url } = downloadMetadata[platform];
+    const { url } = getDownloadMetadata(i18n)[platform];
 
     if (inviteDeepLink) {
       await navigator.clipboard.writeText(inviteDeepLink);
@@ -35,8 +39,10 @@ export function PrimaryOpenInAppButton({
       buttonType={justCopied ? "success" : undefined}
     >
       {justCopied
-        ? "COPIED, REDIRECTING..."
-        : (inviteDeepLink ? "COPY INVITE & " : "") + "INSTALL DAIMO"}
+        ? i18.justCopiedLink()
+        : inviteDeepLink
+        ? i18.copyAndInstall()
+        : i18.install()}
     </PrimaryButton>
   );
 }

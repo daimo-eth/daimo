@@ -1,10 +1,17 @@
-import { KeyData, assert, contractFriendlyKeyToDER } from "@daimo/common";
-import { Pool } from "pg";
+import {
+  KeyData,
+  assert,
+  assertNotNull,
+  contractFriendlyKeyToDER,
+  debugJson,
+  retryBackoff,
+} from "@daimo/common";
+import { Kysely } from "kysely";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export interface KeyChange {
   change: "added" | "removed";
@@ -13,7 +20,6 @@ export interface KeyChange {
   transactionHash: Hex;
   logIndex: number;
   address: Address;
-  account: Address;
   keySlot: number;
   key: [Hex, Hex];
 }
@@ -35,27 +41,48 @@ export class KeyRegistry extends Indexer {
     this.listeners.push(listener);
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
     const startTime = Date.now();
-    const changes: KeyChange[] = [];
-    changes.push(...(await this.loadKeyChange(pg, from, to, "added")));
-    changes.push(...(await this.loadKeyChange(pg, from, to, "removed")));
+
+    const rows = await retryBackoff(`keyRegistry-${from}-${to}`, () =>
+      kdb
+        .selectFrom("index.daimo_acct_update")
+        .selectAll()
+        .where("chain_id", "=", "" + chainConfig.chainL2.id)
+        .where((eb) => eb.between("block_num", "" + from, "" + to))
+        .orderBy("block_num")
+        .orderBy("log_idx")
+        .execute()
+    );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    changes!.sort((a, b) => {
-      const bdiff = a.blockNumber - b.blockNumber;
-      if (bdiff !== 0n) return Number(bdiff);
-      const tdiff = a.transactionIndex - b.transactionIndex;
-      if (tdiff !== 0) return tdiff;
-      return a.logIndex - b.logIndex;
-    });
+    const changes: KeyChange[] = rows
+      .filter((row) => row.key_slot != null)
+      .map((row) => ({
+        change: (function () {
+          if (row.log_name === "SigningKeyAdded") return "added";
+          else if (row.log_name === "SigningKeyRemoved") return "removed";
+          else throw new Error(`Unexpected key log: ${debugJson(row)}`);
+        })(),
+        address: getAddress(bytesToHex(row.log_addr)),
+        blockNumber: BigInt(row.block_num),
+        key: (function () {
+          const k = assertNotNull(row.key);
+          if (k.length !== 64) throw new Error(`Bad key: ${debugJson(row)}`);
+          return [bytesToHex(k.subarray(0, 32)), bytesToHex(k.subarray(32))];
+        })(),
+        keySlot: assertNotNull(row.key_slot),
+        logIndex: Number(row.log_idx),
+        transactionHash: bytesToHex(row.tx_hash),
+        transactionIndex: Number(row.tx_idx),
+      }));
+
     for (const change of changes) {
-      const addr = getAddress(change.address);
-      if (this.addrToLogs.get(addr) === undefined) {
-        this.addrToLogs.set(addr, []);
-      }
-      this.addrToLogs.get(addr)!.push(change);
+      const addr = change.address;
+      const addrLogs = this.addrToLogs.get(addr) || [];
+      addrLogs.push(change);
+      this.addrToLogs.set(addr, addrLogs);
 
       if (!change.key) throw new Error("[KEY-REG] Invalid event, no key");
       const slot = change.keySlot;
@@ -89,64 +116,19 @@ export class KeyRegistry extends Indexer {
           this.keyToAddr.delete(derKey);
           break;
         }
+        default: {
+          throw new Error(`Invalid KeyChange: ${debugJson(change)}`);
+        }
       }
     }
     if (changes.length === 0) return;
+
+    const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[KEY-REG] loaded ${changes.length} key changes in ${
-        Date.now() - startTime
-      }ms`
+      `[KEY-REG] loaded ${changes.length} key changes in ${elapsedMs}ms`
     );
 
     this.listeners.forEach((l) => l(changes));
-  }
-
-  private async loadKeyChange(
-    pg: Pool,
-    from: number,
-    to: number,
-    change: "added" | "removed"
-  ): Promise<KeyChange[]> {
-    let table: string = "";
-    if (change === "added") {
-      table = "key_added";
-    } else if (change === "removed") {
-      table = "key_removed";
-    } else {
-      throw new Error(`Invalid key change ${change}`);
-    }
-    const result = await retryBackoff(`keyRegistry-logs-query-${table}`, () =>
-      pg.query(
-        `
-        select
-          block_num,
-          tx_idx,
-          tx_hash,
-          log_idx,
-          log_addr,
-          account,
-          key_slot,
-          array_agg(key order by abi_idx asc) as key
-        from ${table}
-        where block_num >= $1 and block_num <= $2
-        and chain_id = $3
-        group by block_num, tx_idx, tx_hash, log_idx, log_addr, account, key_slot
-      `,
-        [from, to, chainConfig.chainL2.id]
-      )
-    );
-
-    return result.rows.map((row: any) => ({
-      change,
-      blockNumber: BigInt(row.block_num),
-      transactionIndex: row.tx_idx,
-      transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
-      logIndex: row.log_idx,
-      address: getAddress(bytesToHex(row.log_addr, { size: 20 })),
-      account: getAddress(bytesToHex(row.account, { size: 20 })),
-      keySlot: row.key_slot,
-      key: row.key.map((k: Buffer) => bytesToHex(k)) as [Hex, Hex],
-    }));
   }
 
   /** Find address by DER key */

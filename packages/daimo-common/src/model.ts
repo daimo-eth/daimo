@@ -1,4 +1,4 @@
-import { ForeignToken } from "@daimo/contract/src/foreignToken";
+import { ForeignToken } from "@daimo/contract";
 import { Address, Hex } from "viem";
 import { z } from "zod";
 
@@ -10,6 +10,7 @@ export const zAddress = z
   .regex(/^0x[0-9a-f]{40}$/i)
   .refine((s): s is Address => true);
 
+// Don't edit these for backcompat
 export enum AddrLabel {
   Faucet = "team daimo",
   PaymentLink = "payment link",
@@ -20,6 +21,7 @@ export enum AddrLabel {
   LiFi = "li.fi bridge",
   UniswapETHPool = "swapped ETH",
   Binance = "binance",
+  FastCCTP = "cross-chain",
 }
 
 /** Subset of EAccount for Daimo accounts, which always have a name. */
@@ -108,11 +110,11 @@ export const zPhoneNumber = z.string().regex(phoneNumberRegex);
 
 export type PhoneNumber = z.infer<typeof zPhoneNumber>;
 
-export interface TagRedirectEvent {
+export type TagRedirectEvent = {
   time: number;
   tag: string;
   link: string;
-}
+};
 
 export const zCreateInviteLinkArgs = z.object({
   code: z.string(),

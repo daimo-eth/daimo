@@ -1,18 +1,23 @@
 import {
+  DaimoLinkRequest,
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
-  ForeignToken,
+  ProposedSwap,
   assert,
   assertNotNull,
-  baseUSDC,
-  daimoChainToId,
   dollarsToAmount,
   getAccountName,
-  isTestnetChain,
   now,
 } from "@daimo/common";
-import { DaimoChain, daimoChainFromId } from "@daimo/contract";
+import {
+  DAv2Chain,
+  DaimoChain,
+  ForeignToken,
+  baseUSDC,
+  daimoChainFromId,
+  getDAv2Chain,
+} from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
 import {
@@ -34,6 +39,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { getAccountManager } from "../../../logic/accountManager";
 import {
   EAccountContact,
@@ -41,6 +47,7 @@ import {
   getContactName,
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
+import { getFullMemo } from "../../../logic/memo";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getSwapRoute } from "../../../logic/swapRoute";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
@@ -53,11 +60,12 @@ import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { ss } from "../../shared/style";
-import { TextCenter, TextLight } from "../../shared/text";
+import { color, ss } from "../../shared/style";
+import { TextCenter, TextLight, TextMeta } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
+const i18 = i18n.sendTransferScreen;
 
 export default function SendScreen({ route }: Props) {
   console.log(`[SEND] rendering SendScreen ${JSON.stringify(route.params)}}`);
@@ -70,7 +78,8 @@ function SendScreenInner({
   recipient,
   money,
   memo,
-  coin,
+  toCoin,
+  toChain,
   account,
 }: SendNavProp & { account: Account }) {
   assertNotNull(link || recipient, "SendScreenInner: need link or recipient");
@@ -93,7 +102,9 @@ function SendScreenInner({
   }, [nav, money, recipient]);
 
   const defaultHomeCoin = baseUSDC; // TODO: add homecoin in Account
-  coin = coin ?? defaultHomeCoin;
+  const defaultHomeChain = getDAv2Chain(account.homeChainId);
+  toCoin = toCoin ?? defaultHomeCoin;
+  toChain = toChain ?? getDAv2Chain(account.homeChainId);
 
   const sendDisplay = (() => {
     if (link) {
@@ -114,21 +125,35 @@ function SendScreenInner({
               recipient={recipient}
               memo={memo || statusV2.memo}
               money={usdEntry(requestStatus.link.dollars)}
-              coin={coin}
+              toCoin={toCoin}
+              toChain={toChain}
               requestStatus={requestStatus as DaimoRequestV2Status}
             />
           );
         } else {
-          // Backcompat with old request links
-          return (
-            <SendConfirm
-              account={account}
-              recipient={recipient}
-              memo={memo}
-              money={usdEntry(requestStatus.link.dollars)}
-              coin={coin}
-            />
-          );
+          if (requestStatus.link.dollars == null) {
+            return (
+              <SendChooseAmount
+                recipient={recipient}
+                onCancel={goBack}
+                daimoChain={daimoChain}
+                defaultHomeCoin={(link as DaimoLinkRequest).toCoin}
+                defaultHomeChain={(link as DaimoLinkRequest).toChain}
+                account={account}
+              />
+            );
+          } else {
+            return (
+              <SendConfirm
+                account={account}
+                recipient={recipient}
+                memo={memo}
+                money={usdEntry(requestStatus.link.dollars)}
+                toCoin={(link as DaimoLinkRequest).toCoin}
+                toChain={(link as DaimoLinkRequest).toChain}
+              />
+            );
+          }
         }
       } else return <CenterSpinner />;
     } else if (recipient) {
@@ -139,17 +164,27 @@ function SendScreenInner({
             onCancel={goBack}
             daimoChain={daimoChain}
             defaultHomeCoin={defaultHomeCoin}
+            defaultHomeChain={defaultHomeChain}
+            account={account}
           />
         );
       else
-        return <SendConfirm {...{ account, recipient, memo, money, coin }} />;
+        return (
+          <SendConfirm
+            {...{ account, recipient, memo, money, toCoin, toChain }}
+          />
+        );
     } else throw new Error("unreachable");
   })();
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={ss.container.screen}>
-        <ScreenHeader title="Send to" onBack={goBack} onExit={goHome} />
+        <ScreenHeader
+          title={i18.screenHeader()}
+          onBack={goBack}
+          onExit={goHome}
+        />
         <Spacer h={8} />
         {sendDisplay}
       </View>
@@ -162,11 +197,15 @@ function SendChooseAmount({
   daimoChain,
   onCancel,
   defaultHomeCoin,
+  defaultHomeChain,
+  account,
 }: {
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
   defaultHomeCoin: ForeignToken;
+  defaultHomeChain: DAv2Chain;
+  account: Account;
 }) {
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -175,22 +214,23 @@ function SendChooseAmount({
   const [memo, setMemo] = useState<string | undefined>(undefined);
 
   // Select what coin (defaults to native home coin, e.g. daimo USDC)
-  const [coin, setCoin] = useState<ForeignToken>(defaultHomeCoin);
+  const [toCoin, setToCoin] = useState<ForeignToken>(defaultHomeCoin);
+
+  // Select what chain (defaults to base)
+  const [toChain, setToChain] = useState<DAv2Chain>(defaultHomeChain);
 
   // Once done, update nav
   const nav = useNav();
   const setSendAmount = () =>
     nav.navigate("SendTab", {
       screen: "SendTransfer",
-      params: { money, memo, recipient, coin },
+      params: { money, memo, recipient, toCoin, toChain },
     });
 
   // Warn if paying new account
   let infoBubble = <Spacer h={16} />;
   if (recipient.lastSendTime == null) {
-    infoBubble = (
-      <InfoBox title={`First time paying ${getContactName(recipient)}`} />
-    );
+    infoBubble = <InfoBox title={i18.firstTime(getContactName(recipient))} />;
   }
   const hasLinkedAccounts =
     recipient?.type === "eAcc" && recipient.linkedAccounts?.length;
@@ -200,8 +240,8 @@ function SendChooseAmount({
   const result = rpcHook.validateMemo.useQuery({ memo });
   const memoStatus = result.data;
 
-  // Token swapping is not supported on testnet
-  const isTestnet = isTestnetChain(daimoChainToId(daimoChain));
+  // If sending to another DAv2, will be same chain, same coin
+  const sendCoinIsFixed = recipient.name != null;
 
   return (
     <View>
@@ -212,28 +252,48 @@ function SendChooseAmount({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={setMoney}
-        coin={coin}
+        toCoin={toCoin}
         showAmountAvailable
         autoFocus
       />
       <Spacer h={16} />
       <View style={styles.detailsRow}>
-        <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
-        <SendCoinButton
-          coin={coin}
-          setCoin={setCoin}
-          isFixed={recipient.name != null || isTestnet}
-        />
+        <View style={styles.detail}>
+          {!sendCoinIsFixed && (
+            <TextMeta color={color.gray3}>{i18.memo()}</TextMeta>
+          )}
+          <SendMemoButton
+            memo={memo}
+            memoStatus={memoStatus}
+            setMemo={setMemo}
+          />
+        </View>
+
+        {!sendCoinIsFixed && (
+          <View style={styles.detail}>
+            <TextMeta color={color.gray3}>{i18.sendAs()}</TextMeta>
+            <SendCoinButton
+              toCoin={toCoin}
+              toChain={toChain}
+              setCoin={setToCoin}
+              setChain={setToChain}
+            />
+          </View>
+        )}
       </View>
       <Spacer h={16} />
       <View style={styles.buttonRow}>
         <View style={styles.buttonGrow}>
-          <ButtonBig type="subtle" title="CANCEL" onPress={onCancel} />
+          <ButtonBig
+            type="subtle"
+            title={i18n.shared.buttonAction.cancel()}
+            onPress={onCancel}
+          />
         </View>
         <View style={styles.buttonGrow}>
           <ButtonBig
             type="primary"
-            title="CONFIRM"
+            title={i18n.shared.buttonAction.confirm()}
             onPress={setSendAmount}
             disabled={
               money.dollars === 0 || (memoStatus && memoStatus !== "ok")
@@ -250,7 +310,9 @@ function SendChooseAmount({
 function PublicWarning() {
   return (
     <TextCenter>
-      <TextLight>Payments are public</TextLight>
+      <TextLight>
+        {i18n.sendTransferButton.statusMsg.paymentsPublic()}
+      </TextLight>
     </TextCenter>
   );
 }
@@ -260,14 +322,16 @@ function SendConfirm({
   recipient,
   money,
   memo,
-  coin,
+  toCoin,
+  toChain,
   requestStatus,
 }: {
   account: Account;
   recipient: EAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
-  coin: ForeignToken;
+  toCoin: ForeignToken;
+  toChain: DAv2Chain;
   requestStatus?: DaimoRequestV2Status;
 }) {
   const isRequest = !!requestStatus;
@@ -292,34 +356,30 @@ function SendConfirm({
   const numTokens = dollarsToAmount(money.dollars, homeCoin.decimals);
 
   // If account's home coin is not the same as the desired send coin, retrieve swap route.
-  const swapRoute = getSwapRoute({
-    fromToken: homeCoin.token,
-    toToken: coin.token,
-    amountIn: numTokens,
-    fromAccount: account,
-    toAddress: recipient.addr,
-    daimoChainId: account!.homeChainId,
-  });
-  const route = homeCoin !== coin ? swapRoute : null;
+  let route = null as ProposedSwap | null;
+  if (homeCoin.token !== toCoin.token && homeCoin.chainId === toChain.chainId) {
+    route = getSwapRoute({
+      fromToken: homeCoin.token,
+      toToken: toCoin.token,
+      amountIn: numTokens,
+      fromAccount: account,
+      toAddress: recipient.addr,
+      daimoChainId: account!.homeChainId,
+    });
+  }
 
   let button: ReactNode;
   if (isRequest) {
     button = <FulfillRequestButton {...{ account, requestStatus }} />;
   } else {
-    const memoParts = [] as string[];
-    if (money.currency.currency !== "USD") {
-      memoParts.push(`${money.currency.symbol}${money.localUnits}`);
-    }
-    if (memo != null) {
-      memoParts.push(memo);
-    }
     button = (
       <SendTransferButton
         account={account}
-        memo={memoParts.join(" · ")}
+        memo={getFullMemo(memo, money)}
         recipient={recipient}
         dollars={money.dollars}
-        toCoin={coin}
+        toCoin={toCoin}
+        toChain={toChain}
         route={route}
       />
     );
@@ -369,7 +429,7 @@ function SendConfirm({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={useCallback(() => {}, [])}
-        coin={coin}
+        toCoin={toCoin}
         disabled
         showAmountAvailable={false}
         autoFocus={false}
@@ -382,9 +442,17 @@ function SendConfirm({
         ) : (
           <Spacer h={40} />
         )}
-        <CoinPellet coin={coin} onClick={navToInput} />
+        <CoinPellet toCoin={toCoin} toChain={toChain} onClick={navToInput} />
       </View>
-      {route && <RoutePellet route={route} fromCoin={homeCoin} toCoin={coin} />}
+      {route && (
+        <RoutePellet
+          route={route}
+          fromCoin={homeCoin}
+          fromAmount={numTokens}
+          toCoin={toCoin}
+          toChain={toChain}
+        />
+      )}
       <Spacer h={16} />
       {button}
       {isRequest && (
@@ -394,7 +462,7 @@ function SendConfirm({
             <ActivityIndicator size="large" />
           ) : (
             <TextButton
-              title="DECLINE"
+              title={i18n.shared.buttonAction.decline()}
               onPress={async () => {
                 setIsDecliningRequest(true);
                 await onDecline();
@@ -421,5 +489,9 @@ const styles = StyleSheet.create({
     gap: 18,
     alignItems: "center",
     justifyContent: "center",
+  },
+  detail: {
+    flexDirection: "column",
+    gap: 8,
   },
 });

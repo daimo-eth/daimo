@@ -1,11 +1,11 @@
+import { assert, getSupportedSendPairs } from "@daimo/common";
 import {
   ForeignToken,
-  assert,
   baseUSDC,
   baseUSDbC,
   getChainName,
   getNativeETHForChain,
-} from "@daimo/common";
+} from "@daimo/contract";
 import { Address, Hex, getAddress, isAddress } from "viem";
 
 import { chainConfig } from "../env";
@@ -75,8 +75,8 @@ export class TokenRegistry {
           foreignTokens.set(addr, {
             token: addr,
             decimals: token.decimals,
-            name: token.name,
-            symbol: token.symbol,
+            name: token.name.trim().replaceAll(/  */g, " "),
+            symbol: token.symbol.trim(),
             logoURI: largeLogo,
             chainId: token.chainId,
           });
@@ -90,15 +90,23 @@ export class TokenRegistry {
   }
 
   // Get a token from the foreign token list.
+  // If includeHomeCoin is true, include the home coin in the list.
   public getToken(addr: Address, chainId?: number): ForeignToken | undefined {
     const tokenAddress = getAddress(addr);
+    const cid = chainId ?? this.defaultChainId;
 
-    const token = this.foreignTokensByChain
-      .get(chainId ?? this.defaultChainId)
-      ?.get(tokenAddress);
-    console.log(
-      `[TOKEN-REG] retrieved token ${token?.symbol} for addr ${addr}`
-    );
+    let token = this.foreignTokensByChain.get(cid)?.get(tokenAddress);
+
+    // If not a foreign token, check if it's a home token.
+    if (token == null) {
+      const sendCoins = getSupportedSendPairs(cid).map((s) => s.coin);
+      token = sendCoins.find((s) => s.chainId === cid && s.token === addr);
+    }
+
+    if (token == null) {
+      console.log(`[TOKEN-REG] could not retrieve token for addr ${addr}`);
+    }
+
     return token;
   }
 

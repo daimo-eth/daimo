@@ -1,9 +1,10 @@
 import {
   DaimoAccountCall,
   DaimoLinkStatus,
-  TransferOpEvent,
+  TransferSwapClog,
   formatDaimoLink,
   getInviteStatus,
+  retryBackoff,
 } from "@daimo/common";
 import { erc20ABI } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
@@ -11,14 +12,13 @@ import { Address, Hex, encodeFunctionData } from "viem";
 import { AccountFactory } from "../contract/accountFactory";
 import { NameRegistry } from "../contract/nameRegistry";
 import { Paymaster } from "../contract/paymaster";
+import { IndexWatcher } from "../db/indexWatcher";
 import { chainConfig } from "../env";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { AntiSpam } from "../server/antiSpam";
 import { Telemetry } from "../server/telemetry";
 import { TrpcRequestContext } from "../server/trpc";
-import { Watcher } from "../shovel/watcher";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export async function deployWallet(
   ctx: TrpcRequestContext,
@@ -26,14 +26,14 @@ export async function deployWallet(
   pubKeyHex: Hex,
   inviteLinkStatus: DaimoLinkStatus,
   deviceAttestationString: Hex,
-  watcher: Watcher,
+  watcher: IndexWatcher,
   nameReg: NameRegistry,
   accountFactory: AccountFactory,
   inviteCodeTracker: InviteCodeTracker,
   telemetry: Telemetry,
   paymaster: Paymaster,
   inviteGraph: InviteGraph
-): Promise<{ address: Address; faucetTransfer?: TransferOpEvent }> {
+): Promise<{ address: Address; faucetTransfer?: TransferSwapClog }> {
   // For now, invite is required
   const inviteStatus = getInviteStatus(inviteLinkStatus);
 
@@ -97,7 +97,7 @@ export async function deployWallet(
 
   // Send starter USDC only for invite links, and check for spam.
   let sendFaucet = false;
-  let faucetTransfer: TransferOpEvent | undefined;
+  let faucetTransfer: TransferSwapClog | undefined;
   if (inviteLinkStatus.link.type === "invite") {
     const { requestInfo } = ctx;
     const isTestnet = chainConfig.chainL2.testnet;

@@ -7,6 +7,7 @@ import { NotificationRow } from "./NotificationRow";
 import { RequestNotificationRow } from "./RequestNotificationRow";
 import { SwapNotificationRow } from "./SwapNotificationRow";
 import { useNav } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { useInAppNotifications } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { ScreenHeader } from "../../shared/ScreenHeader";
@@ -14,6 +15,8 @@ import Spacer from "../../shared/Spacer";
 import { color, ss } from "../../shared/style";
 import { TextCenter, TextH3 } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+
+const i18 = i18n.notifications;
 
 // In-app notifications screen.
 export function NotificationsScreen() {
@@ -37,12 +40,12 @@ function NotificationsScreenInner({ account }: { account: Account }) {
   return (
     <View style={ss.container.screenWithoutPadding}>
       <View style={ss.container.padH16}>
-        <ScreenHeader title="Notifications" onBack={nav.goBack} />
+        <ScreenHeader title={i18.screenHeader()} onBack={nav.goBack} />
         {notifications.length === 0 && (
           <>
             <Spacer h={64} />
             <TextCenter>
-              <TextH3 color={color.gray3}>No notifications</TextH3>
+              <TextH3 color={color.gray3}>{i18.noNotifications()}</TextH3>
             </TextCenter>
           </>
         )}
@@ -65,7 +68,6 @@ function NotificationsScreenInner({ account }: { account: Account }) {
                 <SwapNotificationRow
                   key={swapNotifKey(notif.swap)}
                   notif={notif}
-                  account={account}
                 />
               );
           }

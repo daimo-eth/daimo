@@ -13,6 +13,7 @@ import { ButtonCircle } from "./ButtonCircle";
 import { Icon } from "./Icon";
 import { color } from "./style";
 import { useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { useInAppNotifications } from "../../logic/inAppNotifications";
 
@@ -111,7 +112,7 @@ export function SearchHeader({
       </Animated.View>
       <AnimatedSearchInput
         icon="search"
-        placeholder="Search for user..."
+        placeholder={i18n.searchHeader.searchUser()}
         value={prefix}
         onChange={setPrefix}
         onFocus={() => setPrefix(prefix || "")}

@@ -1,17 +1,21 @@
 import {
   DaimoAccountCall,
-  PendingOpEvent,
+  PendingOp,
   ProposedSwap,
   UserOpHex,
-  assertNotNull,
+  assert,
   derKeytoContractFriendlyKey,
-  getNativeWETHByChain,
-  isNativeETH,
+  getCctpMessengerAddr,
   now,
   zUserOpHex,
 } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
-import { erc20ABI } from "@daimo/contract";
+import {
+  DAv2Chain,
+  /*daimoFastCctpAddress,*/ erc20ABI,
+  getBridgeCoin,
+  isNativeETH,
+} from "@daimo/contract";
 import { Constants, Utils } from "userop";
 import {
   Address,
@@ -25,6 +29,7 @@ import {
 
 import { OpSenderCallback, SigningCallback } from "./callback";
 import { DaimoOpBuilder, DaimoOpMetadata } from "./daimoOpBuilder";
+import { generateRandom256BitInteger } from "./nonce";
 
 interface DaimoOpConfig {
   /** Chain ID */
@@ -81,11 +86,11 @@ export class DaimoOpSender {
     return getAddress(this.opBuilder.getSender());
   }
 
-  /** Submits a user op to bundler. Returns PendingOpEvent. */
+  /** Submits a user op to bundler. Returns PendingOp. */
   public async sendUserOp(
     opBuilder: DaimoOpBuilder,
     memo?: string
-  ): Promise<PendingOpEvent> {
+  ): Promise<PendingOp> {
     const nowS = now();
     const validUntil = nowS + this.opConfig.deadlineSecs;
     const builtOp = await opBuilder
@@ -342,22 +347,28 @@ export class DaimoOpSender {
 
     // Approve, then swap
     const { chainId } = this.opConfig;
-    const isETH = isNativeETH(swap.fromCoin, chainId);
-    const coinToApprove = isETH
-      ? assertNotNull(getNativeWETHByChain(chainId))
-      : swap.fromCoin;
+    const swapExecValue = hexToBigInt(swap.execValue);
     const executions: DaimoAccountCall[] = [
-      this.getTokenApproveCall(
-        swap.execRouterAddress,
-        BigInt(swap.fromAmount),
-        coinToApprove.token
-      ),
       {
         dest: swap.execRouterAddress,
-        value: hexToBigInt(swap.execValue),
+        value: swapExecValue,
         data: swap.execCallData,
       },
     ];
+
+    if (isNativeETH(swap.fromCoin, chainId)) {
+      // Native token: value should be the execValue
+      assert(swapExecValue === BigInt(swap.fromAmount), "execValue mismatch");
+    } else {
+      // ERC-20: approve() the swap contract
+      executions.unshift(
+        this.getTokenApproveCall(
+          swap.execRouterAddress,
+          BigInt(swap.fromAmount),
+          swap.fromCoin.token
+        )
+      );
+    }
 
     const op = this.opBuilder.executeBatch(executions, opMetadata);
 
@@ -383,4 +394,338 @@ export class DaimoOpSender {
 
     return this.sendUserOp(op);
   }
+
+  /** Sends USDC to another chain. Returns userOpHash. */
+  public async sendUsdcToOtherChain(
+    to: Address,
+    toChain: DAv2Chain,
+    amount: `${number}`, // in the native unit of the token
+    opMetadata: DaimoOpMetadata,
+    memo?: string
+  ) {
+    const { tokenAddress, tokenDecimals, chainId } = this.opConfig;
+
+    const parsedAmount = parseUnits(amount, tokenDecimals);
+
+    const cctpMessengerAddr = getCctpMessengerAddr(chainId);
+    const fromToken = tokenAddress;
+    const fromAmount = parsedAmount;
+    const toChainId = BigInt(toChain.chainId);
+    const toDomain = toChain.cctpDomain;
+    const toAddr = to;
+    const toToken = getBridgeCoin(toChain.chainId).token;
+    const toAmount = parsedAmount;
+    const nonce = generateRandom256BitInteger();
+
+    console.log(
+      `[OP] FastCCTP startTransfer to ${to} on chain ${toChain.name} for ${amount} USDC`
+    );
+
+    const op = this.opBuilder.executeBatch(
+      [
+        {
+          dest: tokenAddress,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: Contracts.erc20ABI,
+            functionName: "approve",
+            args: [daimoFastCctpAddress, fromAmount],
+          }),
+        },
+        {
+          dest: daimoFastCctpAddress,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: daimoFastCctpABI,
+            functionName: "startTransfer",
+            args: [
+              cctpMessengerAddr,
+              fromToken,
+              fromAmount,
+              toChainId,
+              toDomain,
+              toAddr,
+              toToken,
+              toAmount,
+              nonce,
+            ],
+          }),
+        },
+      ],
+      opMetadata
+    );
+
+    return this.sendUserOp(op, memo);
+  }
 }
+
+// TODO: move these constants to daimo-contracts once audit is done
+export const daimoFastCctpAddress =
+  "0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B";
+
+export const daimoFastCctpABI = [
+  { stateMutability: "nonpayable", type: "constructor", inputs: [] },
+  {
+    stateMutability: "nonpayable",
+    type: "function",
+    inputs: [
+      { name: "fromChainID", internalType: "uint256", type: "uint256" },
+      { name: "fromAddr", internalType: "address", type: "address" },
+      { name: "fromAmount", internalType: "uint256", type: "uint256" },
+      { name: "toAddr", internalType: "address", type: "address" },
+      { name: "toToken", internalType: "contract IERC20", type: "address" },
+      { name: "toAmount", internalType: "uint256", type: "uint256" },
+      { name: "nonce", internalType: "uint256", type: "uint256" },
+    ],
+    name: "claimTransfer",
+    outputs: [],
+  },
+  {
+    stateMutability: "nonpayable",
+    type: "function",
+    inputs: [
+      { name: "fromChainID", internalType: "uint256", type: "uint256" },
+      { name: "fromAddr", internalType: "address", type: "address" },
+      { name: "fromAmount", internalType: "uint256", type: "uint256" },
+      { name: "toAddr", internalType: "address", type: "address" },
+      { name: "toToken", internalType: "contract IERC20", type: "address" },
+      { name: "toAmount", internalType: "uint256", type: "uint256" },
+      { name: "nonce", internalType: "uint256", type: "uint256" },
+    ],
+    name: "fastFinishTransfer",
+    outputs: [],
+  },
+  {
+    stateMutability: "view",
+    type: "function",
+    inputs: [
+      { name: "fromChainID", internalType: "uint256", type: "uint256" },
+      { name: "fromAddr", internalType: "address", type: "address" },
+      { name: "fromAmount", internalType: "uint256", type: "uint256" },
+      { name: "toChainID", internalType: "uint256", type: "uint256" },
+      { name: "toAddr", internalType: "address", type: "address" },
+      { name: "toToken", internalType: "contract IERC20", type: "address" },
+      { name: "toAmount", internalType: "uint256", type: "uint256" },
+      { name: "nonce", internalType: "uint256", type: "uint256" },
+    ],
+    name: "getHandoffAddr",
+    outputs: [{ name: "", internalType: "address", type: "address" }],
+  },
+  {
+    stateMutability: "view",
+    type: "function",
+    inputs: [{ name: "", internalType: "address", type: "address" }],
+    name: "handoffSent",
+    outputs: [{ name: "", internalType: "bool", type: "bool" }],
+  },
+  {
+    stateMutability: "view",
+    type: "function",
+    inputs: [{ name: "", internalType: "address", type: "address" }],
+    name: "handoffToRecipient",
+    outputs: [{ name: "", internalType: "address", type: "address" }],
+  },
+  {
+    stateMutability: "nonpayable",
+    type: "function",
+    inputs: [
+      {
+        name: "cctpMessenger",
+        internalType: "contract ICCTPTokenMessenger",
+        type: "address",
+      },
+      { name: "fromToken", internalType: "contract IERC20", type: "address" },
+      { name: "fromAmount", internalType: "uint256", type: "uint256" },
+      { name: "toChainID", internalType: "uint256", type: "uint256" },
+      { name: "toDomain", internalType: "uint32", type: "uint32" },
+      { name: "toAddr", internalType: "address", type: "address" },
+      { name: "toToken", internalType: "contract IERC20", type: "address" },
+      { name: "toAmount", internalType: "uint256", type: "uint256" },
+      { name: "nonce", internalType: "uint256", type: "uint256" },
+    ],
+    name: "startTransfer",
+    outputs: [],
+  },
+  {
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        name: "handoffAddr",
+        internalType: "address",
+        type: "address",
+        indexed: true,
+      },
+      {
+        name: "finalRecipient",
+        internalType: "address",
+        type: "address",
+        indexed: true,
+      },
+      {
+        name: "fromChainID",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "fromAddr",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "fromAmount",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "toAddr",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "toToken",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "toAmount",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "nonce",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+    ],
+    name: "Claim",
+  },
+  {
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        name: "handoffAddr",
+        internalType: "address",
+        type: "address",
+        indexed: true,
+      },
+      {
+        name: "newRecipient",
+        internalType: "address",
+        type: "address",
+        indexed: true,
+      },
+      {
+        name: "fromChainID",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "fromAddr",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "fromAmount",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "toAddr",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "toToken",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "toAmount",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "nonce",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+    ],
+    name: "FastFinish",
+  },
+  {
+    type: "event",
+    anonymous: false,
+    inputs: [
+      {
+        name: "handoffAddr",
+        internalType: "address",
+        type: "address",
+        indexed: true,
+      },
+      {
+        name: "fromToken",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "fromAmount",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "toChainID",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "toAddr",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "toToken",
+        internalType: "address",
+        type: "address",
+        indexed: false,
+      },
+      {
+        name: "toAmount",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+      {
+        name: "nonce",
+        internalType: "uint256",
+        type: "uint256",
+        indexed: false,
+      },
+    ],
+    name: "Start",
+  },
+  {
+    type: "error",
+    inputs: [{ name: "token", internalType: "address", type: "address" }],
+    name: "SafeERC20FailedOperation",
+  },
+] as const;

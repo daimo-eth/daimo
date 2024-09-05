@@ -5,13 +5,13 @@ import {
   EAccount,
   assertEqual,
   assertNotNull,
-  guessTimestampFromNum,
   isValidName,
   now,
+  retryBackoff,
   validateName,
 } from "@daimo/common";
 import { nameRegistryProxyConfig, teamDaimoFaucetAddr } from "@daimo/contract";
-import { Pool } from "pg";
+import { Kysely } from "kysely";
 import {
   Address,
   bytesToHex,
@@ -24,10 +24,10 @@ import { normalize } from "viem/ens";
 
 import { Indexer } from "./indexer";
 import { ProfileCache } from "../api/profile";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { InviteGraph } from "../offchain/inviteGraph";
-import { retryBackoff } from "../utils/retryBackoff";
 
 // Special labels are append-only. Historical addresses remain labelled.
 export const specialAddrLabels: { [_: Address]: AddrLabel } = {
@@ -60,6 +60,8 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0xb4CB800910B228ED3d0834cF79D697127BBB00e5": AddrLabel.UniswapETHPool,
   // Known Binance addresses on Base
   "0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A": AddrLabel.Binance,
+  // FastCCTP address on all chains
+  "0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B": AddrLabel.FastCCTP, // TODO
 };
 
 // Validate that current addresses are correctly recorded.
@@ -71,6 +73,7 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   assertEqual(s[chainConfig.notesV1Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.notesV2Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.uniswapETHPoolAddress], AddrLabel.UniswapETHPool);
+  // TODO: assertEqual(s[daimoFastCctpAddress], AddrLabel.FastCCTP);
 }
 
 // Represents a Daimo name registration.
@@ -104,37 +107,35 @@ export class NameRegistry extends Indexer {
     return { numAccounts: this.accounts.length, numLogs: this.logs.length };
   }
 
-  async load(pg: Pool, from: number, to: number) {
-    const startTime = Date.now();
-    const result = await retryBackoff(
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
+    const startMs = performance.now();
+    const rows = await retryBackoff(
       `nameRegistry-logs-query-${from}-${to}`,
       () =>
-        pg.query(
-          `
-        select block_num, addr, name
-        from names
-        where block_num >= $1
-        and block_num <= $2
-        and chain_id = $3
-      `,
-          [from, to, chainConfig.chainL2.id]
-        )
+        kdb
+          .selectFrom("index.daimo_name")
+          .selectAll()
+          .where("chain_id", "=", "" + chainConfig.chainL2.id)
+          .where((eb) => eb.between("block_num", "" + from, "" + to))
+          .orderBy("block_num")
+          .orderBy("log_idx")
+          .execute()
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    const names = result.rows.map((r: any) => {
+    const names = rows.map((r) => {
       return {
-        timestamp: guessTimestampFromNum(r.block_num, chainConfig.daimoChain),
+        timestamp: Number(r.block_ts),
         name: bytesToString(r.name, { size: 32 }),
         addr: getAddress(bytesToHex(r.addr, { size: 20 })),
       };
     });
     this.logs.push(...names);
     names.forEach(this.cacheAccount);
-    console.log(
-      `[NAME-REG] loaded ${names.length} names in ${Date.now() - startTime}ms`
-    );
+
+    const elapsedMs = (performance.now() - startMs) | 0;
+    console.log(`[NAME-REG] loaded ${names.length} names in ${elapsedMs}ms`);
   }
 
   /** Cache an account in memory. */
@@ -146,7 +147,6 @@ export class NameRegistry extends Indexer {
 
     // Ignore if already present
     if (this.accounts.find((a) => a.addr === reg.addr)) {
-      console.log(`[NAME-REG] skipping already-cached account ${reg.name}`);
       return;
     }
 

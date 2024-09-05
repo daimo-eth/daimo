@@ -3,9 +3,13 @@ import Image from "next/image";
 import React, { useState } from "react";
 
 import { PrimaryButton } from "../../components/buttons";
+import { useI18N } from "../../i18n/context";
 import { rpc } from "../../utils/rpc";
 
 export default function WaitlistPage() {
+  const i18n = useI18N();
+  const i18 = i18n.waitlist;
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [socials, setSocials] = useState("");
@@ -27,18 +31,16 @@ export default function WaitlistPage() {
         <Image src="/logo-web.png" alt="Daimo" width="96" height="96" />
         <div className="h-8" />
 
-        <div className="text-2xl font-semibold">Sign up for Daimo</div>
+        <div className="text-2xl font-semibold">{i18.signUp()}</div>
         <div className="h-8" />
 
-        <div className="text-md">
-          Daimo is currently in limited release. Sign up for early access.
-        </div>
+        <div className="text-md">{i18.isLimited()}</div>
         <div className="h-8" />
 
         <form className="flex flex-col gap-4 w-[8/10]" onSubmit={onSubmit}>
           <div className="flex flex-col gap-2 text-left font-semibold">
             <label htmlFor="name" className="text-grayMid">
-              Name
+              {i18.name()}
             </label>
             <input
               id="name"
@@ -50,7 +52,7 @@ export default function WaitlistPage() {
           </div>
           <div className="flex flex-col gap-2 text-left font-semibold">
             <label htmlFor="email" className="text-grayMid">
-              Email
+              {i18.email()}
             </label>
             <input
               id="email"
@@ -62,7 +64,7 @@ export default function WaitlistPage() {
           </div>
           <div className="flex flex-col gap-2 text-left font-semibold">
             <label htmlFor="socials" className="text-grayMid">
-              Social (Twitter, Warpcast, etc)
+              {i18.social()}
             </label>
             <input
               id="socials"
@@ -74,18 +76,16 @@ export default function WaitlistPage() {
           </div>
           {submitState === "idle" && (
             <div className="flex flex-col gap-2 w-[8/10] py-8">
-              <PrimaryButton onClick={onSubmit}>SUBMIT</PrimaryButton>
+              <PrimaryButton onClick={onSubmit}>{i18.submit()}</PrimaryButton>
             </div>
           )}
           {submitState === "loading" && (
             <div className="flex flex-col gap-2 w-[8/10] py-8">
-              <PrimaryButton disabled>SUBMITTING</PrimaryButton>
+              <PrimaryButton disabled>{i18.submitting()}</PrimaryButton>
             </div>
           )}
           {submitState === "submitted" && (
-            <div className="text-md">
-              Submitted! We{"'"}ll reach out on email soon.
-            </div>
+            <div className="text-md">{i18.submitted()}</div>
           )}
         </form>
       </center>

@@ -1,8 +1,5 @@
-import {
-  CurrencyExchangeRate,
-  currencyRateUSD,
-  ForeignToken,
-} from "@daimo/common";
+import { CurrencyExchangeRate, currencyRateUSD } from "@daimo/common";
+import { ForeignToken } from "@daimo/contract";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -22,17 +19,19 @@ import { DropdownPickButton } from "./DropdownPickButton";
 import Spacer from "./Spacer";
 import { color, ss } from "./style";
 import { DaimoText, MAX_FONT_SIZE_MULTIPLIER, TextLight } from "./text";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { LocalMoneyEntry, MoneyEntry } from "../../logic/moneyEntry";
 
 // Input components allows entry in range $0.01 to $99,999.99
 const MAX_TOTAL_DIGITS = 7;
+const i18 = i18n.amountInput;
 
 export function AmountChooser({
   moneyEntry,
   onSetEntry,
   showAmountAvailable,
-  coin,
+  toCoin,
   autoFocus,
   disabled,
   innerRef,
@@ -41,7 +40,7 @@ export function AmountChooser({
   moneyEntry: MoneyEntry;
   onSetEntry: (entry: MoneyEntry) => void;
   showAmountAvailable: boolean;
-  coin?: ForeignToken;
+  toCoin?: ForeignToken;
   autoFocus: boolean;
   disabled?: boolean;
   innerRef?: React.RefObject<TextInput>;
@@ -49,6 +48,7 @@ export function AmountChooser({
 }) {
   // Show how much we have available
   const account = useAccount();
+
   if (account == null) return null;
 
   const dollarsAvailStr = getAmountText({ amount: account.lastBalance });
@@ -75,11 +75,11 @@ export function AmountChooser({
       <View style={{ flexDirection: "row", justifyContent: "center" }}>
         {isNonUSD && (
           <Badge color={color.midnight}>
-            = ${moneyEntry.dollars.toFixed(2)} {coin?.symbol ?? "USDC"}
+            = ${moneyEntry.dollars.toFixed(2)} {toCoin?.symbol ?? "USDC"}
           </Badge>
         )}
         {showAmountAvailable && !isNonUSD && (
-          <TextLight>{dollarsAvailStr} available</TextLight>
+          <TextLight>{i18.dollarsAvailable(dollarsAvailStr)}</TextLight>
         )}
       </View>
     </View>

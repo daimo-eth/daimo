@@ -1,4 +1,9 @@
-import { OpStatus, SuggestedAction, amountToDollars } from "@daimo/common";
+import {
+  SuggestedAction,
+  TransferClogStatus,
+  amountToDollars,
+  getTransferClogStatus,
+} from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
 import {
@@ -27,6 +32,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HistoryListSwipe } from "./history/HistoryList";
 import { DispatcherContext } from "../../action/dispatch";
 import { handleDeepLink, useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { getInitialDeepLink } from "../../logic/deeplink";
 import { useOnboardingChecklist } from "../../logic/onboarding";
@@ -48,6 +54,8 @@ import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBody, TextBtnCaps, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
+
+const i18 = i18n.home;
 
 export default function HomeScreen() {
   const Inner = useWithAccount(HomeScreenPullToRefreshWrap);
@@ -112,10 +120,11 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
 
   // Re-render HistoryListSwipe only transfer count or status changes.
   const statusCountsStr = JSON.stringify(
-    Object.keys(OpStatus).map((key) => [
-      key,
-      account.recentTransfers.filter(({ status }) => status === key).length,
-    ])
+    account.recentTransfers.reduce((counts, transfer) => {
+      const status = getTransferClogStatus(transfer);
+      counts[status] = (counts[status] || 0) + 1;
+      return counts;
+    }, {} as Record<TransferClogStatus, number>)
   );
   const histListMini = useMemo(
     () => <HistoryListSwipe account={account} showDate={false} maxToShow={5} />,
@@ -269,7 +278,7 @@ function AmountAndButtons({ account }: { account: Account }) {
   return (
     <TouchableWithoutFeedback accessible={false}>
       <View style={styles.amountAndButtons}>
-        <TextLight>Your balance</TextLight>
+        <TextLight>{i18.yourBalance()}</TextLight>
         <TitleAmount amount={account.lastBalance} />
         {Number(pendingDollars) > 0 && (
           <>
@@ -279,9 +288,9 @@ function AmountAndButtons({ account }: { account: Account }) {
         )}
         <Spacer h={16} />
         <View style={styles.buttonRow}>
-          <IconButton title="Deposit" onPress={goDeposit} />
-          <IconButton title="Request" onPress={goRequest} />
-          <IconButton title="Send" onPress={goSend} disabled={isEmpty} />
+          <IconButton type="Deposit" onPress={goDeposit} />
+          <IconButton type="Request" onPress={goRequest} />
+          <IconButton type="Send" onPress={goSend} disabled={isEmpty} />
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -290,6 +299,7 @@ function AmountAndButtons({ account }: { account: Account }) {
 
 function PendingTag({ pendingDollars }: { pendingDollars: string }) {
   const nav = useNav();
+
   const onPress = () => nav.navigate("Notifications");
   return (
     <Pressable onPress={onPress} hitSlop={8}>
@@ -305,7 +315,7 @@ function PendingTag({ pendingDollars }: { pendingDollars: string }) {
           }}
         >
           <TextBtnCaps color={color.grayDark}>
-            + ${pendingDollars} PENDING
+            {i18.pending(pendingDollars)}
           </TextBtnCaps>
         </View>
       )}
@@ -314,24 +324,24 @@ function PendingTag({ pendingDollars }: { pendingDollars: string }) {
 }
 
 function IconButton({
-  title,
+  type,
   onPress,
   disabled,
 }: {
-  title: string;
+  type: "Deposit" | "Request" | "Send";
   onPress: () => void;
   disabled?: boolean;
 }) {
-  const name: OctName = (function () {
-    switch (title) {
+  const [name, title] = (function (): [OctName, string] {
+    switch (type) {
       case "Deposit":
-        return "plus";
+        return ["plus", i18.deposit()];
       case "Request":
-        return "arrow-down";
+        return ["arrow-down", i18.request()];
       case "Send":
-        return "paper-airplane";
+        return ["paper-airplane", i18.send()];
       default:
-        return "question";
+        throw new Error(`unhandled IconButton "${type}"`);
     }
   })();
 
@@ -376,7 +386,7 @@ function CompleteOnboarding() {
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Icon name="list" size={24} color={color.gray3} />
         <Spacer w={12} />
-        <DaimoText variant="body">Finish setting up your account</DaimoText>
+        <DaimoText variant="body">{i18.finishAccountSetUp()}</DaimoText>
       </View>
       <Octicons size={24} color={color.primary} name="arrow-right" />
     </Pressable>
@@ -405,11 +415,11 @@ function useInitNavLinks() {
       if (url == null) return;
       if (handledInitialDeepLink) return;
       handledInitialDeepLink = true;
-      handleDeepLink(nav, dispatcher, url);
+      handleDeepLink(nav, dispatcher, url, account.homeChainId);
     });
 
     const sub = addEventListener("url", ({ url }) =>
-      handleDeepLink(nav, dispatcher, url)
+      handleDeepLink(nav, dispatcher, url, account.homeChainId)
     );
     return () => sub.remove();
   }, [accountMissing, nav]);

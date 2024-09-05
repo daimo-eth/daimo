@@ -1,17 +1,19 @@
-import { ChainConfig } from "@daimo/contract";
 import {
+  ChainConfig,
   ForeignToken,
   getForeignCoinDisplayAmount,
-} from "@daimo/contract/src/foreignToken";
+} from "@daimo/contract";
+import { Locale } from "expo-localization";
 import { Address, Hex } from "viem";
 
 import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
+import { i18n } from "./i18n";
 import { BigIntStr } from "./model";
 
 /**
- * An OpEvent is an onchain event affecting a Daimo account. Each OpEvent
- * corresponds to an Ethereum event log. Usually--but not always--it is also
- * 1:1 with a Daimo userop.
+ * A Clog (combined log) is an onchain event affecting a Daimo account. Each
+ * Clog corresponds to an Ethereum event log. Usually--but not always--it is
+ * also 1:1 with a Daimo userop.
  *
  * In the pending state, we don't have an event log yet--instead we have an
  * opHash &/or a txHash, and a future event log which we're expecting.
@@ -24,23 +26,24 @@ import { BigIntStr } from "./model";
  * - Adding or removing a device (AddDevice / RemoveDevice log, userop)
  * - Creating or redeeming a Note (NoteCreated / NoteRedeemed log, userop)
  */
-export type OpEvent = TransferOpEvent | PaymentLinkOpEvent | KeyRotationOpEvent;
+export type Clog = TransferClog | KeyRotationClog;
 
-export type DisplayOpEvent = TransferOpEvent | PaymentLinkOpEvent;
+export type TransferClog = TransferSwapClog | PaymentLinkClog;
 
 /**
- *  Fetched data for a pending OpEvent. For a pending op, we (usually)
- *  only know either the opHash or the txHash. Set only one of them in this
- *  type to uniquely identify a pending user action.
- *  Additionally include data that the API may have pre-fetched for the now
- *  authenticated user.
+ * Fetched data for a pending userop or sponsored transaction. Set exactly one
+ * of (opHash, txHash) to uniquely identify a pending user action.
  */
-export type PendingOpEvent = {
+export type PendingOp = {
   opHash?: Hex;
   txHash?: Hex;
   inviteCode?: string;
 };
 
+/**
+ * Original (non-home-coin) inbound transfer, for an inbound swap or inbound
+ * cross-chain transfer.
+ */
 export type PreSwapTransfer = {
   coin: ForeignToken;
   amount: BigIntStr; // in native unit of the token
@@ -48,12 +51,23 @@ export type PreSwapTransfer = {
 };
 
 /**
- * Represents a transfer of tokens from one address to another.
+ * Non-home-coin outbound transfer, for an outbound swap or outbound
+ * cross-chain transfer.
+ */
+export type PostSwapTransfer = {
+  coin: ForeignToken;
+  amount: BigIntStr; // in native unit of the token
+  to: Address;
+};
+
+/**
+ * Represents a transfer of the same tokens from one address to another on the
+ * same chain (a.k.a. same coins, same chain).
  *
  * There's a surprising amount of complexity to the state of a transfer.
  *
  * - Daimo transfers start out as a `PENDING` user op.
- *   The op goes thru a lifecycle of pending (bundler has accepted, but not
+ *   The op goes through a lifecycle of pending (bundler has accepted, but not
  *   yet onchain) to confirmed (bundle transaction onchain) to finalized
  *   (written to a finalized L1 block, and therefore guaranteed permanent).
  *
@@ -76,7 +90,7 @@ export type PreSwapTransfer = {
  * - For others, we show an address, except for a few special ones where we can
  *   show a descriptive slug like Daimo Faucet, Coinbase, or Binance.
  */
-export interface TransferOpEvent extends OpEventBase {
+export interface TransferSwapClog extends ClogBase {
   type: "transfer";
 
   from: Address;
@@ -94,11 +108,17 @@ export interface TransferOpEvent extends OpEventBase {
   /** Memo, user-generated text for the transfer */
   memo?: string;
 
-  /** If the transfer was caused by a user-initiated swap, the swap origin */
+  /** Original amount before swap to home coin */
   preSwapTransfer?: PreSwapTransfer;
+
+  /** Output amount after swap from home coin */
+  postSwapTransfer?: PostSwapTransfer;
+
+  /** Remote transfer data associated with this transfer. e.g. Landline, Tron */
+  offchainTransfer?: OffchainTransfer;
 }
 
-export interface PaymentLinkOpEvent extends OpEventBase {
+export interface PaymentLinkClog extends ClogBase {
   type: "createLink" | "claimLink";
 
   from: Address;
@@ -116,14 +136,66 @@ export interface PaymentLinkOpEvent extends OpEventBase {
   memo?: string;
 }
 
-export interface KeyRotationOpEvent extends OpEventBase {
+/** A transfer that happens offchain or on a non-Daimo chain (e.g. TRON). */
+export interface OffchainTransfer {
+  type: "landline"; // future: "tron-bridge", ...
+
+  transferType: "deposit" | "withdrawal";
+  status: "processing" | "completed" | "failed" | "returned";
+  statusMessage?: string;
+
+  /** Remote account ID */
+  accountID: string;
+  /** Remote transfer ID, if available */
+  transferID?: string;
+
+  /** Unix seconds. Time the remote transfer was initiated */
+  timeStart: number;
+  /** Unix seconds. Time the remote transfer was expected to complete */
+  timeExpected?: number;
+  /** Unix seconds. Time the remote transfer was completed */
+  timeFinish?: number;
+}
+
+/**
+ * Represents a token swap between two accounts on the same chain.
+ * Same chain, different coins.
+ *
+ * A token swap can be inbound swap (e.g. a Daimo account receives a foreign
+ * token transfer in their inbox) or outbound swap (e.g. account Alice sends a
+ * foreign token transfer to Bob).
+ */
+// export interface SwapClog extends ClogBase {
+//   type: "inboundSwap" | "outboundSwap";
+
+//   from: Address;
+//   to: Address;
+
+//   /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
+//   amount: number; // amount that affects the user
+
+//   /** "Other" coin involved in the swap (i.e. not homeCoin) */
+//   coinOther: ForeignToken;
+
+//   /** Amount of the coinOther in the swap (in native unit of coinOther)
+//    * Uses BigIntStr to avoid number type overflows */
+//   amountOther: BigIntStr;
+
+//   /** Userop nonce, if this transfer occurred in a userop */
+//   nonceMetadata?: Hex;
+
+//   /** Memo, user-generated text for the transfer */
+//   memo?: string;
+// }
+
+export interface KeyRotationClog extends ClogBase {
   type: "keyRotation";
 
   slot: number;
   rotationType: "add" | "remove";
 }
 
-interface OpEventBase {
+interface ClogBase {
   /** Unix seconds. When pending, bundler accept time. Otherwise, block time. */
   timestamp: number;
 
@@ -170,14 +242,14 @@ export type DaimoAccountCall = {
 // If the op creates a payment link, to = payment link until claimed, then it's
 // the address of the claimer.
 // If the op claims a payment link, from = sender, to = claimer.
-// If the op is a swap, from = the pre-swap sender.
-export function getDisplayFromTo(op: DisplayOpEvent): [Address, Address] {
+export function getDisplayFromTo(op: TransferClog): [Address, Address] {
   if (op.type === "transfer") {
-    if (op.preSwapTransfer) return [op.preSwapTransfer.from, op.to];
-    else return [op.from, op.to];
-  } else {
+    const from = op.preSwapTransfer?.from || op.from;
+    const to = op.postSwapTransfer?.to || op.to;
+    return [from, to];
+  } else if (op.type === "claimLink" || op.type === "createLink") {
+    // Self-transfer via payment link shows up as two payment link transfers
     if (op.noteStatus.claimer?.addr === op.noteStatus.sender.addr) {
-      // Self-transfer via payment link shows up as two payment link transfers
       return [op.from, op.to];
     } else {
       return [
@@ -185,6 +257,45 @@ export function getDisplayFromTo(op: DisplayOpEvent): [Address, Address] {
         op.noteStatus.claimer ? op.noteStatus.claimer.addr : op.to,
       ];
     }
+  } else {
+    // Swaps (outbound or inbound).
+    return [op.from, op.to];
+  }
+}
+
+export type TransferClogType =
+  | "transfer"
+  | "createLink"
+  | "claimLink"
+  | "landline";
+
+export function getTransferClogType(clog: TransferClog): TransferClogType {
+  if (clog.type === "createLink" || clog.type === "claimLink") {
+    return clog.type;
+  } else if (clog.type === "transfer") {
+    return clog.offchainTransfer ? clog.offchainTransfer.type : "transfer";
+  } else {
+    throw Error(`Unknown clog type: ${clog.type}`);
+  }
+}
+
+export type TransferClogStatus =
+  | "pending"
+  | "processing"
+  | "confirmed"
+  | "finalized"
+  | "failed"
+  | "expired";
+
+export function getTransferClogStatus(clog: TransferClog): TransferClogStatus {
+  const clogType = getTransferClogType(clog);
+  if (clogType === "landline") {
+    const landlineStatus = (clog as TransferSwapClog).offchainTransfer!.status;
+    if (landlineStatus === "returned") return "failed";
+    if (landlineStatus === "completed") return "finalized";
+    return landlineStatus;
+  } else {
+    return clog.status;
   }
 }
 
@@ -193,28 +304,51 @@ export function getDisplayFromTo(op: DisplayOpEvent): [Address, Address] {
 // Or generates a synthetic one for swaps, e.g. "5 USDT -> USDC" if short
 // or "Accepted 5 USDT as USDC" if long
 export function getSynthesizedMemo(
-  op: DisplayOpEvent,
+  op: TransferClog,
   chainConfig: ChainConfig,
+  locale?: Locale,
   short?: boolean
 ) {
-  const coinName = chainConfig.tokenSymbol.toUpperCase();
+  const i18 = i18n(locale).op;
+  // TODO: use home coin from account
+  const homeCoinSymbol = chainConfig.tokenSymbol.toUpperCase();
 
   if (op.memo) return op.memo;
   if (op.type === "createLink" && op.noteStatus.memo) return op.noteStatus.memo;
   if (op.type === "claimLink" && op.noteStatus.memo) return op.noteStatus.memo;
 
-  if (op.type !== "transfer") return null;
-  if (op.requestStatus) {
+  if (op.type === "transfer" && op.requestStatus) {
     return op.requestStatus.memo;
-  } else if (op.preSwapTransfer) {
-    const readableAmount = getForeignCoinDisplayAmount(
-      op.preSwapTransfer.amount,
-      op.preSwapTransfer.coin
-    );
-    if (short) {
-      return `${readableAmount} ${op.preSwapTransfer.coin.symbol} → ${coinName}`;
-    } else {
-      return `Accepted ${readableAmount} ${op.preSwapTransfer.coin.symbol} as ${coinName}`;
-    }
+  } else if (op.type === "transfer" && op.preSwapTransfer) {
+    const { amount, coin } = op.preSwapTransfer;
+    const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+    return short
+      ? `${readableAmount} ${coin.symbol} → ${homeCoinSymbol}`
+      : i18.acceptedInboundSwap(readableAmount, coin.symbol, homeCoinSymbol);
+  } else if (op.type === "transfer" && op.postSwapTransfer) {
+    const { amount, coin } = op.postSwapTransfer;
+    const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+    return short
+      ? `${homeCoinSymbol} → ${readableAmount} ${coin.symbol}`
+      : i18.sentOutboundSwap(readableAmount, coin.symbol);
   }
+
+  // TODO: postSwapTransfer
+  //  else if (op.type === "inboundSwap" || op.type === "outboundSwap") {
+  //   const otherCoin = op.coinOther;
+  //   const readableAmount = getForeignCoinDisplayAmount(
+  //     op.amountOther,
+  //     otherCoin
+  //   );
+
+  //   if (op.type === "inboundSwap") {
+  //     return short
+  //       ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
+  //       : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
+  //   } else {
+  //     return short
+  //       ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
+  //       : `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`;
+  //   }
+  // }
 }

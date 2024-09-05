@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { PrimaryOpenInAppButton, SecondaryButton } from "./buttons";
 import { ConnectWalletFlow } from "./ConnectWalletFlow";
+import { useI18N } from "../i18n/context";
 
 export function AppOrWalletCTA({
   linkStatus,
@@ -19,6 +20,7 @@ export function AppOrWalletCTA({
 }) {
   // If the secondary flow is triggered, hide the Open in Daimo button.
   const [isUsingSecondaryFlow, setIsUsingSecondaryFlow] = useState(false);
+  const i18n = useI18N();
 
   return (
     <center>
@@ -34,7 +36,7 @@ export function AppOrWalletCTA({
               window.open(directDeepLink, "_blank");
             }}
           >
-            ALREADY HAVE IT? OPEN IN APP
+            {i18n.callToAction.openInApp()}
           </SecondaryButton>
           <div className="h-4" />
         </>

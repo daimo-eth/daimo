@@ -10,6 +10,7 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import { requestEnclaveSignature } from "../../../logic/key";
 import { NamedError } from "../../../logic/log";
 import { defaultEnclaveKeyName } from "../../../storage/account";
@@ -22,6 +23,7 @@ type Props = NativeStackScreenProps<
   ParamListOnboarding,
   "CreateSetupKey" | "ExistingSetupKey"
 >;
+const i18 = i18n.onboardingSetupKey;
 export function OnboardingSetupKeyScreen(props: Props) {
   const [loading, setLoading] = useState(false);
   const [askToSetPin, setAskToSetPin] = useState(false);
@@ -75,7 +77,11 @@ export function OnboardingSetupKeyScreen(props: Props) {
 
   return (
     <View>
-      <OnboardingHeader title="Set up device" onPrev={onPrev} {...progress} />
+      <OnboardingHeader
+        title={i18.screenHeader()}
+        onPrev={onPrev}
+        {...progress}
+      />
       <View style={styles.paddedPage}>
         <View style={{ flexDirection: "row", justifyContent: "center" }}>
           <Octicons
@@ -88,17 +94,9 @@ export function OnboardingSetupKeyScreen(props: Props) {
         <View style={ss.container.padH16}>
           <TextCenter>
             {!askToSetPin && (
-              <TextBody>
-                Generate your Daimo device key. This key is generated and stored
-                on your device, and secures access to your Daimo account.
-              </TextBody>
+              <TextBody>{i18.pin.generateDescription()}</TextBody>
             )}
-            {askToSetPin && (
-              <TextBody>
-                Authentication failed. Does your phone have a secure lock screen
-                set up? You'll need one to secure your Daimo account.
-              </TextBody>
-            )}
+            {askToSetPin && <TextBody>{i18.pin.failedDescription()}</TextBody>}
           </TextCenter>
         </View>
         <Spacer h={118} />
@@ -106,7 +104,9 @@ export function OnboardingSetupKeyScreen(props: Props) {
         {!loading && (
           <ButtonBig
             type="primary"
-            title={askToSetPin ? "Try again" : "Generate"}
+            title={
+              askToSetPin ? i18.pin.tryAgainButton() : i18.pin.generateButton()
+            }
             onPress={trySignatureGeneration}
             showBiometricIcon={Platform.OS === "android" && !askToSetPin}
           />

@@ -8,7 +8,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   Linking,
   Platform,
@@ -27,6 +27,7 @@ import {
   useExitToHome,
   useNav,
 } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { decodeQR } from "../../logic/decodeQR";
 import { TextButton } from "../shared/Button";
@@ -40,12 +41,20 @@ import { color, ss } from "../shared/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 
 type Props = NativeStackScreenProps<ParamListHome, "QR">;
+const i18 = i18n.qr;
+
+const tabs = ["PayMe", "Scan"] as QRScreenOptions[];
+const localTabs = [i18.slider.payMe(), i18.slider.scan()];
 
 export function QRScreen(props: Props) {
   const { option } = props.route.params;
-  const [tab, setTab] = useState<QRScreenOptions>(option || "PAY ME");
-  const tabs = useRef(["PAY ME", "SCAN"] as QRScreenOptions[]).current;
-  const title = tab === "PAY ME" ? "Display QR Code" : "Scan QR Code";
+  const [tab, setTab] = useState<QRScreenOptions>(option || "PayMe");
+
+  // Localization
+  const localTab = localTabs[tabs.indexOf(tab)];
+  const setLocalTab = (l: string) => setTab(tabs[localTabs.indexOf(l)]);
+
+  const title = tab === "PayMe" ? i18.title.display() : i18.title.scan();
 
   const goBack = useExitBack();
   const goHome = useExitToHome();
@@ -54,10 +63,10 @@ export function QRScreen(props: Props) {
     <View style={ss.container.screen}>
       <ScreenHeader title={title} onBack={goBack || goHome} />
       <Spacer h={8} />
-      <SegmentSlider {...{ tabs, tab, setTab }} />
+      <SegmentSlider tabs={localTabs} tab={localTab} setTab={setLocalTab} />
       <Spacer h={24} />
-      {tab === "PAY ME" && <QRDisplay />}
-      {tab === "SCAN" && <QRScan />}
+      {tab === "PayMe" && <QRDisplay />}
+      {tab === "Scan" && <QRScan />}
     </View>
   );
 }
@@ -71,7 +80,7 @@ function QRDisplay() {
   const url = formatDaimoLink({ type: "account", account: account.name });
 
   const subtitle = recentlyCopied
-    ? "Copied address"
+    ? i18.copiedAddress()
     : getAddressContraction(account.address);
 
   const onLongPress = () => {
@@ -106,7 +115,7 @@ function QRDisplay() {
         <ShareButton name={account.name} />
       </View>
       <View style={styles.accountShare}>
-        <TextButton title="DEPOSIT FROM EXCHANGE ›" onPress={goToDeposit} />
+        <TextButton title={i18.depositButton()} onPress={goToDeposit} />
       </View>
     </View>
   );

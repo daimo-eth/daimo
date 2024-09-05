@@ -81,3 +81,15 @@ export class DaimoNonceMetadata {
 function assert(condition: boolean) {
   if (!condition) throw new Error("Assertion failed");
 }
+
+export function generateRandom256BitInteger(): bigint {
+  const buffer = new Uint8Array(32); // 256 bits = 32 bytes
+  crypto.getRandomValues(buffer);
+
+  let result = 0n;
+  for (let i = 0; i < buffer.length; i++) {
+    result = (result << 8n) | BigInt(buffer[i]);
+  }
+
+  return result;
+}

@@ -2,6 +2,8 @@ import { LRUCache } from "lru-cache";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
+import { getI18N } from "../../../i18n";
+import { getReqLang } from "../../../i18n/server";
 import { rpc } from "../../../utils/rpc";
 
 type Context = {
@@ -20,6 +22,9 @@ export const dynamic = "force-dynamic";
 export async function GET(_: Request, { params }: Context) {
   const addr = params.addr[0];
 
+  const i18n = getI18N(getReqLang());
+  const i18 = i18n.profile;
+
   try {
     let result: Blob | undefined = undefined;
     if (pfpCache.has(addr)) {
@@ -31,7 +36,8 @@ export async function GET(_: Request, { params }: Context) {
 
     if (result == null) {
       console.warn(`[PROFILE] No image found for ${addr}`);
-      return NextResponse.json({ error: "No image found" }, { status: 404 });
+
+      return NextResponse.json({ error: i18.errorNoImage() }, { status: 404 });
     }
 
     console.log(`[PROFILE] returning ${result.size}b PFP for ${addr}`);

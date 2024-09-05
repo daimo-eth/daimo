@@ -21,11 +21,7 @@ export function parseInviteCodeOrLink(str: string): DaimoLink | undefined {
 
   // Is it a link?
   const link = parseDaimoLink(str);
-  if (link != null && ["invite", "requestv2", "notev2"].includes(link.type)) {
-    return link;
-  }
-
-  return undefined;
+  return link || undefined;
 }
 
 export interface LinkInviteStatus {

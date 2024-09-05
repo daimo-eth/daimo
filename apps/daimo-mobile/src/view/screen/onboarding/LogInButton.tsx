@@ -17,6 +17,7 @@ import { Hex } from "viem";
 
 import { useSendAsync } from "../../../action/useSendAsync";
 import { env } from "../../../env";
+import { i18n } from "../../../i18n";
 import { getWrappedMnemonicSigner } from "../../../logic/key";
 import { getWrappedPasskeySigner } from "../../../logic/passkey";
 import {
@@ -28,6 +29,8 @@ import {
 import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import { ErrorRowCentered } from "../../shared/error";
+
+const i18 = i18n.logIn;
 
 // Adds our device key (pubKeyHex) to an existing account, via [pass, sec]key.
 export function LogInFromKeyButton({
@@ -51,7 +54,8 @@ export function LogInFromKeyButton({
     }
   }, [account, useSecurityKey]);
 
-  const title = `LOG IN WITH ${useSecurityKey ? "SECURITY KEY" : "PASSKEY"}`;
+  const keyType = useSecurityKey ? i18.type.securityKey() : i18.type.passkey();
+  const title = i18.logInWith({ keyType });
   return <LogInButton {...{ account, pubKeyHex, daimoChain, signer, title }} />;
 }
 
@@ -90,13 +94,13 @@ export function LogInFromSeedButton({
 
   // Handle case where user hasn't finished entering a seed phrase yet.
   if (parsedKey == null) {
-    return <ButtonBig type="primary" title="LOG IN" disabled />;
+    return <ButtonBig type="primary" title={i18.logIn()} disabled />;
   } else if (signer == null) {
-    return <ErrorRowCentered message="Seed phrase not on account. Removed?" />;
+    return <ErrorRowCentered message={i18.fromSeed.error()} />;
   } else {
     return (
       <LogInButton
-        title="LOG IN WITH SEED PHRASE"
+        title={i18.fromSeed.button()}
         {...{ account, pubKeyHex, daimoChain, signer }}
       />
     );

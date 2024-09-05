@@ -27,6 +27,7 @@ import { Hex } from "viem";
 
 import { AddKeySlotButton } from "./keyRotation/AddKeySlotButton";
 import { useNav } from "../../common/nav";
+import { i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { ButtonBig } from "../shared/Button";
 import { ProgressBlobs } from "../shared/ProgressBlobs";
@@ -42,6 +43,8 @@ import Spacer from "../shared/Spacer";
 import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { TextBody, TextBtnCaps } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+
+const i18 = i18n.seedPhrase;
 
 export function SeedPhraseScreen() {
   const [activeStep, setActiveStep] = useState(0);
@@ -59,7 +62,7 @@ export function SeedPhraseScreen() {
     <SeedPhraseProvider>
       <View style={styles.screen}>
         <ScreenHeader
-          title={`${activeStep === 0 ? "Copy" : "Verify"} seed phrase`}
+          title={activeStep === 0 ? i18.title.copy() : i18.title.verify()}
           onBack={handleBack}
           secondaryHeader={
             <View style={{ marginVertical: 16, alignItems: "center" }}>
@@ -88,20 +91,18 @@ function CopySeedPhrase({
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <TextBody color={color.grayMid}>
-        This seed phrase will be added to your account, allowing you to recover
-        it even if you lose your device.
-      </TextBody>
+      <TextBody color={color.grayMid}>{i18.description()}</TextBody>
       <Spacer h={24} />
       <SeedPhraseDisplay words={words} />
       <Spacer h={24} />
       <CopyToClipboard />
       <Spacer h={24} />
       <ConfirmPhraseSave saved={saved} toggleSaved={toggleSaved} />
+
       <Spacer h={24} />
       <ButtonBig
         type="primary"
-        title="Continue"
+        title={i18.button.continue()}
         disabled={!saved}
         onPress={() => setActiveStep(1)}
       />
@@ -138,7 +139,7 @@ function CopyToClipboard() {
             style={[ss.text.btnCaps, { textTransform: "uppercase" }]}
             color={color.primary}
           >
-            COPY TO CLIPBOARD
+            {i18.copy.clipboard()}
           </TextBtnCaps>
         </>
       </TouchableHighlight>
@@ -173,9 +174,7 @@ function ConfirmPhraseSave({
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <Checkbox active={saved} toggle={toggleSaved} />
       <Spacer w={4} />
-      <TextBody color={color.grayMid}>
-        I've saved this seed phrase securely
-      </TextBody>
+      <TextBody color={color.grayMid}>{i18.copy.confirm()}</TextBody>
     </View>
   );
 }
@@ -191,14 +190,12 @@ function VerifySeedPhraseInner({ account }: { account: Account }) {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
-      <TextBody color={color.grayMid}>
-        Type your seed phrase into the input box.
-      </TextBody>
+      <TextBody color={color.grayMid}>{i18.verify.description()}</TextBody>
       <Spacer h={24} />
       <SeedPhraseEntry {...{ state, dispatch }} />
       <Spacer h={24} />
       <AddKeySlotButton
-        buttonTitle="Finish Setup"
+        buttonTitle={i18.button.finish()}
         account={account}
         slot={seedPhraseSlot}
         knownPubkey={publicKey}

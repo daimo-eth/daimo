@@ -12,7 +12,16 @@ export async function getTagRedirect(
 
 // Returns tag redirect URL, or null if tag does not exist.
 export async function getTagRedirectHist(tag: string, db: DB) {
-  return db.loadTagRedirectHist(tag);
+  return await db.loadTagRedirectHist(tag);
+}
+
+export async function createTagRedirect(
+  tag: string,
+  link: string,
+  updateToken: string,
+  db: DB
+) {
+  return await db.saveTagRedirect(tag, link, updateToken);
 }
 
 // Updates tag redirect URL, authenticatd by updateToken.
@@ -21,9 +30,9 @@ export async function setTagRedirect(
   link: string,
   updateToken: string,
   db: DB
-): Promise<void> {
+) {
   await verifyTagUpdateToken(tag, updateToken, db);
-  return db.saveTagRedirect(tag, link);
+  return await db.saveTagRedirect(tag, link);
 }
 
 export async function verifyTagUpdateToken(

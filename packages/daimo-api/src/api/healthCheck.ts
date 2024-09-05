@@ -1,19 +1,37 @@
 import { now } from "@daimo/common";
 
 import { DB } from "../db/db";
+import { IndexWatcher } from "../db/indexWatcher";
 import { getNodeMetrics } from "../server/node";
-import { Watcher } from "../shovel/watcher";
 
 // Get node inspector session, for debugging.
 const inspector = require("node:inspector/promises");
 const session = new inspector.Session();
 session.connect();
 
+export async function healthCheck(
+  db: DB,
+  watcher: IndexWatcher,
+  startTimeS: number
+) {
+  return healthCheckInner(db, watcher, startTimeS, []);
+}
+
 export async function healthDebug(
   db: DB,
-  watcher: Watcher,
+  watcher: IndexWatcher,
   startTimeS: number,
   trpcReqsInFlight: string[]
+) {
+  return healthCheckInner(db, watcher, startTimeS, trpcReqsInFlight, true);
+}
+
+async function healthCheckInner(
+  db: DB,
+  watcher: IndexWatcher,
+  startTimeS: number,
+  trpcReqsInFlight: string[],
+  showDetailedDebug?: boolean
 ) {
   // Additional debug diagnostics
   const nowS = now();
@@ -25,28 +43,35 @@ export async function healthDebug(
   let status = "healthy";
   if (indexer.lastGoodTickS < nowS - 10) {
     status = "watcher-not-ticking";
-  } else if (indexer.shovelLatest < indexer.rpcLatest - 5) {
+  } else if (indexer.indexLatest < indexer.rpcLatest - 5) {
     status = "watcher-behind-rpc";
   } else if (node.mem.heapMB / node.mem.maxMB > 0.8) {
     status = "node-mem-full";
   } else if (apiDB.waitingCount > 10) {
     status = "api-db-overloaded";
-  } else if (indexer.shovelDB.waitingCount > 10) {
-    status = "shovel-db-overloaded";
+  } else if (indexer.indexDB.waitingCount > 10) {
+    status = "index-db-overloaded";
   }
 
-  const nPromises = await countPromises();
-
-  return {
+  let ret = {
     status,
     nowS,
     uptimeS,
     node,
     apiDB,
     indexer,
-    nPromises,
-    trpcReqsInFlight: trpcReqsInFlight.slice(),
   };
+
+  if (showDetailedDebug) {
+    const nPromises = await countPromises();
+    ret = {
+      ...ret,
+      nPromises,
+      trpcReqsInFlight: trpcReqsInFlight.slice(),
+    } as any;
+  }
+
+  return ret;
 }
 
 async function countPromises() {

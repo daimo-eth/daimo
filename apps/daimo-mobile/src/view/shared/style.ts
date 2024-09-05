@@ -18,6 +18,7 @@ export const color = {
   grayDark: "#444", // TODO gray5
   midnight: "#262626", // TODO "black" = 111111
   link: "#027AFE",
+  lightBlue: "#A3D3FF",
 };
 
 const textBase: TextStyle = {

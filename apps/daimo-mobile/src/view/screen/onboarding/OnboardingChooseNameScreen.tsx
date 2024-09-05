@@ -1,6 +1,5 @@
 import { validateName } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
-import Octicons from "@expo/vector-icons/Octicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -18,6 +17,7 @@ import {
   useExitBack,
   useOnboardingNav,
 } from "../../../common/nav";
+import { i18n } from "../../../i18n";
 import {
   getAccountManager,
   useDaimoChain,
@@ -26,16 +26,14 @@ import { generateRandomName } from "../../../logic/name";
 import { getRpcHook } from "../../../logic/trpc";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
-import { InputBig, OctName } from "../../shared/InputBig";
+import { IconRow } from "../../shared/IconRow";
+import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
 import image from "../../shared/image";
 import { color, ss } from "../../shared/style";
-import {
-  TextBody,
-  TextBodyMedium,
-  TextBtnCaps,
-  TextCenter,
-} from "../../shared/text";
+import { TextBodyMedium, TextBtnCaps, TextCenter } from "../../shared/text";
+
+const i18 = i18n.onboardingChooseName;
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "CreateChooseName">;
 export function OnboardingChooseNameScreen({ route }: Props) {
@@ -58,7 +56,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View>
         <OnboardingHeader
-          title="Choose Username"
+          title={i18.screenHeader()}
           onPrev={useExitBack()}
           steps={steps}
           activeStep={steps - 2}
@@ -87,20 +85,9 @@ function Instructions() {
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
-        Choose a username you'll go by on Daimo. Your username is public.
+        {i18.instructions()}
       </TextBodyMedium>
     </TextCenter>
-  );
-}
-
-function IconRow(props: { icon?: OctName; color?: string; title: string }) {
-  const { icon, title } = props;
-  const col = props.color || color.grayMid;
-  return (
-    <View style={styles.iconRow}>
-      {icon && <Octicons {...{ name: icon, size: 20, color: col }} />}
-      <TextBody color={col}>{title}</TextBody>
-    </View>
   );
 }
 
@@ -147,7 +134,9 @@ function NamePicker({
               style={{ width: 16, height: 16, zIndex: -1 }}
             />
             <Spacer w={8} />
-            <TextBtnCaps color={color.primary}>GENERATE RANDOM</TextBtnCaps>
+            <TextBtnCaps color={color.primary}>
+              {i18.picker.generateRandom()}
+            </TextBtnCaps>
           </View>
         </TextButton>
       );
@@ -158,9 +147,9 @@ function NamePicker({
     } else if (result.isLoading) {
       return <IconRow color={color.grayMid} title="..." />;
     } else if (result.error) {
-      return <IconRow icon="alert" title="offline?" />;
+      return <IconRow icon="alert" title={i18.picker.error()} />;
     } else if (result.isSuccess && result.data) {
-      return <IconRow icon="alert" title="sorry, that name is taken" />;
+      return <IconRow icon="alert" title={i18.picker.taken()} />;
     } else if (result.isSuccess && result.data === null) {
       isAvailable = true;
       return (
@@ -177,9 +166,9 @@ function NamePicker({
   return (
     <View>
       <InputBig
-        placeholder="choose a username"
+        placeholder={i18.picker.title()}
         value={name}
-        onChange={onChange}
+        onChange={(input) => onChange(input.toLowerCase())}
         center
         autoFocus
       />
@@ -188,7 +177,7 @@ function NamePicker({
       <Spacer h={24} />
       <ButtonBig
         type="primary"
-        title="CREATE ACCOUNT"
+        title={i18.picker.createButton()}
         onPress={onChoose}
         disabled={!isAvailable}
       />
@@ -199,12 +188,5 @@ function NamePicker({
 const styles = StyleSheet.create({
   namePickerWrap: {
     height: 168,
-  },
-  iconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    height: 40,
   },
 });

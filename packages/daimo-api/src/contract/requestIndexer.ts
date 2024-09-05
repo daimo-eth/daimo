@@ -1,25 +1,28 @@
 import {
+  AddrLabel,
   DaimoRequestState,
   DaimoRequestV2Status,
   amountToDollars,
-  getEAccountStr,
+  assertNotNull,
+  debugJson,
+  decodeRequestIdString,
   encodeRequestId,
-  parseRequestMetadata,
+  getEAccountStr,
   guessTimestampFromNum,
   now,
-  AddrLabel,
-  decodeRequestIdString,
+  parseRequestMetadata,
+  retryBackoff,
 } from "@daimo/common";
-import { Pool } from "pg";
+import { Kysely } from "kysely";
 import { Address, Hex, bytesToHex, getAddress } from "viem";
 
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { logCoordinateKey } from "../utils/indexing";
-import { retryBackoff } from "../utils/retryBackoff";
 
 interface RequestCreatedLog {
   transactionHash: Hex;
@@ -31,6 +34,7 @@ interface RequestCreatedLog {
   metadata: Hex;
   logAddr: Address;
   blockNumber: bigint;
+  blockTime: number;
 }
 
 interface RequestFulfilledLog {
@@ -39,11 +43,13 @@ interface RequestFulfilledLog {
   id: bigint;
   fulfiller: Address;
   blockNumber: bigint;
+  blockTime: number;
 }
 
 interface RequestCancelledLog {
   id: bigint;
   blockNumber: bigint;
+  blockTime: number;
 }
 
 /* Request contract. Tracks request creation and fulfillment. */
@@ -64,20 +70,69 @@ export class RequestIndexer extends Indexer {
     super("REQUEST");
   }
 
-  async load(pg: Pool, from: number, to: number) {
-    const startTime = Date.now();
-    const statuses: DaimoRequestV2Status[] = [];
-    statuses.push(...(await this.loadCreated(pg, from, to)));
-    statuses.push(...(await this.loadCancelled(pg, from, to)));
-    statuses.push(...(await this.loadFulfilled(pg, from, to)));
-    if (statuses.length === 0) return;
-    console.log(
-      `[REQUEST] loaded ${statuses.length} statuses in ${
-        Date.now() - startTime
-      }ms`
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
+    const startTime = performance.now();
+
+    // Load logs
+    const rows = await retryBackoff(`requestIndexer-${from}-${to}`, () =>
+      kdb
+        .selectFrom("index.daimo_request")
+        .selectAll()
+        .where("chain_id", "=", "" + chainConfig.chainL2.id)
+        .where((eb) => eb.between("block_num", "" + from, "" + to))
+        .orderBy("block_num")
+        .orderBy("log_idx")
+        .execute()
     );
 
-    if (this.updateLastProcessedCheckStale(from, to)) return;
+    // Load context + update in-memory request index
+    const reqsCreated: RequestCreatedLog[] = rows
+      .filter((r) => r.log_name === "RequestCreated")
+      .map((r) => ({
+        transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+        logIndex: Number(r.log_idx),
+        id: BigInt(r.id),
+        recipient: getAddress(
+          bytesToHex(assertNotNull(r.recipient), { size: 20 })
+        ),
+        creator: getAddress(bytesToHex(assertNotNull(r.creator), { size: 20 })),
+        amount: BigInt(assertNotNull(r.amount)),
+        metadata: bytesToHex(r.metadata || Buffer.from([])),
+        logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
+        blockNumber: BigInt(r.block_num),
+        blockTime: Number(r.block_ts),
+      }));
+    const reqsFulfilled: RequestFulfilledLog[] = rows
+      .filter((r) => r.log_name === "RequestFulfilled")
+      .map((r) => ({
+        transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
+        logIndex: Number(r.log_idx),
+        id: BigInt(r.id),
+        fulfiller: getAddress(
+          bytesToHex(assertNotNull(r.fulfiller), { size: 20 })
+        ),
+        blockNumber: BigInt(r.block_num),
+        blockTime: Number(r.block_ts),
+      }));
+    const reqsCancelled: RequestCancelledLog[] = rows
+      .filter((r) => r.log_name === "RequestCancelled")
+      .map((r) => ({
+        id: BigInt(r.id),
+        blockNumber: BigInt(r.block_num),
+        blockTime: Number(r.block_ts),
+      }));
+
+    const statuses: DaimoRequestV2Status[] = [];
+    statuses.push(...(await this.handleRequestsCreated(reqsCreated)));
+    statuses.push(...(await this.handleRequestsFulfilled(reqsFulfilled)));
+    statuses.push(...(await this.handleRequestsCancelled(reqsCancelled)));
+    if (statuses.length === 0) return;
+
+    // Log
+    const elapsedMs = (performance.now() - startTime) | 0;
+    console.log(
+      `[REQUEST] handled ${rows.length} request updates in ${elapsedMs}ms`
+    );
 
     // Finally, invoke listeners to send notifications etc.
     const ls = this.listeners;
@@ -102,45 +157,11 @@ export class RequestIndexer extends Indexer {
   addListener(listener: (statuses: DaimoRequestV2Status[]) => void) {
     this.listeners.push(listener);
   }
-
-  private async loadCreated(
-    pg: Pool,
-    from: number,
-    to: number
+  private async handleRequestsCreated(
+    logs: RequestCreatedLog[]
   ): Promise<DaimoRequestV2Status[]> {
-    const result = await retryBackoff(`requestLoadCreated-${from}-${to}`, () =>
-      pg.query(
-        `select
-            tx_hash,
-            log_idx,
-            id,
-            recipient,
-            creator,
-            amount,
-            metadata,
-            log_addr,
-            block_num
-          from request_created
-          where block_num >= $1
-          and block_num <= $2
-          and chain_id = $3
-      `,
-        [from, to, chainConfig.chainL2.id]
-      )
-    );
-    const logs = result.rows.map(rowToRequestCreatedLog);
-    // todo: ignore requests not made by the API
-
-    const promises = logs.map(async (l) => {
-      try {
-        return this.handleRequestCreated(l);
-      } catch (e) {
-        console.error(`[REQUEST] Error handling RequestCreated: ${e}`);
-        return null;
-      }
-    });
-    const statuses = (await Promise.all(promises)).filter((n) => n != null);
-    return statuses as DaimoRequestV2Status[];
+    const promises = logs.map((log) => this.handleRequestCreated(log));
+    return Promise.all(promises);
   }
 
   private async handleRequestCreated(
@@ -151,28 +172,20 @@ export class RequestIndexer extends Indexer {
       throw new Error(`bad RequestCreated: ${log.id} exists`);
     }
 
-    const recipient = await this.nameReg.getEAccount(log.recipient);
-
     // TODO: Anyone is allowed to create a request for any recipient on-chain.
     // In future, this could lead to potential spam attacks, so we can use
     // the creator field to filter whitelisted creators.
     const creator = await this.nameReg.getEAccount(log.creator);
+    const recipient = await this.nameReg.getEAccount(log.recipient);
 
     if (creator.label !== AddrLabel.Faucet) {
-      console.warn(
-        `[REQUEST] ${log.id} creator ${JSON.stringify(creator)} is not API`
-      );
+      console.warn(`[REQUEST] ${log.id} creator ${debugJson(creator)} not API`);
     }
 
     const { fulfiller } = parseRequestMetadata(log.metadata);
     const expectedFulfiller = fulfiller
       ? await this.nameReg.getEAccount(fulfiller)
       : undefined;
-
-    const createdAt = guessTimestampFromNum(
-      log.blockNumber,
-      chainConfig.daimoChain
-    );
 
     // Get optional memo, offchain
     // TODO: index memos by {noteID, requestID, or transferLogCoord}, not hash
@@ -189,8 +202,8 @@ export class RequestIndexer extends Indexer {
       creator,
       status: DaimoRequestState.Created,
       metadata: log.metadata,
-      createdAt,
-      updatedAt: createdAt,
+      createdAt: log.blockTime,
+      updatedAt: log.blockTime,
       expectedFulfiller,
       memo,
     };
@@ -206,33 +219,40 @@ export class RequestIndexer extends Indexer {
     return requestStatus;
   }
 
-  private async loadCancelled(
-    pg: Pool,
-    from: number,
-    to: number
+  private async handleRequestsFulfilled(
+    reqs: RequestFulfilledLog[]
   ): Promise<DaimoRequestV2Status[]> {
-    const result = await retryBackoff(
-      `requestLoadCancelled-${from}-${to}`,
-      () =>
-        pg.query(
-          `
-          select
-            id,
-            block_num
-        from request_cancelled
-        where block_num >= $1
-        and block_num <= $2
-        and chain_id = $3
-      `,
-          [from, to, chainConfig.chainL2.id]
-        )
-    );
-    const cancelledRequests = result.rows.map(rowToRequestCancelledLog);
-    const statuses = cancelledRequests
+    const promises = reqs
+      .map(async (req) => {
+        const request = this.requests.get(req.id);
+        if (request == null) {
+          console.error(`[REQUEST] RequestFulfilled missing ID: ${req.id}`);
+          return null;
+        }
+        const fulfilledBy = await this.nameReg.getEAccount(req.fulfiller);
+        request.fulfilledBy = fulfilledBy;
+        request.status = DaimoRequestState.Fulfilled;
+        request.updatedAt = req.blockTime;
+        this.requests.set(req.id, request);
+        this.logCoordinateToRequestFulfill.set(
+          logCoordinateKey(req.transactionHash, req.logIndex),
+          req.id
+        );
+        return request;
+      })
+      .filter((p) => p != null);
+    const results = await Promise.all(promises);
+    return results.filter((n) => n != null) as DaimoRequestV2Status[];
+  }
+
+  private async handleRequestsCancelled(
+    reqs: RequestCancelledLog[]
+  ): Promise<DaimoRequestV2Status[]> {
+    const statuses = reqs
       .map((req) => {
         const request = this.requests.get(req.id);
         if (request == null) {
-          console.error(`[REQUEST] Error handling RequestCancelled: ${req.id}`);
+          console.error(`[REQUEST] error handling RequestCancelled: ${req.id}`);
           return null;
         }
         request.status = DaimoRequestState.Cancelled;
@@ -248,67 +268,17 @@ export class RequestIndexer extends Indexer {
     return statuses as DaimoRequestV2Status[];
   }
 
-  private async loadFulfilled(
-    pg: Pool,
-    from: number,
-    to: number
-  ): Promise<DaimoRequestV2Status[]> {
-    const result = await retryBackoff(
-      `requestLoadFulfilled-${from}-${to}`,
-      () =>
-        pg.query(
-          `select
-             tx_hash,
-             log_idx,
-             id,
-             fulfiller,
-             block_num
-          from request_fulfilled
-          where block_num >= $1
-          and block_num <= $2
-          and chain_id = $3`,
-          [from, to, chainConfig.chainL2.id]
-        )
-    );
-    const fulfilledRequests = result.rows.map(rowToRequestFulfilledLog);
-    const promises = fulfilledRequests
-      .map(async (req) => {
-        const request = this.requests.get(req.id);
-        if (request == null) {
-          console.error(`[REQUEST] Error handling RequestFulfilled: ${req.id}`);
-          return null;
-        }
-        const fulfilledBy = await this.nameReg.getEAccount(req.fulfiller);
-        request.fulfilledBy = fulfilledBy;
-        request.status = DaimoRequestState.Fulfilled;
-        request.updatedAt = guessTimestampFromNum(
-          req.blockNumber,
-          chainConfig.daimoChain
-        );
-        this.requests.set(req.id, request);
-        this.logCoordinateToRequestFulfill.set(
-          logCoordinateKey(req.transactionHash, req.logIndex),
-          req.id
-        );
-        return request;
-      })
-      .filter((n) => n != null);
-    const statuses = (await Promise.all(promises)).filter((n) => n != null);
-    return statuses as DaimoRequestV2Status[];
-  }
-
   private storeReqByAddress(address: Address, id: bigint) {
     const existingReqs = this.requestsByAddress.get(address) || [];
     this.requestsByAddress.set(address, [...existingReqs, id]);
   }
 
   // Fetch requests sent from/to an address: addr = creator or expectedFulfiller
-  getAddrRequests(addr: Address) {
-    const requests = (this.requestsByAddress.get(addr) || []).map(
-      (id) => this.requests.get(id)!
-    );
-
-    return requests;
+  getAddrRequests(addr: Address): DaimoRequestV2Status[] {
+    const requests = (this.requestsByAddress.get(addr) || [])
+      .map((id) => this.requests.get(id))
+      .filter((r) => r != null);
+    return requests as DaimoRequestV2Status[];
   }
 
   // TODO: gate creates and declines by account API key
@@ -363,35 +333,4 @@ export class RequestIndexer extends Indexer {
     if (id == null) return null;
     return this.getRequestStatusById(id);
   }
-}
-
-function rowToRequestCreatedLog(r: any): RequestCreatedLog {
-  return {
-    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
-    logIndex: r.log_idx,
-    id: BigInt(r.id),
-    recipient: getAddress(bytesToHex(r.recipient, { size: 20 })),
-    creator: getAddress(bytesToHex(r.creator, { size: 20 })),
-    amount: BigInt(r.amount),
-    metadata: bytesToHex(r.metadata || []),
-    logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
-    blockNumber: BigInt(r.block_num),
-  };
-}
-
-function rowToRequestFulfilledLog(r: any): RequestFulfilledLog {
-  return {
-    transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
-    logIndex: r.log_idx,
-    id: BigInt(r.id),
-    fulfiller: getAddress(bytesToHex(r.fulfiller, { size: 20 })),
-    blockNumber: BigInt(r.block_num),
-  };
-}
-
-function rowToRequestCancelledLog(r: any): RequestCancelledLog {
-  return {
-    id: BigInt(r.id),
-    blockNumber: BigInt(r.block_num),
-  };
 }

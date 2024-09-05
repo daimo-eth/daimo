@@ -2,6 +2,7 @@ import {
   DaimoLinkInviteCode,
   DaimoLinkRequestV2,
   amountToDollars,
+  assert,
   assertNotNull,
   encodeRequestId,
   formatDaimoLink,
@@ -12,12 +13,12 @@ import {
   zEAccount,
   zHex,
   zInviteCodeStr,
+  zOffchainAction,
   zUserOpHex,
 } from "@daimo/common";
 import { SpanStatusCode } from "@opentelemetry/api";
 import { TRPCError } from "@trpc/server";
-import { observable } from "@trpc/server/observable";
-import { getAddress, hexToNumber } from "viem";
+import { getAddress, hashMessage, hexToNumber } from "viem";
 import { z } from "zod";
 
 import { AntiSpam } from "./antiSpam";
@@ -28,20 +29,18 @@ import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
-import {
-  AccountHistoryResult,
-  getAccountHistory,
-} from "../api/getAccountHistory";
+import { getAccountHistory } from "../api/getAccountHistory";
 import { getExchangeRates } from "../api/getExchangeRates";
 import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
 import { getSwapQuote } from "../api/getSwapRoute";
-import { healthDebug } from "../api/healthCheck";
+import { healthCheck, healthDebug } from "../api/healthCheck";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
 import { submitWaitlist } from "../api/submitWaitlist";
 import {
+  createTagRedirect,
   getTagRedirect,
   getTagRedirectHist,
   setTagRedirect,
@@ -59,8 +58,9 @@ import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
-import { DB_EVENT_DAIMO_NEW_BLOCK } from "../db/notifications";
+import { IndexWatcher } from "../db/indexWatcher";
 import { getEnvApi } from "../env";
+import { landlineDeposit } from "../landline/connector";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
 import { BundlerClient } from "../network/bundlerClient";
@@ -68,14 +68,14 @@ import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
-import { Watcher } from "../shovel/watcher";
+import { verifyERC1271Signature } from "../utils/verifySignature";
 
 // Service authentication for, among other things, invite link creation
 const apiKeys = new Set(getEnvApi().DAIMO_ALLOWED_API_KEYS?.split(",") || []);
 console.log(`[API] allowed API keys: ${[...apiKeys].join(", ")}`);
 
 export function createRouter(
-  watcher: Watcher,
+  watcher: IndexWatcher,
   vc: ViemClient,
   db: DB,
   bundlerClient: BundlerClient,
@@ -183,14 +183,13 @@ export function createRouter(
 
   return trpcT.router({
     health: publicProcedure.query(async () => {
-      // See readyMiddleware for ready check
-      return { status: "healthy" };
+      const ret = await healthCheck(db, watcher, startTimeS);
+      console.log(`[API] health check: ${ret.status}`);
+      return ret;
     }),
 
     healthDebug: publicProcedure.query(async () => {
-      const ret = await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
-      console.log(`[API] health check: ${ret.status}`);
-      return ret;
+      return await healthDebug(db, watcher, startTimeS, trpcReqsInFlight);
     }),
 
     search: publicProcedure
@@ -213,7 +212,7 @@ export function createRouter(
         z.object({
           amountIn: zBigIntStr,
           fromToken: zAddress,
-          fromAccount: zEAccount,
+          fromAccount: zEAccount, // TODO: zAddress
           toToken: zAddress,
           toAddr: zAddress,
           chainId: z.number(),
@@ -223,6 +222,7 @@ export function createRouter(
         const { amountIn, fromToken, fromAccount, toToken, toAddr, chainId } =
           opts.input;
         return await getSwapQuote({
+          receivedAt: now(),
           amountInStr: amountIn,
           tokenIn: getAddress(fromToken),
           tokenOut: getAddress(toToken),
@@ -341,16 +341,18 @@ export function createRouter(
           address: zAddress,
           inviteCode: z.string().optional(),
           sinceBlockNum: z.number(),
+          lang: z.string().optional(),
         })
       )
       .query(async (opts) => {
-        const { inviteCode, sinceBlockNum } = opts.input;
+        const { inviteCode, sinceBlockNum, lang } = opts.input;
         const address = getAddress(opts.input.address);
         return getAccountHistory(
           opts.ctx,
           address,
           inviteCode,
           sinceBlockNum,
+          lang,
           vc,
           homeCoinIndexer,
           foreignCoinIndexer,
@@ -364,7 +366,7 @@ export function createRouter(
           paymaster,
           db,
           extApiCache,
-          await watcher.getShovelLatest()
+          watcher.latestBlock().number
         );
       }),
 
@@ -583,7 +585,6 @@ export function createRouter(
         return profileCache.updateProfileLinks(addr, actionJSON, signature);
       }),
 
-    // @deprecated, remove by 2024 Q4
     getTagRedirect: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
@@ -591,22 +592,39 @@ export function createRouter(
         return getTagRedirect(tag, db);
       }),
 
-    // @deprecated, remove by 2024 Q4
+    createTagRedirect: publicProcedure
+      .input(
+        z.object({
+          apiKey: z.string(),
+          tag: z.string(),
+          link: z.string(),
+          updateToken: z.string(),
+        })
+      )
+      .mutation(async (opts) => {
+        const { apiKey, tag, link, updateToken } = opts.input;
+        authorize(apiKey);
+
+        const res = await createTagRedirect(tag, link, updateToken, db);
+        return { tag: res.tag, link: res.link };
+      }),
+
     updateTagRedirect: publicProcedure
       .input(
         z.object({ tag: z.string(), link: z.string(), updateToken: z.string() })
       )
       .mutation(async (opts) => {
         const { tag, link, updateToken } = opts.input;
-        return setTagRedirect(tag, link, updateToken, db);
+
+        const res = await setTagRedirect(tag, link, updateToken, db);
+        return { tag: res.tag, link: res.link };
       }),
 
-    // @deprecated, remove by 2024 Q4
     getTagHistory: publicProcedure
       .input(z.object({ tag: z.string() }))
       .query(async (opts) => {
         const { tag } = opts.input;
-        return getTagRedirectHist(tag, db);
+        return await getTagRedirectHist(tag, db);
       }),
 
     // @deprecated, remove by 2024 Q4
@@ -664,6 +682,38 @@ export function createRouter(
         await reqIndexer.declineRequest(requestId, decliner);
       }),
 
+    depositFromLandline: publicProcedure
+      .input(
+        z.object({
+          daimoAddress: zAddress,
+          actionJSON: z.string(),
+          signature: zHex,
+        })
+      )
+      .mutation(async (opts) => {
+        const { daimoAddress, actionJSON, signature } = opts.input;
+
+        const isValidSignature = await verifyERC1271Signature(
+          vc,
+          daimoAddress,
+          hashMessage(actionJSON),
+          signature
+        );
+        assert(isValidSignature, "Invalid ERC-1271 signature");
+
+        const action = zOffchainAction.parse(JSON.parse(actionJSON));
+        assert(action.type === "landlineDeposit", "Invalid action type");
+
+        const response = await landlineDeposit(
+          daimoAddress,
+          action.landlineAccountUuid,
+          action.amount,
+          action.memo
+        );
+
+        return response;
+      }),
+
     // @deprecated, remove by 2024 Q4
     verifyInviteCode: publicProcedure
       .input(z.object({ inviteCode: z.string() }))
@@ -712,85 +762,6 @@ export function createRouter(
           telemetry,
           inviteCodeTracker
         );
-      }),
-
-    onAccountUpdate: publicProcedure
-      .input(
-        z.object({
-          address: zAddress,
-          inviteCode: z.string().optional(),
-          sinceBlockNum: z.number(),
-        })
-      )
-      .subscription(async (opts) => {
-        const { address, inviteCode } = opts.input;
-        // how often to send updates regardless of new transfers
-        // useful to update keys, exchange rates and others.
-        const refreshInterval = 10_000;
-
-        return observable<AccountHistoryResult>((emit) => {
-          let lastEmittedBlock = opts.input.sinceBlockNum;
-
-          const pushHistory = async (
-            blockNumber: number,
-            requireNewTransfers = false
-          ) => {
-            const history = await getAccountHistory(
-              opts.ctx,
-              address,
-              inviteCode,
-              blockNumber,
-              vc,
-              homeCoinIndexer,
-              foreignCoinIndexer,
-              profileCache,
-              noteIndexer,
-              reqIndexer,
-              inviteCodeTracker,
-              inviteGraph,
-              nameReg,
-              keyReg,
-              paymaster,
-              db,
-              extApiCache,
-              blockNumber
-            );
-
-            if (lastEmittedBlock >= history.lastBlock) {
-              return;
-            }
-
-            if (requireNewTransfers && history.transferLogs.length === 0) {
-              return;
-            }
-
-            emit.next(history);
-
-            lastEmittedBlock = history.lastBlock;
-          };
-
-          // on new block, push state only when new transfers are available
-          const onNewBlock = async (payload: string) => {
-            const { block_number } = JSON.parse(payload);
-
-            pushHistory(block_number, true);
-          };
-
-          // for interval updates push full history
-          const intervalTimer = setInterval(async () => {
-            const blockNumber = await watcher.getShovelLatest();
-
-            pushHistory(blockNumber);
-          }, refreshInterval);
-
-          watcher.notifications.on(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
-
-          return () => {
-            watcher.notifications.off(DB_EVENT_DAIMO_NEW_BLOCK, onNewBlock);
-
-            clearInterval(intervalTimer);
-          };
-        });
       }),
   });
 }

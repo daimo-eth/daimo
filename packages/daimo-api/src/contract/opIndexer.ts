@@ -1,12 +1,15 @@
+import { assertNotNull, retryBackoff } from "@daimo/common";
 import { DaimoNonce } from "@daimo/userop";
-import { Pool } from "pg";
+import { Kysely } from "kysely";
 import { Hex, bytesToHex, numberToHex } from "viem";
 
 import { Indexer } from "./indexer";
+import { SwapClogMatcher } from "./SwapClogMatcher";
+import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
-import { retryBackoff } from "../utils/retryBackoff";
 
 export interface UserOp {
+  blockNumber: bigint;
   transactionHash: Hex;
   logIndex: number;
   nonce: bigint;
@@ -20,7 +23,7 @@ export class OpIndexer extends Indexer {
   private txHashToSortedUserOps: Map<Hex, UserOp[]> = new Map();
   private callbacks: Map<Hex, OpCallback[]> = new Map();
 
-  constructor() {
+  constructor(private swapClogMatcher: SwapClogMatcher) {
     super("OP");
   }
 
@@ -40,37 +43,38 @@ export class OpIndexer extends Indexer {
     this.callbacks.delete(userOp.hash);
   }
 
-  async load(pg: Pool, from: number, to: number) {
+  async load(kdb: Kysely<IndexDB>, from: number, to: number) {
     const startTime = Date.now();
+
     const result = await retryBackoff(
       `opIndexer-logs-query-${from}-${to}`,
       () =>
-        pg.query(
-          `
-        select tx_hash, log_idx, op_nonce, op_hash
-        from erc4337_user_op
-        where block_num >= $1 and block_num <= $2 and chain_id = $3
-        and op_sender in (select addr from "names")
-      `,
-          [from, to, chainConfig.chainL2.id]
-        )
+        kdb
+          .selectFrom("index.daimo_op")
+          .select(["block_num", "tx_hash", "log_idx", "op_nonce", "op_hash"])
+          .where((eb) => eb.between("block_num", "" + from, "" + to))
+          .where("chain_id", "=", "" + chainConfig.chainL2.id)
+          .execute()
     );
-    if (result.rows.length === 0) return;
-    console.log(
-      `[OP] loaded ${result.rows.length} ops in ${Date.now() - startTime}ms`
-    );
+    if (result.length === 0) return;
+
+    let elapsedMs = (Date.now() - startTime) | 0;
+    console.log(`[OP] loaded ${result.length} ops in ${elapsedMs}ms`);
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    result.rows.forEach((row: any) => {
+    const blockNums = new Set<bigint>();
+    const txHashes = new Set<Hex>();
+    result.forEach((row) => {
       const userOp: UserOp = {
-        transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
-        logIndex: row.log_idx,
-        nonce: BigInt(row.op_nonce),
-        hash: bytesToHex(row.op_hash, { size: 32 }),
+        blockNumber: BigInt(row.block_num),
+        transactionHash: bytesToHex(assertNotNull(row.tx_hash), { size: 32 }),
+        logIndex: Number(assertNotNull(row.log_idx)),
+        nonce: BigInt(assertNotNull(row.op_nonce)),
+        hash: bytesToHex(assertNotNull(row.op_hash), { size: 32 }),
       };
       const curLogs = this.txHashToSortedUserOps.get(userOp.transactionHash);
-      const newLogs = curLogs ? [...curLogs, row] : [userOp];
+      const newLogs = curLogs ? [...curLogs, userOp] : [userOp];
       this.txHashToSortedUserOps.set(
         userOp.transactionHash,
         newLogs.sort((a, b) => a.logIndex - b.logIndex)
@@ -82,9 +86,20 @@ export class OpIndexer extends Indexer {
       if (!nonceMetadata) return;
 
       this.callback(userOp);
+      blockNums.add(userOp.blockNumber);
+      txHashes.add(userOp.transactionHash);
     });
-    console.log(
-      `[OP] processed ${result.rows.length} ops in ${Date.now() - startTime}ms`
+
+    elapsedMs = (Date.now() - startTime) | 0;
+    console.log(`[OP] processed ${result.length} ops in ${elapsedMs}ms`);
+
+    this.swapClogMatcher.loadSwapTransfers(
+      kdb,
+      from,
+      to,
+      chainConfig.chainL2.id,
+      blockNums,
+      txHashes
     );
   }
 
