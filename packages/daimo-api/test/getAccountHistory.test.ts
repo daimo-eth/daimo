@@ -66,9 +66,9 @@ test("addLandlineTransfers", (t) => {
         status: LandlineTransferStatus.Completed,
         statusMessage: "transfer completed",
 
-        createdAt: "2024-01-01T00:00:00Z",
-        estimatedClearingDate: "2024-01-02T00:00:00Z",
-        completedAt: "2024-01-02T00:00:00Z",
+        createdAt: new Date("2024-01-01T00:00:00Z").getTime(),
+        estimatedClearingDate: new Date("2024-01-02T00:00:00Z").getTime(),
+        completedAt: new Date("2024-01-02T00:00:00Z").getTime(),
       },
     ];
 
@@ -165,9 +165,9 @@ test("addLandlineTransfers", (t) => {
           status: LandlineTransferStatus.Processing,
           statusMessage: "processing deposit",
 
-          createdAt: "2024-01-01T00:00:00Z",
-          estimatedClearingDate: "2024-01-02T00:00:00Z",
-          completedAt: "2024-01-02T00:00:00Z",
+          createdAt: new Date("2024-01-01T00:00:00Z").getTime(),
+          estimatedClearingDate: new Date("2024-01-02T00:00:00Z").getTime(),
+          completedAt: new Date("2024-01-02T00:00:00Z").getTime(),
         },
         {
           daimoAddress: "0x6af35dF65594398726140cf1bf0339e94c7A817F",
@@ -197,9 +197,9 @@ test("addLandlineTransfers", (t) => {
           status: LandlineTransferStatus.Processing,
           statusMessage: "processing withdrawal",
 
-          createdAt: "2024-02-01T00:00:00Z",
-          estimatedClearingDate: "2024-02-03T00:00:00Z",
-          completedAt: "2024-02-03T00:00:00Z",
+          createdAt: new Date("2024-02-01T00:00:00Z").getTime(),
+          estimatedClearingDate: new Date("2024-02-03T00:00:00Z").getTime(),
+          completedAt: new Date("2024-02-03T00:00:00Z").getTime(),
         },
       ];
 
