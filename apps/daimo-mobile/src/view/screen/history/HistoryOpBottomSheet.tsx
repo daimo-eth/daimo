@@ -282,7 +282,7 @@ function TransferBody({
   let coinName = chainConfig.tokenSymbol;
   let chainName = chainConfig.chainL2.name.toUpperCase();
 
-  // Special case: if this transfer is from or to a different coin
+  // Special case: if this transfer is from or to a different coin or chain
   let foreignChainName: string | undefined = undefined;
   if (transferClog.type === "transfer") {
     const coin =

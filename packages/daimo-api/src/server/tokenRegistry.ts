@@ -1,96 +1,66 @@
-import { assert, getSupportedSendPairs } from "@daimo/common";
+import { getSupportedSendPairs } from "@daimo/common";
 import {
   ForeignToken,
-  baseUSDC,
-  baseUSDbC,
-  getChainName,
-  getNativeETHForChain,
+  base,
+  getTokensForChain,
+  isTestnetChain,
+  polygon,
+  ethereum,
+  arbitrum,
+  chainToForeignTokens,
 } from "@daimo/contract";
-import { Address, Hex, getAddress, isAddress } from "viem";
+import { Address, getAddress } from "viem";
 
 import { chainConfig } from "../env";
-import { fetchWithBackoff } from "../network/fetchWithBackoff";
 
-interface CoinGeckoResponse {
-  tokens: CoinGeckoToken[];
-  version: any;
-}
-
-interface CoinGeckoToken {
-  chainId: number;
-  address: Hex;
-  name: string;
-  symbol: string;
-  decimals: number;
-  logoURI?: string;
-}
-
-const customOverrides = [baseUSDC, baseUSDbC] as ForeignToken[];
-
-// Token Registry sorted by chain id.
+/**
+ * Token Registry sorted by chain id.
+ */
 export class TokenRegistry {
+  /** Map of chainId to token address to foreign token type. */
   private foreignTokensByChain = new Map<number, Map<Address, ForeignToken>>();
 
   private defaultChainId = chainConfig.chainL2.id;
 
-  // No token registry on testnet
-  private chains = chainConfig.chainL2.testnet ? [] : [this.defaultChainId];
-
+  // Load tokens for all chains
   public async load() {
-    for (const chainId of this.chains) {
-      const chainName = getChainName(chainId);
-      const foreignTokens = new Map<Address, ForeignToken>();
-
-      // Add native ETH
-      const nativeETH = getNativeETHForChain(chainId);
-      if (nativeETH != null) foreignTokens.set(nativeETH.token, nativeETH);
-
-      // Add coins from CoinGecko
-      const tokenList = (await (
-        await fetchWithBackoff(
-          `https://tokens.coingecko.com/${chainName}/all.json`
-        )
-      ).json()) as CoinGeckoResponse;
-
-      for (const token of tokenList.tokens) {
-        assert(
-          token.chainId === chainConfig.chainL2.id,
-          `Unsupported token on ${chainName}`
-        );
-        const largeLogo = token.logoURI
-          ?.split("?")[0]
-          .replace("thumb", "large");
-        // Ignore invalid addresses that Coingecko returns
-        if (!isAddress(token.address)) continue;
-        const addr = getAddress(token.address);
-
-        // TODO: add known coins, including all supported stables
-        // if (addr === chainConfig.tokenAddress) continue; // excude home coin
-
-        const override = customOverrides.find(
-          (o) => o.token === addr && o.chainId === chainId
-        );
-        if (override) foreignTokens.set(addr, override);
-        else {
-          foreignTokens.set(addr, {
-            token: addr,
-            decimals: token.decimals,
-            name: token.name.trim().replaceAll(/  */g, " "),
-            symbol: token.symbol.trim(),
-            logoURI: largeLogo,
-            chainId: token.chainId,
-          });
+    // If on testnet, only load native and CCTP tokens
+    if (isTestnetChain(chainConfig.chainL2.id)) {
+      chainToForeignTokens.forEach((tokens, chainId) => {
+        const foreignTokens = new Map<Address, ForeignToken>();
+        for (const token of tokens) {
+          foreignTokens.set(token.token, token);
         }
-      }
+        this.foreignTokensByChain.set(chainId, foreignTokens);
+      });
       console.log(
-        `[TOKEN-REG] loaded ${foreignTokens.size} tokens on ${chainName}`
+        `[TOKEN-REG] loaded ${this.foreignTokensByChain.size} testnet tokens`
       );
+    }
+
+    // Otherwise, load tokens from generated registry
+    const chainIds = [
+      base.chainId,
+      polygon.chainId,
+      arbitrum.chainId,
+      ethereum.chainId,
+    ];
+    for (const chainId of chainIds) {
+      const foreignTokens = new Map<Address, ForeignToken>();
+      const tokens = getTokensForChain(chainId);
+      tokens.forEach((token) => {
+        foreignTokens.set(token.token, token);
+      });
       this.foreignTokensByChain.set(chainId, foreignTokens);
     }
+    console.log(
+      `[TOKEN-REG] loaded ${this.foreignTokensByChain.size} mainnet tokens`
+    );
   }
 
-  // Get a token from the foreign token list.
-  // If includeHomeCoin is true, include the home coin in the list.
+  /**
+   * Get a token from the foreign token list.
+   */
   public getToken(addr: Address, chainId?: number): ForeignToken | undefined {
     const tokenAddress = getAddress(addr);
     const cid = chainId ?? this.defaultChainId;

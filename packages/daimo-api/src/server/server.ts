@@ -14,6 +14,7 @@ import { TokenRegistry } from "./tokenRegistry";
 import { createContext, onTrpcError } from "./trpc";
 import { ProfileCache } from "../api/profile";
 import { AccountFactory } from "../contract/accountFactory";
+import { ClogMatcher } from "../contract/ClogMatcher";
 import { ForeignCoinIndexer } from "../contract/foreignCoinIndexer";
 import { HomeCoinIndexer } from "../contract/homeCoinIndexer";
 import { KeyRegistry } from "../contract/keyRegistry";
@@ -22,7 +23,6 @@ import { NoteIndexer } from "../contract/noteIndexer";
 import { OpIndexer } from "../contract/opIndexer";
 import { Paymaster } from "../contract/paymaster";
 import { RequestIndexer } from "../contract/requestIndexer";
-import { SwapClogMatcher } from "../contract/SwapClogMatcher";
 import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { IndexWatcher } from "../db/indexWatcher";
@@ -70,8 +70,8 @@ async function main() {
   const tokenReg = new TokenRegistry();
   await tokenReg.load();
 
-  const swapClogMatcher = new SwapClogMatcher(tokenReg);
-  const opIndexer = new OpIndexer(swapClogMatcher);
+  const clogMatcher = new ClogMatcher(tokenReg);
+  const opIndexer = new OpIndexer(clogMatcher);
   const noteIndexer = new NoteIndexer(nameReg, opIndexer, paymentMemoTracker);
   const requestIndexer = new RequestIndexer(db, nameReg, paymentMemoTracker);
   const foreignCoinIndexer = new ForeignCoinIndexer(nameReg, vc, tokenReg);
@@ -83,7 +83,7 @@ async function main() {
     requestIndexer,
     foreignCoinIndexer,
     paymentMemoTracker,
-    swapClogMatcher
+    clogMatcher
   );
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);

@@ -2,6 +2,8 @@ import {
   ChainConfig,
   ForeignToken,
   getForeignCoinDisplayAmount,
+  getChainDisplayName,
+  getDAv2Chain,
 } from "@daimo/contract";
 import { Locale } from "expo-localization";
 import { Address, Hex } from "viem";
@@ -55,7 +57,7 @@ export type PreSwapTransfer = {
  * cross-chain transfer.
  */
 export type PostSwapTransfer = {
-  coin: ForeignToken;
+  coin: ForeignToken; // coin contains chainId
   amount: BigIntStr; // in native unit of the token
   to: Address;
 };
@@ -312,8 +314,9 @@ export function getSynthesizedMemo(
   const i18 = i18n(locale).op;
   // TODO: use home coin from account
   const homeCoinSymbol = chainConfig.tokenSymbol.toUpperCase();
+  let memo;
 
-  if (op.memo) return op.memo;
+  if (op.memo) memo = op.memo;
   if (op.type === "createLink" && op.noteStatus.memo) return op.noteStatus.memo;
   if (op.type === "claimLink" && op.noteStatus.memo) return op.noteStatus.memo;
 
@@ -322,33 +325,47 @@ export function getSynthesizedMemo(
   } else if (op.type === "transfer" && op.preSwapTransfer) {
     const { amount, coin } = op.preSwapTransfer;
     const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+
+    // inbound cross-chain transfer
+    if (coin.chainId !== chainConfig.chainL2.id) {
+      const crossChain = getChainDisplayName(getDAv2Chain(coin.chainId));
+      return short
+        ? `${homeCoinSymbol} ${crossChain}`
+        : i18.acceptedInbound(
+            readableAmount,
+            coin.symbol,
+            homeCoinSymbol,
+            crossChain
+          );
+    }
+
+    // inbound swap
     return short
       ? `${readableAmount} ${coin.symbol} → ${homeCoinSymbol}`
-      : i18.acceptedInboundSwap(readableAmount, coin.symbol, homeCoinSymbol);
+      : i18.acceptedInbound(readableAmount, coin.symbol, homeCoinSymbol);
   } else if (op.type === "transfer" && op.postSwapTransfer) {
     const { amount, coin } = op.postSwapTransfer;
     const readableAmount = getForeignCoinDisplayAmount(amount, coin);
+
+    // outbound cross-chain transfer
+    if (coin.chainId !== chainConfig.chainL2.id) {
+      const crossChain = getChainDisplayName(getDAv2Chain(coin.chainId));
+      const crossChainShort = getChainDisplayName(
+        getDAv2Chain(coin.chainId),
+        true
+      );
+      const shortMemo = memo
+        ? `${memo} • ${homeCoinSymbol} ${crossChainShort}`
+        : `${homeCoinSymbol} ${crossChain}`;
+      return short
+        ? shortMemo
+        : i18.sentOutbound(readableAmount, coin.symbol, crossChain);
+    }
+
+    // oubound swap
     return short
       ? `${homeCoinSymbol} → ${readableAmount} ${coin.symbol}`
-      : i18.sentOutboundSwap(readableAmount, coin.symbol);
+      : i18.sentOutbound(readableAmount, coin.symbol);
   }
-
-  // TODO: postSwapTransfer
-  //  else if (op.type === "inboundSwap" || op.type === "outboundSwap") {
-  //   const otherCoin = op.coinOther;
-  //   const readableAmount = getForeignCoinDisplayAmount(
-  //     op.amountOther,
-  //     otherCoin
-  //   );
-
-  //   if (op.type === "inboundSwap") {
-  //     return short
-  //       ? `${readableAmount} ${otherCoin.symbol} → ${coinName}`
-  //       : `Accepted ${readableAmount} ${otherCoin.symbol} as ${coinName}`;
-  //   } else {
-  //     return short
-  //       ? `${coinName} → ${readableAmount} ${otherCoin.symbol}`
-  //       : `Sent ${coinName} as ${readableAmount} ${otherCoin.symbol}`;
-  //   }
-  // }
+  return memo;
 }

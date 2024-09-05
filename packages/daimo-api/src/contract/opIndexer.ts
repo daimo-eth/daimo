@@ -3,8 +3,8 @@ import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
 import { Hex, bytesToHex, numberToHex } from "viem";
 
+import { ClogMatcher } from "./ClogMatcher";
 import { Indexer } from "./indexer";
-import { SwapClogMatcher } from "./SwapClogMatcher";
 import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 
@@ -23,7 +23,7 @@ export class OpIndexer extends Indexer {
   private txHashToSortedUserOps: Map<Hex, UserOp[]> = new Map();
   private callbacks: Map<Hex, OpCallback[]> = new Map();
 
-  constructor(private swapClogMatcher: SwapClogMatcher) {
+  constructor(private clogMatcher: ClogMatcher) {
     super("OP");
   }
 
@@ -63,7 +63,6 @@ export class OpIndexer extends Indexer {
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
-    const blockNums = new Set<bigint>();
     const txHashes = new Set<Hex>();
     result.forEach((row) => {
       const userOp: UserOp = {
@@ -86,19 +85,17 @@ export class OpIndexer extends Indexer {
       if (!nonceMetadata) return;
 
       this.callback(userOp);
-      blockNums.add(userOp.blockNumber);
       txHashes.add(userOp.transactionHash);
     });
 
     elapsedMs = (Date.now() - startTime) | 0;
     console.log(`[OP] processed ${result.length} ops in ${elapsedMs}ms`);
 
-    this.swapClogMatcher.loadSwapTransfers(
+    this.clogMatcher.loadClogTransfers(
       kdb,
       from,
       to,
       chainConfig.chainL2.id,
-      blockNums,
       txHashes
     );
   }
