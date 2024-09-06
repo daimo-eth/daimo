@@ -35,19 +35,19 @@ function getHeader(h: string | string[] | undefined) {
 }
 
 export type DaimoVersion = {
-  applicationVersion: { major: number; minor: number; patch: number } | null;
+  appVersion: { major: number; minor: number; patch: number } | null;
   buildVersion: number | null;
 };
 
 export function parseDaimoVersion(v: string | undefined): DaimoVersion {
   if (v == null) {
-    return { applicationVersion: null, buildVersion: null };
+    return { appVersion: null, buildVersion: null };
   }
 
   // Parse version string in format "1.2.3 #456"
   const parts = v.split(" #");
   if (parts.length !== 2) {
-    return { applicationVersion: null, buildVersion: null };
+    return { appVersion: null, buildVersion: null };
   }
 
   const [applicationVersion, buildVersion] = parts;
@@ -69,7 +69,7 @@ export function parseDaimoVersion(v: string | undefined): DaimoVersion {
     : null;
 
   return {
-    applicationVersion: parsedAppVersion,
+    appVersion: parsedAppVersion,
     buildVersion: parsedBuildVersion,
   };
 }

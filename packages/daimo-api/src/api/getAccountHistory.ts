@@ -203,10 +203,12 @@ export async function getAccountHistory(
     // in version 1.9.8 and doesn't support backcompat.
     // Only add landline transfers if the app version is > 1.9.7
     if (
-      version.applicationVersion != null &&
-      (version.applicationVersion.major > 1 ||
-        version.applicationVersion.minor > 9 ||
-        version.applicationVersion.patch > 6) // TODO, change this to > 7 during 1.9.8 release
+      version.appVersion != null &&
+      (version.appVersion.major > 1 ||
+        (version.appVersion.major === 1 && version.appVersion.minor > 9) ||
+        (version.appVersion.major === 1 &&
+          version.appVersion.minor === 9 &&
+          version.appVersion.patch > 6)) // TODO, change this to > 7 during 1.9.8 release
     ) {
       const landlineTransfers = await getLandlineTransfers(address);
       transferClogs = addLandlineTransfers(
