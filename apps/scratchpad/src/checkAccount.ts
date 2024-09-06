@@ -1,8 +1,4 @@
-import {
-  entryPointABI,
-  erc20ABI,
-  nameRegistryProxyConfig,
-} from "@daimo/contract";
+import { erc20ABI, nameRegistryProxyConfig } from "@daimo/contract";
 import { Constants } from "userop";
 import {
   Address,
@@ -66,19 +62,7 @@ export async function checkAccount() {
   const balStr = formatUnits(bal, tokenDecimals) + " " + tokenSymbol;
   console.log(`BAL      - ${balStr}`);
 
-  // Get account info from the EntryPoint contract
-  const prefundBal = await publicClient.readContract({
-    abi: entryPointABI,
-    address: getAddress(Constants.ERC4337.EntryPoint),
-    functionName: "balanceOf",
-    args: [addr],
-  });
-  const prefundStr = formatUnits(prefundBal, 18) + " ETH";
-  console.log(`PREFUND  - ${prefundStr}`);
-  console.log();
-
   console.log(`...NameReg ${nameRegistryProxyConfig.address}`);
   console.log(`...  ERC20 ${chainConfig.tokenAddress}`);
-  console.log(`EntryPoint ${Constants.ERC4337.EntryPoint}`);
   console.log();
 }

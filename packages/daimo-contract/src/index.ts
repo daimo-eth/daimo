@@ -46,6 +46,11 @@ export {
   aggregatorV2V3InterfaceABI,
 } from "./codegen/contracts";
 
+export const nameRegistryProxyConfig = {
+  address: daimoNameRegistryProxyAddress,
+  abi: daimoNameRegistryABI,
+} as const;
+
 // CREATE3 addresses
 export const daimoFastCctpAddress =
   "0x92275f59CEB72DD132de54F726f767ab6ba9559f";
@@ -54,13 +59,13 @@ export const daimoFlexSwapperAddress =
 export const daimoCctpBridgerAddress =
   "0x97DA4FaA21DA8bab9b0724B854Bd43250F25FF58";
 
-export const nameRegistryProxyConfig = {
-  address: daimoNameRegistryProxyAddress,
-  abi: daimoNameRegistryABI,
-} as const;
+// DAv2
+export const entryPointV07Address =
+  "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
 
-// Other internal contracts
-export * from "./legacyAccountV1";
+// DAv1 backcompat
+export * from "./backcompat/daimoAccountV1";
+export * from "./backcompat/entryPointV06";
 
 // Vendored external contract interfaces
 export * from "./external";

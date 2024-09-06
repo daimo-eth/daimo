@@ -1,14 +1,12 @@
+import { UserOpHex, debugJson } from "@daimo/common";
 import {
-  bundleBulkerABI,
-  bundleBulkerAddress,
-  daimoOpInflatorABI,
-  perOpInflatorABI,
-  perOpInflatorAddress,
-} from "@daimo/bulk";
-import { UserOpHex, assert, lookup } from "@daimo/common";
-import { entryPointABI } from "@daimo/contract";
+  entryPointABI,
+  entryPointV06ABI,
+  entryPointV06Address,
+  entryPointV07Address,
+} from "@daimo/contract";
 import { trace } from "@opentelemetry/api";
-import { BundlerJsonRpcProvider, Constants } from "userop";
+import { BundlerJsonRpcProvider } from "userop";
 import {
   Address,
   BaseError,
@@ -20,11 +18,9 @@ import {
   numberToHex,
 } from "viem";
 
-import { CompressionInfo, compressBundle } from "./bundleCompression";
 import { ViemClient } from "./viemClient";
-import { NameRegistry } from "../contract/nameRegistry";
 import { OpIndexer } from "../contract/opIndexer";
-import { chainConfig, getEnvApi } from "../env";
+import { getEnvApi } from "../env";
 
 interface GasPriceParams {
   maxFeePerGas: Hex;
@@ -41,128 +37,64 @@ interface GasPrice {
 export class BundlerClient {
   provider: BundlerJsonRpcProvider;
 
-  // Compression settings
-  private compressionInfo: CompressionInfo | undefined;
-
   constructor(bundlerRpcUrl: string, private opIndexer?: OpIndexer) {
     this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
   }
 
-  async init(publicClient: PublicClient) {
-    console.log(`[BUNDLER] init, loading compression info`);
-
-    const opInflatorAddr = lookup(
-      [84532, "0xf51Da0D79cB71B5b1f7990547838743065aA0c0d" as Address],
-      [8453, "0x8ABD51A785160481DB9E638eE71A3F4Ec4B996D8" as Address]
-    )(chainConfig.chainL2.id);
-
-    const [inflatorID, opInflatorID, opInflatorCoinAddr, opInflatorPaymaster] =
-      await Promise.all([
-        publicClient.readContract({
-          abi: bundleBulkerABI,
-          address: bundleBulkerAddress,
-          functionName: "inflatorToID",
-          args: [perOpInflatorAddress],
-        }),
-        publicClient.readContract({
-          abi: perOpInflatorABI,
-          address: perOpInflatorAddress,
-          functionName: "inflatorToID",
-          args: [opInflatorAddr],
-        }),
-        publicClient.readContract({
-          abi: daimoOpInflatorABI,
-          address: opInflatorAddr,
-          functionName: "coinAddr",
-        }),
-        publicClient.readContract({
-          abi: daimoOpInflatorABI,
-          address: opInflatorAddr,
-          functionName: "paymaster",
-        }),
-      ]);
-    console.log(`[BUNDLER] init done. inflatorID: ${inflatorID}`);
-
-    this.compressionInfo = {
-      inflatorAddr: perOpInflatorAddress,
-      inflatorID,
-      opInflatorID,
-      opInflatorCoinAddr,
-      opInflatorPaymaster,
-    };
-  }
-
-  async sendUserOp(
-    opHash: Hex,
-    op: UserOpHex,
-    viemClient: ViemClient,
-    nameReg?: NameRegistry
-  ) {
+  async sendUserOp(opHash: Hex, op: UserOpHex, viemClient: ViemClient) {
     console.log(`[BUNDLER] submitting userOp: ${JSON.stringify(op)}`);
 
-    try {
-      assert(nameReg != null, "nameReg required");
-      const compressed = this.compress(op, nameReg);
-      await this.sendCompressedBundle(compressed, viemClient);
-
-      if (this.opIndexer) {
-        const opStart = Date.now();
-        const span = trace.getTracer("daimo-api").startSpan("bundler.submit");
-        this.opIndexer.addCallback(opHash, (userOp) => {
-          span.setAttributes({
-            "op.hash": userOp.hash,
-            "op.tx_hash": userOp.transactionHash,
-            "op.log_index": userOp.logIndex,
-          });
-          span.end();
-          const elapsedMs = (Date.now() - opStart) | 0;
-          console.log(`[BUNDLER] user op completed in ${elapsedMs}ms`);
+    if (this.opIndexer) {
+      const opStart = Date.now();
+      const span = trace.getTracer("daimo-api").startSpan("bundler.submit");
+      this.opIndexer.addCallback(opHash, (userOp) => {
+        span.setAttributes({
+          "op.hash": userOp.hash,
+          "op.tx_hash": userOp.transactionHash,
+          "op.log_index": userOp.logIndex,
         });
-      }
-
-      console.log(`[BUNDLER] submitted compressed op ${opHash}`);
-      return opHash;
-    } catch (e) {
-      console.log(`[BUNDLER] cant send compressed, falling back: ${e}`);
-      await this.sendUncompressedBundle(op, viemClient);
-      return opHash;
+        span.end();
+        const elapsedMs = (Date.now() - opStart) | 0;
+        console.log(`[BUNDLER] user op completed in ${elapsedMs}ms`);
+      });
     }
+
+    await this.sendUncompressedBundle(op, viemClient);
+    console.log(`[BUNDLER] submitted uncompressed op ${opHash}`);
+    return opHash;
   }
 
   async getOpHash(op: UserOpHex, publicClient: PublicClient) {
-    return publicClient.readContract({
+    // TODO: use v0.6 for DAv1, v0.7 for DAv2
+    const hashV06 = await publicClient.readContract({
+      abi: entryPointV06ABI,
+      address: entryPointV06Address,
+      functionName: "getUserOpHash",
+      args: [userOpV06FromHex(op)],
+    });
+    const hashV07 = await publicClient.readContract({
       abi: entryPointABI,
-      address: Constants.ERC4337.EntryPoint as Address,
+      address: entryPointV07Address,
       functionName: "getUserOpHash",
       args: [packedUserOpFromHex(op)],
     });
-  }
 
-  compress(op: UserOpHex, nameReg: NameRegistry) {
-    if (this.compressionInfo == null) {
-      throw new Error("can't compress, inflator info not loaded");
-    }
-    return compressBundle(op, this.compressionInfo, nameReg);
-  }
+    console.log(`[BUNDLER] ophash: ${debugJson({ hashV06, hashV07 })}`);
 
-  /// Send compressed userop. This is about 4x cheaper than sending uncompressed
-  async sendCompressedBundle(compressed: Hex, viemClient: ViemClient) {
-    const txHash = await viemClient.sendTransaction({
-      to: bundleBulkerAddress,
-      data: compressed,
-    });
-    return txHash;
+    return hashV06;
   }
 
   /// Send uncompressed. Used for ops for which we don't yet have an inflator.
-  async sendUncompressedBundle(op: UserOpHex, viemClient: ViemClient) {
+  private async sendUncompressedBundle(op: UserOpHex, viemClient: ViemClient) {
+    // TODO: support EntryPoint v0.7 / DAv2 ops
+
     const beneficiary = viemClient.account.address;
     try {
       const txHash = await viemClient.writeContract({
-        abi: entryPointABI,
-        address: Constants.ERC4337.EntryPoint as Address,
+        abi: entryPointV06ABI,
+        address: entryPointV06Address as Address,
         functionName: "handleOps",
-        args: [[packedUserOpFromHex(op)], beneficiary],
+        args: [[userOpV06FromHex(op)], beneficiary],
       });
       console.log(`[BUNDLER] submitted uncompressed bundle: ${txHash}`);
       return txHash;
@@ -243,6 +175,23 @@ function packGasFees({
 function packHiLo(hi: bigint, lo: bigint) {
   return concatHex([
     numberToHex(hi, { size: 16 }),
-    numberToHex(lo, { size: 32 }),
+    numberToHex(lo, { size: 16 }),
   ]);
+}
+
+/** DAv1 backcompat: format a userop for EntryPoint v0.6 */
+function userOpV06FromHex(op: UserOpHex) {
+  return {
+    callData: op.callData,
+    callGasLimit: hexToBigInt(op.callGasLimit),
+    initCode: op.initCode,
+    maxFeePerGas: hexToBigInt(op.maxFeePerGas),
+    maxPriorityFeePerGas: hexToBigInt(op.maxPriorityFeePerGas),
+    preVerificationGas: hexToBigInt(op.preVerificationGas),
+    verificationGasLimit: hexToBigInt(op.verificationGasLimit),
+    nonce: hexToBigInt(op.nonce),
+    paymasterAndData: op.paymasterAndData,
+    sender: op.sender,
+    signature: op.signature,
+  };
 }

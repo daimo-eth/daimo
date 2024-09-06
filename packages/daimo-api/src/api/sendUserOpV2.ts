@@ -48,7 +48,7 @@ export async function sendUserOpV2(
     // confirmed and indexed before the memo is saved -- but that's unlikely.
     const [, , inviteCode] = await Promise.all([
       saveMemo(),
-      bundlerClient.sendUserOp(opHash, op, vc, nameReg),
+      bundlerClient.sendUserOp(opHash, op, vc),
       inviteCodeTracker.getBestInviteCodeForSender(op.sender),
     ]);
 

@@ -473,7 +473,7 @@ export function createRouter(
 
         try {
           const opHash = await bundlerClient.getOpHash(op, vc.publicClient);
-          return await bundlerClient.sendUserOp(opHash, op, vc, nameReg);
+          return await bundlerClient.sendUserOp(opHash, op, vc);
         } catch (e: any) {
           const em = e.message || "no error message";
           span.setAttribute("op.send_err", em);

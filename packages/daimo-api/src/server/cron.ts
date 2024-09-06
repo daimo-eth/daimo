@@ -9,12 +9,12 @@ import {
 } from "@daimo/common";
 import {
   daimoPaymasterV2Address,
-  entryPointABI,
+  entryPointV06ABI,
+  entryPointV06Address,
   erc20ABI,
   getForeignCoinDisplayAmount,
 } from "@daimo/contract";
 import { CronJob } from "cron";
-import { Constants } from "userop";
 import { Hex, formatEther, getAddress } from "viem";
 
 import { Telemetry } from "./telemetry";
@@ -86,8 +86,8 @@ export class Crontab {
 
   async checkPaymasterDeposit() {
     const depositInfo = await this.vc.publicClient.readContract({
-      address: Constants.ERC4337.EntryPoint as Hex,
-      abi: entryPointABI,
+      address: entryPointV06Address as Hex,
+      abi: entryPointV06ABI,
       functionName: "getDepositInfo",
       args: [daimoPaymasterV2Address],
     });

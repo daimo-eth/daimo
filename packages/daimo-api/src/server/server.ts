@@ -87,7 +87,6 @@ async function main() {
   );
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
-  bundlerClient.init(vc.publicClient);
 
   const paymaster = new Paymaster(vc, bundlerClient, db);
   const accountFactory = new AccountFactory(vc);

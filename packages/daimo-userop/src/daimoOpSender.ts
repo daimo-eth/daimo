@@ -12,11 +12,11 @@ import {
 import * as Contracts from "@daimo/contract";
 import {
   DAv2Chain,
-  /*daimoFastCctpAddress,*/ erc20ABI,
+  erc20ABI,
   getBridgeCoin,
   isNativeETH,
 } from "@daimo/contract";
-import { Constants, Utils } from "userop";
+import { Utils } from "userop";
 import {
   Address,
   Hex,
@@ -95,7 +95,7 @@ export class DaimoOpSender {
     const validUntil = nowS + this.opConfig.deadlineSecs;
     const builtOp = await opBuilder
       .setValidUntil(validUntil)
-      .buildOp(Constants.ERC4337.EntryPoint, this.opConfig.chainId);
+      .buildOp(Contracts.entryPointV06Address, this.opConfig.chainId);
 
     // This method is incorrectly named. It does not return JSON, it returns
     // a userop object with all the fields normalized to hex.
