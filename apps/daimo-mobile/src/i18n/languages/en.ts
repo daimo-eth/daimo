@@ -320,7 +320,7 @@ export const en = {
   onboardingChooseName: {
     screenHeader: () => `Choose Username`,
     instructions: () =>
-      `Choose a username you'll go by on Daimo. Your username is public.`,
+      `Choose a username you'll go by on Daimo. Your username is public & on-chain.`,
     picker: {
       title: () => `choose a username`,
       createButton: () => `CREATE ACCOUNT`,

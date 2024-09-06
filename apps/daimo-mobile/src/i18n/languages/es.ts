@@ -323,7 +323,7 @@ export const es: LanguageDefinition = {
   onboardingChooseName: {
     screenHeader: () => `Elija su Usuario`,
     instructions: () =>
-      `Elija a un nombre de usuario que utilizará en Daimo. Tu usuario es publico.`,
+      `Elija a un nombre de usuario que utilizará en Daimo. Tu usuario es publico & en cadena.`,
     picker: {
       title: () => `elija un usuario`,
       createButton: () => `CREAR CUENTA`,
