@@ -20,6 +20,7 @@ import {
   guessTimestampFromNum,
   hasAccountName,
 } from "@daimo/common";
+import semver from "semver";
 import semverLt from "semver/functions/lt";
 import { Address } from "viem";
 
@@ -49,7 +50,7 @@ import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { getAppVersionTracker } from "../server/appVersion";
-import { DaimoVersion, TrpcRequestContext } from "../server/trpc";
+import { TrpcRequestContext } from "../server/trpc";
 
 export interface AccountHistoryResult {
   address: Address;
@@ -106,7 +107,7 @@ export async function getAccountHistory(
   db: DB,
   extApiCache: ExternalApiCache,
   blockNumber: number,
-  version: DaimoVersion
+  version: string | undefined
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(
@@ -114,6 +115,16 @@ export async function getAccountHistory(
     `${address} is not a Daimo account`
   );
   const startMs = performance.now();
+  // Split version string into appVersion and buildVersion
+  let appVersion: string | undefined;
+  if (version) {
+    const parts = version.split(" #");
+    appVersion = parts[0];
+    assert(
+      semver.valid(appVersion) != null,
+      `${version} is not a valid app version`
+    );
+  }
   const log = `[API] getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
   console.log(`${log}: starting`);
 
@@ -200,16 +211,9 @@ export async function getAccountHistory(
     landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts(address);
     // Support for displaying landline transfers in the mobile app was added
-    // in version 1.9.8 and doesn't support backcompat.
-    // Only add landline transfers if the app version is > 1.9.7
-    if (
-      version.appVersion != null &&
-      (version.appVersion.major > 1 ||
-        (version.appVersion.major === 1 && version.appVersion.minor > 9) ||
-        (version.appVersion.major === 1 &&
-          version.appVersion.minor === 9 &&
-          version.appVersion.patch > 6)) // TODO, change this to > 7 during 1.9.8 release
-    ) {
+    // in version 1.9.7 and doesn't support backcompat.
+    // Only add landline transfers if the app version is > 1.9.6
+    if (appVersion && semver.gt(appVersion, "1.9.6")) {
       const landlineTransfers = await getLandlineTransfers(address);
       transferClogs = addLandlineTransfers(
         landlineTransfers,
