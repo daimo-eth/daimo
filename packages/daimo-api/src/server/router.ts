@@ -25,7 +25,7 @@ import { AntiSpam } from "./antiSpam";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { TokenRegistry } from "./tokenRegistry";
-import { trpcT } from "./trpc";
+import { parseDaimoVersion, trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
@@ -347,6 +347,11 @@ export function createRouter(
       .query(async (opts) => {
         const { inviteCode, sinceBlockNum, lang } = opts.input;
         const address = getAddress(opts.input.address);
+
+        const version = parseDaimoVersion(
+          opts.ctx.req.headers["x-daimo-version"] as string | undefined
+        );
+
         return getAccountHistory(
           opts.ctx,
           address,
@@ -366,7 +371,8 @@ export function createRouter(
           paymaster,
           db,
           extApiCache,
-          watcher.latestBlock().number
+          watcher.latestBlock().number,
+          version
         );
       }),
 

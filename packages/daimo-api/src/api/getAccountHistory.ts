@@ -49,7 +49,7 @@ import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
 import { getAppVersionTracker } from "../server/appVersion";
-import { TrpcRequestContext } from "../server/trpc";
+import { DaimoVersion, TrpcRequestContext } from "../server/trpc";
 
 export interface AccountHistoryResult {
   address: Address;
@@ -105,7 +105,8 @@ export async function getAccountHistory(
   paymaster: Paymaster,
   db: DB,
   extApiCache: ExternalApiCache,
-  blockNumber: number
+  blockNumber: number,
+  version: DaimoVersion
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(
@@ -198,12 +199,22 @@ export async function getAccountHistory(
     const landlineSessionKey = (await getLandlineSession(address)).key;
     landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts(address);
-    const landlineTransfers = await getLandlineTransfers(address);
-    transferClogs = addLandlineTransfers(
-      landlineTransfers,
-      transferClogs,
-      chainConfig.daimoChain
-    );
+    // Support for displaying landline transfers in the mobile app was added
+    // in version 1.9.8 and doesn't support backcompat.
+    // Only add landline transfers if the app version is > 1.9.7
+    if (
+      version.applicationVersion != null &&
+      (version.applicationVersion.major > 1 ||
+        version.applicationVersion.minor > 9 ||
+        version.applicationVersion.patch > 6) // TODO, change this to > 7 during 1.9.8 release
+    ) {
+      const landlineTransfers = await getLandlineTransfers(address);
+      transferClogs = addLandlineTransfers(
+        landlineTransfers,
+        transferClogs,
+        chainConfig.daimoChain
+      );
+    }
   }
 
   // Get named accounts

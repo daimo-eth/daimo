@@ -34,6 +34,46 @@ function getHeader(h: string | string[] | undefined) {
   else return h || "";
 }
 
+export type DaimoVersion = {
+  applicationVersion: { major: number; minor: number; patch: number } | null;
+  buildVersion: number | null;
+};
+
+export function parseDaimoVersion(v: string | undefined): DaimoVersion {
+  if (v == null) {
+    return { applicationVersion: null, buildVersion: null };
+  }
+
+  // Parse version string in format "1.2.3 #456"
+  const parts = v.split(" #");
+  if (parts.length !== 2) {
+    return { applicationVersion: null, buildVersion: null };
+  }
+
+  const [applicationVersion, buildVersion] = parts;
+
+  // Parse application version (e.g., "1.2.3")
+  const appVersionParts = applicationVersion.split(".").map(Number);
+  const parsedAppVersion =
+    appVersionParts.length === 3 && appVersionParts.every(Number.isInteger)
+      ? {
+          major: appVersionParts[0],
+          minor: appVersionParts[1],
+          patch: appVersionParts[2],
+        }
+      : null;
+
+  // Parse build version (e.g., "456")
+  const parsedBuildVersion = Number.isInteger(Number(buildVersion))
+    ? Number(buildVersion)
+    : null;
+
+  return {
+    applicationVersion: parsedAppVersion,
+    buildVersion: parsedBuildVersion,
+  };
+}
+
 export function onTrpcError(telemetry: Telemetry) {
   return ({ error, ctx }: { error: TRPCError; ctx?: TrpcRequestContext }) => {
     const err = `${error.code} ${error.name} ${error.message}`;
