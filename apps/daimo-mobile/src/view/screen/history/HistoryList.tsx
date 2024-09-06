@@ -208,9 +208,15 @@ function TransferClogRow({
   const nav = useNav();
   const address = account.address;
 
-  assert(transferClog.amount > 0);
+  assert(
+    transferClog.amount > 0,
+    `TransferClogRow amount should be greater than 0. amount: ${transferClog.amount}`
+  );
   const [from, to] = getDisplayFromTo(transferClog);
-  assert([from, to].includes(getAddress(address)));
+  assert(
+    [from, to].includes(getAddress(address)),
+    `TransferClogRow from and to should include address. from: ${from}, to: ${to}`
+  );
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   const otherContact = getTransferClogContact(transferClog, address);

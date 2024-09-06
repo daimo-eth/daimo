@@ -347,6 +347,11 @@ export function createRouter(
       .query(async (opts) => {
         const { inviteCode, sinceBlockNum, lang } = opts.input;
         const address = getAddress(opts.input.address);
+
+        const version = opts.ctx.req.headers["x-daimo-version"] as
+          | string
+          | undefined;
+
         return getAccountHistory(
           opts.ctx,
           address,
@@ -366,7 +371,8 @@ export function createRouter(
           paymaster,
           db,
           extApiCache,
-          watcher.latestBlock().number
+          watcher.latestBlock().number,
+          version
         );
       }),
 

@@ -20,6 +20,7 @@ import {
   guessTimestampFromNum,
   hasAccountName,
 } from "@daimo/common";
+import semver from "semver";
 import semverLt from "semver/functions/lt";
 import { Address } from "viem";
 
@@ -105,7 +106,8 @@ export async function getAccountHistory(
   paymaster: Paymaster,
   db: DB,
   extApiCache: ExternalApiCache,
-  blockNumber: number
+  blockNumber: number,
+  version: string | undefined
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(
@@ -113,6 +115,16 @@ export async function getAccountHistory(
     `${address} is not a Daimo account`
   );
   const startMs = performance.now();
+  // Split version string into appVersion and buildVersion
+  let appVersion: string | undefined;
+  if (version) {
+    const parts = version.split(" #");
+    appVersion = parts[0];
+    assert(
+      semver.valid(appVersion) != null,
+      `${version} is not a valid app version`
+    );
+  }
   const log = `[API] getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
   console.log(`${log}: starting`);
 
@@ -198,12 +210,17 @@ export async function getAccountHistory(
     const landlineSessionKey = (await getLandlineSession(address)).key;
     landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts(address);
-    const landlineTransfers = await getLandlineTransfers(address);
-    transferClogs = addLandlineTransfers(
-      landlineTransfers,
-      transferClogs,
-      chainConfig.daimoChain
-    );
+    // Support for displaying landline transfers in the mobile app was added
+    // in version 1.9.7 and doesn't support backcompat.
+    // Only add landline transfers if the app version is > 1.9.6
+    if (appVersion && semver.gt(appVersion, "1.9.6")) {
+      const landlineTransfers = await getLandlineTransfers(address);
+      transferClogs = addLandlineTransfers(
+        landlineTransfers,
+        transferClogs,
+        chainConfig.daimoChain
+      );
+    }
   }
 
   // Get named accounts
