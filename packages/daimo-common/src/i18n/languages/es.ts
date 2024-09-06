@@ -9,13 +9,21 @@ export const es: LanguageDefinition = {
 
   // op.ts
   op: {
-    acceptedInboundSwap: (
+    acceptedInbound: (
       readableAmount: string,
       otherCoinSymbol: string,
-      homeCoinSymbol: string
-    ) => `Aceptado ${readableAmount} ${otherCoinSymbol} como ${homeCoinSymbol}`,
-    sentOutboundSwap: (readableAmount: string, coinSymbol: string) =>
-      `Envidado ${readableAmount} ${coinSymbol}`,
+      homeCoinSymbol: string,
+      chain?: string
+    ) =>
+      `Aceptado ${readableAmount} ${otherCoinSymbol}${
+        chain ? ` en ${chain}` : ""
+      } como ${homeCoinSymbol}`,
+    sentOutbound: (
+      readableAmount: string,
+      coinSymbol: string,
+      chain?: string
+    ) =>
+      `Envidado ${readableAmount} ${coinSymbol}${chain ? ` en ${chain}` : ""}`,
   },
 
   // time.ts

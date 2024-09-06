@@ -8,13 +8,20 @@ export const en = {
 
   // op.ts
   op: {
-    acceptedInboundSwap: (
+    acceptedInbound: (
       readableAmount: string,
       otherCoinSymbol: string,
-      homeCoinSymbol: string
-    ) => `Accepted ${readableAmount} ${otherCoinSymbol} as ${homeCoinSymbol}`,
-    sentOutboundSwap: (readableAmount: string, coinSymbol: string) =>
-      `Sent ${readableAmount} ${coinSymbol}`,
+      homeCoinSymbol: string,
+      chain?: string
+    ) =>
+      `Accepted ${readableAmount} ${otherCoinSymbol}${
+        chain ? ` on ${chain}` : ""
+      } as ${homeCoinSymbol}`,
+    sentOutbound: (
+      readableAmount: string,
+      coinSymbol: string,
+      chain?: string
+    ) => `Sent ${readableAmount} ${coinSymbol}${chain ? ` on ${chain}` : ""}`,
   },
 
   // time.ts

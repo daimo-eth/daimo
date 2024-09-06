@@ -13,12 +13,12 @@ import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
 import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
+import { ClogMatcher } from "./ClogMatcher";
 import { ForeignCoinIndexer } from "./foreignCoinIndexer";
 import { Indexer } from "./indexer";
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
-import { SwapClogMatcher } from "./SwapClogMatcher";
 import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
@@ -52,7 +52,7 @@ export class HomeCoinIndexer extends Indexer {
     private requestIndexer: RequestIndexer,
     private foreignCoinIndexer: ForeignCoinIndexer,
     private paymentMemoTracker: PaymentMemoTracker,
-    private swapClogMatcher: SwapClogMatcher
+    private clogMatcher: ClogMatcher
   ) {
     super("COIN");
   }
@@ -90,8 +90,9 @@ export class HomeCoinIndexer extends Indexer {
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
 
+    const txHashes = new Set<Hex>();
     const logs: Transfer[] = result.map((row) => {
-      return {
+      const transferLog = {
         blockHash: bytesToHex(row.block_hash, { size: 32 }),
         blockNumber: BigInt(row.block_num),
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
@@ -102,6 +103,8 @@ export class HomeCoinIndexer extends Indexer {
         to: getAddress(bytesToHex(row.t, { size: 20 })),
         value: BigInt(row.amount),
       };
+      txHashes.add(transferLog.transactionHash);
+      return transferLog;
     });
     if (logs.length === 0) return;
 
@@ -117,6 +120,14 @@ export class HomeCoinIndexer extends Indexer {
     });
 
     this.listeners.forEach((l) => l(logs));
+
+    this.clogMatcher.loadCrossChainClogs(
+      kdb,
+      from,
+      to,
+      chainConfig.chainL2.id,
+      txHashes
+    );
   }
 
   updateCurrentBalance(addr: Address, delta: bigint) {
@@ -222,16 +233,24 @@ export class HomeCoinIndexer extends Indexer {
 
     const memo = opHash ? this.paymentMemoTracker.getMemo(opHash) : undefined;
 
-    // If inbound swap, attach original sender + token + amount info.
+    // If inbound swap or cross-chain transfers, attach original sender +
+    // token + amount info.
     const notSwapAddrs = [chainConfig.pimlicoPaymasterAddress];
     const notSwap = notSwapAddrs.includes(from) || notSwapAddrs.includes(to);
     const correspondingForeignReceive =
       to === accountAddr &&
       !notSwap &&
-      this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
+      (this.foreignCoinIndexer.getForeignTokenReceiveForSwap(
         to,
         transactionHash
-      );
+      ) ||
+        this.clogMatcher.getCorrespondingTransfer(
+          from,
+          to,
+          transactionHash,
+          true
+        ));
+
     const preSwapTransfer: PreSwapTransfer | undefined =
       correspondingForeignReceive
         ? {
@@ -241,11 +260,11 @@ export class HomeCoinIndexer extends Indexer {
           }
         : undefined;
 
-    // If outbound swap, attach final destination info.
+    // If outbound swap or cross-chain transfer, attach final destination info.
     const correspondingForeignSend =
       from === accountAddr &&
       !notSwap &&
-      this.swapClogMatcher.getMatchingSwapTransfer(from, transactionHash);
+      this.clogMatcher.getCorrespondingTransfer(from, to, transactionHash);
     const postSwapTransfer: PostSwapTransfer | undefined =
       correspondingForeignSend
         ? {
