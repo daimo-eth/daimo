@@ -289,6 +289,7 @@ export type TransferClogStatus =
   | "failed"
   | "expired";
 
+/** Returns a combined onchain + offchain transfer status. */
 export function getTransferClogStatus(clog: TransferClog): TransferClogStatus {
   const clogType = getTransferClogType(clog);
   if (clogType === "landline") {

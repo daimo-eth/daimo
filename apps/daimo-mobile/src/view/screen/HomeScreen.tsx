@@ -1,6 +1,7 @@
 import {
   SuggestedAction,
   TransferClogStatus,
+  TransferSwapClog,
   amountToDollars,
   getTransferClogStatus,
 } from "@daimo/common";
@@ -121,10 +122,12 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
   // Re-render HistoryListSwipe only transfer count or status changes.
   const statusCountsStr = JSON.stringify(
     account.recentTransfers.reduce((counts, transfer) => {
-      const status = getTransferClogStatus(transfer);
-      counts[status] = (counts[status] || 0) + 1;
+      let statusStr = getTransferClogStatus(transfer);
+      const { offchainTransfer } = transfer as TransferSwapClog;
+      statusStr += `-${offchainTransfer?.timeExpected}`;
+      counts[statusStr] = (counts[statusStr] || 0) + 1;
       return counts;
-    }, {} as Record<TransferClogStatus, number>)
+    }, {} as Record<string, number>)
   );
   const histListMini = useMemo(
     () => <HistoryListSwipe account={account} showDate={false} maxToShow={5} />,

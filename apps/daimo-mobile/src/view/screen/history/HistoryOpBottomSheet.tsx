@@ -9,6 +9,7 @@ import {
   TransferSwapClog,
   amountToDollars,
   assert,
+  assertNotNull,
   daysUntil,
   getAccountName,
   getSynthesizedMemo,
@@ -392,11 +393,16 @@ function getOpVerb(op: TransferClog, accountAddress: Address) {
       ? i18.opVerb.fulfilledRequest()
       : i18.opVerb.receivedRequest();
   } else if (isLandline) {
-    const landlineTransferType = (op as TransferSwapClog).offchainTransfer!
-      .transferType;
-    return landlineTransferType === "deposit"
-      ? i18.opVerb.deposited()
-      : i18.opVerb.withdrew();
+    const llTransfer = assertNotNull((op as TransferSwapClog).offchainTransfer);
+    if (llTransfer.transferType === "deposit") {
+      return llTransfer.status === "completed"
+        ? i18.opVerb.deposited()
+        : i18.opVerb.depositing();
+    } else {
+      return llTransfer.status === "completed"
+        ? i18.opVerb.withdrew()
+        : i18.opVerb.withdrawing();
+    }
   } else {
     return sentByUs ? i18.opVerb.sent() : i18.opVerb.received();
   }

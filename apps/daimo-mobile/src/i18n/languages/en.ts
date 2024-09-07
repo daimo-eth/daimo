@@ -57,7 +57,9 @@ export const en = {
       sent: () => `Sent`,
       received: () => `Received`,
       deposited: () => `Deposited`,
+      depositing: () => `Depositing`,
       withdrew: () => `Withdrew`,
+      withdrawing: () => `Withdrawing`,
     },
     help: {
       title: () => `About this transfer`,

@@ -59,7 +59,9 @@ export const es: LanguageDefinition = {
       sent: () => `Enviado`,
       received: () => `Recibida`,
       deposited: () => `Depositado`,
+      depositing: () => `Depositando`,
       withdrew: () => `Retirado`,
+      withdrawing: () => `Retirando`,
     },
     help: {
       title: () => `Sobre esta transferencia`,
@@ -509,7 +511,7 @@ export const es: LanguageDefinition = {
       cta: () => `Conectar con Landline`,
       title: () => `Deposite o retire directamente de un banco americano`,
       optionRowTitle: (timeAgo: string) => `Conectado hace ${timeAgo}`,
-      startTransfer: () => `Empezar transferencia`,
+      startTransfer: () => `Empezar`,
     },
     binance: {
       cta: () => `Deposite desde Binance`,
