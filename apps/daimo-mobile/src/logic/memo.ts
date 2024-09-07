@@ -1,5 +1,6 @@
 import { MoneyEntry } from "./moneyEntry";
 
+// TODO: move common, combine with swap / bridge memo annotation.
 /** Reterns eg "foo", "€1.23", or "€1.23 · foo". */
 export function getFullMemo(
   memo: string | undefined,

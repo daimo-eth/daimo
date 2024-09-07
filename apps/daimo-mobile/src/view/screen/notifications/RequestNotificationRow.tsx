@@ -41,8 +41,8 @@ export function RequestNotificationRow({
 
   const type =
     account.address === notif.request.recipient.addr
-      ? "recipient"
-      : "expectedFulfiller";
+      ? "recipient" // we sent the request -> we're the recipient of funds
+      : "expectedFulfiller"; // we're the expected fulfiller -> sender of funds
 
   // Hack: if request is via link, display a dummy fulfiller EAccount
   const requestLinkContact: DaimoContact = {
@@ -54,7 +54,9 @@ export function RequestNotificationRow({
   const otherAcc =
     type === "expectedFulfiller"
       ? notif.request.recipient
-      : notif.request.expectedFulfiller || requestLinkContact;
+      : notif.request.expectedFulfiller ||
+        notif.request.fulfilledBy ||
+        requestLinkContact;
 
   const ts = timeAgo(notif.timestamp, i18NLocale, now(), true);
   const dispatcher = useContext(DispatcherContext);

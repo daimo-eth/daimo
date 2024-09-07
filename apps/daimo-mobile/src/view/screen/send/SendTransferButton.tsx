@@ -71,6 +71,8 @@ export function SendTransferButton({
 
   // Note whether the transfer has a swap or not for op creation.
   const isSwap = !!(route && route.routeFound);
+
+  // Pending swap, appears immediately > replaced by onchain data
   const pendingOpBase = {
     from: account.address,
     to: recipient.addr,
@@ -120,18 +122,6 @@ export function SendTransferButton({
       );
     },
     pendingOp: { type: "transfer", ...pendingOpBase },
-    // TODO: outbound swap, postSwapTransfer
-    // pendingOp: isSwap
-    //   ? {
-    //       type: "outboundSwap",
-    //       ...pendingOpBase,
-    //       coinOther: toCoin,
-    //       amountOther: `${route.toAmount}` as BigIntStr,
-    //     }
-    //   : {
-    //       type: "transfer",
-    //       ...pendingOpBase,
-    //     },
     accountTransform: transferAccountTransform(
       hasAccountName(recipient) ? [recipient as EAccount] : []
     ),
