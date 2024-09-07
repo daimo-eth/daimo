@@ -1,6 +1,5 @@
 import {
   SuggestedAction,
-  TransferClogStatus,
   TransferSwapClog,
   amountToDollars,
   getTransferClogStatus,
