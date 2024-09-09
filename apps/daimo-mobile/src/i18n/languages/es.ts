@@ -134,18 +134,23 @@ export const es: LanguageDefinition = {
   // DeviceScreen.tsx
   device: {
     deleted: () => `Dispositivo eliminado`,
-    remove: {
-      title: (deviceName: string) => `Eliminar ${deviceName}\n`,
-      msg: () => `Esta seguro que quiera eliminar este dispositivo?`,
-      remove: (deviceName: string) => `Eliminar ${deviceName}`,
+    confirmation: {
+      titleRemoveDevice: (deviceName: string) => `Eliminar ${deviceName}\n`,
+      msgRemoveDevice: () =>
+        `Esta seguro que quiera eliminar este dispositivo?`,
+      titleDeleteAccount: () => `Eliminar Su Cuenta`,
+      msgDeleteAccount: () => `Esta seguro que quiera eliminar su cuenta?`,
+      remove: () => `Eliminar`,
       cancel: () => `Cancelar`,
     },
     current: {
       cannotRemove: () =>
         `Este es su unico dispositivo. Transfiera su saldo a otro lugar antes de eliminar su cuenta.`,
       usingTitle: () => `Esta usando este dispositivo`,
+      deleteTitle: () => `Eliminar su cuenta`,
       usingSubtitle: () => `Eliminarlo de esta cuenta le cerrará la sesión`,
-      deleteSubtitle: () => `Eliminarlo eliminará su cuenta.`,
+      deleteSubtitle: () =>
+        `Este es tu único dispositivo. Eliminarlo eliminará su cuenta.`,
     },
   },
 
@@ -689,7 +694,7 @@ export const es: LanguageDefinition = {
       },
     },
     logOut: () => `Cerrar sesión`,
-    delete: () => `Eliminar`,
+    delete: () => `Eliminar cuenta`,
     remove: () => `Eliminar`,
     pending: () => `Pendiente`,
     addedAgo: (timeAgo: string) => `Añadida ${timeAgo}`,

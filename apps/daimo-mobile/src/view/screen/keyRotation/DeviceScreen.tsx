@@ -86,21 +86,25 @@ export function DeviceScreen({ route, navigation }: Props) {
   });
 
   const removeDevice = useCallback(() => {
-    Alert.alert(i18.remove.title(deviceName), i18.remove.msg(), [
+    const title = isOnlyDevice
+      ? i18.confirmation.titleDeleteAccount()
+      : i18.confirmation.titleRemoveDevice(deviceName);
+    const msg = isOnlyDevice
+      ? i18.confirmation.msgDeleteAccount()
+      : i18.confirmation.msgDeleteAccount();
+    Alert.alert(title, msg, [
       {
-        text: i18.remove.remove(deviceName),
-        onPress: removeKey,
+        text: i18.confirmation.remove(),
+        onPress: () => {
+          console.log(`[DEVICE] removing device ${deviceName} ${devicePubkey}`);
+          exec();
+        },
       },
       {
-        text: i18.remove.cancel(),
+        text: i18.confirmation.cancel(),
         style: "cancel",
       },
     ]);
-
-    function removeKey() {
-      console.log(`[DEVICE] Removing device ${devicePubkey}`);
-      exec();
-    }
   }, []);
 
   // If we removed the device key, go back to settings.
@@ -147,7 +151,7 @@ export function DeviceScreen({ route, navigation }: Props) {
         return (
           <ButtonBig
             type="danger"
-            title={i18.remove.remove(deviceName)}
+            title={i18.confirmation.remove()}
             onPress={removeDevice}
             disabled={!canRemove}
             showBiometricIcon
@@ -183,8 +187,14 @@ export function DeviceScreen({ route, navigation }: Props) {
       <Spacer h={32} />
       {isCurrentDevice && (
         <InfoBox
-          title={i18.current.usingTitle()}
-          subtitle={i18.current.deleteSubtitle()}
+          title={
+            isOnlyDevice ? i18.current.deleteTitle() : i18.current.usingTitle()
+          }
+          subtitle={
+            isOnlyDevice
+              ? i18.current.deleteSubtitle()
+              : i18.current.usingSubtitle()
+          }
         />
       )}
       <Spacer h={64} />
