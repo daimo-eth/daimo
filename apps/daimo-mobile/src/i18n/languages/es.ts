@@ -142,9 +142,10 @@ export const es: LanguageDefinition = {
     },
     current: {
       cannotRemove: () =>
-        `Este es su unico dispositivo. Transfiera su saldo a otro lugar antes de eliminarlo.`,
+        `Este es su unico dispositivo. Transfiera su saldo a otro lugar antes de eliminar su cuenta.`,
       usingTitle: () => `Esta usando este dispositivo`,
       usingSubtitle: () => `Eliminarlo de esta cuenta le cerrará la sesión`,
+      deleteSubtitle: () => `Eliminarlo eliminará su cuenta.`,
     },
   },
 
@@ -688,6 +689,7 @@ export const es: LanguageDefinition = {
       },
     },
     logOut: () => `Cerrar sesión`,
+    delete: () => `Eliminar`,
     remove: () => `Eliminar`,
     pending: () => `Pendiente`,
     addedAgo: (timeAgo: string) => `Añadida ${timeAgo}`,

@@ -201,6 +201,7 @@ function DevicesSection({ account }: { account: Account }) {
         key={keyData.slot}
         keyData={keyData}
         isCurrentDevice={keyData.pubKey === account.enclavePubKey}
+        isOnlyDevice={account.accountKeys.length === 1}
         chain={daimoChainFromId(account.homeChainId)}
         pendingRemoval={
           account.pendingKeyRotation.find(
@@ -287,11 +288,13 @@ function DevicesSection({ account }: { account: Account }) {
 function DeviceRow({
   keyData,
   isCurrentDevice,
+  isOnlyDevice,
   chain,
   pendingRemoval,
 }: {
   keyData: KeyData;
   isCurrentDevice: boolean;
+  isOnlyDevice: boolean;
   chain: DaimoChain;
   pendingRemoval: boolean;
 }) {
@@ -312,6 +315,11 @@ function DeviceRow({
   const dispTime = pendingRemoval
     ? i18.pending()
     : i18.addedAgo(timeAgo(addAtS, i18NLocale, nowS, true));
+  const cta = (() => {
+    if (isCurrentDevice && isOnlyDevice) return i18.delete();
+    if (isCurrentDevice) return i18.logOut();
+    return i18.remove();
+  })();
   const textCol = pendingRemoval ? color.gray3 : color.midnight;
 
   return (
@@ -336,8 +344,7 @@ function DeviceRow({
             )}
             {!isCurrentDevice && <Spacer w={16} />}
             <TextMeta color={pendingRemoval ? color.gray3 : color.primary}>
-              {isCurrentDevice && i18.logOut()}
-              {!isCurrentDevice && i18.remove()}
+              {cta}
             </TextMeta>
           </View>
         </View>
