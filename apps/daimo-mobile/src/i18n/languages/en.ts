@@ -132,18 +132,22 @@ export const en = {
   // DeviceScreen.tsx
   device: {
     deleted: () => `Deleted device`,
-    remove: {
-      title: (deviceName: string) => `Remove ${deviceName}\n`,
-      msg: () => `Are you sure you want to remove this device?`,
-      remove: (deviceName: string) => `Remove ${deviceName}`,
+    confirmation: {
+      titleRemoveDevice: (deviceName: string) => `Remove ${deviceName}\n`,
+      msgRemoveDevice: () => `Are you sure you want to remove this device?`,
+      titleDeleteAccount: () => `Delete Account`,
+      msgDeleteAccount: () => `Are you sure you want to delete your account?`,
+      remove: () => `Remove`,
       cancel: () => `Cancel`,
     },
     current: {
       cannotRemove: () =>
         `This is your only device. Transfer your balance elsewhere before deleting your account.`,
       usingTitle: () => `You're using this device now`,
+      deleteTitle: () => `Delete your account`,
       usingSubtitle: () => `Removing it from this account will log you out`,
-      deleteSubtitle: () => `Removing it will delete your account.`,
+      deleteSubtitle: () =>
+        `This is your only device. Removing it will delete your account.`,
     },
   },
 
@@ -685,7 +689,7 @@ export const en = {
       },
     },
     logOut: () => `Log out`,
-    delete: () => `Delete`,
+    delete: () => `Delete account`,
     remove: () => `Remove`,
     pending: () => `Pending`,
     addedAgo: (timeAgo: string) => `Added ${timeAgo}`,
