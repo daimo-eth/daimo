@@ -140,9 +140,10 @@ export const en = {
     },
     current: {
       cannotRemove: () =>
-        `This is your only device. Transfer your balance elsewhere before removing.`,
+        `This is your only device. Transfer your balance elsewhere before deleting your account.`,
       usingTitle: () => `You're using this device now`,
       usingSubtitle: () => `Removing it from this account will log you out`,
+      deleteSubtitle: () => `Removing it will delete your account.`,
     },
   },
 
@@ -684,6 +685,7 @@ export const en = {
       },
     },
     logOut: () => `Log out`,
+    delete: () => `Delete`,
     remove: () => `Remove`,
     pending: () => `Pending`,
     addedAgo: (timeAgo: string) => `Added ${timeAgo}`,

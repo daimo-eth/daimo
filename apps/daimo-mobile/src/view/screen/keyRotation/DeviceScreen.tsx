@@ -118,8 +118,9 @@ export function DeviceScreen({ route, navigation }: Props) {
   if (!account || !device) return null;
 
   const isCurrentDevice = devicePubkey === account?.enclavePubKey;
+  const isOnlyDevice = account.accountKeys.length === 1;
   const canRemove =
-    account.accountKeys.length > 1 ||
+    !isOnlyDevice ||
     account.lastBalance < dollarsToAmount(1) ||
     account.homeChainId === 84532; // Testnet
 
@@ -183,7 +184,7 @@ export function DeviceScreen({ route, navigation }: Props) {
       {isCurrentDevice && (
         <InfoBox
           title={i18.current.usingTitle()}
-          subtitle={i18.current.usingSubtitle()}
+          subtitle={i18.current.deleteSubtitle()}
         />
       )}
       <Spacer h={64} />
