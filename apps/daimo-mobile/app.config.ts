@@ -2,7 +2,9 @@ import type { ExpoConfig } from "@expo/config";
 
 const IS_DEV = process.env.DAIMO_APP_VARIANT === "dev";
 
-const VERSION = "1.9.9";
+// Next pending release version. Update this only as part of a release PR.
+// For example, PR "release: 1.2.3" = checklist + update below to 1.2.4.
+const VERSION = "1.9.10";
 
 const config: ExpoConfig = {
   owner: "daimo",
