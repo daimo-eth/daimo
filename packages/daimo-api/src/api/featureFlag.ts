@@ -8,7 +8,7 @@ export class FeatFlag {
       "andrewliu",
       "nibnalin",
       "hanna",
-      "sofiane",
+      "sfl",
     ].includes(account.name);
   }
 }
