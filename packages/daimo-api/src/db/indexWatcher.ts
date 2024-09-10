@@ -62,9 +62,7 @@ export class IndexWatcher {
     });
     this.notifications = new DBNotifier(dbConfig);
 
-    const { testnet } = assertNotNull(rpcClient.chain);
-    if (testnet) this.latest = 12000000 - 1;
-    else this.latest = 5700000 - 1;
+    this.latest = 5700000 - 1;
   }
 
   add(...i: Indexer[][]) {
