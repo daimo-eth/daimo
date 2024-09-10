@@ -1,9 +1,4 @@
-import {
-  assertNotNull,
-  guessTimestampFromNum,
-  now,
-  retryBackoff,
-} from "@daimo/common";
+import { guessTimestampFromNum, now, retryBackoff } from "@daimo/common";
 import { Kysely, PostgresDialect } from "kysely";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 import { PublicClient } from "viem";
@@ -62,9 +57,7 @@ export class IndexWatcher {
     });
     this.notifications = new DBNotifier(dbConfig);
 
-    const { testnet } = assertNotNull(rpcClient.chain);
-    if (testnet) this.latest = 12000000 - 1;
-    else this.latest = 5700000 - 1;
+    this.latest = 5700000 - 1;
   }
 
   add(...i: Indexer[][]) {
