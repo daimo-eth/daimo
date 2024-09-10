@@ -1,8 +1,4 @@
-import {
-  guessTimestampFromNum,
-  now,
-  retryBackoff,
-} from "@daimo/common";
+import { guessTimestampFromNum, now, retryBackoff } from "@daimo/common";
 import { Kysely, PostgresDialect } from "kysely";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 import { PublicClient } from "viem";
