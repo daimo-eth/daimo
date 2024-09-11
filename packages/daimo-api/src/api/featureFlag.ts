@@ -9,6 +9,7 @@ export class FeatFlag {
       "nibnalin",
       "hanna",
       "sfl",
+      "sbg",
     ].includes(account.name);
   }
 }
