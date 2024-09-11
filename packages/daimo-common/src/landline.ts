@@ -104,6 +104,15 @@ export function landlineTransferToTransferClog(
   // show coinbase as the sender for landline deposits
   const DEFAULT_LANDLINE_ADDRESS = "0x1985EA6E9c68E1C272d8209f3B478AC2Fdb25c87";
 
+  // TransferClog requires a logical "from" & "to". For Wire accelerated
+  // transfers, the final to-address = a Daimo account while the immediate to-
+  // address is a handoff address.
+  const from = landlineTransfer.fromAddress || DEFAULT_LANDLINE_ADDRESS;
+  let to = landlineTransfer.toAddress || DEFAULT_LANDLINE_ADDRESS;
+  if (landlineTransfer.type === LandlineTransferType.Deposit) {
+    to = landlineTransfer.daimoAddress;
+  }
+
   const timestamp = landlineTransfer.createdAt / 1000;
   const offchainTransfer = landlineTransferToOffchainTransfer(landlineTransfer);
 
@@ -120,8 +129,8 @@ export function landlineTransferToTransferClog(
     logIndex: 0,
 
     type: "transfer",
-    from: landlineTransfer.fromAddress || DEFAULT_LANDLINE_ADDRESS,
-    to: landlineTransfer.toAddress || DEFAULT_LANDLINE_ADDRESS,
+    from,
+    to,
     amount: Number(parseUnits(landlineTransfer.amount, 6)),
     memo: landlineTransfer.memo || undefined,
     offchainTransfer,
