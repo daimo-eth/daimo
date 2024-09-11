@@ -291,13 +291,15 @@ export type TransferClogStatus =
 
 /** Returns a combined onchain + offchain transfer status. */
 export function getTransferClogStatus(clog: TransferClog): TransferClogStatus {
-  const clogType = getTransferClogType(clog);
-  if (clogType === "landline") {
-    const landlineStatus = (clog as TransferSwapClog).offchainTransfer!.status;
-    if (landlineStatus === "returned") return "failed";
-    if (landlineStatus === "completed") return "finalized";
-    return landlineStatus;
+  const { offchainTransfer } = clog as TransferSwapClog;
+  if (clog.status === "confirmed" && offchainTransfer != null) {
+    // Show status of offchain transfer
+    const offchainStatus = offchainTransfer.status;
+    if (offchainStatus === "returned") return "failed";
+    if (offchainStatus === "completed") return "finalized";
+    return offchainStatus;
   } else {
+    // Show status of onchain transfer
     return clog.status;
   }
 }

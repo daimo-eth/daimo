@@ -90,6 +90,7 @@ test("addLandlineTransfers", (t) => {
       amount: 1000000,
       timestamp: 1234567890,
       status: "confirmed",
+      memo: "test deposit",
       txHash:
         "0x1d6e083a6009de3dc3672f2dd799e52604d819c5b98e3beb77c50ec259630060",
       offchainTransfer: {
@@ -240,7 +241,7 @@ test("addLandlineTransfers", (t) => {
       };
       const expectedWithdrawalClog = {
         timestamp: 1706745600,
-        status: "confirmed",
+        status: "pending",
         txHash:
           "0x222222222209de3dc3672f2dd799e52604d819c5b98e3beb77c50ec259630060",
         blockNumber: 9978126,

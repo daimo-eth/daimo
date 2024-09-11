@@ -87,7 +87,8 @@ function depositAccountTransform(
 ): Account {
   const transferClog = landlineTransferToTransferClog(
     landlineTransfer,
-    daimoChainFromId(account.homeChainId)
+    daimoChainFromId(account.homeChainId),
+    true
   );
   return {
     ...account,

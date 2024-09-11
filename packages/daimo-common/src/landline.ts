@@ -98,7 +98,9 @@ export function landlineTransferToOffchainTransfer(
 
 export function landlineTransferToTransferClog(
   landlineTransfer: LandlineTransfer,
-  chain: DaimoChain
+  chain: DaimoChain,
+  /** Tx (potentially) already sent onchain, show as PENDING. */
+  isPending: boolean
 ): TransferClog {
   // Default to a Coinbase address so that old versions of the mobile app will
   // show coinbase as the sender for landline deposits
@@ -120,7 +122,7 @@ export function landlineTransferToTransferClog(
     timestamp,
     // Set status as confirmed otherwise old versions of the app will
     // clear the pending transfer after a while
-    status: OpStatus.confirmed,
+    status: isPending ? OpStatus.pending : OpStatus.confirmed,
     txHash: landlineTransfer.txHash || undefined,
     // blockNumber and logIndex need to be set because old versions of the
     // mobile app use blockNumber and logIndex to sort TransferClogs. Block

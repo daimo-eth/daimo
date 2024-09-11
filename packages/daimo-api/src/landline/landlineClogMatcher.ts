@@ -1,4 +1,5 @@
 import {
+  assert,
   LandlineTransfer,
   landlineTransferToOffchainTransfer,
   landlineTransferToTransferClog,
@@ -6,7 +7,6 @@ import {
   TransferSwapClog,
 } from "@daimo/common";
 import { DaimoChain } from "@daimo/contract";
-import { Hex } from "viem";
 
 /**
  * Matches and merges landline transfers its corresponding transfer clog, so
@@ -14,56 +14,51 @@ import { Hex } from "viem";
  * represented by a single clog.
  *
  * Matching strategy:
- * - If a landline transfer has a tx hash which matches a TransferSwapClog,
- *   the transfer clog will be merged with the landline transfer.
- * - Otherwise, a new TransferClog will be created for the landline transfer.
+ * - (FastFinish transfers, tx not yet landed.) If a landline transfer has a tx
+ *   hash which does NOT match, add it as a pending transfer.
+ * - (Completed transfers.) If a landline transfer has a tx hash which matches a
+ *   TransferSwapClog, that transfer will be merged with the landline transfer.
+ * - (Pending offchain, no FastFinish.) Otherwise, a new TransferClog will be
+ *   created for the landline transfer. Shows an ETA: ~several business days.
  */
 export function addLandlineTransfers(
-  landlineTransfers: LandlineTransfer[],
+  llTransfers: LandlineTransfer[],
   transferClogs: TransferClog[],
   chain: DaimoChain
 ): TransferClog[] {
   const fullTransferClogs: TransferClog[] = [];
 
-  // Create a map from tx hash to landline transfer
-  const hashToLandlineTransfer = new Map<Hex, LandlineTransfer>();
-  for (const landlineTransfer of landlineTransfers) {
-    if (landlineTransfer.txHash) {
-      hashToLandlineTransfer.set(landlineTransfer.txHash, landlineTransfer);
-    } else {
-      // No tx hash, so it can't be matched to a transfer clog.
-      // Create a new TransferClog for it.
-      fullTransferClogs.push(
-        landlineTransferToTransferClog(landlineTransfer, chain)
-      );
+  // First, index by txHash
+  const hashToLandlineTransfer = new Map(
+    llTransfers.filter((lt) => lt.txHash != null).map((lt) => [lt.txHash, lt])
+  );
+  const hashToClog = new Map(
+    transferClogs.filter((t) => t.txHash != null).map((t) => [t.txHash, t])
+  );
+
+  // Add all unmatched Landline transfers = PENDING or PROCESSING
+  for (const llTransfer of llTransfers) {
+    if (llTransfer.txHash != null && hashToClog.has(llTransfer.txHash)) {
+      continue; // LL transfer matches an onchain transfer, handled below.
     }
+    const isPending = llTransfer.txHash != null; // FastFinish about to hit.
+    const clog = landlineTransferToTransferClog(llTransfer, chain, isPending);
+    fullTransferClogs.push(clog);
   }
 
-  // Go through each transfer clog and see if it's matched to a landline transfer.
+  // Add all transfer clogs, Landline or otherwise.
   for (const transfer of transferClogs) {
-    if (transfer.txHash && hashToLandlineTransfer.has(transfer.txHash)) {
-      // Landline transfers can only be matched to TransferSwapClogs
-      if (transfer.type !== "transfer") {
-        throw new Error(
-          `${transfer.txHash} matched with Landline tx hash. Expected clog to be of type "transfer"`
-        );
-      }
-
-      const landlineTransfer = hashToLandlineTransfer.get(transfer.txHash);
-      fullTransferClogs.push(
-        mergeLandlineTransfer(landlineTransfer!, transfer)
-      );
-      hashToLandlineTransfer.delete(transfer.txHash);
+    const { txHash, type } = transfer;
+    const llTransfer =
+      txHash == null ? null : hashToLandlineTransfer.get(txHash);
+    if (llTransfer != null) {
+      // LL CONFIRMED: Landline transfers matched to TransferSwapClogs
+      assert(type === "transfer", `LL matched non-transfer tx ${txHash}`);
+      fullTransferClogs.push(mergeLandlineTransfer(llTransfer, transfer));
     } else {
+      // ALL OTHER TRANSFERS: non-landline transfer of any kind
       fullTransferClogs.push(transfer);
     }
-  }
-
-  // Add the un-matched landline transfers in hashToLandlineTransfer
-  for (const [, landlineTransfer] of hashToLandlineTransfer.entries()) {
-    fullTransferClogs.push(
-      landlineTransferToTransferClog(landlineTransfer, chain)
-    );
   }
 
   return fullTransferClogs.sort((a, b) => a.timestamp - b.timestamp);
@@ -76,6 +71,7 @@ function mergeLandlineTransfer(
   const offchainTransfer = landlineTransferToOffchainTransfer(landlineTransfer);
   return {
     ...transferClog,
+    memo: landlineTransfer.memo || transferClog.memo,
     offchainTransfer,
   };
 }
