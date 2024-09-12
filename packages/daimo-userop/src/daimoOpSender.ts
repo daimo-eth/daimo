@@ -10,12 +10,7 @@ import {
   zUserOpHex,
 } from "@daimo/common";
 import * as Contracts from "@daimo/contract";
-import {
-  DAv2Chain,
-  erc20ABI,
-  getBridgeCoin,
-  isNativeETH,
-} from "@daimo/contract";
+import { DAv2Chain, erc20ABI, getBridgeCoin } from "@daimo/contract";
 import { Utils } from "userop";
 import {
   Address,
@@ -25,6 +20,7 @@ import {
   hexToBigInt,
   maxUint256,
   parseUnits,
+  zeroAddress,
 } from "viem";
 
 import { OpSenderCallback, SigningCallback } from "./callback";
@@ -346,7 +342,6 @@ export class DaimoOpSender {
     );
 
     // Approve, then swap
-    const { chainId } = this.opConfig;
     const swapExecValue = hexToBigInt(swap.execValue);
     const executions: DaimoAccountCall[] = [
       {
@@ -356,7 +351,7 @@ export class DaimoOpSender {
       },
     ];
 
-    if (isNativeETH(swap.fromCoin, chainId)) {
+    if (swap.fromCoin.token === zeroAddress) {
       // Native token: value should be the execValue
       assert(swapExecValue === BigInt(swap.fromAmount), "execValue mismatch");
     } else {

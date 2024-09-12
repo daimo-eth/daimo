@@ -1,9 +1,11 @@
 import {
   base,
+  baseETH,
   baseUSDC,
-  baseUSDT,
   optimism,
   optimismUSDC,
+  polygon,
+  polygonUSDC,
 } from "@daimo/contract";
 import assert from "node:assert";
 import test from "node:test";
@@ -260,27 +262,16 @@ test("New DaimoLinkRequest parsing", () => {
   const linkTestCases: [string, DaimoLinkRequest | null][] = [
     // No amount
     [
-      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&id=123&c=8453&t=usdt",
+      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&id=123&c=10&t=usdc",
       {
         type: "request",
         recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
-        toChain: base,
-        toCoin: baseUSDT,
+        toChain: optimism,
+        toCoin: optimismUSDC,
         requestId: "123",
       },
     ],
     // No request id
-    [
-      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.23&c=8453&t=usdt",
-      {
-        type: "request",
-        recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
-        toChain: base,
-        toCoin: baseUSDT,
-        dollars: "1.23",
-      },
-    ],
-    // Receive on Optimism
     [
       "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.23&c=10&t=usdc",
       {
@@ -288,6 +279,28 @@ test("New DaimoLinkRequest parsing", () => {
         recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
         toChain: optimism,
         toCoin: optimismUSDC,
+        dollars: "1.23",
+      },
+    ],
+    // Receive on Polygon
+    [
+      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.23&c=137&t=usdc",
+      {
+        type: "request",
+        recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+        toChain: polygon,
+        toCoin: polygonUSDC,
+        dollars: "1.23",
+      },
+    ],
+    // Receive $1.23 worth of Base ETH
+    [
+      "https://daimo.com/l/request?to=0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93&n=1.23&c=8453&t=eth",
+      {
+        type: "request",
+        recipient: "0x061b0a794945fe0Ff4b764bfB926317f3cFc8b93",
+        toChain: base,
+        toCoin: baseETH,
         dollars: "1.23",
       },
     ],

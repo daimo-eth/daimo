@@ -5,6 +5,7 @@ import {
   assert,
   formatDaimoLink,
   getAccountName,
+  getForeignCoinDisplayAmount,
   getSynthesizedMemo,
 } from "@daimo/common";
 import {
@@ -12,7 +13,6 @@ import {
   entryPointV06ABI,
   entryPointV06Address,
   erc20ABI,
-  getForeignCoinDisplayAmount,
 } from "@daimo/contract";
 import { CronJob } from "cron";
 import { Hex, formatEther, getAddress } from "viem";

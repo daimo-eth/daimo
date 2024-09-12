@@ -4,11 +4,11 @@ import {
   DAv2Chain,
   ForeignToken,
   getDAv2Chain,
-  getForeignCoinBySymbolAndChain,
 } from "@daimo/contract";
 import { Address, getAddress, Hex, isAddress } from "viem";
 
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
+import { getSupportedSendPairs } from "./sendPair";
 
 // TODO: today, we use https://daimo.com/l/... deeplinks in both staging and prod.
 // This is ambiguous, and means that staging links are broken in the prod app
@@ -378,11 +378,14 @@ function parseNewDaimoLinkRequest(url: URL): DaimoLinkRequest | null {
     return null;
   }
 
-  let toCoin: ForeignToken;
-  try {
-    toCoin = getForeignCoinBySymbolAndChain(t, toChain.chainId);
-  } catch (e) {
-    console.warn(`[LINK] ignoring invalid coin ${t}: ${e}`);
+  const sendPairs = getSupportedSendPairs(toChain.chainId);
+
+  const toCoin = sendPairs
+    .map((s) => s.coin)
+    .filter((c) => c.chainId === toChain.chainId)
+    .find((c) => c.symbol.toLowerCase() === t.toLowerCase());
+  if (toCoin == null) {
+    console.warn(`[LINK] ignoring invalid coin ${t} on chain ${c}`);
     return null;
   }
 

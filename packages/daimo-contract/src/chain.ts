@@ -5,12 +5,9 @@
  * https://developers.circle.com/stablecoins/docs/supported-domains
  */
 
-import { zeroAddress } from "viem";
-
-import { ChainConfig, DaimoChain } from "./chainConfig";
+import { DaimoChain } from "./chainConfig";
 import {
   ForeignToken,
-  TokenLogo,
   arbitrumSepoliaUSDC,
   arbitrumSepoliaWETH,
   arbitrumUSDC,
@@ -177,6 +174,11 @@ const chains = [
   avalancheFuji,
 ];
 
+/** Supported chains for send (+ soon receive). */
+export function getDAv2Chains(isTestnet: boolean): DAv2Chain[] {
+  return chains.filter((c) => !!c.isTestnet === isTestnet);
+}
+
 /** Given a chain ID, return the chain. */
 export function getDAv2Chain(chainId: number): DAv2Chain {
   const ret = chains.find((c) => c.chainId === chainId);
@@ -228,46 +230,4 @@ export function getChainDisplayName(
     displayName = displayName.replace("Sepolia", noSepolia ? "" : " Sepolia");
   }
   return displayName;
-}
-
-/** Get native WETH token address using chainId. */
-export function getNativeWETHByChain(chainId: number): ForeignToken {
-  switch (chainId) {
-    case base.chainId:
-      return baseWETH;
-    case baseSepolia.chainId:
-      return baseSepoliaWETH;
-    default:
-      throw new Error(`No WETH for chain ${chainId}`);
-  }
-}
-
-// Checks if the token ETH or native WETH on the given chain.
-export function isNativeETH(
-  token: ForeignToken,
-  chain: ChainConfig | number
-): boolean {
-  const chainId = typeof chain === "number" ? chain : chain.chainL2.id;
-  return token.chainId === chainId && token.token === zeroAddress;
-}
-
-// Get native ETH placeholder pseudo-token.
-export function getNativeETHForChain(
-  chainId: number
-): ForeignToken | undefined {
-  switch (chainId) {
-    case base.chainId:
-    case baseSepolia.chainId:
-      return {
-        token: zeroAddress,
-        decimals: 18,
-        name: "Ethereum",
-        symbol: "ETH",
-        logoURI: TokenLogo.ETH,
-        chainId,
-      };
-    default:
-      // Some chains, like Polygon PoS, don't have native ETH.
-      return undefined;
-  }
 }

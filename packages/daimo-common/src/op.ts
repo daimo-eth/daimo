@@ -1,7 +1,6 @@
 import {
   ChainConfig,
   ForeignToken,
-  getForeignCoinDisplayAmount,
   getChainDisplayName,
   getDAv2Chain,
 } from "@daimo/contract";
@@ -9,6 +8,7 @@ import { Locale } from "expo-localization";
 import { Address, Hex } from "viem";
 
 import { DaimoNoteStatus, DaimoRequestV2Status } from "./daimoLinkStatus";
+import { getForeignCoinDisplayAmount } from "./format";
 import { i18n } from "./i18n";
 import { BigIntStr } from "./model";
 

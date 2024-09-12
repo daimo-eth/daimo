@@ -2,12 +2,17 @@ import { BigIntStr, EAccount, ProposedSwap, assert, now } from "@daimo/common";
 import {
   daimoFlexSwapperABI,
   daimoFlexSwapperAddress,
-  isNativeETH,
   isTestnetChain,
   swapRouter02Abi,
   swapRouter02Address,
 } from "@daimo/contract";
-import { Address, Hex, encodeFunctionData, numberToHex } from "viem";
+import {
+  Address,
+  Hex,
+  encodeFunctionData,
+  numberToHex,
+  zeroAddress,
+} from "viem";
 
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
@@ -76,7 +81,7 @@ export async function getSwapQuote({
   // Reference: https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/entities/protocols/uniswap.ts
   // TODO: re-enable to support native ETH sends
   // const routerMustCustody = tokenOut === getNativeWETHByChain(chainId)?.token;
-  // const recipient: Address = routerMustCustody ? zeroAddr : toAddr;
+  // const recipient: Address = routerMustCustody ? zeroAddress : toAddr;
   const recipient = toAddr;
 
   const t = now();
@@ -87,7 +92,7 @@ export async function getSwapQuote({
   const amountOutMinimum = amountOut - (maxSlippagePercent * amountOut) / 100n;
 
   // Special handling for fromCoin = native ETH
-  const isFromETH = isNativeETH(fromCoin, chainId);
+  const isFromETH = fromCoin.token === zeroAddress;
 
   let swapCallData;
   if (pathIsDirectSwap(swapPath)) {
@@ -128,7 +133,7 @@ export async function getSwapQuote({
   // If swapping native ETH: pass it, wrap it, then swap from WETH
   let execValue = 0n;
   let callData;
-  if (isNativeETH(fromCoin, chainId)) {
+  if (isFromETH) {
     execValue = amountIn;
     const wrapETHCall = encodeFunctionData({
       abi: swapRouter02Abi,

@@ -1,13 +1,13 @@
 import {
-  BigIntStr,
-  EAccount,
-  ProposedSwap,
-  SwapQueryResult,
   amountToDollars,
   assertNotNull,
+  BigIntStr,
   debugJson,
+  EAccount,
   guessTimestampFromNum,
+  ProposedSwap,
   retryBackoff,
+  SwapQueryResult,
 } from "@daimo/common";
 import {
   baseDAI,
@@ -15,10 +15,9 @@ import {
   baseUSDC,
   baseWETH,
   ForeignToken,
-  zeroAddr,
 } from "@daimo/contract";
 import { Kysely } from "kysely";
-import { Address, Hex, bytesToHex, getAddress, zeroAddress } from "viem";
+import { Address, bytesToHex, getAddress, Hex, zeroAddress } from "viem";
 
 import { Transfer } from "./homeCoinIndexer";
 import { Indexer } from "./indexer";
@@ -104,7 +103,7 @@ export class ForeignCoinIndexer extends Indexer {
         logIndex: Number(row.sort_idx),
         address:
           row.token == null
-            ? zeroAddr // ETH / native token transfer
+            ? zeroAddress // ETH / native token transfer
             : getAddress(bytesToHex(row.token, { size: 20 })), // ERC-20
         from: getAddress(bytesToHex(row.f, { size: 20 })),
         to: getAddress(bytesToHex(row.t, { size: 20 })),

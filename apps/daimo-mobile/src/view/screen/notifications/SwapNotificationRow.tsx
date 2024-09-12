@@ -1,5 +1,9 @@
-import { getAccountName, now, timeAgo } from "@daimo/common";
-import { getForeignCoinDisplayAmount } from "@daimo/contract";
+import {
+  getAccountName,
+  getForeignCoinDisplayAmount,
+  now,
+  timeAgo,
+} from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import React, { useContext } from "react";
 import { ActivityIndicator, View, useWindowDimensions } from "react-native";
@@ -46,7 +50,7 @@ export function SwapNotificationRow({ notif }: { notif: SwapNotification }) {
   const copy = (() => {
     return (
       <TextBody color={color.grayMid} style={{ maxWidth: messageWidth }}>
-        {i18.msg(readableAmount, coin.name)}
+        {i18.msg(readableAmount, coin.symbol)}
         <TextBody color={color.midnight}>{accName}</TextBody>
       </TextBody>
     );

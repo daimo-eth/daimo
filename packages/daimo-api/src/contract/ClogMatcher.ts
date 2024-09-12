@@ -1,8 +1,14 @@
 import { assertNotNull, debugJson, retryBackoff } from "@daimo/common";
-import { zeroAddr } from "@daimo/contract";
 import { daimoFastCctpAddress } from "@daimo/userop/dist/daimoOpSender";
 import { Kysely } from "kysely";
-import { Address, bytesToHex, getAddress, Hex, hexToBytes } from "viem";
+import {
+  Address,
+  bytesToHex,
+  getAddress,
+  Hex,
+  hexToBytes,
+  zeroAddress,
+} from "viem";
 
 import { ForeignTokenTransfer } from "./foreignCoinIndexer";
 import { DB as IndexDB } from "../codegen/dbIndex";
@@ -68,7 +74,7 @@ export class ClogMatcher {
         logIndex: Number(row.sort_idx),
         address:
           row.token == null
-            ? zeroAddr
+            ? zeroAddress
             : getAddress(bytesToHex(row.token, { size: 20 })),
         from: getAddress(bytesToHex(row.f, { size: 20 })),
         to: getAddress(bytesToHex(row.t, { size: 20 })),

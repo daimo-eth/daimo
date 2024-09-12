@@ -1,18 +1,19 @@
 import {
   DAv2Chain,
-  arbitrum,
-  base,
-  baseSepolia,
-  ethereumSepolia,
-  isTestnetChain,
-  optimism,
-  polygon,
   ForeignToken,
+  arbitrum,
   arbitrumUSDC,
+  base,
+  baseETH,
+  baseSepolia,
   baseSepoliaUSDC,
   baseUSDC,
+  ethereumSepolia,
   ethereumSepoliaUSDC,
+  isTestnetChain,
+  optimism,
   optimismUSDC,
+  polygon,
   polygonUSDC,
 } from "@daimo/contract";
 
@@ -27,6 +28,7 @@ const supportedSendPairsMainnet: SendPair[] = [
   { chain: optimism, coin: optimismUSDC },
   { chain: polygon, coin: polygonUSDC },
   { chain: arbitrum, coin: arbitrumUSDC },
+  { chain: base, coin: baseETH },
 ];
 
 const supportedSendPairsTestnet: SendPair[] = [

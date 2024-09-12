@@ -2,14 +2,11 @@ import {
   OpStatus,
   ProposedSwap,
   amountToDollars,
+  getForeignCoinDisplayAmount,
   hasAccountName,
   now,
 } from "@daimo/common";
-import {
-  ForeignToken,
-  baseUSDC,
-  getForeignCoinDisplayAmount,
-} from "@daimo/contract";
+import { ForeignToken, baseUSDC } from "@daimo/contract";
 import { DaimoNonce, DaimoNonceMetadata, DaimoNonceType } from "@daimo/userop";
 import { useContext, useEffect, useMemo } from "react";
 import { ActivityIndicator, Image, View } from "react-native";

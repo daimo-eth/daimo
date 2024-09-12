@@ -80,7 +80,6 @@ export function migrateV15Clog(clog: StoredV15Clog): StoredV16Clog {
         coin: {
           chainId: coin.chainId,
           decimals: coin.decimals,
-          name: coin.name,
           symbol: coin.symbol,
           logoURI: coin.logoURI,
           token: tokenAddress,

@@ -13,8 +13,8 @@ import {
   getSlotLabel,
   parseRequestMetadata,
   retryBackoff,
+  getForeignCoinDisplayAmount,
 } from "@daimo/common";
-import { getForeignCoinDisplayAmount } from "@daimo/contract";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { Address, getAddress } from "viem";
 

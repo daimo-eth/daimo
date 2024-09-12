@@ -233,7 +233,6 @@ export interface StoredV16ProposedSwap {
 interface StoredV16ForeignCoin {
   chainId: number;
   token: Address;
-  name: string;
   symbol: string;
   decimals: number;
   logoURI?: string;
