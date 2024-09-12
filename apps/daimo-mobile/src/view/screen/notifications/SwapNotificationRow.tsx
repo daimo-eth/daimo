@@ -15,7 +15,7 @@ import { i18NLocale, i18n } from "../../../i18n";
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { TokenBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
-import { color, touchHighlightUnderlay } from "../../shared/style";
+import { color, touchHighlightUnderlay } from "../../style/style";
 import { TextBody, TextMeta } from "../../shared/text";
 
 const i18 = i18n.swapNotification;

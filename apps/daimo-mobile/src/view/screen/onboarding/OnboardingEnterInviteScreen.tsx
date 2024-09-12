@@ -21,7 +21,7 @@ import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
 import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
+import { color, ss } from "../../style/style";
 import { TextBodyMedium, TextCenter } from "../../shared/text";
 
 const i18 = i18n.onboardingEnterInvite;

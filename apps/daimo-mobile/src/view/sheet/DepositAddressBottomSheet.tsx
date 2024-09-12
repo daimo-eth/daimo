@@ -13,7 +13,7 @@ import { Account } from "../../storage/account";
 import { CheckLabel } from "../shared/Check";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../style/style";
 import { DaimoText, TextBold, TextLight, TextPara } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 

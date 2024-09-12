@@ -2,7 +2,7 @@ import { Octicons } from "@expo/vector-icons";
 import { View, StyleSheet } from "react-native";
 
 import { OctName } from "./InputBig";
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBody } from "./text";
 
 export function IconRow(props: {

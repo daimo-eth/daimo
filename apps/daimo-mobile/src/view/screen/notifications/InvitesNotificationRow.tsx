@@ -6,7 +6,7 @@ import { NotificationRow } from "./NotificationRow";
 import { useNav } from "../../../common/nav";
 import { i18n } from "../../../i18n";
 import { InvitesNotification } from "../../../logic/inAppNotifications";
-import { color, touchHighlightUnderlay } from "../../shared/style";
+import { color, touchHighlightUnderlay } from "../../style/style";
 import { TextBody } from "../../shared/text";
 
 const i18 = i18n.invitesNotification;

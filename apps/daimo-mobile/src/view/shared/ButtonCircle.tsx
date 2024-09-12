@@ -1,7 +1,7 @@
 import { ReactNode, useMemo } from "react";
 import { TouchableHighlight } from "react-native";
 
-import { touchHighlightUnderlay } from "./style";
+import { touchHighlightUnderlay } from "../style/style";
 
 export function ButtonCircle({
   onPress,

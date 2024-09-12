@@ -40,7 +40,7 @@ import {
   useSeedPhraseInput,
 } from "../shared/SeedPhraseDisplay";
 import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../style/style";
 import { TextBody, TextBtnCaps } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 

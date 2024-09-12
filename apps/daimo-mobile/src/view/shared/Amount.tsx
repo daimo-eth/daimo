@@ -2,7 +2,7 @@ import { amountToDollars } from "@daimo/common";
 import { StyleSheet, Text, TextStyle } from "react-native";
 
 import Spacer from "./Spacer";
-import { color } from "./style";
+import { color } from "../style/style";
 import { DaimoText } from "./text";
 import { i18NLocale } from "../../i18n";
 

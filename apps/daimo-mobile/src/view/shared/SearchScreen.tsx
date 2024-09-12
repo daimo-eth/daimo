@@ -10,7 +10,7 @@ import { InputBig } from "./InputBig";
 import { PressableText } from "./PressableText";
 import { SearchResults } from "./SearchResults";
 import Spacer from "./Spacer";
-import { ss } from "./style";
+import { ss } from "../style/style";
 import { i18n } from "../../i18n";
 import { useContactsPermission } from "../../logic/systemContacts";
 

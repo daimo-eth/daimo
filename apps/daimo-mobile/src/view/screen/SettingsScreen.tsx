@@ -39,7 +39,7 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { PendingDot } from "../shared/StatusDot";
 import { openSupportTG } from "../shared/error";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../style/style";
 import {
   TextBody,
   TextBodyMedium,

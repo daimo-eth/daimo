@@ -37,7 +37,7 @@ import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorBanner } from "../../shared/error";
-import { ss } from "../../shared/style";
+import { ss } from "../../style/style";
 import {
   TextBody,
   TextBold,

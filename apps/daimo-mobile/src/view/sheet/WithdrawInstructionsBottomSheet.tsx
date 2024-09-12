@@ -6,7 +6,7 @@ import { i18n } from "../../i18n";
 import { Badge } from "../shared/Badge";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
+import { color, ss } from "../style/style";
 import { TextBold, TextLight, TextPara } from "../shared/text";
 
 const i18 = i18n.withdrawInstructionsBottom;

@@ -28,7 +28,7 @@ import {
 } from "../../../logic/accountManager";
 import { ButtonBig, HelpButton, TextButton } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { color } from "../../shared/style";
+import { color } from "../../style/style";
 import {
   TextBody,
   TextH1,

@@ -27,7 +27,7 @@ import { ContactBubble } from "../../shared/Bubble";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { color, ss } from "../../shared/style";
+import { color, ss } from "../../style/style";
 import { TextBodyMedium, TextCenter, TextH2 } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingUseBackup">;

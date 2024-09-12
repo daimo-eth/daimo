@@ -53,7 +53,7 @@ import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { FailedDot, PendingDot, ProcessingDot } from "../../shared/StatusDot";
-import { color, ss } from "../../shared/style";
+import { color, ss } from "../../style/style";
 import {
   TextBodyCaps,
   TextCenter,

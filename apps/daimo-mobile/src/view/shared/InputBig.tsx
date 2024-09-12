@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
-import { color, ss } from "./style";
+import { color, ss } from "../style/style";
 import { MAX_FONT_SIZE_MULTIPLIER } from "./text";
 
 export type OctName = typeof Octicons extends Icon<infer G, any> ? G : never;

@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
-import { color } from "../../shared/style";
+import { color } from "../../style/style";
 
 export function NotificationRow({ children }: { children: React.ReactNode }) {
   return <View style={styles.row}>{children}</View>;

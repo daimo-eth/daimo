@@ -23,7 +23,7 @@ import { FarcasterButton } from "../shared/FarcasterBubble";
 import Spacer from "../shared/Spacer";
 import { ErrorRowCentered } from "../shared/error";
 import image from "../shared/image";
-import { color, ss } from "../shared/style";
+import { color, ss } from "../style/style";
 import { TextBody, TextH3, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 

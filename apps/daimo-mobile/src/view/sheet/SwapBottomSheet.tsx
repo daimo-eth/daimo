@@ -27,7 +27,7 @@ import { TokenBubble } from "../shared/Bubble";
 import { ButtonMed } from "../shared/Button";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
+import { color, ss } from "../style/style";
 import { TextBodyCaps, TextH3 } from "../shared/text";
 
 const i18 = i18n.swapBottom;

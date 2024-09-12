@@ -1,6 +1,6 @@
 import { Pressable, PressableProps } from "react-native";
 
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBody } from "./text";
 
 type PressableTextProps = PressableProps & {

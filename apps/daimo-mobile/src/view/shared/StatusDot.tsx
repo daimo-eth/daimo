@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
-import { color } from "./style";
+import { color } from "../style/style";
 
 export function PendingDot({ size }: { size?: number }) {
   return <View style={styles(size || 12).pendingDot} />;

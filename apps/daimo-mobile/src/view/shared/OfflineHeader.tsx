@@ -5,7 +5,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Spacer from "./Spacer";
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBody } from "./text";
 import { i18n } from "../../i18n";
 import { useNetworkState } from "../../sync/networkState";

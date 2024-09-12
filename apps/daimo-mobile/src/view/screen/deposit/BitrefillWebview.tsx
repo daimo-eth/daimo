@@ -9,7 +9,7 @@ import { DispatcherContext } from "../../../action/dispatch";
 import { useNav } from "../../../common/nav";
 import { i18NLocale } from "../../../i18n";
 import { ScreenHeader } from "../../shared/ScreenHeader";
-import { ss } from "../../shared/style";
+import { ss } from "../../style/style";
 
 export function BitrefillWebView() {
   const nav = useNav();

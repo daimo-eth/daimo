@@ -29,7 +29,7 @@ import { PressableText } from "../shared/PressableText";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../style/style";
 import {
   DaimoText,
   TextBody,

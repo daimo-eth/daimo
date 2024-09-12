@@ -14,7 +14,7 @@ import { useNotificationsAccess } from "../../../logic/notify";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
+import { color, ss } from "../../style/style";
 import { TextBodyMedium, TextCenter } from "../../shared/text";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "AllowNotifs">;

@@ -3,7 +3,7 @@ import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { ContactBubble } from "./Bubble";
 import { FailedDot, PendingDot, ProcessingDot } from "./StatusDot";
-import { color, touchHighlightUnderlay } from "./style";
+import { color, touchHighlightUnderlay } from "../style/style";
 import { TextBody, TextPara } from "./text";
 import { i18NLocale } from "../../i18n";
 import {

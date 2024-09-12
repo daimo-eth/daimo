@@ -11,7 +11,7 @@ import Animated, {
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
 import { Icon } from "./Icon";
-import { color } from "./style";
+import { color } from "../style/style";
 import { useNav } from "../../common/nav";
 import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";

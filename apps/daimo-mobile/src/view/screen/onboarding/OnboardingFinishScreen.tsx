@@ -7,7 +7,7 @@ import {
 } from "../../../logic/accountManager";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
+import { ss } from "../../style/style";
 import {
   EmojiToOcticon,
   TextCenter,

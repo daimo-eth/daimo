@@ -15,7 +15,7 @@ import { ButtonBig } from "../shared/Button";
 import { OctName } from "../shared/InputBig";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color } from "../shared/style";
+import { color } from "../style/style";
 import { TextBody, TextCenter, TextH3 } from "../shared/text";
 
 const i18 = i18n.createBackup;

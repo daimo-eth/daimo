@@ -1,27 +1,18 @@
 import { Platform, StyleSheet, TextStyle } from "react-native";
 
-/** Match daimo-web tailwind config. Same name = refers to the same color. */
-export const color = {
-  primary: "#13915F",
-  primaryBgLight: "#CCF3D7",
-  danger: "#f35369",
-  warningLight: "#ffeeb3",
-  yellow: "#FFDC62",
-  success: "#14B174",
-  successDark: "#13915F",
-  white: "#ffffff",
-  ivoryLight: "#f9f9f9",
-  ivoryDark: "#f2f2f2",
-  grayLight: "#e2e2e2", // TODO gray2 = d6d6d6
-  gray3: "#aaaaaa",
-  grayMid: "#717171", // TODO gray4
-  grayDark: "#444", // TODO gray5
-  midnight: "#262626", // TODO "black" = 111111
-  link: "#027AFE",
-  lightBlue: "#A3D3FF",
+import { orangeColorway } from "./colorway";
+
+export const color = orangeColorway;
+
+const fonts = {
+  default: "NeueMontreal-Regular",
+  chalkboard: "ChalkboardSE-Light",
+  courier: "CourierNewPSMT",
+  menlo: "Menlo",
 };
 
 const textBase: TextStyle = {
+  fontFamily: fonts.chalkboard,
   fontVariant: ["tabular-nums"],
   color: color.midnight,
 };

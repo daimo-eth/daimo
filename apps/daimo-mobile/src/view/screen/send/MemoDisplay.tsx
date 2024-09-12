@@ -5,7 +5,7 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 import { i18n } from "../../../i18n";
 import Spacer from "../../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../../style/style";
 import { TextBtnCaps, TextCenter, TextColor } from "../../shared/text";
 
 const i18 = i18n.memoDisplay;

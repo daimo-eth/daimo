@@ -5,7 +5,7 @@ import { ContactBubble } from "./Bubble";
 import { ButtonCircle } from "./ButtonCircle";
 import { FarcasterButton } from "./FarcasterBubble";
 import Spacer from "./Spacer";
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBtnCaps, TextH2, TextLight } from "./text";
 import { navToAccountPage, useNav } from "../../common/nav";
 import { i18n } from "../../i18n";

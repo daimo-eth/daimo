@@ -15,7 +15,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { OctName } from "./InputBig";
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBody, TextMeta } from "./text";
 import { DispatcherContext } from "../../action/dispatch";
 import { handleDeepLink, useNav } from "../../common/nav";

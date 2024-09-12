@@ -1,6 +1,6 @@
 import { View, ActivityIndicator } from "react-native";
 
-import { ss } from "./style";
+import { ss } from "../style/style";
 
 export function CenterSpinner() {
   return (

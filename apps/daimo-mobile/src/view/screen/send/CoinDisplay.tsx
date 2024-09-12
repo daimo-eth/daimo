@@ -29,8 +29,7 @@ import IconBase from "../../../../assets/logos/base-logo.png";
 import IconOptimism from "../../../../assets/logos/op-logo.png";
 import IconPolygon from "../../../../assets/logos/poly-logo.png";
 import { useAccount } from "../../../logic/accountManager";
-import { color, ss } from "../../shared/style";
-import { TextBtnCaps } from "../../shared/text";
+import { color, ss } from "../../style/style";
 
 // Get the logo for the chain
 // TODO: move elsewhere

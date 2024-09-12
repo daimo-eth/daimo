@@ -27,7 +27,7 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
+import { color, ss } from "../../style/style";
 import {
   TextBody,
   TextCenter,

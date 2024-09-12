@@ -4,7 +4,7 @@ import { memo, useCallback, useReducer } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
 import Spacer from "./Spacer";
-import { color, ss } from "./style";
+import { color, ss } from "../style/style";
 import { TextBody } from "./text";
 
 export function SeedPhraseDisplay({ words }: { words: string[] }) {

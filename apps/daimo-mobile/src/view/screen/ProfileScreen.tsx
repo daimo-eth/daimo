@@ -38,7 +38,7 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { ErrorBanner } from "../shared/error";
-import { color, ss } from "../shared/style";
+import { color, ss } from "../style/style";
 import { TextBody, TextH2 } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";

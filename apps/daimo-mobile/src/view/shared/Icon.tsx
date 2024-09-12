@@ -1,7 +1,7 @@
 import { StyleProp, ViewStyle } from "react-native";
 import { Svg, Path } from "react-native-svg";
 
-import { color as baseColor } from "../shared/style";
+import { color as baseColor } from "../style/style";
 
 const icons = {
   "bell-01": (

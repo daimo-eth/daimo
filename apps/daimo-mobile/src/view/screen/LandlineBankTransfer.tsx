@@ -33,7 +33,7 @@ import { ContactDisplay } from "../shared/ContactDisplay";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
-import { ss } from "../shared/style";
+import { ss } from "../style/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 

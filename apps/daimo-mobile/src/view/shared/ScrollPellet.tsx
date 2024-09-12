@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 
-import { color } from "../shared/style";
+import { color } from "../style/style";
 
 export default function ScrollPellet() {
   return (

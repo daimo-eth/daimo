@@ -5,7 +5,7 @@ import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { OctName } from "./InputBig";
 import { OfflineHeader } from "./OfflineHeader";
-import { color, touchHighlightUnderlay } from "./style";
+import { color, touchHighlightUnderlay } from "../style/style";
 import { TextH3 } from "./text";
 
 export function ScreenHeader({

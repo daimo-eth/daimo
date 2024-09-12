@@ -6,7 +6,7 @@ import { i18NLocale, i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../style/style";
 import { TextBody } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 

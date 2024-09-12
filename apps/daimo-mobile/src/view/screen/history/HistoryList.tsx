@@ -37,7 +37,7 @@ import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { FailedDot, PendingDot, ProcessingDot } from "../../shared/StatusDot";
-import { color, ss, touchHighlightUnderlay } from "../../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../../style/style";
 import {
   DaimoText,
   TextBody,

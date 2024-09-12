@@ -5,7 +5,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { color } from "./style";
+import { color } from "../style/style";
 
 export function ProgressBlobs({
   activeStep,

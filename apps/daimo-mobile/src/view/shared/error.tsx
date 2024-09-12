@@ -4,7 +4,7 @@ import { Linking, Platform, StyleSheet, View } from "react-native";
 
 import { ButtonBig } from "./Button";
 import Spacer from "./Spacer";
-import { color } from "./style";
+import { color } from "../style/style";
 import { DaimoText, TextCenter, TextError, TextH3 } from "./text";
 import { useExitToHome } from "../../common/nav";
 

@@ -5,7 +5,7 @@ import { Image, ImageStyle } from "expo-image";
 import { useMemo } from "react";
 import { Text, TextStyle, View, ViewStyle } from "react-native";
 
-import { color } from "./style";
+import { color } from "../style/style";
 import {
   DaimoContact,
   getContactName,

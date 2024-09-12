@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { View } from "react-native";
 
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBtnCaps } from "./text";
 
 const defaultColor = color.grayDark;

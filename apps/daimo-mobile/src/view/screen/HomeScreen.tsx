@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 import {
+  ImageBackground,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -50,10 +51,11 @@ import { SearchResults } from "../shared/SearchResults";
 import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBody, TextBtnCaps, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
+import SpinningDogeBackground from "../style/spinningDoge";
+import { color, ss, touchHighlightUnderlay } from "../style/style";
 
 const i18 = i18n.home;
 
@@ -151,6 +153,7 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
 
   return (
     <View>
+      <SpinningDogeBackground />
       <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
       <Animated.ScrollView
         ref={scrollRef}

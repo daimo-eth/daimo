@@ -14,7 +14,7 @@ import { AmountChooser } from "../shared/AmountInput";
 import { ContactDisplay } from "../shared/ContactDisplay";
 import { IconRow } from "../shared/IconRow";
 import Spacer from "../shared/Spacer";
-import { color } from "../shared/style";
+import { color } from "../style/style";
 import { useWithAccount } from "../shared/withAccount";
 
 export function BitrefillBottomSheet({

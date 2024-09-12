@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { OctName } from "./InputBig";
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBody } from "./text";
 
 export function InfoBox({

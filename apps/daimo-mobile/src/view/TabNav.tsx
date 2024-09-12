@@ -55,7 +55,7 @@ import { SendNoteScreen } from "./screen/send/SendNoteScreen";
 import SendTransferScreen from "./screen/send/SendTransferScreen";
 import { IconHome } from "./shared/IconHome";
 import { OctName } from "./shared/InputBig";
-import { color } from "./shared/style";
+import { color } from "./style/style";
 import {
   ParamListDeposit,
   ParamListHome,

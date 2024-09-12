@@ -12,8 +12,8 @@ import { useInitNotifications } from "./logic/notify";
 import { RpcProvider } from "./logic/trpc";
 import { TabNav } from "./view/TabNav";
 import { renderErrorFallback } from "./view/screen/errorScreens";
-import { color } from "./view/shared/style";
 import { GlobalBottomSheet } from "./view/sheet/GlobalBottomSheet";
+import { color } from "./view/style/style";
 
 export default function App() {
   const account = useAccount();
@@ -24,7 +24,9 @@ export default function App() {
   useInitNotifications();
 
   // Load font to fix icons on Android
-  useFonts({ Octicons: require("../assets/octicons.ttf") });
+  useFonts({
+    Octicons: require("../assets/octicons.ttf"),
+  });
 
   // White background to avoid between-tab flicker
   let theme = DefaultTheme;

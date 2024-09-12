@@ -3,7 +3,7 @@ import { BackHandler, View, StyleSheet, Platform } from "react-native";
 
 import { ProgressBlobs } from "../../shared/ProgressBlobs";
 import { ScreenHeader } from "../../shared/ScreenHeader";
-import { ss } from "../../shared/style";
+import { ss } from "../../style/style";
 
 export function getNumOnboardingSteps() {
   return Platform.OS === "ios" ? 3 : 4;

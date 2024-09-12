@@ -30,7 +30,7 @@ import { IconRow } from "../../shared/IconRow";
 import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
 import image from "../../shared/image";
-import { color, ss } from "../../shared/style";
+import { color, ss } from "../../style/style";
 import { TextBodyMedium, TextBtnCaps, TextCenter } from "../../shared/text";
 
 const i18 = i18n.onboardingChooseName;

@@ -9,7 +9,7 @@ import { LandlineBankAccountContact } from "../../../logic/daimoContacts";
 import { Account } from "../../../storage/account";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
-import { color } from "../../shared/style";
+import { color } from "../../style/style";
 import { TextColor, TextError } from "../../shared/text";
 
 const i18 = i18n.landlineDepositButton;

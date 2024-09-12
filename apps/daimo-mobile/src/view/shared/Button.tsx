@@ -21,7 +21,7 @@ import Animated, {
 
 import { AnimatedCircle } from "./AnimatedCircle";
 import Spacer from "./Spacer";
-import { color, touchHighlightUnderlay } from "./style";
+import { color, touchHighlightUnderlay } from "../style/style";
 import { DaimoText, TextBody, TextBtnCaps } from "./text";
 import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
 import FaceIdIcon from "../../../assets/face-id.png";

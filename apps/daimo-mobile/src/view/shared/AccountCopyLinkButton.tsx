@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Platform, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import Spacer from "./Spacer";
-import { color, touchHighlightUnderlay } from "./style";
+import { color, touchHighlightUnderlay } from "../style/style";
 import { TextH2, TextH3 } from "./text";
 import { i18NLocale } from "../../i18n";
 

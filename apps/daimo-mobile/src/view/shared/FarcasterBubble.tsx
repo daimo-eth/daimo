@@ -5,7 +5,7 @@ import { Linking, StyleSheet, View } from "react-native";
 import { BadgeButton } from "./Button";
 import Spacer from "./Spacer";
 import image from "./image";
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBtnCaps, TextMeta } from "./text";
 import { FarcasterClient } from "../../profile/farcaster";
 

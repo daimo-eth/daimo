@@ -2,7 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { ReactNode, useMemo } from "react";
 import { Text, TextProps } from "react-native";
 
-import { color, ss } from "./style";
+import { color, ss } from "../style/style";
 
 export const MAX_FONT_SIZE_MULTIPLIER = 1.4;
 

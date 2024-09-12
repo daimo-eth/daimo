@@ -17,7 +17,7 @@ import { amountSeparator, getAmountText } from "./Amount";
 import { Badge } from "./Badge";
 import { DropdownPickButton } from "./DropdownPickButton";
 import Spacer from "./Spacer";
-import { color, ss } from "./style";
+import { color, ss } from "../style/style";
 import { DaimoText, MAX_FONT_SIZE_MULTIPLIER, TextLight } from "./text";
 import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";

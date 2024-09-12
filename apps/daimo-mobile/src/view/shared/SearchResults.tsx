@@ -16,7 +16,7 @@ import { ButtonMed } from "./Button";
 import { LinkedAccountBubble } from "./LinkedAccountBubble";
 import Spacer from "./Spacer";
 import { ErrorRowCentered } from "./error";
-import { color, touchHighlightUnderlay } from "./style";
+import { color, touchHighlightUnderlay } from "../style/style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { useWithAccount } from "./withAccount";
 import { navToAccountPage, useNav } from "../../common/nav";

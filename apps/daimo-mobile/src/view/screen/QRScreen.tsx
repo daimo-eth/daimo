@@ -37,7 +37,7 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
-import { color, ss } from "../shared/style";
+import { color, ss } from "../style/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 
 type Props = NativeStackScreenProps<ParamListHome, "QR">;

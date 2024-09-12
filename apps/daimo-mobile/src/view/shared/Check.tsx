@@ -1,7 +1,7 @@
 import React, { ReactNode, useCallback } from "react";
 import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 
-import { color } from "./style";
+import { color } from "../style/style";
 import { TextBody } from "./text";
 
 export function CheckLabel({

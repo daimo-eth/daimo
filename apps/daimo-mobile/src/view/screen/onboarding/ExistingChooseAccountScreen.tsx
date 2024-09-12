@@ -12,7 +12,7 @@ import { InputBig } from "../../shared/InputBig";
 import { SearchResultRow } from "../../shared/SearchResults";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { color, ss } from "../../shared/style";
+import { color, ss } from "../../style/style";
 import { TextBodyMedium, TextCenter, TextLight } from "../../shared/text";
 
 const i18 = i18n.existingChooseAccount;

@@ -16,7 +16,7 @@ import { NamedError } from "../../../logic/log";
 import { defaultEnclaveKeyName } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
+import { color, ss } from "../../style/style";
 import { TextBody, TextCenter, TextError } from "../../shared/text";
 
 type Props = NativeStackScreenProps<

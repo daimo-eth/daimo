@@ -4,7 +4,7 @@ import { View } from "react-native";
 import { i18n } from "../../i18n";
 import { ButtonMed } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { ss } from "../shared/style";
+import { ss } from "../style/style";
 import { TextCenter, TextH3 } from "../shared/text";
 
 const i18 = i18n.helpBottom;

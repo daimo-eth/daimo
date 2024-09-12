@@ -7,7 +7,7 @@ import { useOnboardingChecklist } from "../../logic/onboarding";
 import { Account } from "../../storage/account";
 import { TextButton } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../style/style";
 import { DaimoText, TextBody, TextH3 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 

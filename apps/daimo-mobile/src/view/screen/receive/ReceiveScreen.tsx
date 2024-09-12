@@ -40,7 +40,7 @@ import { ContactDisplay } from "../../shared/ContactDisplay";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
+import { ss } from "../../style/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 import { SendMemoButton } from "../send/MemoDisplay";

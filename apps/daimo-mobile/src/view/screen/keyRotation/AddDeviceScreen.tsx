@@ -12,7 +12,7 @@ import { Account } from "../../../storage/account";
 import { Scanner } from "../../shared/Scanner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
+import { ss } from "../../style/style";
 import { TextCenter, TextH2, TextPara } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 

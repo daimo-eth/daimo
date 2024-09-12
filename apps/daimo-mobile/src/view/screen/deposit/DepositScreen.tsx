@@ -41,7 +41,7 @@ import { CoverGraphic } from "../../shared/CoverGraphic";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../../shared/style";
+import { color, ss, touchHighlightUnderlay } from "../../style/style";
 import { TextBody, TextMeta } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
 
