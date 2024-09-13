@@ -1,13 +1,13 @@
 import {
-  EAccount,
-  OpStatus,
-  ProposedSwap,
   assert,
   canSendTo,
   dollarsToAmount,
+  EAccount,
   hasAccountName,
+  OpStatus,
+  ProposedSwap,
 } from "@daimo/common";
-import { DAv2Chain, ForeignToken } from "@daimo/contract";
+import { baseUSDC, DAv2Chain, ForeignToken } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -70,7 +70,10 @@ export function SendTransferButton({
   );
 
   // Note whether the transfer has a swap or not for op creation.
-  const isSwap = !!(route && route.routeFound);
+  const chainId = account.homeChainId;
+  const homeCoin = baseUSDC; // TODO
+  const isBridge = toCoin.chainId !== chainId;
+  const isSwap = !isBridge && homeCoin.token !== toCoin.token;
 
   // Pending swap, appears immediately > replaced by onchain data
   const pendingOpBase = {
@@ -95,10 +98,9 @@ export function SendTransferButton({
         chainGasConstants: account.chainGasConstants,
       };
 
-      // TODO: handle case with swap and bridge
-      assert(toCoin.symbol === "USDC");
-
       if (toChain.chainId !== account.homeChainId) {
+        // TODO: handle case with swap and bridge
+        assert(toCoin.symbol === homeCoin.symbol);
         console.log(`[ACTION] sending via FastCCTP to chain ${toChain.name}`);
         return opSender.sendUsdcToOtherChain(
           recipient.addr,
@@ -108,6 +110,9 @@ export function SendTransferButton({
           memo
         );
       } else if (isSwap) {
+        if (route == null) {
+          throw new Error("missing swap route");
+        }
         // Swap and transfer if outbound coin is different than home coin.
         console.log(`[ACTION] sending via swap with route ${route}`);
         return opSender.executeProposedSwap(route, opMetadata);

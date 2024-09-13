@@ -6,6 +6,7 @@ import {
   base,
   baseETH,
   baseSepolia,
+  baseSepoliaETH,
   baseSepoliaUSDC,
   baseUSDC,
   ethereumSepolia,
@@ -34,6 +35,7 @@ const supportedSendPairsMainnet: SendPair[] = [
 const supportedSendPairsTestnet: SendPair[] = [
   { chain: baseSepolia, coin: baseSepoliaUSDC },
   { chain: ethereumSepolia, coin: ethereumSepoliaUSDC },
+  { chain: baseSepolia, coin: baseSepoliaETH },
 ];
 
 export const getSupportedSendPairs = (chainId: number): SendPair[] => {

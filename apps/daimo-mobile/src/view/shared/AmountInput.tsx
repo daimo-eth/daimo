@@ -180,11 +180,12 @@ function AmountInput({
   const onSetCurrency = (currency: CurrencyExchangeRate) => {
     onChange({ currency, localUnits });
   };
+  const showPicker = !disabled;
 
   return (
     <TouchableWithoutFeedback onPress={focus} accessible={false}>
       <View style={styles.amountRow}>
-        {!disabled && <CurrencyPicker {...{ allCurrencies, onSetCurrency }} />}
+        {showPicker && <CurrencyPicker {...{ allCurrencies, onSetCurrency }} />}
         <View style={styles.amountInputWrap}>
           <DaimoText style={styles.amountDollar}>{currency.symbol}</DaimoText>
           <TextInput

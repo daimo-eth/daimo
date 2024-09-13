@@ -1,13 +1,13 @@
-import { getSupportedSendPairs, SendPair } from "@daimo/common";
+import { assert, getSupportedSendPairs, SendPair } from "@daimo/common";
 import {
-  DAv2Chain,
-  ForeignToken,
   arbitrum,
   arbitrumSepolia,
   base,
   baseSepolia,
-  baseUSDC,
+  DAv2Chain,
+  ForeignToken,
   getChainDisplayName,
+  getDAv2Chain,
   optimism,
   optimismSepolia,
   polygon,
@@ -29,6 +29,7 @@ import IconOptimism from "../../../../assets/logos/op-logo.png";
 import IconPolygon from "../../../../assets/logos/poly-logo.png";
 import { useAccount } from "../../../logic/accountManager";
 import { color, ss } from "../../shared/style";
+import { TextBtnCaps } from "../../shared/text";
 
 // Get the logo for the chain
 // TODO: move elsewhere
@@ -52,27 +53,26 @@ const getChainUri = (chain: DAv2Chain) => {
 
 export function SendCoinButton({
   toCoin,
-  toChain,
   setCoin,
-  setChain,
 }: {
   toCoin: ForeignToken;
-  toChain: DAv2Chain;
   setCoin: (coin: ForeignToken) => void;
-  setChain: (chain: DAv2Chain) => void;
 }) {
   const account = useAccount();
-
   if (account == null) return null;
 
-  const onSetPair = (entry: SendPair) => {
-    setCoin(entry.coin);
-    setChain(entry.chain);
-  };
+  // Get home coin = default send coin + all other supported send coins
+  const { homeChainId, homeCoinAddress } = account;
+  const supportedSendPairs = getSupportedSendPairs(homeChainId);
+  const homeCoin = supportedSendPairs
+    .map((p) => p.coin)
+    .find((c) => c.chainId === homeChainId && c.token === homeCoinAddress);
+  assert(homeCoin != null, "home coin not a supported send coin");
 
-  const homeCoin = baseUSDC; // TODO: add home coin to account
+  // Currently selected send coin
+  const toChain = getDAv2Chain(toCoin.chainId);
   const chainUri = getChainUri(toChain);
-  const supportedSendPairs = getSupportedSendPairs(toChain.chainId);
+  const onSetPair = (entry: SendPair) => setCoin(entry.coin);
 
   return (
     <SelectDropdown
@@ -80,31 +80,14 @@ export function SendCoinButton({
       defaultValue={homeCoin}
       onSelect={onSetPair}
       renderButton={() => (
-        <View
-          style={{
-            ...styles.coinButton,
-            backgroundColor: color.white,
-          }}
-        >
+        <View style={{ ...styles.coinButton, backgroundColor: color.white }}>
           <View style={styles.coinPickerWrap}>
             <SendPairImage coinUri={toCoin.logoURI} chainSource={chainUri} />
             <View style={styles.textContainer}>
-              <Text
-                style={{
-                  ...ss.text.btnCaps,
-                  color: color.grayDark,
-                }}
-              >
-                {toCoin.symbol}
-              </Text>
-              <Text
-                style={{
-                  ...ss.text.btnCaps,
-                  color: color.grayMid,
-                }}
-              >
+              <TextBtnCaps color={color.grayDark}>{toCoin.symbol}</TextBtnCaps>
+              <TextBtnCaps color={color.grayMid}>
                 {getChainDisplayName(toChain, true, true)}
-              </Text>
+              </TextBtnCaps>
             </View>
           </View>
         </View>

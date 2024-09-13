@@ -114,14 +114,15 @@ export function FulfillRequestButton({
   const statusMessage = (function (): ReactNode {
     switch (status) {
       case "idle":
-        if (sendDisabledReason != null)
+        if (sendDisabledReason != null) {
           return <TextError>{sendDisabledReason}</TextError>;
-        if (dollars === 0) return i18.statusMsg.paymentsPublic();
-        return i18.statusMsg.totalDollars(
-          getAmountText({
-            dollars: cost.totalDollars,
-          })
-        );
+        } else if (dollars === 0) {
+          return i18.statusMsg.paymentsPublic();
+        } else {
+          return i18.statusMsg.totalDollars(
+            getAmountText({ dollars: cost.totalDollars })
+          );
+        }
       case "loading":
         return message;
       case "error":

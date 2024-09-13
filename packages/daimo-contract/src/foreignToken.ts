@@ -446,3 +446,13 @@ export function getTokensForChain(chainId: number): ForeignToken[] {
   if (ret == null) throw new Error(`Unsupported chain ${chainId}`);
   return ret;
 }
+
+/** Get a given token */
+export function getTokenByAddress(
+  chainId: number,
+  addr: Address
+): ForeignToken {
+  const ret = getTokensForChain(chainId).find((t) => t.token === addr);
+  if (ret == null) throw new Error(`Unknown token ${addr} on chain ${chainId}`);
+  return ret;
+}

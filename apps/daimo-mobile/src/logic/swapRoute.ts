@@ -1,37 +1,45 @@
-import { BigIntStr, ProposedSwap } from "@daimo/common";
-import { daimoChainFromId } from "@daimo/contract";
+import { assert, BigIntStr, ProposedSwap } from "@daimo/common";
+import { daimoChainFromId, ForeignToken } from "@daimo/contract";
 import { Address } from "viem";
 
 import { getRpcHook } from "./trpc";
 import { Account, toEAccount } from "../storage/account";
 
 // Get a swap route from on-chain contract.
-export function getSwapRoute({
-  fromToken,
-  toToken,
-  amountIn,
+export function useSwapRoute({
   fromAccount,
+  fromCoin,
   toAddress,
-  daimoChainId,
+  toCoin,
+  amountIn,
 }: {
-  fromToken: Address;
-  toToken: Address;
-  amountIn: bigint;
   fromAccount: Account;
+  fromCoin: ForeignToken;
   toAddress: Address;
-  daimoChainId: number;
+  toCoin: ForeignToken;
+  amountIn: bigint;
 }) {
-  const rpcHook = getRpcHook(daimoChainFromId(daimoChainId));
+  const chainId = fromAccount.homeChainId;
+  assert(chainId === fromCoin.chainId, "fromCoin chain mismatch");
 
-  const result = rpcHook.getSwapQuote.useQuery({
-    amountIn: `${amountIn}` as BigIntStr,
-    fromToken,
-    toToken,
-    fromAccount: toEAccount(fromAccount),
-    toAddr: toAddress,
-    chainId: daimoChainId,
-  });
+  const isBridge = toCoin.chainId !== chainId;
+  const isSwap = !isBridge && fromCoin.token !== toCoin.token;
 
-  const route = result.data as ProposedSwap | null;
-  return route;
+  const rpcHook = getRpcHook(daimoChainFromId(chainId));
+  const result = rpcHook.getSwapQuote.useQuery(
+    {
+      amountIn: `${amountIn}` as BigIntStr,
+      fromToken: fromCoin.token,
+      toToken: toCoin.token,
+      fromAccount: toEAccount(fromAccount),
+      toAddr: toAddress,
+      chainId,
+    },
+    {
+      enabled: isSwap,
+    }
+  );
+
+  if (!isSwap) return null;
+  return result.data as ProposedSwap | null;
 }

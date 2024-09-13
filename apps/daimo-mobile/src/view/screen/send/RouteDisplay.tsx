@@ -1,4 +1,8 @@
-import { ProposedSwap, amountToDollars } from "@daimo/common";
+import {
+  ProposedSwap,
+  amountToDollars,
+  getForeignCoinDisplayAmount,
+} from "@daimo/common";
 import { DAv2Chain, ForeignToken, getChainDisplayName } from "@daimo/contract";
 import { StyleSheet, View } from "react-native";
 
@@ -20,16 +24,22 @@ export function RoutePellet({
   toChain: DAv2Chain;
   toCoin: ForeignToken;
 }) {
-  const toAmount = route
-    ? amountToDollars(route.toAmount, toCoin.decimals)
-    : amountToDollars(fromAmount, fromCoin.decimals);
+  let toAmountStr: string;
+  if (route == null) {
+    toAmountStr = amountToDollars(fromAmount, fromCoin.decimals);
+  } else if (toCoin.symbol.startsWith("USD")) {
+    // TODO: isStablecoin
+    toAmountStr = amountToDollars(route.toAmount, toCoin.decimals);
+  } else {
+    toAmountStr = getForeignCoinDisplayAmount(BigInt(route.toAmount), toCoin);
+  }
 
   const chainName = getChainDisplayName(toChain);
 
   return (
     <View style={styles.route}>
       <TextLight>
-        {i18.theyWillReceive(toAmount, toCoin.symbol, chainName)}
+        {i18.theyWillReceive(toAmountStr, toCoin.symbol, chainName)}
       </TextLight>
     </View>
   );

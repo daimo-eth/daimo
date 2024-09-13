@@ -2,7 +2,7 @@ import { BigIntStr, EAccount, ProposedSwap, assert, now } from "@daimo/common";
 import {
   daimoFlexSwapperABI,
   daimoFlexSwapperAddress,
-  isTestnetChain,
+  getDAv2Chain,
   swapRouter02Abi,
   swapRouter02Address,
 } from "@daimo/contract";
@@ -44,16 +44,22 @@ export async function getSwapQuote({
   tokenReg: TokenRegistry;
 }) {
   // Swap quoter is not supported on testnet.
-  if (isTestnetChain(chainId)) return null;
+  const chain = getDAv2Chain(chainId);
+  if (chain.isTestnet) return null;
 
   const amountIn: bigint = BigInt(amountInStr);
   assert(amountIn > 0, "amountIn must be positive");
   assert(tokenIn !== tokenOut, "tokenIn == tokenOut");
 
+  // Special handling for native ETH
+  const isFromETH = tokenIn === zeroAddress;
+  const isToETH = tokenOut === zeroAddress;
+
   // Only quote known tokens (that appear on CoinGecko etc) to avoid spam.
   const fromCoin = tokenReg.getToken(tokenIn);
-  if (fromCoin == null) {
-    console.log(`[SWAP QUOTE] no quote, unknown token: ${tokenIn}`);
+  const toCoin = tokenReg.getToken(tokenOut);
+  if (fromCoin == null || toCoin == null) {
+    console.log(`[SWAP QUOTE] no quote, unknown token: ${tokenIn} ${tokenOut}`);
     return null;
   }
 
@@ -62,7 +68,11 @@ export async function getSwapQuote({
     abi: daimoFlexSwapperABI,
     address: daimoFlexSwapperAddress,
     functionName: "quote",
-    args: [tokenIn, amountIn, tokenOut],
+    args: [
+      isFromETH ? chain.wrappedNativeToken.token : tokenIn,
+      amountIn,
+      isToETH ? chain.wrappedNativeToken.token : tokenOut,
+    ],
   });
   const amountOut: bigint = swapQuote[0];
   const swapPath: Hex = swapQuote[1];
@@ -76,13 +86,9 @@ export async function getSwapQuote({
   }
 
   // By default, the router holds the funds until the last swap, then it is
-  // sent to the recipient.
-  // Special case: if outputToken is native, then routerMustCustody is true.
+  // sent to the recipient. Special case: if outputToken is ETH, unwrap first.
   // Reference: https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/entities/protocols/uniswap.ts
-  // TODO: re-enable to support native ETH sends
-  // const routerMustCustody = tokenOut === getNativeWETHByChain(chainId)?.token;
-  // const recipient: Address = routerMustCustody ? zeroAddress : toAddr;
-  const recipient = toAddr;
+  const swapRecipient: Address = isToETH ? swapRouter02Address : toAddr;
 
   const t = now();
   const cacheUntil = t + 5 * 60; // 5 minutes
@@ -90,9 +96,6 @@ export async function getSwapQuote({
 
   const maxSlippagePercent = 5n;
   const amountOutMinimum = amountOut - (maxSlippagePercent * amountOut) / 100n;
-
-  // Special handling for fromCoin = native ETH
-  const isFromETH = fromCoin.token === zeroAddress;
 
   let swapCallData;
   if (pathIsDirectSwap(swapPath)) {
@@ -105,7 +108,7 @@ export async function getSwapQuote({
           tokenIn,
           tokenOut,
           fee,
-          recipient,
+          recipient: swapRecipient,
           // amountIn 0 = use router's balance. When swapping from ETH, we wrap
           // msg.value using wrapETH, giving the router a WETH balance.
           amountIn: isFromETH ? 0n : amountIn,
@@ -121,7 +124,7 @@ export async function getSwapQuote({
       args: [
         {
           path: swapPath,
-          recipient,
+          recipient: swapRecipient,
           amountIn: isFromETH ? 0n : amountIn,
           amountOutMinimum,
         },
@@ -145,10 +148,20 @@ export async function getSwapQuote({
       functionName: "multicall",
       args: [[wrapETHCall, swapCallData]],
     });
+  } else if (isToETH) {
+    const unwrapETHCall = encodeFunctionData({
+      abi: swapRouter02Abi,
+      functionName: "unwrapWETH9",
+      args: [0n, toAddr],
+    });
+    callData = encodeFunctionData({
+      abi: swapRouter02Abi,
+      functionName: "multicall",
+      args: [[swapCallData, unwrapETHCall]],
+    });
   } else {
     callData = swapCallData;
   }
-  // TODO: unwrap weth if toCoin = native ETH
 
   const swap: ProposedSwap = {
     fromCoin,

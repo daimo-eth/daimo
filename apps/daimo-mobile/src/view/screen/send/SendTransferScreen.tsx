@@ -3,7 +3,6 @@ import {
   DaimoRequestState,
   DaimoRequestStatus,
   DaimoRequestV2Status,
-  ProposedSwap,
   assert,
   assertNotNull,
   dollarsToAmount,
@@ -14,9 +13,9 @@ import {
   DAv2Chain,
   DaimoChain,
   ForeignToken,
-  baseUSDC,
   daimoChainFromId,
   getDAv2Chain,
+  getTokenByAddress,
 } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
@@ -49,7 +48,7 @@ import {
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
 import { getFullMemo } from "../../../logic/memo";
 import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
-import { getSwapRoute } from "../../../logic/swapRoute";
+import { useSwapRoute } from "../../../logic/swapRoute";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -101,10 +100,11 @@ function SendScreenInner({
     else goHome();
   }, [nav, money, recipient]);
 
-  const defaultHomeCoin = baseUSDC; // TODO: add homecoin in Account
-  const defaultHomeChain = getDAv2Chain(account.homeChainId);
-  toCoin = toCoin ?? defaultHomeCoin;
-  toChain = toChain ?? getDAv2Chain(account.homeChainId);
+  const { homeChainId, homeCoinAddress } = account;
+  const homeChain = getDAv2Chain(homeChainId);
+  const homeCoin = getTokenByAddress(homeChainId, homeCoinAddress);
+  toCoin = toCoin ?? homeCoin;
+  toChain = toChain ?? homeChain;
 
   const sendDisplay = (() => {
     if (link) {
@@ -125,6 +125,7 @@ function SendScreenInner({
               recipient={recipient}
               memo={memo || statusV2.memo}
               money={usdEntry(requestStatus.link.dollars)}
+              homeCoin={homeCoin}
               toCoin={toCoin}
               toChain={toChain}
               requestStatus={requestStatus as DaimoRequestV2Status}
@@ -137,9 +138,7 @@ function SendScreenInner({
                 recipient={recipient}
                 onCancel={goBack}
                 daimoChain={daimoChain}
-                defaultHomeCoin={(link as DaimoLinkRequest).toCoin}
-                defaultHomeChain={(link as DaimoLinkRequest).toChain}
-                account={account}
+                defaultToCoin={(link as DaimoLinkRequest).toCoin}
               />
             );
           } else {
@@ -149,6 +148,7 @@ function SendScreenInner({
                 recipient={recipient}
                 memo={memo}
                 money={usdEntry(requestStatus.link.dollars)}
+                homeCoin={homeCoin}
                 toCoin={(link as DaimoLinkRequest).toCoin}
                 toChain={(link as DaimoLinkRequest).toChain}
               />
@@ -163,15 +163,13 @@ function SendScreenInner({
             recipient={recipient}
             onCancel={goBack}
             daimoChain={daimoChain}
-            defaultHomeCoin={defaultHomeCoin}
-            defaultHomeChain={defaultHomeChain}
-            account={account}
+            defaultToCoin={homeCoin}
           />
         );
       else
         return (
           <SendConfirm
-            {...{ account, recipient, memo, money, toCoin, toChain }}
+            {...{ account, recipient, memo, money, homeCoin, toCoin, toChain }}
           />
         );
     } else throw new Error("unreachable");
@@ -196,16 +194,12 @@ function SendChooseAmount({
   recipient,
   daimoChain,
   onCancel,
-  defaultHomeCoin,
-  defaultHomeChain,
-  account,
+  defaultToCoin,
 }: {
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
-  defaultHomeCoin: ForeignToken;
-  defaultHomeChain: DAv2Chain;
-  account: Account;
+  defaultToCoin: ForeignToken;
 }) {
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -214,17 +208,14 @@ function SendChooseAmount({
   const [memo, setMemo] = useState<string | undefined>(undefined);
 
   // Select what coin (defaults to native home coin, e.g. daimo USDC)
-  const [toCoin, setToCoin] = useState<ForeignToken>(defaultHomeCoin);
-
-  // Select what chain (defaults to base)
-  const [toChain, setToChain] = useState<DAv2Chain>(defaultHomeChain);
+  const [toCoin, setToCoin] = useState<ForeignToken>(defaultToCoin);
 
   // Once done, update nav
   const nav = useNav();
   const setSendAmount = () =>
     nav.navigate("SendTab", {
       screen: "SendTransfer",
-      params: { money, memo, recipient, toCoin, toChain },
+      params: { money, memo, recipient, toCoin },
     });
 
   // Warn if paying new account
@@ -272,12 +263,7 @@ function SendChooseAmount({
         {!sendCoinIsFixed && (
           <View style={styles.detail}>
             <TextMeta color={color.gray3}>{i18.sendAs()}</TextMeta>
-            <SendCoinButton
-              toCoin={toCoin}
-              toChain={toChain}
-              setCoin={setToCoin}
-              setChain={setToChain}
-            />
+            <SendCoinButton toCoin={toCoin} setCoin={setToCoin} />
           </View>
         )}
       </View>
@@ -322,6 +308,7 @@ function SendConfirm({
   recipient,
   money,
   memo,
+  homeCoin,
   toCoin,
   toChain,
   requestStatus,
@@ -330,6 +317,7 @@ function SendConfirm({
   recipient: EAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
+  homeCoin: ForeignToken;
   toCoin: ForeignToken;
   toChain: DAv2Chain;
   requestStatus?: DaimoRequestV2Status;
@@ -349,24 +337,16 @@ function SendConfirm({
     nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
   };
 
-  const rpcFunc = getRpcFunc(daimoChainFromId(account!.homeChainId));
-
-  // TODO: store homeCoin (foreignToken type) in account in the future
-  const homeCoin = baseUSDC;
-  const numTokens = dollarsToAmount(money.dollars, homeCoin.decimals);
+  const amountIn = dollarsToAmount(money.dollars, homeCoin.decimals);
 
   // If account's home coin is not the same as the desired send coin, retrieve swap route.
-  let route = null as ProposedSwap | null;
-  if (homeCoin.token !== toCoin.token && homeCoin.chainId === toChain.chainId) {
-    route = getSwapRoute({
-      fromToken: homeCoin.token,
-      toToken: toCoin.token,
-      amountIn: numTokens,
-      fromAccount: account,
-      toAddress: recipient.addr,
-      daimoChainId: account!.homeChainId,
-    });
-  }
+  const route = useSwapRoute({
+    fromAccount: account,
+    fromCoin: homeCoin,
+    toAddress: recipient.addr,
+    toCoin,
+    amountIn,
+  });
 
   let button: ReactNode;
   if (isRequest) {
@@ -393,6 +373,7 @@ function SendConfirm({
   const onDecline = async () => {
     assert(requestStatus != null);
 
+    const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
     await rpcFunc.declineRequest.mutate({
       requestId: requestStatus.link.id,
       decliner: account.address,
@@ -448,7 +429,7 @@ function SendConfirm({
         <RoutePellet
           route={route}
           fromCoin={homeCoin}
-          fromAmount={numTokens}
+          fromAmount={amountIn}
           toCoin={toCoin}
           toChain={toChain}
         />

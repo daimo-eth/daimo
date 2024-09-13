@@ -23,7 +23,7 @@ export function formatFeeAmountOrNull(
 
 /** Formats an amount for a non-USD token, eg "123.000000" */
 export function getForeignCoinDisplayAmount(
-  amount: `${bigint}`,
+  amount: `${bigint}` | bigint,
   coin: ForeignToken
 ) {
   const amountStr = formatUnits(BigInt(amount), coin.decimals);
