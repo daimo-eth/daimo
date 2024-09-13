@@ -16,7 +16,6 @@ import { ButtonMed } from "./Button";
 import { LinkedAccountBubble } from "./LinkedAccountBubble";
 import Spacer from "./Spacer";
 import { ErrorRowCentered } from "./error";
-import { color, touchHighlightUnderlay } from "../style/style";
 import { TextBody, TextCenter, TextLight } from "./text";
 import { useWithAccount } from "./withAccount";
 import { navToAccountPage, useNav } from "../../common/nav";
@@ -31,6 +30,7 @@ import {
 import { ContactsAccess } from "../../logic/systemContacts";
 import { Account } from "../../storage/account";
 import { useKeyboardHeight } from "../../vendor/useKeyboardHeight";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.searchResults;
 
@@ -257,6 +257,7 @@ function ExtraRows({
   requestContactsPermission: () => void;
   mode: "send" | "receive" | "account";
 }) {
+  const { color } = useTheme();
   const nav = useNav();
 
   return (
@@ -338,6 +339,7 @@ function Row({
   children: React.ReactNode;
   onPress: () => void;
 }) {
+  const { touchHighlightUnderlay } = useTheme();
   return (
     <View>
       <TouchableHighlight

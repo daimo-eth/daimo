@@ -15,12 +15,13 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { OctName } from "./InputBig";
-import { color } from "../style/style";
 import { TextBody, TextMeta } from "./text";
 import { DispatcherContext } from "../../action/dispatch";
 import { handleDeepLink, useNav } from "../../common/nav";
 import { getAccountManager, useAccount } from "../../logic/accountManager";
 import { getRpcFunc } from "../../logic/trpc";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function SuggestedActionBox({
   action,
@@ -29,6 +30,8 @@ export function SuggestedActionBox({
   action: SuggestedAction;
   onHideAction?(): void;
 }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
   const nav = useNav();
   const account = useAccount();
   const dispatcher = useContext(DispatcherContext);
@@ -212,39 +215,40 @@ export function SuggestedActionBox({
   );
 }
 
-const styles = StyleSheet.create({
-  animatedWrapper: {
-    width: "100%",
-    zIndex: 10000,
-  },
-  bubble: {
-    backgroundColor: color.ivoryDark,
-    borderRadius: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    gap: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  bubbleIcon: {
-    backgroundColor: color.primary,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 32,
-    height: 32,
-    borderRadius: 32,
-  },
-  bubbleExit: {
-    alignSelf: "stretch",
-    flexDirection: "column",
-    justifyContent: "center",
-    paddingRight: 12,
-    marginRight: -8,
-  },
-  bubbleText: {
-    flex: 1,
-    flexDirection: "column",
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    animatedWrapper: {
+      width: "100%",
+      zIndex: 10000,
+    },
+    bubble: {
+      backgroundColor: color.ivoryDark,
+      borderRadius: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 12,
+      gap: 16,
+      marginHorizontal: 16,
+      marginBottom: 16,
+    },
+    bubbleIcon: {
+      backgroundColor: color.primary,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      width: 32,
+      height: 32,
+      borderRadius: 32,
+    },
+    bubbleExit: {
+      alignSelf: "stretch",
+      flexDirection: "column",
+      justifyContent: "center",
+      paddingRight: 12,
+      marginRight: -8,
+    },
+    bubbleText: {
+      flex: 1,
+      flexDirection: "column",
+    },
+  });

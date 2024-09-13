@@ -37,7 +37,6 @@ import { getAmountText } from "../../shared/Amount";
 import { ContactBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
 import { FailedDot, PendingDot, ProcessingDot } from "../../shared/StatusDot";
-import { color, ss, touchHighlightUnderlay } from "../../style/style";
 import {
   DaimoText,
   TextBody,
@@ -45,6 +44,8 @@ import {
   TextLight,
   TextMeta,
 } from "../../shared/text";
+import { Colorway } from "../../style/skins";
+import { useTheme } from "../../style/theme";
 
 interface HeaderObject {
   isHeader: true;
@@ -70,6 +71,8 @@ export function HistoryListSwipe({
   maxToShow?: number;
   otherContact?: DaimoContact;
 }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
   assert(
     !otherContact || otherContact.type === "eAcc",
     "Unsupported DaimoContact in HistoryListSwipe"
@@ -185,6 +188,9 @@ export function HistoryListSwipe({
 }
 
 function HeaderRow({ title }: { title: string }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color);
+
   return (
     <View style={styles.rowHeader}>
       <DaimoText style={[ss.text.body, { color: color.gray3 }]}>
@@ -205,6 +211,9 @@ function TransferClogRow({
   linkTo: "op" | "account";
   showDate?: boolean;
 }) {
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = getStyles(color);
+
   const nav = useNav();
   const address = account.address;
 
@@ -323,6 +332,9 @@ function TransferAmountDate({
   showDate?: boolean;
   isPending?: boolean;
 }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color);
+
   const dollarStr = getAmountText({ amount: BigInt(Math.abs(amount)) });
   const sign = amount < 0 ? "-" : "+";
   const amountColor = amount < 0 ? color.midnight : color.success;
@@ -359,42 +371,45 @@ function getTransferClogId(t: TransferClog): string {
   return `${t.timestamp}-${t.from}-${t.to}-${t.txHash}-${t.opHash}`;
 }
 
-const styles = StyleSheet.create({
-  historyListBody: {
-    paddingHorizontal: 24,
-    marginBottom: 48,
-  },
-  rowHeader: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    paddingTop: 16,
-    paddingHorizontal: 2,
-    backgroundColor: color.white,
-  },
-  transferBorder: {
-    borderTopWidth: 1,
-    borderColor: color.grayLight,
-    backgroundColor: "white",
-  },
-  transferClogRowWrap: {
-    marginHorizontal: -24,
-  },
-  transferClogRow: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  transferOtherAccount: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  transferAmountDate: {
-    flexDirection: "column",
-    alignItems: "flex-end",
-    justifyContent: "center",
-    gap: 2,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    historyListBody: {
+      paddingHorizontal: 24,
+      marginBottom: 48,
+      backgroundColor: color.white,
+    },
+    rowHeader: {
+      flexDirection: "row",
+      paddingVertical: 8,
+      paddingTop: 16,
+      paddingHorizontal: 2,
+      backgroundColor: color.white,
+    },
+    transferBorder: {
+      borderTopWidth: 1,
+      borderColor: color.grayLight,
+      backgroundColor: "white",
+    },
+    transferClogRowWrap: {
+      marginHorizontal: -24,
+    },
+    transferClogRow: {
+      paddingHorizontal: 24,
+      paddingVertical: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: color.white,
+    },
+    transferOtherAccount: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+    },
+    transferAmountDate: {
+      flexDirection: "column",
+      alignItems: "flex-end",
+      justifyContent: "center",
+      gap: 2,
+    },
+  });

@@ -1,20 +1,24 @@
 import { StyleSheet, View } from "react-native";
 
-import { color } from "../style/style";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function PendingDot({ size }: { size?: number }) {
-  return <View style={styles(size || 12).pendingDot} />;
+  const { color } = useTheme();
+  return <View style={styles(size || 12, color).pendingDot} />;
 }
 
 export function ProcessingDot({ size }: { size?: number }) {
-  return <View style={styles(size || 12).processingDot} />;
+  const { color } = useTheme();
+  return <View style={styles(size || 12, color).processingDot} />;
 }
 
 export function FailedDot({ size }: { size?: number }) {
-  return <View style={styles(size || 12).failedDot} />;
+  const { color } = useTheme();
+  return <View style={styles(size || 12, color).failedDot} />;
 }
 
-const styles = (size: number) =>
+const styles = (size: number, color: Colorway) =>
   StyleSheet.create({
     pendingDot: {
       width: size,

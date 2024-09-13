@@ -23,9 +23,9 @@ import { FarcasterButton } from "../shared/FarcasterBubble";
 import Spacer from "../shared/Spacer";
 import { ErrorRowCentered } from "../shared/error";
 import image from "../shared/image";
-import { color, ss } from "../style/style";
 import { TextBody, TextH3, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+import { useTheme } from "../style/theme";
 
 // Connect Farcaster
 export function FarcasterBottomSheet() {
@@ -37,6 +37,7 @@ const fc = new FarcasterClient();
 const i18 = i18n.farcasterBottom;
 
 function FarcasterBottomSheetInner({ account }: { account: Account }) {
+  const { ss } = useTheme();
   const nonce = account.address.substring(2);
 
   const [error, setError] = useState<Error>();
@@ -118,6 +119,7 @@ function LinkFarcasterSection({
   account: Account;
   data?: StatusAPIResponse;
 }) {
+  const { color } = useTheme();
   // Account we've already linked
   const linkedAcc = account.linkedAccounts.find((l) => l.type === "farcaster");
 

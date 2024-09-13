@@ -2,9 +2,10 @@ import { amountToDollars } from "@daimo/common";
 import { StyleSheet, Text, TextStyle } from "react-native";
 
 import Spacer from "./Spacer";
-import { color } from "../style/style";
 import { DaimoText } from "./text";
 import { i18NLocale } from "../../i18n";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 /** 1.23 or 1,23 depending on user locale */
 export const amountSeparator = i18NLocale.decimalSeparator || ".";
@@ -54,6 +55,9 @@ export function TitleAmount({
   preSymbol?: string;
   postText?: string;
 }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   if (!(amount >= 0)) throw new Error("Invalid amount");
 
   const symbol = "$";
@@ -75,25 +79,26 @@ export function TitleAmount({
   );
 }
 
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 48,
-    fontVariant: ["tabular-nums"],
-    color: color.midnight,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  titleSmall: {
-    fontSize: 42,
-  },
-  subtitle: {
-    fontSize: 40,
-    fontVariant: ["tabular-nums"],
-    color: color.midnight,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  subtitleSmall: {
-    fontSize: 36,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    title: {
+      fontSize: 48,
+      fontVariant: ["tabular-nums"],
+      color: color.midnight,
+      fontWeight: "600",
+      textAlign: "center",
+    },
+    titleSmall: {
+      fontSize: 42,
+    },
+    subtitle: {
+      fontSize: 40,
+      fontVariant: ["tabular-nums"],
+      color: color.midnight,
+      fontWeight: "600",
+      textAlign: "center",
+    },
+    subtitleSmall: {
+      fontSize: 36,
+    },
+  });

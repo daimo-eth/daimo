@@ -5,9 +5,9 @@ import { Linking, StyleSheet, View } from "react-native";
 import { BadgeButton } from "./Button";
 import Spacer from "./Spacer";
 import image from "./image";
-import { color } from "../style/style";
 import { TextBtnCaps, TextMeta } from "./text";
 import { FarcasterClient } from "../../profile/farcaster";
+import { useTheme } from "../style/theme";
 
 export function FarcasterButton({
   fcAccount,
@@ -20,6 +20,7 @@ export function FarcasterButton({
   hideUsername?: boolean;
   onPress?: () => void;
 }) {
+  const { color } = useTheme();
   const username = FarcasterClient.getDispUsername(fcAccount).toUpperCase();
   if (onPress == null) {
     // Go to profile
@@ -54,6 +55,7 @@ export function FarcasterBubble({
 }: {
   fcAccount: FarcasterLinkedAccount;
 }) {
+  const { color } = useTheme();
   const dispUsername = FarcasterClient.getDispUsername(fcAccount);
 
   return (

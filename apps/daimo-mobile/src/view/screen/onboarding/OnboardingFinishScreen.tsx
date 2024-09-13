@@ -7,16 +7,17 @@ import {
 } from "../../../logic/accountManager";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../style/style";
 import {
   EmojiToOcticon,
   TextCenter,
   TextError,
   TextLight,
 } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 // Show a spinner while waiting for account creation, or error.
 export function OnboardingFinishScreen() {
+  const { ss } = useTheme();
   const { account, createAccountHandle } = useAccountAndKeyInfo();
   const { status, message, retry } = createAccountHandle || {};
 

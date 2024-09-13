@@ -9,7 +9,7 @@ import { DispatcherContext } from "../../../action/dispatch";
 import { useNav } from "../../../common/nav";
 import { i18NLocale } from "../../../i18n";
 import { ScreenHeader } from "../../shared/ScreenHeader";
-import { ss } from "../../style/style";
+import { useTheme } from "../../style/theme";
 
 export function BitrefillWebView() {
   const nav = useNav();
@@ -96,6 +96,7 @@ export function BitrefillWebView() {
   };
 
   const goBack = () => nav.goBack();
+  const { ss } = useTheme();
 
   return (
     <View style={ss.container.screenWithoutPadding}>

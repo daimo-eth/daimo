@@ -24,13 +24,14 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollPellet from "./ScrollPellet";
-import { color } from "../style/style";
 import { ParamListBottomSheet, useNav } from "../../common/nav";
 import useTabBarHeight from "../../common/useTabBarHeight";
 import {
   HistoryOpBottomSheet,
   SetBottomSheetDetailHeight,
 } from "../screen/history/HistoryOpBottomSheet";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const BottomSheetStackNavigator =
   createNativeStackNavigator<ParamListBottomSheet>();
@@ -61,6 +62,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
     { itemMini, itemFull, swipeHeight, onShowMini, onShowFull, disabled },
     ref
   ) => {
+    const { color } = useTheme();
     const ins = useSafeAreaInsets();
     const tabBarHeight = useTabBarHeight();
 
@@ -136,6 +138,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         activeOffsetX={[-SCREEN_WIDTH, SCREEN_WIDTH]}
         activeOffsetY={[-10, 10]}
         animationConfigs={ANIMATION_CONFIG}
+        backgroundStyle={{ backgroundColor: color.white }}
       >
         <SetBottomSheetDetailHeight.Provider value={setDetailHeight}>
           <SwipeContext.Provider
@@ -182,6 +185,8 @@ function useSwipeContext() {
 
 // Fade animation between minified and full lists
 function TransactionList() {
+  const { color } = useTheme();
+  const styles = getStyles(color);
   const { itemMini, itemFull, isMini, itemMiniStyle } = useSwipeContext();
 
   return (
@@ -204,11 +209,12 @@ const ANIMATION_CONFIG = {
   restDisplacement: 1,
 };
 
-const styles = StyleSheet.create({
-  itemMiniWrapper: {
-    position: "absolute",
-    zIndex: 100,
-    width: "100%",
-    backgroundColor: color.white,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    itemMiniWrapper: {
+      position: "absolute",
+      zIndex: 100,
+      width: "100%",
+      backgroundColor: color.white,
+    },
+  });

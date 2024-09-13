@@ -8,10 +8,14 @@ import {
   Dimensions,
 } from "react-native";
 
+/**
+ * Doge skin background
+ */
+
 const { width, height } = Dimensions.get("window");
 
 const DOGE_SIZE = 50; // Fixed size for each doge
-const ROW_HEIGHT = 60; // Height of each row, slightly larger than DOGE_SIZE to add some vertical spacing
+const ROW_HEIGHT = 60;
 const ANIMATION_DURATION = 2500; // Duration for one complete cycle (adjust for speed)
 
 const MovingDogeRow = ({ y, moveRight }: { y: number; moveRight: boolean }) => {
@@ -35,7 +39,7 @@ const MovingDogeRow = ({ y, moveRight }: { y: number; moveRight: boolean }) => {
   }, [moveRight]);
 
   const dogesPerRow = Math.ceil(width / DOGE_SIZE) + 1;
-  const totalDoges = dogesPerRow * 2; // Double the doges to ensure seamless looping
+  const totalDoges = dogesPerRow * 2;
 
   return (
     <Animated.View
@@ -50,7 +54,7 @@ const MovingDogeRow = ({ y, moveRight }: { y: number; moveRight: boolean }) => {
       {Array.from({ length: totalDoges }).map((_, index) => (
         <Image
           key={index}
-          source={require("../../../assets/skins/doge.png")}
+          source={require("../../../../assets/skins/doge.png")}
           style={styles.doge}
         />
       ))}
@@ -58,10 +62,7 @@ const MovingDogeRow = ({ y, moveRight }: { y: number; moveRight: boolean }) => {
   );
 };
 
-const DogeRowsBackground = ({
-  overlayOpacity = 0.5,
-  overlayColor = "white",
-}) => {
+const DogeBackground = ({ overlayOpacity = 0.5, overlayColor = "white" }) => {
   const rowCount = Math.ceil(height / ROW_HEIGHT);
 
   return (
@@ -113,4 +114,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DogeRowsBackground;
+export default DogeBackground;

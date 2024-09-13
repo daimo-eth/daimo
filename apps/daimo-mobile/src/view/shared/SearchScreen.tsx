@@ -10,9 +10,9 @@ import { InputBig } from "./InputBig";
 import { PressableText } from "./PressableText";
 import { SearchResults } from "./SearchResults";
 import Spacer from "./Spacer";
-import { ss } from "../style/style";
 import { i18n } from "../../i18n";
 import { useContactsPermission } from "../../logic/systemContacts";
+import { useTheme } from "../style/theme";
 
 /** Find someone you've already paid, a Daimo user by name, Ethereum account by ENS,
  *  or a system contact with phone number or email. */
@@ -33,6 +33,7 @@ export function SearchScreen({
   textInputRef,
   mode,
 }: SearchScreenProps) {
+  const { ss } = useTheme();
   const [inputFocused, setInputFocused] = useState(autoFocus ?? false);
   const contactsAccess = useContactsPermission();
 

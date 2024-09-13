@@ -28,7 +28,6 @@ import {
 } from "../../../logic/accountManager";
 import { ButtonBig, HelpButton, TextButton } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { color } from "../../style/style";
 import {
   TextBody,
   TextH1,
@@ -36,11 +35,16 @@ import {
   TextLight,
   TextLink,
 } from "../../shared/text";
+import { Colorway } from "../../style/skins";
+import { useTheme } from "../../style/theme";
 
 const isAndroid = Platform.OS === "android";
 const i18 = i18n.onboardingIntro;
 
 export function OnboardingIntroScreen() {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   const dc = useDaimoChain();
   const nav = useOnboardingNav();
 
@@ -116,6 +120,9 @@ const icons = {
 };
 
 function IntroRows() {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   return (
     <View style={styles.introRows}>
       <IntroRow icon="intro-your-keys" title={i18.rows.selfCustody.title()}>
@@ -153,6 +160,9 @@ function IntroRow({
   title: string;
   children: ReactNode;
 }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   return (
     <View style={styles.introRow}>
       <View style={styles.introRowIcon}>
@@ -187,47 +197,48 @@ function HelpModalUSDC() {
   );
 }
 
-const styles = StyleSheet.create({
-  onboardingPage: {
-    display: "flex",
-    justifyContent: "space-between",
-    flexGrow: 1,
-  },
-  onboardingPageTop: {
-    display: "flex",
-    alignItems: "center",
-  },
-  introButtonsCenter: {
-    paddingHorizontal: 24,
-    alignSelf: "stretch",
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  introButtonsWrap: {
-    flexGrow: 1,
-    maxWidth: 480,
-  },
-  introRows: {
-    shadowColor: color.white,
-    flexGrow: 1,
-    paddingHorizontal: 24,
-  },
-  introRow: {
-    flexDirection: "row",
-  },
-  introRowIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: color.grayLight,
-    marginRight: 16,
-  },
-  introRowIconImage: {
-    width: 32,
-    height: 32,
-  },
-  introRowContent: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    onboardingPage: {
+      display: "flex",
+      justifyContent: "space-between",
+      flexGrow: 1,
+    },
+    onboardingPageTop: {
+      display: "flex",
+      alignItems: "center",
+    },
+    introButtonsCenter: {
+      paddingHorizontal: 24,
+      alignSelf: "stretch",
+      flexDirection: "row",
+      justifyContent: "center",
+    },
+    introButtonsWrap: {
+      flexGrow: 1,
+      maxWidth: 480,
+    },
+    introRows: {
+      shadowColor: color.white,
+      flexGrow: 1,
+      paddingHorizontal: 24,
+    },
+    introRow: {
+      flexDirection: "row",
+    },
+    introRowIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: color.grayLight,
+      marginRight: 16,
+    },
+    introRowIconImage: {
+      width: 32,
+      height: 32,
+    },
+    introRowContent: {
+      flexDirection: "column",
+      alignItems: "flex-start",
+    },
+  });

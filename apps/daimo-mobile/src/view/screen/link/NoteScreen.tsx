@@ -37,7 +37,6 @@ import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorBanner } from "../../shared/error";
-import { ss } from "../../style/style";
 import {
   TextBody,
   TextBold,
@@ -46,6 +45,7 @@ import {
   TextLight,
 } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+import { useTheme } from "../../style/theme";
 
 type Props = NativeStackScreenProps<ParamListHome, "Note">;
 const i18 = i18n.note;
@@ -56,6 +56,7 @@ export default function NoteScreen(props: Props) {
 }
 
 function NoteScreenInner({ route, account }: Props & { account: Account }) {
+  const { ss } = useTheme();
   const { link } = route.params;
   console.log(`[NOTE] rendering NoteScreen, link ${JSON.stringify(link)}`);
 
@@ -119,6 +120,8 @@ function NoteDisplayInner({
   hideAmount?: boolean;
   leaveScreen?: () => void;
 }) {
+  const { ss } = useTheme();
+
   // Where the note came from
   const sendPhrase =
     noteStatus.sender.addr === account.address

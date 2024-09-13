@@ -38,10 +38,10 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
 import { ErrorBanner } from "../shared/error";
-import { color, ss } from "../style/style";
 import { TextBody, TextH2 } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
+import { useTheme } from "../style/theme";
 
 type Props = NativeStackScreenProps<ParamListHome, "Profile">;
 const i18 = i18n.profile;
@@ -52,6 +52,8 @@ export function ProfileScreen(props: Props) {
 }
 
 function ProfileScreenInner(props: Props & { account: Account }) {
+  const { ss } = useTheme();
+
   const goBack = useExitBack();
   const goHome = useExitToHome();
 
@@ -98,6 +100,7 @@ function ProfileScreenLoader({
   account: Account;
   link: DaimoLinkAccount | DaimoLinkInviteCode;
 }) {
+  const { ss } = useTheme();
   console.log(`[ACCOUNT] loading account from link`, link);
   const daimoChain = daimoChainFromId(account.homeChainId);
   const status = useFetchLinkStatus(link, daimoChain)!;
@@ -166,7 +169,7 @@ function ProfileScreenBody({
 }) {
   const nav = useNav();
   const bottomSheetRef = useRef<SwipeUpDownRef>(null);
-
+  const { color, ss } = useTheme();
   const contact = addLastTransferTimes(account, eAcc);
 
   const canSend = canSendTo(eAcc);

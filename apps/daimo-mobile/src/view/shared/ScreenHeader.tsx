@@ -5,8 +5,9 @@ import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { OctName } from "./InputBig";
 import { OfflineHeader } from "./OfflineHeader";
-import { color, touchHighlightUnderlay } from "../style/style";
 import { TextH3 } from "./text";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function ScreenHeader({
   title,
@@ -24,6 +25,8 @@ export function ScreenHeader({
   secondaryHeader?: ReactNode;
 }) {
   assert(!onExit || !onShare, "Exit and share are mutually exclusive");
+  const { color } = useTheme();
+  const styles = getStyles(color);
 
   const back = useCallback(onBack || (() => {}), [onBack]);
   const exit = useCallback(onExit || (() => {}), [onExit]);
@@ -56,6 +59,9 @@ function ScreenHeadButton({
   show: boolean;
   onPress: () => void;
 }) {
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = getStyles(color);
+
   return (
     <View style={styles.screenHeadButtonWrap}>
       {show && (
@@ -72,23 +78,24 @@ function ScreenHeadButton({
   );
 }
 
-const styles = StyleSheet.create({
-  screenHead: {
-    backgroundColor: color.white,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    height: 48,
-  },
-  screenHeadButtonWrap: {
-    width: 40,
-  },
-  screenHeadButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 40,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    screenHead: {
+      backgroundColor: color.white,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      height: 48,
+    },
+    screenHeadButtonWrap: {
+      width: 40,
+    },
+    screenHeadButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 40,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });

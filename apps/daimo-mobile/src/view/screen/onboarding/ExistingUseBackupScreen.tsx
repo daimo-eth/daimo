@@ -27,13 +27,14 @@ import { ContactBubble } from "../../shared/Bubble";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { color, ss } from "../../style/style";
 import { TextBodyMedium, TextCenter, TextH2 } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingUseBackup">;
 const i18 = i18n.existingUseBackup;
 
 export function ExistingUseBackupScreen({ route }: Props) {
+  const { ss } = useTheme();
   const { targetEAcc } = route.params;
 
   return (
@@ -46,6 +47,8 @@ export function ExistingUseBackupScreen({ route }: Props) {
 }
 
 function LogInOptions({ eAcc }: { eAcc: EAccount }) {
+  const { color, ss } = useTheme();
+
   // Passkey, security key: just log in
   const { keyInfo } = useAccountAndKeyInfo();
   const pubKeyHex = assertNotNull(keyInfo?.pubKeyHex, "Missing pubKeyHex");

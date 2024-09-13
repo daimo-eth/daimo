@@ -33,9 +33,9 @@ import { ContactDisplay } from "../shared/ContactDisplay";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
-import { ss } from "../style/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+import { useTheme } from "../style/theme";
 
 type Props = NativeStackScreenProps<ParamListDeposit, "LandlineTransfer">;
 const i18 = i18n.landlineBankTransfer;
@@ -59,6 +59,7 @@ function LandlineTransferScreenInner({
   const daimoChain = daimoChainFromId(account.homeChainId);
 
   const nav = useNav();
+  const { ss } = useTheme();
   const goHome = useExitToHome();
   const goBack = useCallback(() => {
     const goTo = (params: Props["route"]["params"]) =>
@@ -248,6 +249,11 @@ function SendConfirm({
   bankTransferOption: BankTransferOptions;
 }) {
   const nav = useNav();
+<<<<<<< HEAD
+=======
+  const { ss } = useTheme();
+
+>>>>>>> 453e9e56 (wip)
   const navToInput = () => {
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",

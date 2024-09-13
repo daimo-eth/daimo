@@ -1,6 +1,6 @@
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 
-import { ss, color } from "../style/style";
+import { useTheme } from "../style/theme";
 
 export function SegmentSlider<T extends string>({
   tabs,
@@ -11,6 +11,7 @@ export function SegmentSlider<T extends string>({
   tab: T;
   setTab: (tab: T) => void;
 }) {
+  const { ss, color } = useTheme();
   return (
     <SegmentedControl
       values={tabs}

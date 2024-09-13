@@ -37,8 +37,9 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
-import { color, ss } from "../style/style";
 import { TextCenter, TextH3, TextLight } from "../shared/text";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 type Props = NativeStackScreenProps<ParamListHome, "QR">;
 const i18 = i18n.qr;
@@ -47,6 +48,7 @@ const tabs = ["PayMe", "Scan"] as QRScreenOptions[];
 const localTabs = [i18.slider.payMe(), i18.slider.scan()];
 
 export function QRScreen(props: Props) {
+  const { ss } = useTheme();
   const { option } = props.route.params;
   const [tab, setTab] = useState<QRScreenOptions>(option || "PayMe");
 
@@ -72,6 +74,9 @@ export function QRScreen(props: Props) {
 }
 
 function QRDisplay() {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   const [recentlyCopied, setRecentlyCopied] = useState(false);
   const account = useAccount();
   const nav = useNav();
@@ -122,6 +127,9 @@ function QRDisplay() {
 }
 
 function ShareButton({ name }: { name: string }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   const link: DaimoLinkAccount = {
     type: "account",
     account: name,
@@ -153,6 +161,9 @@ export function QRCodeBox({
   value: string;
   logoURI?: string;
 }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   if (logoURI == null) logoURI = image.qrLogo;
 
   return (
@@ -188,35 +199,36 @@ function QRScan() {
   return <Scanner handleBarCodeScanned={handleBarCodeScanned} />;
 }
 
-const styles = StyleSheet.create({
-  qrBackground: {
-    backgroundColor: color.ivoryDark,
-    borderRadius: 8,
-    paddingVertical: 40,
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  qrWrap: {
-    borderWidth: 1,
-    borderColor: color.primary,
-    borderRadius: 8,
-    padding: 16,
-    backgroundColor: color.white,
-  },
-  shareCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: color.grayLight,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  accountShare: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    qrBackground: {
+      backgroundColor: color.ivoryDark,
+      borderRadius: 8,
+      paddingVertical: 40,
+      flexDirection: "row",
+      justifyContent: "center",
+    },
+    qrWrap: {
+      borderWidth: 1,
+      borderColor: color.primary,
+      borderRadius: 8,
+      padding: 16,
+      backgroundColor: color.white,
+    },
+    shareCircle: {
+      width: 50,
+      height: 50,
+      borderRadius: 50,
+      borderWidth: 1,
+      borderColor: color.grayLight,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    accountShare: {
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });

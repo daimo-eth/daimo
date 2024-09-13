@@ -1,7 +1,7 @@
 import { ReactNode, useMemo } from "react";
 import { TouchableHighlight } from "react-native";
 
-import { touchHighlightUnderlay } from "../style/style";
+import { useTheme } from "../style/theme";
 
 export function ButtonCircle({
   onPress,
@@ -14,6 +14,7 @@ export function ButtonCircle({
   margin?: number;
   children: ReactNode;
 }) {
+  const { touchHighlightUnderlay } = useTheme();
   const style = useMemo(
     () => ({
       width: size,

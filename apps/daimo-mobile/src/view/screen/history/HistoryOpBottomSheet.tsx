@@ -53,7 +53,6 @@ import { CenterSpinner } from "../../shared/CenterSpinner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { FailedDot, PendingDot, ProcessingDot } from "../../shared/StatusDot";
-import { color, ss } from "../../style/style";
 import {
   TextBodyCaps,
   TextCenter,
@@ -62,6 +61,8 @@ import {
   TextPara,
 } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+import { SkinStyleSheet } from "../../style/skins";
+import { useTheme } from "../../style/theme";
 import { NoteDisplay } from "../link/NoteScreen";
 
 type Props = NativeStackScreenProps<
@@ -83,6 +84,7 @@ export function HistoryOpBottomSheet(props: Props) {
 }
 
 function HistoryOpInner({ account, route }: Props & { account: Account }) {
+  const { ss } = useTheme();
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
   // Load the latest version of this op. If the user opens the detail screen
@@ -272,6 +274,8 @@ function TransferBody({
   account: Account;
   transferClog: TransferClog;
 }) {
+  const { ss, color } = useTheme();
+
   const nav = useNav();
   const address = account.address;
 
@@ -305,6 +309,7 @@ function TransferBody({
       dispatcher,
       transferClog,
       chainConfig.chainL2.name,
+      ss,
       foreignChainName
     );
   }, [transferClog]);
@@ -412,6 +417,7 @@ function showHelpWhyNoFees(
   dispatcher: Dispatcher,
   transferClog: TransferClog,
   chainName: string,
+  ss: SkinStyleSheet,
   foreignChainName?: string
 ) {
   const i1 = i18.help;

@@ -21,12 +21,14 @@ import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
 import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../style/style";
 import { TextBodyMedium, TextCenter } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.onboardingEnterInvite;
 
 export function OnboardingEnterInviteScreen() {
+  const { ss } = useTheme();
+
   // No invite code? Join waitlist
   const linkToWaitlist = () => {
     const url = `https://daimo.com/waitlist`;
@@ -63,6 +65,7 @@ export function OnboardingEnterInviteScreen() {
 }
 
 function Instructions() {
+  const { color } = useTheme();
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>

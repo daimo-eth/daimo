@@ -21,11 +21,12 @@ import Animated, {
 
 import { AnimatedCircle } from "./AnimatedCircle";
 import Spacer from "./Spacer";
-import { color, touchHighlightUnderlay } from "../style/style";
 import { DaimoText, TextBody, TextBtnCaps } from "./text";
 import FaceIdPrimaryIcon from "../../../assets/face-id-primary.png";
 import FaceIdIcon from "../../../assets/face-id.png";
 import { DispatcherContext } from "../../action/dispatch";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 interface TextButtonProps {
   title?: string;
@@ -45,10 +46,13 @@ interface LongPressButtonProps extends ButtonProps {
 }
 
 export function LongPressBigButton(props: LongPressButtonProps) {
+  const buttonStyles = getButtonStyles(useTheme().color);
+  const style = useButtonStyle(buttonStyles.big, props);
   const buttonScale = useSharedValue(1);
   const animatedCircleProgress = useSharedValue(0);
 
-  const style = useStyle(buttonStyles.big, props);
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = getStyles(color);
   const touchUnderlay = useTouchUnderlay(props.type);
   const disabledStyle = useMemo(
     () => ({ ...style.button, opacity: 0.5 }),
@@ -117,10 +121,12 @@ export function LongPressBigButton(props: LongPressButtonProps) {
 }
 
 export function ButtonBig(props: ButtonProps) {
+  const buttonStyles = getButtonStyles(useTheme().color);
+  const style = useButtonStyle(buttonStyles.big, props);
   return (
     <Button
       {...props}
-      style={useStyle(buttonStyles.big, props)}
+      style={style}
       touchUnderlay={useTouchUnderlay(props.type)}
       icon={props.type === "subtle" ? FaceIdPrimaryIcon : FaceIdIcon}
     />
@@ -128,10 +134,13 @@ export function ButtonBig(props: ButtonProps) {
 }
 
 export function ButtonMed(props: ButtonProps) {
+  const { color } = useTheme();
+  const buttonStyles = useMemo(() => getButtonStyles(color), [color]);
+  const style = useButtonStyle(buttonStyles.med, props);
   return (
     <Button
       {...props}
-      style={useStyle(buttonStyles.med, props)}
+      style={style}
       touchUnderlay={useTouchUnderlay(props.type)}
       icon={props.type === "subtle" ? FaceIdPrimaryIcon : FaceIdIcon}
     />
@@ -139,13 +148,10 @@ export function ButtonMed(props: ButtonProps) {
 }
 
 export function TextButton(props: TextButtonProps) {
-  return (
-    <Button
-      {...props}
-      style={useStyle(buttonStyles.small, props)}
-      icon={FaceIdPrimaryIcon}
-    />
-  );
+  const { color } = useTheme();
+  const buttonStyles = useMemo(() => getButtonStyles(color), [color]);
+  const style = useButtonStyle(buttonStyles.small, props);
+  return <Button {...props} style={style} icon={FaceIdPrimaryIcon} />;
 }
 
 // Shows the (?) icon. Should open the help modal.
@@ -161,6 +167,7 @@ export function HelpButton({
   title?: string;
 }) {
   const dispatcher = useContext(DispatcherContext);
+  const { color } = useTheme();
 
   if (onPress == null) {
     onPress = () => {
@@ -192,6 +199,7 @@ export function BadgeButton({
   children?: ReactNode;
   onPress?: () => void;
 }) {
+  const { color, touchHighlightUnderlay } = useTheme();
   return (
     <View style={{ paddingVertical: 8 }}>
       <TouchableHighlight
@@ -211,49 +219,50 @@ export function BadgeButton({
   );
 }
 
-function useStyle(base: ButtonStyle, props: TextButtonProps) {
-  const { type } = props as ButtonProps;
-  const btnOverride = useMemo<ViewStyle>(() => {
-    switch (type) {
-      case "primary":
-        return { backgroundColor: color.primary };
-      case "danger":
-        return { backgroundColor: color.danger };
-      case "success":
-        return { backgroundColor: color.success };
-      case "subtle": // Hollow, primary border on white background
-        return {
-          backgroundColor: color.white,
-          borderWidth: 1,
-          borderColor: color.primary,
-        };
-      default: // Text button. No fill, no border
-        return {};
-    }
-  }, [type]);
+function useButtonStyle(baseStyle: ButtonStyle, props: TextButtonProps) {
+  const { color } = useTheme();
+  return useMemo(() => {
+    const { type } = props as ButtonProps;
 
-  const titleOverride = useMemo<TextStyle>(() => {
-    switch (type) {
-      case "primary":
-      case "danger":
-      case "success":
-        return { color: color.white };
-      default:
-        return { color: color.primary };
-    }
-  }, [type]);
+    const btnOverride: ViewStyle = (() => {
+      switch (type) {
+        case "primary":
+          return { backgroundColor: color.primary };
+        case "danger":
+          return { backgroundColor: color.danger };
+        case "success":
+          return { backgroundColor: color.success };
+        case "subtle":
+          return {
+            backgroundColor: color.white,
+            borderWidth: 1,
+            borderColor: color.primary,
+          };
+        default:
+          return {};
+      }
+    })();
 
-  const style = useMemo(
-    () => ({
-      button: { ...base.button, ...btnOverride },
-      title: { ...base.title, ...titleOverride },
-    }),
-    [base, btnOverride]
-  );
-  return style;
+    const titleOverride: TextStyle = (() => {
+      switch (type) {
+        case "primary":
+        case "danger":
+        case "success":
+          return { color: color.white };
+        default:
+          return { color: color.primary };
+      }
+    })();
+
+    return {
+      button: { ...baseStyle.button, ...btnOverride },
+      title: { ...baseStyle.title, ...titleOverride },
+    };
+  }, [baseStyle, props, color]);
 }
 
 function useTouchUnderlay(type: ButtonProps["type"]) {
+  const { touchHighlightUnderlay } = useTheme();
   return useMemo(() => {
     switch (type) {
       case "success":
@@ -278,6 +287,8 @@ function Button(
     icon?: ImageSourcePropType;
   }
 ) {
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = getStyles(color);
   const disabledStyle = useMemo(
     () => ({ ...props.style.button, opacity: 0.5 }),
     [props.style.button]
@@ -319,6 +330,8 @@ export function DescriptiveClickableRow({
   message: string;
   onPressHelp?(): void;
 }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
   return (
     <View style={styles.buttonInfoContainer}>
       {icon}
@@ -334,82 +347,86 @@ export function DescriptiveClickableRow({
   );
 }
 
-const buttonStyles = {
-  big: StyleSheet.create({
-    button: {
-      paddingHorizontal: 24,
-      paddingVertical: 20,
-      borderRadius: 8,
-      backgroundColor: color.primaryBgLight,
-      height: 60,
-    },
-    title: {
-      fontSize: 14,
-      fontWeight: "bold",
-      letterSpacing: 1,
-      textAlign: "center",
-    },
-  }),
-  med: StyleSheet.create({
-    button: {
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-      borderRadius: 6,
-      backgroundColor: color.primaryBgLight,
-    },
-    title: {
-      fontSize: 14,
-      fontWeight: "bold",
-      letterSpacing: 1,
-      textAlign: "center",
-    },
-  }),
-  small: StyleSheet.create({
-    button: {
-      justifyContent: "center",
-      alignItems: "center",
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 4,
-      height: 40,
-    },
-    title: {
-      fontSize: 14,
-      fontWeight: "bold",
-      letterSpacing: 1,
-      textAlign: "center",
-    },
-  }),
+const getButtonStyles = (color: Colorway) => {
+  return {
+    big: StyleSheet.create({
+      button: {
+        paddingHorizontal: 24,
+        paddingVertical: 20,
+        borderRadius: 8,
+        backgroundColor: color.primaryBgLight,
+        height: 60,
+      },
+      title: {
+        fontSize: 14,
+        fontWeight: "bold",
+        letterSpacing: 1,
+        textAlign: "center",
+      },
+    }),
+    med: StyleSheet.create({
+      button: {
+        paddingHorizontal: 16,
+        paddingVertical: 16,
+        borderRadius: 6,
+        backgroundColor: color.primaryBgLight,
+      },
+      title: {
+        fontSize: 14,
+        fontWeight: "bold",
+        letterSpacing: 1,
+        textAlign: "center",
+      },
+    }),
+    small: StyleSheet.create({
+      button: {
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 4,
+        height: 40,
+      },
+      title: {
+        fontSize: 14,
+        fontWeight: "bold",
+        letterSpacing: 1,
+        textAlign: "center",
+      },
+    }),
+  };
 };
 
-const styles = StyleSheet.create({
-  biometricIconContainer: {
-    marginLeft: 8,
-  },
-  biometricIcon: {
-    height: 24,
-    width: 24,
-  },
-  centerContent: {
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-  messageContainer: {
-    marginLeft: 16,
-    flex: 1,
-  },
-  infoMessageText: {
-    fontSize: 16,
-    lineHeight: 20,
-    color: color.gray3,
-    fontWeight: "500",
-  },
-  buttonInfoContainer: {
-    flexDirection: "row",
-    marginBottom: 20,
-  },
-  textRow: {
-    flexDirection: "row",
-  },
-});
+const getStyles = (color: Colorway) => {
+  return StyleSheet.create({
+    biometricIconContainer: {
+      marginLeft: 8,
+    },
+    biometricIcon: {
+      height: 24,
+      width: 24,
+    },
+    centerContent: {
+      justifyContent: "center",
+      alignItems: "center",
+      flexDirection: "row",
+    },
+    messageContainer: {
+      marginLeft: 16,
+      flex: 1,
+    },
+    infoMessageText: {
+      fontSize: 16,
+      lineHeight: 20,
+      color: color.gray3,
+      fontWeight: "500",
+    },
+    buttonInfoContainer: {
+      flexDirection: "row",
+      marginBottom: 20,
+    },
+    textRow: {
+      flexDirection: "row",
+    },
+  });
+};

@@ -40,13 +40,16 @@ import {
   useSeedPhraseInput,
 } from "../shared/SeedPhraseDisplay";
 import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../style/style";
 import { TextBody, TextBtnCaps } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.seedPhrase;
 
 export function SeedPhraseScreen() {
+  const { color } = useTheme();
+  const styles = getStyles(color);
   const [activeStep, setActiveStep] = useState(0);
   const nav = useNav();
 
@@ -86,6 +89,7 @@ function CopySeedPhrase({
 }: {
   setActiveStep: (value: 0 | 1) => void;
 }) {
+  const { color } = useTheme();
   const [saved, toggleSaved] = useReducer((s) => !s, false);
   const { words } = useSeedPhraseContext();
 
@@ -111,6 +115,8 @@ function CopySeedPhrase({
 }
 
 function CopyToClipboard() {
+  const { color, ss, touchHighlightUnderlay } = useTheme();
+  const styles = getStyles(color);
   const { mnemonic } = useSeedPhraseContext();
   const [justCopied, setJustCopied] = useState(false);
 
@@ -148,6 +154,7 @@ function CopyToClipboard() {
 }
 
 function Checkbox({ active, toggle }: { active: boolean; toggle(): void }) {
+  const { color } = useTheme();
   const boxStyle: ViewStyle = useMemo(
     () => ({
       width: 16,
@@ -170,6 +177,7 @@ function ConfirmPhraseSave({
   saved: boolean;
   toggleSaved(): void;
 }) {
+  const { color } = useTheme();
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <Checkbox active={saved} toggle={toggleSaved} />
@@ -180,6 +188,8 @@ function ConfirmPhraseSave({
 }
 
 function VerifySeedPhraseInner({ account }: { account: Account }) {
+  const { color } = useTheme();
+
   const nav = useNav();
   const { isValid, publicKey, state, dispatch } = useSeedPhraseContext();
 
@@ -254,16 +264,17 @@ function useSeedPhraseContext() {
   return assertNotNull(seedPhraseContext, "Must be used in SeedPhraseProvider");
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: color.white,
-    paddingHorizontal: 24,
-  },
-  copyButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    flexDirection: "row",
-    borderRadius: 4,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: color.white,
+      paddingHorizontal: 24,
+    },
+    copyButton: {
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      flexDirection: "row",
+      borderRadius: 4,
+    },
+  });

@@ -29,7 +29,6 @@ import { ContactDisplay } from "../../shared/ContactDisplay";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../style/style";
 import {
   TextBody,
   TextBold,
@@ -37,11 +36,13 @@ import {
   TextLight,
   TextPara,
 } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendLink">;
 const i18 = i18n.sendNote;
 
 export function SendNoteScreen({ route }: Props) {
+  const { ss } = useTheme();
   const { recipient } = route.params || {};
 
   // Account, home coin, home chain
@@ -184,6 +185,7 @@ export function SendNoteScreen({ route }: Props) {
 }
 
 function HelpContentPaymentLink() {
+  const { ss } = useTheme();
   return (
     <View style={ss.container.padH16}>
       <TextPara>

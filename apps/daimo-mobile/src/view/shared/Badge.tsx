@@ -1,11 +1,8 @@
 import { useMemo } from "react";
 import { View } from "react-native";
 
-import { color } from "../style/style";
 import { TextBtnCaps } from "./text";
-
-const defaultColor = color.grayDark;
-const defaultBgColor = color.ivoryDark;
+import { useTheme } from "../style/theme";
 
 export function Badge({
   children,
@@ -16,8 +13,10 @@ export function Badge({
   color?: string;
   bgColor?: string;
 }) {
-  color = color || defaultColor;
-  bgColor = bgColor || defaultBgColor;
+  const defaultColorway = useTheme().theme;
+
+  color = color || defaultColorway.color.grayDark;
+  bgColor = bgColor || defaultColorway.color.ivoryDark;
 
   const styleWrap = useMemo(
     () => ({

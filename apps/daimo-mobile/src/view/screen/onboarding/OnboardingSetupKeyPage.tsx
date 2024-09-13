@@ -16,8 +16,8 @@ import { NamedError } from "../../../logic/log";
 import { defaultEnclaveKeyName } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../style/style";
 import { TextBody, TextCenter, TextError } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 type Props = NativeStackScreenProps<
   ParamListOnboarding,
@@ -25,6 +25,8 @@ type Props = NativeStackScreenProps<
 >;
 const i18 = i18n.onboardingSetupKey;
 export function OnboardingSetupKeyScreen(props: Props) {
+  const { color, ss } = useTheme();
+
   const [loading, setLoading] = useState(false);
   const [askToSetPin, setAskToSetPin] = useState(false);
   const [error, setError] = useState("");

@@ -17,11 +17,12 @@ import { amountSeparator, getAmountText } from "./Amount";
 import { Badge } from "./Badge";
 import { DropdownPickButton } from "./DropdownPickButton";
 import Spacer from "./Spacer";
-import { color, ss } from "../style/style";
 import { DaimoText, MAX_FONT_SIZE_MULTIPLIER, TextLight } from "./text";
 import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { LocalMoneyEntry, MoneyEntry } from "../../logic/moneyEntry";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 // Input components allows entry in range $0.01 to $99,999.99
 const MAX_TOTAL_DIGITS = 7;
@@ -46,6 +47,8 @@ export function AmountChooser({
   innerRef?: React.RefObject<TextInput>;
   onFocus?: () => void;
 }) {
+  const { color, ss } = useTheme();
+
   // Show how much we have available
   const account = useAccount();
 
@@ -101,6 +104,9 @@ function AmountInput({
   disabled?: boolean;
   onFocus?: () => void;
 }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   const { localUnits, currency } = moneyEntry;
   if (localUnits < 0) throw new Error("AmountPicker value can't be negative");
 
@@ -217,6 +223,9 @@ function CurrencyPicker({
   allCurrencies: CurrencyExchangeRate[];
   onSetCurrency: (currency: CurrencyExchangeRate) => void;
 }) {
+  const { color } = useTheme();
+  const styles = getStyles(color);
+
   const choose = (val: CurrencyExchangeRate) => {
     if (val == null) return;
     onSetCurrency(val);
@@ -246,6 +255,7 @@ function CurrencyPicker({
 }
 
 function CurrencyPickItem({ currency }: { currency: CurrencyExchangeRate }) {
+  const { color } = useTheme();
   return (
     <View
       style={{
@@ -268,45 +278,46 @@ function CurrencyPickItem({ currency }: { currency: CurrencyExchangeRate }) {
 const dim = Dimensions.get("window");
 const isSmall = dim.width < 375;
 
-const styles = StyleSheet.create({
-  amountRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  amountInputWrap: {
-    flexShrink: 1,
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 4,
-  },
-  amountDollar: {
-    fontSize: isSmall ? 50 : 56,
-    fontWeight: "600",
-    paddingBottom: 2,
-    color: color.midnight,
-    textAlign: "right",
-  },
-  amountInput: {
-    fontSize: isSmall ? 56 : 64,
-    fontWeight: "600",
-    fontVariant: ["tabular-nums"],
-    color: color.midnight,
-  },
-  currencyPickerWrap: {
-    width: 40,
-    height: 40,
-  },
-  currencyButton: {
-    padding: 8,
-  },
-  currencyDropdown: {
-    width: 256,
-    backgroundColor: color.white,
-    borderRadius: 13,
-    flexDirection: "column",
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    amountRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    amountInputWrap: {
+      flexShrink: 1,
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: 4,
+    },
+    amountDollar: {
+      fontSize: isSmall ? 50 : 56,
+      fontWeight: "600",
+      paddingBottom: 2,
+      color: color.midnight,
+      textAlign: "right",
+    },
+    amountInput: {
+      fontSize: isSmall ? 56 : 64,
+      fontWeight: "600",
+      fontVariant: ["tabular-nums"],
+      color: color.midnight,
+    },
+    currencyPickerWrap: {
+      width: 40,
+      height: 40,
+    },
+    currencyButton: {
+      padding: 8,
+    },
+    currencyDropdown: {
+      width: 256,
+      backgroundColor: color.white,
+      borderRadius: 13,
+      flexDirection: "column",
+    },
+  });
 
 // Parse both 1.23 and 1,23
 function parseLocalFloat(str?: string) {

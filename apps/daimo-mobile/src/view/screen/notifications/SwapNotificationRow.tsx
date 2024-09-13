@@ -15,12 +15,14 @@ import { i18NLocale, i18n } from "../../../i18n";
 import { SwapNotification } from "../../../logic/inAppNotifications";
 import { TokenBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
-import { color, touchHighlightUnderlay } from "../../style/style";
 import { TextBody, TextMeta } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.swapNotification;
 
 export function SwapNotificationRow({ notif }: { notif: SwapNotification }) {
+  const { color, touchHighlightUnderlay } = useTheme();
+
   // should be very rare, but we write this defensively
   const isSwapPastDeadline = notif.swap.execDeadline < now();
 

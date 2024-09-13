@@ -41,9 +41,10 @@ import { CoverGraphic } from "../../shared/CoverGraphic";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../../style/style";
 import { TextBody, TextMeta } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+import { Colorway, SkinStyleSheet } from "../../style/skins";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.deposit;
 
@@ -54,6 +55,7 @@ export default function DepositScreen() {
 
 // maybe is in here is the problem?
 function DepositScreenInner({ account }: { account: Account }) {
+  const { ss } = useTheme();
   return (
     <View style={{ flex: 1 }}>
       <View style={ss.container.padH16}>
@@ -200,6 +202,8 @@ function getOnDemandExchanges(
 type Progress = "idle" | "loading-binance-deposit" | "started";
 
 function DepositList({ account }: { account: Account }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color, ss);
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const isTestnet = chainConfig.chainL2.testnet;
 
@@ -265,6 +269,8 @@ function DepositList({ account }: { account: Account }) {
 }
 
 function WithdrawList({ account }: { account: Account }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color, ss);
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const dispatcher = useContext(DispatcherContext);
   const nav = useNav();
@@ -319,6 +325,8 @@ function LandlineOptionRow({
   isAccount,
   onClick,
 }: LandlineOptionRowProps) {
+  const { color, touchHighlightUnderlay, ss } = useTheme();
+  const styles = getStyles(color, ss);
   const width = useWindowDimensions().width;
 
   return (
@@ -378,6 +386,8 @@ function OptionRow({
   onClick,
   progress,
 }: OptionRowProps) {
+  const { color, touchHighlightUnderlay, ss } = useTheme();
+  const styles = getStyles(color, ss);
   const width = useWindowDimensions().width;
 
   const rightContent = (() => {
@@ -416,6 +426,8 @@ function OptionRow({
 }
 
 function LogoBubble({ logo }: { logo: ImageSourcePropType }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color, ss);
   return (
     <View style={styles.logoBubble}>
       <Image source={logo} style={styles.logoBubble} />
@@ -423,50 +435,51 @@ function LogoBubble({ logo }: { logo: ImageSourcePropType }) {
   );
 }
 
-const styles = StyleSheet.create({
-  optionRow: {
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderTopWidth: 1,
-    borderColor: color.grayLight,
-    marginHorizontal: 16,
-  },
-  optionRowLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  optionRowRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  rowUnderlayWrap: {
-    marginHorizontal: -16,
-  },
-  logoBubble: {
-    width: 36,
-    height: 36,
-    borderRadius: 99,
-  },
-  section: {
-    marginHorizontal: 16,
-    borderBottomWidth: 1,
-    borderColor: color.grayLight,
-  },
-  checklistAction: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: color.grayLight,
-    marginHorizontal: 24,
-    backgroundColor: color.white,
-    ...ss.container.shadow,
-    elevation: 0, // Android shadows are bugged with Pressable: https://github.com/facebook/react-native/issues/25093#issuecomment-789502424
-  },
-});
+const getStyles = (color: Colorway, ss: SkinStyleSheet) =>
+  StyleSheet.create({
+    optionRow: {
+      paddingVertical: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderTopWidth: 1,
+      borderColor: color.grayLight,
+      marginHorizontal: 16,
+    },
+    optionRowLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+    },
+    optionRowRight: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+    },
+    rowUnderlayWrap: {
+      marginHorizontal: -16,
+    },
+    logoBubble: {
+      width: 36,
+      height: 36,
+      borderRadius: 99,
+    },
+    section: {
+      marginHorizontal: 16,
+      borderBottomWidth: 1,
+      borderColor: color.grayLight,
+    },
+    checklistAction: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 20,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: color.grayLight,
+      marginHorizontal: 24,
+      backgroundColor: color.white,
+      ...ss.container.shadow,
+      elevation: 0, // Android shadows are bugged with Pressable: https://github.com/facebook/react-native/issues/25093#issuecomment-789502424
+    },
+  });

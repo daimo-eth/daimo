@@ -2,7 +2,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { ReactNode, useMemo } from "react";
 import { Text, TextProps } from "react-native";
 
-import { color, ss } from "../style/style";
+import { useTheme } from "../style/theme";
 
 export const MAX_FONT_SIZE_MULTIPLIER = 1.4;
 
@@ -32,9 +32,10 @@ export function DaimoText({
   style,
   ...props
 }: TypographyProps) {
+  const { ss, color: themeColor } = useTheme();
   return (
     <Text
-      style={[ss.text[variant], { color }, style]}
+      style={[ss.text[variant], { color: color || themeColor.midnight }, style]}
       maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
       {...props}
     />
@@ -78,6 +79,7 @@ export function TextBtnCaps(props: TypographyProps) {
 }
 
 export function TextLight(props: TextProps) {
+  const { color } = useTheme();
   return <TextBody {...props} color={color.gray3} />;
 }
 
@@ -87,18 +89,22 @@ export function TextColor(props: TextProps & { color: string }) {
 }
 
 export function TextBold(props: TextProps) {
+  const { ss } = useTheme();
   return <DaimoText {...props} style={ss.text.bold} />;
 }
 
 export function TextLink(props: TextProps) {
+  const { ss } = useTheme();
   return <DaimoText {...props} style={ss.text.link} />;
 }
 
 export function TextCenter(props: TextProps) {
+  const { ss } = useTheme();
   return <DaimoText {...props} style={ss.text.center} />;
 }
 
 export function TextError(props: TextProps) {
+  const { ss } = useTheme();
   return <DaimoText {...props} style={ss.text.error} />;
 }
 

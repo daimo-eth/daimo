@@ -4,8 +4,8 @@ import { View } from "react-native";
 import { i18n } from "../../i18n";
 import { ButtonMed } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { ss } from "../style/style";
 import { TextCenter, TextH3 } from "../shared/text";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.helpBottom;
 
@@ -18,6 +18,7 @@ export function HelpBottomSheet({
   title: string;
   onPress(): void;
 }) {
+  const { ss } = useTheme();
   return (
     <View style={ss.container.padH16}>
       <Spacer h={16} />

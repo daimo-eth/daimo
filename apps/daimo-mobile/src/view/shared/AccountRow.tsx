@@ -3,7 +3,6 @@ import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { ContactBubble } from "./Bubble";
 import { FailedDot, PendingDot, ProcessingDot } from "./StatusDot";
-import { color, touchHighlightUnderlay } from "../style/style";
 import { TextBody, TextPara } from "./text";
 import { i18NLocale } from "../../i18n";
 import {
@@ -11,6 +10,8 @@ import {
   DaimoContact,
   getContactName,
 } from "../../logic/daimoContacts";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function AccountRow({
   contact,
@@ -23,6 +24,9 @@ export function AccountRow({
   viewAccount?: () => void;
   status?: TransferClogStatus;
 }) {
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = getStyles(color);
+
   const textDark = status === "pending" ? color.gray3 : color.midnight;
   const textLight = status === "pending" ? color.gray3 : color.grayMid;
 
@@ -57,25 +61,26 @@ export function AccountRow({
   );
 }
 
-const styles = StyleSheet.create({
-  border: {
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: color.grayLight,
-  },
-  rowWrap: {
-    marginHorizontal: -24,
-  },
-  row: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  otherAccount: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    border: {
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: color.grayLight,
+    },
+    rowWrap: {
+      marginHorizontal: -24,
+    },
+    row: {
+      paddingHorizontal: 24,
+      paddingVertical: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    otherAccount: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+    },
+  });

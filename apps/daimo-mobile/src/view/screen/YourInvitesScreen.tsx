@@ -6,9 +6,10 @@ import { i18NLocale, i18n } from "../../i18n";
 import { Account } from "../../storage/account";
 import { ContactBubble } from "../shared/Bubble";
 import { ScreenHeader } from "../shared/ScreenHeader";
-import { color, ss, touchHighlightUnderlay } from "../style/style";
 import { TextBody } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.yourInvites;
 
@@ -18,6 +19,9 @@ export function YourInvitesScreen() {
 }
 
 function YourInvitesScreenInner({ account }: { account: Account }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color);
+
   const nav = useNav();
 
   const invitees = account.invitees;
@@ -35,6 +39,9 @@ function YourInvitesScreenInner({ account }: { account: Account }) {
 }
 
 function InviteeRow({ invitee }: { invitee: EAccount }) {
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = getStyles(color);
+
   const nav = useNav();
 
   return (
@@ -62,31 +69,32 @@ function InviteeRow({ invitee }: { invitee: EAccount }) {
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    backgroundColor: color.white,
-    marginHorizontal: -16,
-  },
-  inviteeRow: {
-    paddingVertical: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderTopWidth: 1,
-    borderColor: color.grayLight,
-    marginHorizontal: 16,
-  },
-  inviteeRowLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  inviteeRowRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  rowUnderlayWrap: {
-    marginHorizontal: -16,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    list: {
+      backgroundColor: color.white,
+      marginHorizontal: -16,
+    },
+    inviteeRow: {
+      paddingVertical: 16,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderTopWidth: 1,
+      borderColor: color.grayLight,
+      marginHorizontal: 16,
+    },
+    inviteeRowLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+    },
+    inviteeRowRight: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+    },
+    rowUnderlayWrap: {
+      marginHorizontal: -16,
+    },
+  });

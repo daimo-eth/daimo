@@ -29,7 +29,8 @@ import IconBase from "../../../../assets/logos/base-logo.png";
 import IconOptimism from "../../../../assets/logos/op-logo.png";
 import IconPolygon from "../../../../assets/logos/poly-logo.png";
 import { useAccount } from "../../../logic/accountManager";
-import { color, ss } from "../../style/style";
+import { Colorway, SkinStyleSheet } from "../../style/skins";
+import { useTheme } from "../../style/theme";
 
 // Get the logo for the chain
 // TODO: move elsewhere
@@ -60,6 +61,8 @@ export function SendCoinButton({
   setCoin: (coin: ForeignToken) => void;
   autoFocus?: boolean;
 }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color, ss);
   const account = useAccount();
 
   // Autofocus
@@ -119,6 +122,8 @@ function SendPairImage({
   coinUri: string | undefined;
   chainSource: ImageSourcePropType;
 }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color, ss);
   if (coinUri == null) return null;
   return (
     <View style={styles.sendPairContainer}>
@@ -137,6 +142,8 @@ function CoinPickItem({
   coin: ForeignToken;
   chain: DAv2Chain;
 }) {
+  const { color, ss } = useTheme();
+  const styles = getStyles(color, ss);
   const chainUri = getChainUri(chain);
   return (
     <View style={styles.coinPickItem}>
@@ -170,7 +177,12 @@ export function CoinPellet({
   toCoin: ForeignToken;
   onClick: () => void;
 }) {
+<<<<<<< HEAD
   const toChain = getDAv2Chain(toCoin.chainId);
+=======
+  const { color, ss } = useTheme();
+  const styles = getStyles(color, ss);
+>>>>>>> 453e9e56 (wip)
   const chainUri = getChainUri(toChain);
   return (
     <View style={{ ...styles.coinButton, backgroundColor: color.white }}>
@@ -194,80 +206,81 @@ export function CoinPellet({
 }
 
 // Styles for dropdown
-const styles = StyleSheet.create({
-  textContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  coinPickerWrap: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-  },
-  coinDropdown: {
-    width: 200,
-    backgroundColor: color.white,
-    borderRadius: 13,
-    flexDirection: "column",
-    marginLeft: -46,
-  },
-  coinButton: {
-    borderColor: color.grayLight,
-    borderWidth: 1,
-    borderRadius: 8,
-    height: 40,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    ...ss.container.shadow,
-    alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  coinPickItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: color.grayLight,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  sheetContainer: {
-    // add horizontal space
-    marginHorizontal: 24,
-    ...ss.container.shadow,
-  },
-  contentContainer: {
-    flex: 1,
-    alignItems: "center",
-  },
-  sendPairContainer: {
-    width: 24,
-    height: 24,
-    left: -2, // offset chain image
-    position: "relative",
-  },
-  coinImage: {
-    width: 24,
-    height: 24,
-    position: "absolute",
-    top: 0,
-    left: 0,
-  },
-  chainImageContainer: {
-    position: "absolute",
-    bottom: -4,
-    right: -6,
-    borderRadius: 7,
-    borderWidth: 2,
-    borderColor: "white",
-    overflow: "hidden",
-  },
-  chainImage: {
-    width: 14,
-    height: 14,
-  },
-});
+const getStyles = (color: Colorway, ss: SkinStyleSheet) =>
+  StyleSheet.create({
+    textContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    coinPickerWrap: {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+    },
+    coinDropdown: {
+      width: 200,
+      backgroundColor: color.white,
+      borderRadius: 13,
+      flexDirection: "column",
+      marginLeft: -46,
+    },
+    coinButton: {
+      borderColor: color.grayLight,
+      borderWidth: 1,
+      borderRadius: 8,
+      height: 40,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      ...ss.container.shadow,
+      alignSelf: "center",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    coinPickItem: {
+      borderBottomWidth: 1,
+      borderBottomColor: color.grayLight,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    sheetContainer: {
+      // add horizontal space
+      marginHorizontal: 24,
+      ...ss.container.shadow,
+    },
+    contentContainer: {
+      flex: 1,
+      alignItems: "center",
+    },
+    sendPairContainer: {
+      width: 24,
+      height: 24,
+      left: -2, // offset chain image
+      position: "relative",
+    },
+    coinImage: {
+      width: 24,
+      height: 24,
+      position: "absolute",
+      top: 0,
+      left: 0,
+    },
+    chainImageContainer: {
+      position: "absolute",
+      bottom: -4,
+      right: -6,
+      borderRadius: 7,
+      borderWidth: 2,
+      borderColor: "white",
+      overflow: "hidden",
+    },
+    chainImage: {
+      width: 14,
+      height: 14,
+    },
+  });

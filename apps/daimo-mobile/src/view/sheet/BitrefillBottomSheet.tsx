@@ -14,8 +14,8 @@ import { AmountChooser } from "../shared/AmountInput";
 import { ContactDisplay } from "../shared/ContactDisplay";
 import { IconRow } from "../shared/IconRow";
 import Spacer from "../shared/Spacer";
-import { color } from "../style/style";
 import { useWithAccount } from "../shared/withAccount";
+import { useTheme } from "../style/theme";
 
 export function BitrefillBottomSheet({
   address,
@@ -37,6 +37,7 @@ function BitrefillBottomSheetInner({
   address: Address;
   amount: `${number}`;
 }) {
+  const { color } = useTheme();
   const recipient: EAccountContact = { type: "eAcc", addr: address };
   // Show "bitrefill" as the name, but only on the send screen
   const recipientWithName = { ...recipient, name: "Bitrefill" };
