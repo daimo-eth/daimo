@@ -1,5 +1,5 @@
 import { DaimoLink } from "@daimo/common";
-import { base, baseUSDC } from "@daimo/contract";
+import { baseUSDC } from "@daimo/contract";
 
 import { Dispatcher } from "../src/action/dispatch";
 import { MainNav, handleDeepLink } from "../src/common/nav";
@@ -47,7 +47,6 @@ describe("nav", () => {
         dollars: "1.23",
         requestId: "456",
         toCoin: baseUSDC,
-        toChain: base,
       },
     });
   });

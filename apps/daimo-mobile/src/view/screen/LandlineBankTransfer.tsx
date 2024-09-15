@@ -1,4 +1,4 @@
-import { base, baseUSDC, DaimoChain, daimoChainFromId } from "@daimo/contract";
+import { baseUSDC, DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
 import {
@@ -248,7 +248,6 @@ function SendConfirm({
   bankTransferOption: BankTransferOptions;
 }) {
   const nav = useNav();
-
   const navToInput = () => {
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
@@ -275,7 +274,6 @@ function SendConfirm({
         // https://apidocs.bridge.xyz/docs/liquidation-address
         minTransferAmount={1.0}
         toCoin={baseUSDC} // TODO: get home coin from account
-        toChain={base} // TODO: get home chain from account
       />
     ) : (
       <LandlineDepositButton

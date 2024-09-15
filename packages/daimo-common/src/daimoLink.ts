@@ -1,10 +1,4 @@
-import {
-  base,
-  baseUSDC,
-  DAv2Chain,
-  ForeignToken,
-  getDAv2Chain,
-} from "@daimo/contract";
+import { baseUSDC, ForeignToken } from "@daimo/contract";
 import { Address, getAddress, Hex, isAddress } from "viem";
 
 import { BigIntStr, DollarStr, zDollarStr, zHex } from "./model";
@@ -52,7 +46,6 @@ export type DaimoLinkRequest = {
   recipient: string;
   dollars?: DollarStr;
   toCoin: ForeignToken;
-  toChain: DAv2Chain;
 };
 
 /** Represents a request for $x to be paid to y address. */
@@ -135,7 +128,7 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
         params.append("id", link.requestId.toString());
       }
 
-      params.append("c", link.toChain.chainId.toString());
+      params.append("c", link.toCoin.chainId.toString());
       params.append("t", link.toCoin.symbol.toLowerCase());
 
       return `${linkBase}/request?${params.toString()}`;
@@ -343,10 +336,9 @@ function parseOldDaimoLinkRequest(parts: string[]): DaimoLinkRequest | null {
 
   if (dollars === "0.00") return null;
 
-  const toChain = base;
   const toCoin = baseUSDC;
 
-  return { type: "request", requestId, recipient, dollars, toCoin, toChain };
+  return { type: "request", requestId, recipient, dollars, toCoin };
 }
 
 /**
@@ -370,19 +362,11 @@ function parseNewDaimoLinkRequest(url: URL): DaimoLinkRequest | null {
   if (!to || !c || !t) return null;
   if (!isValidRequestAccountName(to)) return null;
 
-  let toChain: DAv2Chain;
-  try {
-    toChain = getDAv2Chain(parseInt(c, 10));
-  } catch (e) {
-    console.warn(`[LINK] ignoring invalid chain ${c}: ${e}`);
-    return null;
-  }
-
-  const sendPairs = getSupportedSendPairs(toChain.chainId);
-
+  const toChainId = parseInt(c, 10);
+  const sendPairs = getSupportedSendPairs(toChainId);
   const toCoin = sendPairs
     .map((s) => s.coin)
-    .filter((c) => c.chainId === toChain.chainId)
+    .filter((c) => c.chainId === toChainId)
     .find((c) => c.symbol.toLowerCase() === t.toLowerCase());
   if (toCoin == null) {
     console.warn(`[LINK] ignoring invalid coin ${t} on chain ${c}`);
@@ -393,7 +377,6 @@ function parseNewDaimoLinkRequest(url: URL): DaimoLinkRequest | null {
     type: "request",
     recipient: to,
     toCoin,
-    toChain,
   };
 
   if (n) {

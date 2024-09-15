@@ -7,7 +7,7 @@ import {
   OpStatus,
   ProposedSwap,
 } from "@daimo/common";
-import { baseUSDC, DAv2Chain, ForeignToken } from "@daimo/contract";
+import { ForeignToken, getDAv2Chain, getTokenByAddress } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -40,7 +40,6 @@ export function SendTransferButton({
   recipient,
   dollars,
   toCoin,
-  toChain,
   memo,
   minTransferAmount = 0,
   route,
@@ -50,7 +49,6 @@ export function SendTransferButton({
   recipient: EAccountContact | LandlineBankAccountContact;
   dollars: number;
   toCoin: ForeignToken;
-  toChain: DAv2Chain;
   memo?: string;
   minTransferAmount?: number;
   route?: ProposedSwap | null;
@@ -59,7 +57,7 @@ export function SendTransferButton({
   console.log(`[SEND] rendering SendButton ${dollars}`);
 
   // Get exact amount. No partial cents.
-  assert(dollars >= 0);
+  assert(dollars > 0);
   const maxDecimals = 2;
   const dollarsStr = dollars.toFixed(maxDecimals) as `${number}`;
 
@@ -70,9 +68,9 @@ export function SendTransferButton({
   );
 
   // Note whether the transfer has a swap or not for op creation.
-  const chainId = account.homeChainId;
-  const homeCoin = baseUSDC; // TODO
-  const isBridge = toCoin.chainId !== chainId;
+  const { homeChainId, homeCoinAddress } = account;
+  const homeCoin = getTokenByAddress(homeChainId, homeCoinAddress);
+  const isBridge = toCoin.chainId !== homeChainId;
   const isSwap = !isBridge && homeCoin.token !== toCoin.token;
 
   // Pending swap, appears immediately > replaced by onchain data
@@ -98,9 +96,11 @@ export function SendTransferButton({
         chainGasConstants: account.chainGasConstants,
       };
 
-      if (toChain.chainId !== account.homeChainId) {
+      if (toCoin.chainId !== homeChainId) {
         // TODO: handle case with swap and bridge
         assert(toCoin.symbol === homeCoin.symbol);
+
+        const toChain = getDAv2Chain(toCoin.chainId);
         console.log(`[ACTION] sending via FastCCTP to chain ${toChain.name}`);
         return opSender.sendUsdcToOtherChain(
           recipient.addr,

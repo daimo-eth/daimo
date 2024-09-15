@@ -3,7 +3,11 @@ import {
   amountToDollars,
   getForeignCoinDisplayAmount,
 } from "@daimo/common";
-import { DAv2Chain, ForeignToken, getChainDisplayName } from "@daimo/contract";
+import {
+  ForeignToken,
+  getChainDisplayName,
+  getDAv2Chain,
+} from "@daimo/contract";
 import { StyleSheet, View } from "react-native";
 
 import { i18n } from "../../../i18n";
@@ -15,13 +19,11 @@ export function RoutePellet({
   route,
   fromCoin,
   fromAmount,
-  toChain,
   toCoin,
 }: {
   route: ProposedSwap | null;
   fromCoin: ForeignToken;
   fromAmount: bigint;
-  toChain: DAv2Chain;
   toCoin: ForeignToken;
 }) {
   let toAmountStr: string;
@@ -34,6 +36,7 @@ export function RoutePellet({
     toAmountStr = getForeignCoinDisplayAmount(BigInt(route.toAmount), toCoin);
   }
 
+  const toChain = getDAv2Chain(toCoin.chainId);
   const chainName = getChainDisplayName(toChain);
 
   return (

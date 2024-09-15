@@ -13,12 +13,7 @@ import {
   parseDaimoLink,
   parseInviteCodeOrLink,
 } from "@daimo/common";
-import {
-  DAv2Chain,
-  DaimoChain,
-  ForeignToken,
-  daimoChainFromId,
-} from "@daimo/contract";
+import { DaimoChain, ForeignToken, daimoChainFromId } from "@daimo/contract";
 import { NavigatorScreenParams, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { URLListener, addEventListener } from "expo-linking";
@@ -134,7 +129,6 @@ export interface SendNavProp {
   recipient?: EAccountContact;
   money?: MoneyEntry;
   toCoin?: ForeignToken;
-  toChain?: DAv2Chain;
   memo?: string;
   requestId?: `${bigint}`;
   autoFocus?: boolean;

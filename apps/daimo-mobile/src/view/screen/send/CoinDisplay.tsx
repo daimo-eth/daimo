@@ -155,13 +155,12 @@ function CoinPickItem({
 
 export function CoinPellet({
   toCoin,
-  toChain,
   onClick,
 }: {
   toCoin: ForeignToken;
-  toChain: DAv2Chain;
   onClick: () => void;
 }) {
+  const toChain = getDAv2Chain(toCoin.chainId);
   const chainUri = getChainUri(toChain);
   return (
     <View style={{ ...styles.coinButton, backgroundColor: color.white }}>

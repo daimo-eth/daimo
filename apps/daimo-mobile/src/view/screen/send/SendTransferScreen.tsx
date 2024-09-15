@@ -10,11 +10,9 @@ import {
   now,
 } from "@daimo/common";
 import {
-  DAv2Chain,
   DaimoChain,
   ForeignToken,
   daimoChainFromId,
-  getDAv2Chain,
   getTokenByAddress,
 } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -78,7 +76,6 @@ function SendScreenInner({
   money,
   memo,
   toCoin,
-  toChain,
   account,
 }: SendNavProp & { account: Account }) {
   assertNotNull(link || recipient, "SendScreenInner: need link or recipient");
@@ -101,18 +98,16 @@ function SendScreenInner({
   }, [nav, money, recipient]);
 
   const { homeChainId, homeCoinAddress } = account;
-  const homeChain = getDAv2Chain(homeChainId);
   const homeCoin = getTokenByAddress(homeChainId, homeCoinAddress);
   toCoin = toCoin ?? homeCoin;
-  toChain = toChain ?? homeChain;
 
   const sendDisplay = (() => {
-    if (link) {
+    if (link != null) {
       if (requestFetch.isFetching) {
         return <CenterSpinner />;
       } else if (requestFetch.error) {
         return <ErrorRowCentered error={requestFetch.error} />;
-      } else if (requestStatus) {
+      } else if (requestStatus != null) {
         const recipient = addLastTransferTimes(
           account,
           requestStatus.recipient
@@ -127,7 +122,6 @@ function SendScreenInner({
               money={usdEntry(requestStatus.link.dollars)}
               homeCoin={homeCoin}
               toCoin={toCoin}
-              toChain={toChain}
               requestStatus={requestStatus as DaimoRequestV2Status}
             />
           );
@@ -150,14 +144,13 @@ function SendScreenInner({
                 money={usdEntry(requestStatus.link.dollars)}
                 homeCoin={homeCoin}
                 toCoin={(link as DaimoLinkRequest).toCoin}
-                toChain={(link as DaimoLinkRequest).toChain}
               />
             );
           }
         }
       } else return <CenterSpinner />;
     } else if (recipient) {
-      if (money == null)
+      if (money == null) {
         return (
           <SendChooseAmount
             recipient={recipient}
@@ -166,12 +159,13 @@ function SendScreenInner({
             defaultToCoin={homeCoin}
           />
         );
-      else
+      } else {
         return (
           <SendConfirm
-            {...{ account, recipient, memo, money, homeCoin, toCoin, toChain }}
+            {...{ account, recipient, memo, money, homeCoin, toCoin }}
           />
         );
+      }
     } else throw new Error("unreachable");
   })();
 
@@ -310,7 +304,6 @@ function SendConfirm({
   memo,
   homeCoin,
   toCoin,
-  toChain,
   requestStatus,
 }: {
   account: Account;
@@ -319,7 +312,6 @@ function SendConfirm({
   memo: string | undefined;
   homeCoin: ForeignToken;
   toCoin: ForeignToken;
-  toChain: DAv2Chain;
   requestStatus?: DaimoRequestV2Status;
 }) {
   const isRequest = !!requestStatus;
@@ -333,8 +325,9 @@ function SendConfirm({
   }
 
   const nav = useNav();
-  const navToInput = () => {
-    nav.navigate("SendTab", { screen: "SendTransfer", params: { recipient } });
+  const navToInput = (reset: Partial<SendNavProp>) => {
+    const params: SendNavProp = { recipient, money, memo, toCoin, ...reset };
+    nav.navigate("SendTab", { screen: "SendTransfer", params });
   };
 
   const amountIn = dollarsToAmount(money.dollars, homeCoin.decimals);
@@ -359,7 +352,6 @@ function SendConfirm({
         recipient={recipient}
         dollars={money.dollars}
         toCoin={toCoin}
-        toChain={toChain}
         route={route}
       />
     );
@@ -414,16 +406,22 @@ function SendConfirm({
         disabled
         showAmountAvailable={false}
         autoFocus={false}
-        onFocus={navToInput}
+        onFocus={() => navToInput({ money: undefined })}
       />
       <Spacer h={16} />
       <View style={styles.detailsRow}>
         {memo ? (
-          <MemoPellet memo={memo} onClick={navToInput} />
+          <MemoPellet
+            memo={memo}
+            onClick={() => navToInput({ memo: undefined })}
+          />
         ) : (
           <Spacer h={40} />
         )}
-        <CoinPellet toCoin={toCoin} toChain={toChain} onClick={navToInput} />
+        <CoinPellet
+          toCoin={toCoin}
+          onClick={() => navToInput({ toCoin: undefined })}
+        />
       </View>
       {route && (
         <RoutePellet
@@ -431,7 +429,6 @@ function SendConfirm({
           fromCoin={homeCoin}
           fromAmount={amountIn}
           toCoin={toCoin}
-          toChain={toChain}
         />
       )}
       <Spacer h={16} />

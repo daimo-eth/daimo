@@ -1,5 +1,5 @@
 import { DollarStr } from "@daimo/common";
-import { polygon, polygonUSDC } from "@daimo/contract";
+import { polygonUSDC } from "@daimo/contract";
 import { useState } from "react";
 import { View } from "react-native";
 import { Address } from "viem";
@@ -45,7 +45,6 @@ function BitrefillBottomSheetInner({
 
   const money = usdEntry(amount);
   const toCoin = polygonUSDC;
-  const toChain = polygon;
 
   const [success, setSuccess] = useState(false);
 
@@ -68,7 +67,7 @@ function BitrefillBottomSheetInner({
         onFocus={() => {}}
       />
       <Spacer h={16} />
-      <CoinPellet toCoin={toCoin} toChain={toChain} onClick={() => {}} />
+      <CoinPellet toCoin={toCoin} onClick={() => {}} />
       <Spacer h={24} />
       <SendTransferButton
         account={account}
@@ -76,7 +75,6 @@ function BitrefillBottomSheetInner({
         recipient={recipient}
         dollars={money.dollars}
         toCoin={toCoin}
-        toChain={toChain}
         onSuccess={() => {
           setSuccess(true);
         }}
