@@ -59,11 +59,20 @@ export function canSendTo(acc: EAccount): boolean {
   // Daimo accounts, ENS & bare addresses can receive funds.
   if (acc.label == null) return true;
   // Certain labelled accounts cannot.
-  return ![
-    AddrLabel.PaymentLink,
-    AddrLabel.Paymaster,
-    AddrLabel.FastCCTP,
-  ].includes(acc.label);
+  switch (acc.label) {
+    case AddrLabel.PaymentLink:
+    case AddrLabel.Paymaster:
+    case AddrLabel.FastCCTP:
+    case AddrLabel.Coinbase:
+    case AddrLabel.Binance:
+    case AddrLabel.LiFi:
+    case AddrLabel.Relay:
+    case AddrLabel.RequestLink:
+    case AddrLabel.UniswapETHPool:
+      return false;
+    case AddrLabel.Faucet:
+      return true;
+  }
 }
 
 export function canRequestFrom(acc: EAccount): boolean {

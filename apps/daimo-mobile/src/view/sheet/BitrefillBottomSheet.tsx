@@ -37,11 +37,9 @@ function BitrefillBottomSheetInner({
   address: Address;
   amount: `${number}`;
 }) {
-  const recipient: EAccountContact = {
-    type: "eAcc",
-    addr: address,
-    name: "Bitrefill",
-  };
+  const recipient: EAccountContact = { type: "eAcc", addr: address };
+  // Show "bitrefill" as the name, but only on the send screen
+  const recipientWithName = { ...recipient, name: "Bitrefill" };
 
   const money = usdEntry(amount);
   const toCoin = polygonUSDC;
@@ -52,7 +50,7 @@ function BitrefillBottomSheetInner({
     <View>
       <Spacer h={24} />
       <ContactDisplay
-        contact={recipient}
+        contact={recipientWithName}
         isRequest={false}
         onPress={() => {}}
       />
@@ -75,9 +73,7 @@ function BitrefillBottomSheetInner({
         recipient={recipient}
         dollars={money.dollars}
         toCoin={toCoin}
-        onSuccess={() => {
-          setSuccess(true);
-        }}
+        onSuccess={() => setSuccess(true)}
       />
       {success && (
         <IconRow
