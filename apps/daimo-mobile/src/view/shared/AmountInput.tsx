@@ -75,7 +75,7 @@ export function AmountChooser({
       <View style={{ flexDirection: "row", justifyContent: "center" }}>
         {isNonUSD && (
           <Badge color={color.midnight}>
-            = ${moneyEntry.dollars.toFixed(2)} {toCoin?.symbol ?? "USDC"}
+            = ${moneyEntry.dollars.toFixed(2)}
           </Badge>
         )}
         {showAmountAvailable && !isNonUSD && (
@@ -173,8 +173,6 @@ function AmountInput({
   }, [ref, onFocus]);
 
   // Currency picker
-  // const [currency, onSetCurrency] =
-  //   useState<CurrencyExchangeRate>(currencyRateUSD);
   const account = useAccount();
   const allCurrencies = [currencyRateUSD, ...(account?.exchangeRates || [])];
   const onSetCurrency = (currency: CurrencyExchangeRate) => {
