@@ -14,12 +14,14 @@ export function SendMemoButton({
   memo,
   memoStatus,
   setMemo,
+  autoFocus,
 }: {
   memo: string | undefined;
   memoStatus: "ok" | string | undefined;
   setMemo: (memo: string | undefined) => void;
+  autoFocus?: boolean;
 }) {
-  const [isFocused, setIsFocused] = useState(false);
+  const [isFocused, setIsFocused] = useState(autoFocus || false);
 
   const ref = useRef<TextInput>(null);
 

@@ -132,6 +132,7 @@ export interface SendNavProp {
   memo?: string;
   requestId?: `${bigint}`;
   autoFocus?: boolean;
+  edit?: "money" | "memo" | "coin";
 }
 
 export interface LandlineTransferNavProp {

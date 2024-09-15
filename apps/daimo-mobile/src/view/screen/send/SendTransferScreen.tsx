@@ -5,6 +5,7 @@ import {
   DaimoRequestV2Status,
   assert,
   assertNotNull,
+  debugJson,
   dollarsToAmount,
   getAccountName,
   now,
@@ -77,6 +78,7 @@ function SendScreenInner({
   memo,
   toCoin,
   account,
+  edit,
 }: SendNavProp & { account: Account }) {
   assertNotNull(link || recipient, "SendScreenInner: need link or recipient");
 
@@ -132,7 +134,10 @@ function SendScreenInner({
                 recipient={recipient}
                 onCancel={goBack}
                 daimoChain={daimoChain}
+                defaultMoney={zeroUSDEntry}
+                defaultMemo={memo}
                 defaultToCoin={(link as DaimoLinkRequest).toCoin}
+                edit="money"
               />
             );
           } else {
@@ -149,14 +154,17 @@ function SendScreenInner({
           }
         }
       } else return <CenterSpinner />;
-    } else if (recipient) {
-      if (money == null) {
+    } else if (recipient != null) {
+      if (edit != null || money == null) {
         return (
           <SendChooseAmount
             recipient={recipient}
             onCancel={goBack}
             daimoChain={daimoChain}
-            defaultToCoin={homeCoin}
+            defaultMoney={money || zeroUSDEntry}
+            defaultMemo={memo}
+            defaultToCoin={toCoin || homeCoin}
+            edit={edit || "money"}
           />
         );
       } else {
@@ -188,18 +196,24 @@ function SendChooseAmount({
   recipient,
   daimoChain,
   onCancel,
+  defaultMoney,
+  defaultMemo,
   defaultToCoin,
+  edit,
 }: {
   recipient: EAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
+  defaultMoney: MoneyEntry;
+  defaultMemo: string | undefined;
   defaultToCoin: ForeignToken;
+  edit: "money" | "memo" | "coin";
 }) {
   // Select how much
-  const [money, setMoney] = useState(zeroUSDEntry);
+  const [money, setMoney] = useState(defaultMoney);
 
   // Select what for
-  const [memo, setMemo] = useState<string | undefined>(undefined);
+  const [memo, setMemo] = useState<string | undefined>(defaultMemo);
 
   // Select what coin (defaults to native home coin, e.g. daimo USDC)
   const [toCoin, setToCoin] = useState<ForeignToken>(defaultToCoin);
@@ -239,7 +253,7 @@ function SendChooseAmount({
         onSetEntry={setMoney}
         toCoin={toCoin}
         showAmountAvailable
-        autoFocus
+        autoFocus={edit === "money"}
       />
       <Spacer h={16} />
       <View style={styles.detailsRow}>
@@ -251,13 +265,18 @@ function SendChooseAmount({
             memo={memo}
             memoStatus={memoStatus}
             setMemo={setMemo}
+            autoFocus={edit === "memo"}
           />
         </View>
 
         {!sendCoinIsFixed && (
           <View style={styles.detail}>
             <TextMeta color={color.gray3}>{i18.sendAs()}</TextMeta>
-            <SendCoinButton toCoin={toCoin} setCoin={setToCoin} />
+            <SendCoinButton
+              toCoin={toCoin}
+              setCoin={setToCoin}
+              autoFocus={edit === "coin"}
+            />
           </View>
         )}
       </View>
@@ -326,7 +345,8 @@ function SendConfirm({
 
   const nav = useNav();
   const navToInput = (reset: Partial<SendNavProp>) => {
-    const params: SendNavProp = { recipient, money, memo, toCoin, ...reset };
+    const params = { recipient, money, memo, toCoin, ...reset };
+    console.log(`[SEND] navToInput, params ${debugJson(params)}`);
     nav.navigate("SendTab", { screen: "SendTransfer", params });
   };
 
@@ -406,21 +426,21 @@ function SendConfirm({
         disabled
         showAmountAvailable={false}
         autoFocus={false}
-        onFocus={() => navToInput({ money: undefined })}
+        onFocus={() => navToInput({ money: undefined, edit: "money" })}
       />
       <Spacer h={16} />
       <View style={styles.detailsRow}>
         {memo ? (
           <MemoPellet
             memo={memo}
-            onClick={() => navToInput({ memo: undefined })}
+            onClick={() => navToInput({ edit: "memo" })}
           />
         ) : (
           <Spacer h={40} />
         )}
         <CoinPellet
           toCoin={toCoin}
-          onClick={() => navToInput({ toCoin: undefined })}
+          onClick={() => navToInput({ edit: "coin" })}
         />
       </View>
       {route && (

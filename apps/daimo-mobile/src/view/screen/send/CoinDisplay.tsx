@@ -13,6 +13,7 @@ import {
   polygon,
   polygonAmoy,
 } from "@daimo/contract";
+import { useEffect, useRef } from "react";
 import {
   Image,
   ImageSourcePropType,
@@ -54,11 +55,20 @@ const getChainUri = (chain: DAv2Chain) => {
 export function SendCoinButton({
   toCoin,
   setCoin,
+  autoFocus,
 }: {
   toCoin: ForeignToken;
   setCoin: (coin: ForeignToken) => void;
+  autoFocus?: boolean;
 }) {
   const account = useAccount();
+
+  // Autofocus
+  const ddRef = useRef<SelectDropdown>(null);
+  useEffect(() => {
+    if (autoFocus && ddRef.current) ddRef.current.openDropdown();
+  }, []);
+
   if (account == null) return null;
 
   // Get home coin = default send coin + all other supported send coins
@@ -79,6 +89,7 @@ export function SendCoinButton({
       data={supportedSendPairs}
       defaultValue={homeCoin}
       onSelect={onSetPair}
+      ref={ddRef}
       renderButton={() => (
         <View style={{ ...styles.coinButton, backgroundColor: color.white }}>
           <View style={styles.coinPickerWrap}>

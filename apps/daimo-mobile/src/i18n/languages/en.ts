@@ -548,7 +548,7 @@ export const en = {
   // HomeScreen.tsx
   home: {
     pending: (pendingDollars: string) => `+ $${pendingDollars} PENDING`,
-    finishAccountSetUp: () => `Finish setting up your account`,
+    finishAccountSetUp: () => `Secure your account`,
     yourBalance: () => `Your balance`,
     deposit: () => `Deposit`,
     request: () => `Request`,
