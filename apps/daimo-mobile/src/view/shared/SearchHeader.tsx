@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback, useEffect } from "react";
+import { RefObject, useCallback, useEffect, useMemo } from "react";
 import { Keyboard, StyleSheet, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
@@ -31,7 +31,7 @@ export function SearchHeader({
   innerRef?: RefObject<TextInput>;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const isFocused = useSharedValue(prefix != null);
   const nav = useNav();
@@ -138,7 +138,7 @@ export function SearchHeader({
 
 function NotificationBadge() {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   return (
     <View style={styles.badgeBorder}>

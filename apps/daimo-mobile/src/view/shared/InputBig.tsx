@@ -1,6 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
-import { RefObject, useCallback, useRef, useState } from "react";
+import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -40,7 +40,7 @@ export function InputBig({
   style?: ViewStyle;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const [isFocused, setIsFocused] = useState(false);
   const onInputFocus = useCallback(() => {

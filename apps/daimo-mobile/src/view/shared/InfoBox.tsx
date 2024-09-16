@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { OctName } from "./InputBig";
@@ -17,7 +17,7 @@ export function InfoBox({
   icon?: OctName;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   if (typeof title === "string") {
     title = <TextBody>{title}</TextBody>;

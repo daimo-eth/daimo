@@ -8,7 +8,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BarCodeScannedCallback } from "expo-barcode-scanner";
 import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Linking,
   Platform,
@@ -75,7 +75,7 @@ export function QRScreen(props: Props) {
 
 function QRDisplay() {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const [recentlyCopied, setRecentlyCopied] = useState(false);
   const account = useAccount();
@@ -128,7 +128,7 @@ function QRDisplay() {
 
 function ShareButton({ name }: { name: string }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const link: DaimoLinkAccount = {
     type: "account",
@@ -162,7 +162,7 @@ export function QRCodeBox({
   logoURI?: string;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   if (logoURI == null) logoURI = image.qrLogo;
 

@@ -13,7 +13,7 @@ import {
   polygon,
   polygonAmoy,
 } from "@daimo/contract";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   Image,
   ImageSourcePropType,
@@ -29,6 +29,7 @@ import IconBase from "../../../../assets/logos/base-logo.png";
 import IconOptimism from "../../../../assets/logos/op-logo.png";
 import IconPolygon from "../../../../assets/logos/poly-logo.png";
 import { useAccount } from "../../../logic/accountManager";
+import { TextBtnCaps } from "../../shared/text";
 import { Colorway, SkinStyleSheet } from "../../style/skins";
 import { useTheme } from "../../style/theme";
 
@@ -62,7 +63,7 @@ export function SendCoinButton({
   autoFocus?: boolean;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const account = useAccount();
 
   // Autofocus
@@ -123,7 +124,7 @@ function SendPairImage({
   chainSource: ImageSourcePropType;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   if (coinUri == null) return null;
   return (
     <View style={styles.sendPairContainer}>
@@ -143,7 +144,7 @@ function CoinPickItem({
   chain: DAv2Chain;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const chainUri = getChainUri(chain);
   return (
     <View style={styles.coinPickItem}>
@@ -177,12 +178,9 @@ export function CoinPellet({
   toCoin: ForeignToken;
   onClick: () => void;
 }) {
-<<<<<<< HEAD
-  const toChain = getDAv2Chain(toCoin.chainId);
-=======
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
->>>>>>> 453e9e56 (wip)
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+  const toChain = getDAv2Chain(toCoin.chainId);
   const chainUri = getChainUri(toChain);
   return (
     <View style={{ ...styles.coinButton, backgroundColor: color.white }}>

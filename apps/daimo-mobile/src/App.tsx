@@ -1,7 +1,7 @@
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { StatusBar } from "expo-status-bar";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -14,7 +14,7 @@ import { TabNav } from "./view/TabNav";
 import { renderErrorFallback } from "./view/screen/errorScreens";
 import { GlobalBottomSheet } from "./view/sheet/GlobalBottomSheet";
 import { SkinContextType, skins } from "./view/style/skins";
-import { ThemeContext } from "./view/style/theme";
+import { ThemeContext, loadSavedTheme } from "./view/style/theme";
 
 export default function App() {
   const account = useAccount();
@@ -29,8 +29,17 @@ export default function App() {
     Octicons: require("../assets/octicons.ttf"),
   });
 
-  // White background to avoid between-tab flicker
-  const [theme, setTheme] = useState<SkinContextType>(skins.usdc);
+  // Skin theme
+  const [theme, setTheme] = useState<SkinContextType>(skins.usdt);
+  useEffect(() => {
+    async function loadTheme() {
+      const savedTheme = await loadSavedTheme();
+      setTheme(savedTheme);
+    }
+    loadTheme();
+  }, []);
+
+  // Nav background to avoid between-tab flicker
   const navTheme = {
     ...DefaultTheme,
     colors: { ...DefaultTheme.colors, background: theme.color.white },

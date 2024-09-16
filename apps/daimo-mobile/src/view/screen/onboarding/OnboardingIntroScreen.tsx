@@ -1,6 +1,6 @@
 import { debugJson } from "@daimo/common";
 import * as Clipboard from "expo-clipboard";
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect, useMemo } from "react";
 import {
   Image,
   Linking,
@@ -43,7 +43,7 @@ const i18 = i18n.onboardingIntro;
 
 export function OnboardingIntroScreen() {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const dc = useDaimoChain();
   const nav = useOnboardingNav();
@@ -121,7 +121,7 @@ const icons = {
 
 function IntroRows() {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   return (
     <View style={styles.introRows}>
@@ -161,7 +161,7 @@ function IntroRow({
   children: ReactNode;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   return (
     <View style={styles.introRow}>

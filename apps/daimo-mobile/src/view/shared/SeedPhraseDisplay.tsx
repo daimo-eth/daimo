@@ -1,6 +1,6 @@
 import { assert } from "@daimo/common";
 import { Map } from "immutable";
-import { memo, useCallback, useReducer } from "react";
+import { memo, useCallback, useMemo, useReducer } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
 import Spacer from "./Spacer";
@@ -10,7 +10,7 @@ import { useTheme } from "../style/theme";
 
 export function SeedPhraseDisplay({ words }: { words: string[] }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const renderCell = useCallback(
     (index: number) => (
@@ -48,7 +48,7 @@ export function SeedPhraseEntry({
   dispatch: (a: { key: number; value: string }) => void;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const handleInputChange = (index: number, text: string) => {
     dispatch({ key: index, value: text });
@@ -95,7 +95,7 @@ function SeedPhraseCellInner({
   onChangeText?: (text: string) => void;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   return (
     <View style={styles.boxInputWrapper}>

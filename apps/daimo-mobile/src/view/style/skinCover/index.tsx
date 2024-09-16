@@ -1,9 +1,10 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 
 import DogeBackground from "./doge";
 import { MaddoxBackground } from "./maddox";
 import PenguinBackground from "./penguin";
+import { styles } from "./shared";
 import { Skin } from "../skins";
 import { useTheme } from "../theme";
 
@@ -30,19 +31,3 @@ export function ThemeBackground({ children }: { children: React.ReactNode }) {
       return <View style={styles.contentContainer}>{children}</View>;
   }
 }
-
-export const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  contentContainer: {
-    flex: 1,
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-});

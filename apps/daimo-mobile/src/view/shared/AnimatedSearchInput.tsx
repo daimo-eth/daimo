@@ -1,5 +1,12 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Dimensions,
   LayoutChangeEvent,
@@ -57,7 +64,7 @@ export const AnimatedSearchInput = ({
   style,
 }: AnimatedSearchInputProps) => {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const closedWidth = useSharedValue(INITIAL_WIDTH - ICONS);
   const openWidth = useSharedValue(INITIAL_WIDTH - BACK_ICON);

@@ -249,11 +249,8 @@ function SendConfirm({
   bankTransferOption: BankTransferOptions;
 }) {
   const nav = useNav();
-<<<<<<< HEAD
-=======
   const { ss } = useTheme();
 
->>>>>>> 453e9e56 (wip)
   const navToInput = () => {
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",

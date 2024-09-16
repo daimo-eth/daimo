@@ -186,7 +186,7 @@ function useSwipeContext() {
 // Fade animation between minified and full lists
 function TransactionList() {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const { itemMini, itemFull, isMini, itemMiniStyle } = useSwipeContext();
 
   return (

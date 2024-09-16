@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback } from "react";
+import React, { ReactNode, useCallback, useMemo } from "react";
 import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 
 import { TextBody } from "./text";
@@ -15,7 +15,7 @@ export function CheckLabel({
   children: ReactNode;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const toggle = useCallback(() => setValue(!value), [value, setValue]);
 

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { Colorway } from "../style/skins";
@@ -5,7 +6,7 @@ import { useTheme } from "../style/theme";
 
 export default function ScrollPellet() {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <View style={styles.scrollPelletRow}>
       <View style={styles.scrollPellet} />

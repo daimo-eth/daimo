@@ -2,7 +2,7 @@ import { SuggestedAction } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { GestureResponderEvent, Linking, StyleSheet, View } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
@@ -31,7 +31,7 @@ export function SuggestedActionBox({
   onHideAction?(): void;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const nav = useNav();
   const account = useAccount();
   const dispatcher = useContext(DispatcherContext);

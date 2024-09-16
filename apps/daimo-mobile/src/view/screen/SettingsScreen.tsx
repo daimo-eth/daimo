@@ -5,7 +5,7 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import {
   Linking,
   Pressable,
@@ -43,12 +43,11 @@ import { openSupportTG } from "../shared/error";
 import {
   TextBody,
   TextBodyMedium,
-  TextColor,
   TextLight,
   TextMeta,
   TextPara,
 } from "../shared/text";
-import { SkinSelector } from "../style/skinSelector";
+import { SkinSelector } from "../style/SkinSelector";
 import { Colorway } from "../style/skins";
 import { useTheme } from "../style/theme";
 
@@ -57,7 +56,7 @@ const i18 = i18n.settings;
 export function SettingsScreen() {
   const account = useAccount();
   const { color, ss } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const [showDetails, setShowDetails] = useState(false);
 
@@ -90,7 +89,7 @@ export function SettingsScreen() {
 
 function AccountSection({ account }: { account: Account }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const explorer = chainConfig.chainL2.blockExplorers!.default;
@@ -133,12 +132,11 @@ export function AccountHeader({
   noLinkedAccounts?: boolean;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const tokenSymbol = chainConfig.tokenSymbol;
   const l2Name = chainConfig.chainL2.name;
-  const isTestnet = chainConfig.chainL2.testnet;
 
   const eAcc = toEAccount(account);
 
@@ -150,12 +148,7 @@ export function AccountHeader({
         <Spacer h={2} />
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>
           <TextBodyMedium color={color.gray3}>
-            {tokenSymbol} ·{" "}
-            {isTestnet ? (
-              <TextColor color={color.success}>{l2Name}</TextColor>
-            ) : (
-              l2Name
-            )}
+            {tokenSymbol} · {l2Name}
           </TextBodyMedium>
         </View>
         {!noLinkedAccounts && (
@@ -191,7 +184,7 @@ function LinkedAccountsRow({
 function DevicesSection({ account }: { account: Account }) {
   const nav = useNav();
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const dispatcher = useContext(DispatcherContext);
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
   const createBackup = () => {
@@ -329,7 +322,7 @@ function DeviceRow({
   const nowS = useTime();
   const nav = useNav();
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const viewDevice = () => {
     if (!pendingRemoval)
@@ -386,7 +379,7 @@ function DeviceRow({
 function PendingDeviceRow({ slot }: { slot: number }) {
   const dispName = getSlotLabel(slot);
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   return (
     <View style={styles.rowBorder}>
@@ -412,7 +405,7 @@ function PendingDeviceRow({ slot }: { slot: number }) {
 
 function DetailsSection({ account }: { account: Account }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const { ask } = useNotificationsAccess();
 
   const [sendDebugLog, debugEnvSummary] = useSendDebugLog(account);
@@ -449,7 +442,7 @@ function DetailsSection({ account }: { account: Account }) {
 
 function KV({ label, value }: { label: string; value: string }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <View style={styles.kvRow}>
       <View style={styles.kvKey}>

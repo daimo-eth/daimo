@@ -1,5 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableHighlight } from "@gorhom/bottom-sheet";
+import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { i18n } from "../../i18n";
@@ -24,7 +25,7 @@ function OnboardingChecklistBottomSheetInner({
   account: Account;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const {
     hasBackup,
     farcasterConnected,
@@ -81,7 +82,7 @@ function ChecklistRow({
   done: boolean;
 }) {
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <TouchableHighlight onPress={onPress} {...touchHighlightUnderlay.subtle}>
       <View style={styles.row}>
@@ -110,7 +111,7 @@ function ChecklistRow({
 
 function ChecklistRowBubble({ step, done }: { step: number; done: boolean }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <View
       style={[

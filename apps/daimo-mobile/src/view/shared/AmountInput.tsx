@@ -1,7 +1,7 @@
 import { CurrencyExchangeRate, currencyRateUSD } from "@daimo/common";
 import { ForeignToken } from "@daimo/contract";
 import * as Haptics from "expo-haptics";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   NativeSyntheticEvent,
@@ -105,7 +105,7 @@ function AmountInput({
   onFocus?: () => void;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const { localUnits, currency } = moneyEntry;
   if (localUnits < 0) throw new Error("AmountPicker value can't be negative");
@@ -224,7 +224,7 @@ function CurrencyPicker({
   onSetCurrency: (currency: CurrencyExchangeRate) => void;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const choose = (val: CurrencyExchangeRate) => {
     if (val == null) return;

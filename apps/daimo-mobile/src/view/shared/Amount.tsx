@@ -1,4 +1,5 @@
 import { amountToDollars } from "@daimo/common";
+import { useMemo } from "react";
 import { StyleSheet, Text, TextStyle } from "react-native";
 
 import Spacer from "./Spacer";
@@ -56,7 +57,7 @@ export function TitleAmount({
   postText?: string;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   if (!(amount >= 0)) throw new Error("Invalid amount");
 

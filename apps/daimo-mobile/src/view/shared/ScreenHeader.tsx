@@ -1,6 +1,6 @@
 import { assert } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
-import { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useMemo } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { OctName } from "./InputBig";
@@ -26,7 +26,7 @@ export function ScreenHeader({
 }) {
   assert(!onExit || !onShare, "Exit and share are mutually exclusive");
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const back = useCallback(onBack || (() => {}), [onBack]);
   const exit = useCallback(onExit || (() => {}), [onExit]);
@@ -60,7 +60,7 @@ function ScreenHeadButton({
   onPress: () => void;
 }) {
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   return (
     <View style={styles.screenHeadButtonWrap}>

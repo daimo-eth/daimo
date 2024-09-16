@@ -7,16 +7,14 @@ import { useTheme } from "../style/theme";
 export function Badge({
   children,
   color,
-  bgColor,
 }: {
   children: React.ReactNode;
   color?: string;
-  bgColor?: string;
 }) {
   const defaultColorway = useTheme().theme;
 
   color = color || defaultColorway.color.grayDark;
-  bgColor = bgColor || defaultColorway.color.ivoryDark;
+  const bgColor = defaultColorway.color.ivoryDark;
 
   const styleWrap = useMemo(
     () => ({

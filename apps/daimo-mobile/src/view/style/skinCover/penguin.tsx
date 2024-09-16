@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Platform, Image } from "react-native";
 
-import { styles } from ".";
+import { styles } from "./shared";
 
 function PenguinBackground({ children }: { children: React.ReactNode }) {
   const [useStaticImage, setUseStaticImage] = useState(false);

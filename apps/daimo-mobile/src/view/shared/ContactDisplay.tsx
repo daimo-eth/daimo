@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { ContactBubble } from "./Bubble";
@@ -26,7 +26,7 @@ export function ContactDisplay({
   onPress?: () => void;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   // Show who we're sending to
   const isAccount = contact.type === "eAcc";
@@ -95,7 +95,7 @@ export function ContactDisplay({
 
 const SubtitleBubble = ({ subtitle }: { subtitle: string }) => {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   return (
     <View style={styles.subtitleBubble}>

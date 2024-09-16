@@ -60,7 +60,7 @@ function AddKeyButton({ slotType }: { slotType: SlotType }) {
 
 function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <Animated.View
       entering={FadeIn}
@@ -112,7 +112,7 @@ function OfflineBackupContent({
   setStep: (value: 0 | 1) => void;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
 
@@ -169,7 +169,7 @@ function BackupOptionRow({
   recommended?: boolean;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const { width } = useSafeAreaFrame();
   const isCompact = width < 400;
 

@@ -49,7 +49,7 @@ const i18 = i18n.seedPhrase;
 
 export function SeedPhraseScreen() {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const [activeStep, setActiveStep] = useState(0);
   const nav = useNav();
 
@@ -116,7 +116,7 @@ function CopySeedPhrase({
 
 function CopyToClipboard() {
   const { color, ss, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const { mnemonic } = useSeedPhraseContext();
   const [justCopied, setJustCopied] = useState(false);
 

@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, TouchableHighlight, View } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
@@ -23,7 +23,7 @@ export function SendMemoButton({
   autoFocus?: boolean;
 }) {
   const { color, ss, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const [isFocused, setIsFocused] = useState(autoFocus || false);
 
   const ref = useRef<TextInput>(null);
@@ -109,7 +109,7 @@ export function MemoPellet({
   onClick: () => void;
 }) {
   const { color, ss, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   return (
     <View>

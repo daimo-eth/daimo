@@ -7,7 +7,7 @@ import {
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   ImageSourcePropType,
@@ -37,7 +37,6 @@ import {
 import { useTime } from "../../../logic/time";
 import { getRpcFunc } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
-import { CoverGraphic } from "../../shared/CoverGraphic";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
@@ -62,8 +61,6 @@ function DepositScreenInner({ account }: { account: Account }) {
         <ScreenHeader title={i18.screenHeader()} />
       </View>
       <ScrollView>
-        <CoverGraphic type="deposit" />
-        <Spacer h={16} />
         <LandlineList />
         <Spacer h={24} />
         <DepositList account={account} />
@@ -203,7 +200,7 @@ type Progress = "idle" | "loading-binance-deposit" | "started";
 
 function DepositList({ account }: { account: Account }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const isTestnet = chainConfig.chainL2.testnet;
 
@@ -270,7 +267,7 @@ function DepositList({ account }: { account: Account }) {
 
 function WithdrawList({ account }: { account: Account }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const dispatcher = useContext(DispatcherContext);
   const nav = useNav();
@@ -326,7 +323,7 @@ function LandlineOptionRow({
   onClick,
 }: LandlineOptionRowProps) {
   const { color, touchHighlightUnderlay, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const width = useWindowDimensions().width;
 
   return (
@@ -387,7 +384,7 @@ function OptionRow({
   progress,
 }: OptionRowProps) {
   const { color, touchHighlightUnderlay, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const width = useWindowDimensions().width;
 
   const rightContent = (() => {
@@ -427,7 +424,7 @@ function OptionRow({
 
 function LogoBubble({ logo }: { logo: ImageSourcePropType }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   return (
     <View style={styles.logoBubble}>
       <Image source={logo} style={styles.logoBubble} />

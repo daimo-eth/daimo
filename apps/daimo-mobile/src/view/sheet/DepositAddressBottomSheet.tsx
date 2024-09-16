@@ -2,7 +2,7 @@ import { assert, getAddressContraction } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 import { Address } from "viem";
 
@@ -70,7 +70,7 @@ function AddressCopier({
   disabled?: boolean;
 }) {
   const { color, ss, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const [justCopied, setJustCopied] = useState(false);
   const copy = useCallback(async () => {

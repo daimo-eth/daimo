@@ -1,4 +1,5 @@
 import { EAccount, timeAgo } from "@daimo/common";
+import { useMemo } from "react";
 import { ScrollView, StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { navToAccountPage, useNav } from "../../common/nav";
@@ -20,7 +21,7 @@ export function YourInvitesScreen() {
 
 function YourInvitesScreenInner({ account }: { account: Account }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const nav = useNav();
 
@@ -40,7 +41,7 @@ function YourInvitesScreenInner({ account }: { account: Account }) {
 
 function InviteeRow({ invitee }: { invitee: EAccount }) {
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const nav = useNav();
 

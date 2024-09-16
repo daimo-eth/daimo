@@ -1,7 +1,7 @@
 import React from "react";
 import { View, ImageBackground } from "react-native";
 
-import { styles } from ".";
+import { styles } from "./shared";
 
 export function MaddoxBackground({ children }: { children: React.ReactNode }) {
   return (

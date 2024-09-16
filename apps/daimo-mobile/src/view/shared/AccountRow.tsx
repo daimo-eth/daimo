@@ -1,4 +1,5 @@
 import { timeString, TransferClogStatus } from "@daimo/common";
+import { useMemo } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 
 import { ContactBubble } from "./Bubble";
@@ -25,7 +26,7 @@ export function AccountRow({
   status?: TransferClogStatus;
 }) {
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const textDark = status === "pending" ? color.gray3 : color.midnight;
   const textLight = status === "pending" ? color.gray3 : color.grayMid;

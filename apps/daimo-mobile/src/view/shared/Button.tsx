@@ -52,7 +52,7 @@ export function LongPressBigButton(props: LongPressButtonProps) {
   const animatedCircleProgress = useSharedValue(0);
 
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const touchUnderlay = useTouchUnderlay(props.type);
   const disabledStyle = useMemo(
     () => ({ ...style.button, opacity: 0.5 }),
@@ -288,7 +288,7 @@ function Button(
   }
 ) {
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   const disabledStyle = useMemo(
     () => ({ ...props.style.button, opacity: 0.5 }),
     [props.style.button]
@@ -331,7 +331,7 @@ export function DescriptiveClickableRow({
   onPressHelp?(): void;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <View style={styles.buttonInfoContainer}>
       {icon}

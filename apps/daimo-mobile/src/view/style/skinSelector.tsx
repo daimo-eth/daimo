@@ -1,19 +1,20 @@
 import { Image } from "expo-image";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { SkinContextType, skins, SkinName, Colorway } from "./skins";
-import { useTheme } from "./theme";
+import { saveTheme, useTheme } from "./theme";
 
 export function SkinSelector() {
   const { color, theme, setTheme } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const [selectedSkin, setSelectedSkin] = useState<SkinName>(theme.name);
 
-  const handleSkinSelection = (skin: SkinContextType) => {
+  const handleSkinSelection = async (skin: SkinContextType) => {
     setSelectedSkin(skin.name);
     setTheme(skin);
+    await saveTheme(skin);
   };
 
   return (
@@ -40,7 +41,7 @@ function SkinBubble({
   onSelect: () => void;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <TouchableOpacity onPress={onSelect}>
       <View style={[styles.logoBubble, isSelected && styles.selectedBubble]}>

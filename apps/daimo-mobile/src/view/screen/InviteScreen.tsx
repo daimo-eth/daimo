@@ -6,7 +6,7 @@ import {
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ImageBackground,
   Linking,
@@ -86,7 +86,7 @@ function InviteScreenInner({ account }: { account: Account }) {
 function InviteeBubble({ invitee }: { invitee: EAccount }) {
   const nav = useNav();
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const onPress = useCallback(() => {
     navToAccountPage(invitee, nav);
@@ -108,7 +108,7 @@ function InviteeBubble({ invitee }: { invitee: EAccount }) {
 function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
   const nav = useNav();
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const displayInvitees = invitees.slice(-3); // Most recent invitees
   const moreInvitees =
@@ -135,7 +135,7 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
 
 function HeaderGraphic({ invitees }: { invitees?: EAccount[] }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   return invitees && invitees.length > 0 ? (
     <View style={styles.imageContainer}>
@@ -258,7 +258,7 @@ function ReferralButtonsFooter({
   account: Account;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const { link, bonusDollarsInvitee, bonusDollarsInviter } = inviteCodeStatus;
   const url = formatDaimoLink(link);
@@ -333,7 +333,7 @@ function ReferralButtonsFooter({
 
 function InviteCodeCopier({ code, url }: { code: string; url: string }) {
   const { color, touchHighlightUnderlay, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const [justCopied, setJustCopied] = useState(false);
 
   const copy = useCallback(async () => {

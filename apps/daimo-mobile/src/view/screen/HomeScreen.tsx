@@ -67,7 +67,7 @@ export default function HomeScreen() {
 // The whole screen (HomeScreenInner) can be pulled down to refresh.
 function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   // Pull-to-refresh state
   const scrollRef = useRef<Animated.ScrollView>(null);
@@ -255,7 +255,7 @@ function useHomeCTA(account: Account): HomeCTA | null {
 function AmountAndButtons({ account }: { account: Account }) {
   const nav = useNav();
   const { color, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const goSend = useCallback(
     () =>
       nav.navigate("SendTab", {
@@ -345,7 +345,7 @@ function IconButton({
   disabled?: boolean;
 }) {
   const { color, touchHighlightUnderlay, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const [name, title] = (function (): [OctName, string] {
     switch (type) {
@@ -382,7 +382,7 @@ function IconButton({
 function CompleteOnboarding() {
   const dispatcher = useContext(DispatcherContext);
   const { color, touchHighlightUnderlay, ss } = useTheme();
-  const styles = getStyles(color, ss);
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const openChecklist = useCallback(() => {
     dispatcher.dispatch({ name: "onboardingChecklist" });

@@ -1,5 +1,6 @@
 import { appStoreLinks } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import { useMemo } from "react";
 import { Linking, Platform, StyleSheet, View } from "react-native";
 
 import { ButtonBig } from "./Button";
@@ -46,7 +47,7 @@ export function ErrorBanner({
   onGoHome?: () => void;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const exitToHome = useExitToHome();
   const goHomeScreen = onGoHome || exitToHome;

@@ -12,7 +12,7 @@ import {
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import {
   TouchableHighlight,
@@ -72,7 +72,7 @@ export function HistoryListSwipe({
   otherContact?: DaimoContact;
 }) {
   const { color } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
   assert(
     !otherContact || otherContact.type === "eAcc",
     "Unsupported DaimoContact in HistoryListSwipe"
@@ -189,7 +189,7 @@ export function HistoryListSwipe({
 
 function HeaderRow({ title }: { title: string }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   return (
     <View style={styles.rowHeader}>
@@ -212,7 +212,7 @@ function TransferClogRow({
   showDate?: boolean;
 }) {
   const { color, touchHighlightUnderlay } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const nav = useNav();
   const address = account.address;
@@ -333,7 +333,7 @@ function TransferAmountDate({
   isPending?: boolean;
 }) {
   const { color, ss } = useTheme();
-  const styles = getStyles(color);
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const dollarStr = getAmountText({ amount: BigInt(Math.abs(amount)) });
   const sign = amount < 0 ? "-" : "+";
