@@ -1,6 +1,6 @@
 {
   "name": "@daimo/common",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Shared between web and mobile",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
