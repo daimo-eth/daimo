@@ -13,18 +13,20 @@ import {
 import { createAddDeviceString } from "../../../logic/key";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
 import {
   TextBody,
   TextBodyMedium,
   TextCenter,
   TextLight,
 } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 import { QRCodeBox } from "../QRScreen";
 
 const i18 = i18n.existing;
 
 export function ExistingScreen() {
+  const { color, ss } = useTheme();
+
   // On-chain signing key slot identifies key type (phone, computer, etc)
   const daimoChain = useDaimoChain();
   const slotType =

@@ -1,5 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { TouchableHighlight } from "@gorhom/bottom-sheet";
+import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { i18n } from "../../i18n";
@@ -7,9 +8,10 @@ import { useOnboardingChecklist } from "../../logic/onboarding";
 import { Account } from "../../storage/account";
 import { TextButton } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBody, TextH3 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function OnboardingChecklistBottomSheet() {
   const Inner = useWithAccount(OnboardingChecklistBottomSheetInner);
@@ -22,6 +24,8 @@ function OnboardingChecklistBottomSheetInner({
 }: {
   account: Account;
 }) {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   const {
     hasBackup,
     farcasterConnected,
@@ -77,6 +81,8 @@ function ChecklistRow({
   onPress(): void;
   done: boolean;
 }) {
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <TouchableHighlight onPress={onPress} {...touchHighlightUnderlay.subtle}>
       <View style={styles.row}>
@@ -104,6 +110,8 @@ function ChecklistRow({
 }
 
 function ChecklistRowBubble({ step, done }: { step: number; done: boolean }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <View
       style={[
@@ -120,26 +128,27 @@ function ChecklistRowBubble({ step, done }: { step: number; done: boolean }) {
   );
 }
 
-const styles = StyleSheet.create({
-  separator: {
-    height: 0.5,
-    backgroundColor: color.grayLight,
-    marginHorizontal: 24,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 24,
-    marginHorizontal: 24,
-    borderBottomWidth: 0.5,
-    borderBottomColor: color.grayLight,
-  },
-  rowLeft: {
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 18,
-    height: 36,
-    width: 36,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    separator: {
+      height: 0.5,
+      backgroundColor: color.grayLight,
+      marginHorizontal: 24,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 24,
+      marginHorizontal: 24,
+      borderBottomWidth: 0.5,
+      borderBottomColor: color.grayLight,
+    },
+    rowLeft: {
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 18,
+      height: 36,
+      width: 36,
+    },
+  });

@@ -1,10 +1,11 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { OctName } from "./InputBig";
-import { color } from "./style";
 import { TextBody } from "./text";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function InfoBox({
   title,
@@ -15,6 +16,9 @@ export function InfoBox({
   subtitle?: ReactNode;
   icon?: OctName;
 }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
+
   if (typeof title === "string") {
     title = <TextBody>{title}</TextBody>;
   }
@@ -33,28 +37,29 @@ export function InfoBox({
   );
 }
 
-const styles = StyleSheet.create({
-  bubble: {
-    backgroundColor: color.ivoryDark,
-    borderRadius: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 16,
-    marginHorizontal: 8,
-  },
-  bubbleIcon: {
-    backgroundColor: color.primary,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 24,
-    height: 24,
-    borderRadius: 24,
-  },
-  bubbleText: {
-    flex: 1,
-    flexDirection: "column",
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    bubble: {
+      backgroundColor: color.ivoryDark,
+      borderRadius: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      gap: 16,
+      marginHorizontal: 8,
+    },
+    bubbleIcon: {
+      backgroundColor: color.primary,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      width: 24,
+      height: 24,
+      borderRadius: 24,
+    },
+    bubbleText: {
+      flex: 1,
+      flexDirection: "column",
+    },
+  });

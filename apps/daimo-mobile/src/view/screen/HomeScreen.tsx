@@ -50,10 +50,12 @@ import { SearchResults } from "../shared/SearchResults";
 import Spacer from "../shared/Spacer";
 import { SuggestedActionBox } from "../shared/SuggestedActionBox";
 import { SwipeUpDownRef } from "../shared/SwipeUpDown";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBody, TextBtnCaps, TextLight } from "../shared/text";
 import { useSwipeUpDown } from "../shared/useSwipeUpDown";
 import { useWithAccount } from "../shared/withAccount";
+import { ThemeBackground } from "../style/skinCover";
+import { Colorway, SkinStyleSheet } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.home;
 
@@ -64,6 +66,9 @@ export default function HomeScreen() {
 
 // The whole screen (HomeScreenInner) can be pulled down to refresh.
 function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   // Pull-to-refresh state
   const scrollRef = useRef<Animated.ScrollView>(null);
   const isScrollDragged = useRef<boolean>(false);
@@ -150,32 +155,34 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
   useInitNavLinks();
 
   return (
-    <View>
-      <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
-      <Animated.ScrollView
-        ref={scrollRef}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-        scrollToOverflowEnabled={false}
-        scrollsToTop={false}
-        scrollEnabled={searchPrefix == null && !isBottomSheetOpen}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={styles.animatedScrollContent}
-        style={styles.scrollView}
-        onScrollBeginDrag={onScrollBeginDrag}
-        onScrollEndDrag={onScrollEndDrag}
-        onScroll={scrollHandler}
-        scrollEventThrottle={8}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Animated.View style={preventOverscrollStyle}>
-          <HomeScreenInner {...{ account, searchPrefix, setSearchPrefix }} />
-        </Animated.View>
-      </Animated.ScrollView>
-      {searchPrefix == null && bottomSheet}
-    </View>
+    <ThemeBackground>
+      <View>
+        <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
+        <Animated.ScrollView
+          ref={scrollRef}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          scrollToOverflowEnabled={false}
+          scrollsToTop={false}
+          scrollEnabled={searchPrefix == null && !isBottomSheetOpen}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          contentContainerStyle={styles.animatedScrollContent}
+          style={styles.scrollView}
+          onScrollBeginDrag={onScrollBeginDrag}
+          onScrollEndDrag={onScrollEndDrag}
+          onScroll={scrollHandler}
+          scrollEventThrottle={8}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Animated.View style={preventOverscrollStyle}>
+            <HomeScreenInner {...{ account, searchPrefix, setSearchPrefix }} />
+          </Animated.View>
+        </Animated.ScrollView>
+        {searchPrefix == null && bottomSheet}
+      </View>
+    </ThemeBackground>
   );
 }
 
@@ -247,6 +254,8 @@ function useHomeCTA(account: Account): HomeCTA | null {
 
 function AmountAndButtons({ account }: { account: Account }) {
   const nav = useNav();
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const goSend = useCallback(
     () =>
       nav.navigate("SendTab", {
@@ -301,6 +310,7 @@ function AmountAndButtons({ account }: { account: Account }) {
 
 function PendingTag({ pendingDollars }: { pendingDollars: string }) {
   const nav = useNav();
+  const { color, touchHighlightUnderlay } = useTheme();
 
   const onPress = () => nav.navigate("Notifications");
   return (
@@ -334,6 +344,9 @@ function IconButton({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const { color, touchHighlightUnderlay, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   const [name, title] = (function (): [OctName, string] {
     switch (type) {
       case "Deposit":
@@ -368,6 +381,8 @@ function IconButton({
 
 function CompleteOnboarding() {
   const dispatcher = useContext(DispatcherContext);
+  const { color, touchHighlightUnderlay, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const openChecklist = useCallback(() => {
     dispatcher.dispatch({ name: "onboardingChecklist" });
@@ -381,7 +396,7 @@ function CompleteOnboarding() {
           ...styles.checklistAction,
           backgroundColor: pressed
             ? touchHighlightUnderlay.subtle.underlayColor
-            : undefined,
+            : color.white,
         },
       ]}
     >
@@ -427,65 +442,67 @@ function useInitNavLinks() {
   }, [accountMissing, nav]);
 }
 
-const iconButton = {
-  backgroundColor: color.primary,
-  height: 64,
-  width: 64,
-  borderRadius: 64,
-  flexDirection: "row",
-  justifyContent: "center",
-  alignItems: "center",
-} as const;
-
 const iconLabel = {
   alignSelf: "stretch",
   flexDirection: "row",
   justifyContent: "center",
 } as const;
 
-const styles = StyleSheet.create({
-  amountAndButtons: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  scrollView: {
-    height: "100%",
-  },
-  animatedScrollContent: {
-    height: "100%",
-  },
-  buttonRow: {
+const getStyles = (color: Colorway, ss: SkinStyleSheet) => {
+  const iconButton = {
+    backgroundColor: color.primary,
+    height: 64,
+    width: 64,
+    borderRadius: 64,
     flexDirection: "row",
-    paddingHorizontal: 20,
-  },
-  iconButtonWrap: {
-    borderRadius: 16,
-    paddingVertical: 16,
-    width: 96,
-    flexDirection: "column",
+    justifyContent: "center",
     alignItems: "center",
-  },
-  iconButton,
-  iconButtonDisabled: {
-    ...iconButton,
-    opacity: 0.5,
-  },
-  iconLabel,
-  iconLabelDisabled: {
-    ...iconLabel,
-    opacity: 0.5,
-  },
-  checklistAction: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: color.grayLight,
-    marginHorizontal: 24,
-    backgroundColor: color.white,
-    ...ss.container.shadow,
-    elevation: 0, // Android shadows are bugged with Pressable: https://github.com/facebook/react-native/issues/25093#issuecomment-789502424
-  },
-});
+  } as const;
+
+  return StyleSheet.create({
+    amountAndButtons: {
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    scrollView: {
+      height: "100%",
+    },
+    animatedScrollContent: {
+      height: "100%",
+    },
+    buttonRow: {
+      flexDirection: "row",
+      paddingHorizontal: 20,
+    },
+    iconButtonWrap: {
+      borderRadius: 16,
+      paddingVertical: 16,
+      width: 96,
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    iconButton,
+    iconButtonDisabled: {
+      ...iconButton,
+      opacity: 0.5,
+    },
+    iconLabel,
+    iconLabelDisabled: {
+      ...iconLabel,
+      opacity: 0.5,
+    },
+    checklistAction: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: 20,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: color.grayLight,
+      marginHorizontal: 24,
+      backgroundColor: color.white,
+      ...ss.container.shadow,
+      elevation: 0, // Android shadows are bugged with Pressable: https://github.com/facebook/react-native/issues/25093#issuecomment-789502424
+    },
+  });
+};

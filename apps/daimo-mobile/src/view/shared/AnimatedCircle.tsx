@@ -7,7 +7,7 @@ import Animated, {
 } from "react-native-reanimated";
 import Svg, { Circle } from "react-native-svg";
 
-import { color } from "./style";
+import { useTheme } from "../style/theme";
 
 const ACircle = Animated.createAnimatedComponent(Circle);
 
@@ -21,6 +21,7 @@ export const AnimatedCircle = ({
   size: number;
   strokeWidth: number;
 }) => {
+  const { color } = useTheme();
   const componentHeight = size * 2 + strokeWidth * 2;
   const circleProps = useAnimatedProps(() => {
     return {

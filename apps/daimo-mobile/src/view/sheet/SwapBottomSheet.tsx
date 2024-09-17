@@ -27,13 +27,14 @@ import { TokenBubble } from "../shared/Bubble";
 import { ButtonMed } from "../shared/Button";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
 import { TextBodyCaps, TextH3 } from "../shared/text";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.swapBottom;
 
 // Bottom sheet for proposed inbound swap
 export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
+  const { ss } = useTheme();
   const account = useAccount();
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
@@ -121,6 +122,7 @@ export function SwapBottomSheet({ swap }: { swap: ProposedSwap }) {
 }
 
 function SwapInfoRow({ swap }: { swap: ProposedSwap }) {
+  const { color } = useTheme();
   const humanReadableFromAmount = getForeignCoinDisplayAmount(
     swap.fromAmount,
     swap.fromCoin
@@ -155,6 +157,7 @@ function CurrencyDisplay({
   amount: string;
   amountColor?: string;
 }) {
+  const { color } = useTheme();
   return (
     <View
       style={{

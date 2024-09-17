@@ -2,7 +2,7 @@ import { assert, getAddressContraction } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 import { Address } from "viem";
 
@@ -13,9 +13,10 @@ import { Account } from "../../storage/account";
 import { CheckLabel } from "../shared/Check";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import { DaimoText, TextBold, TextLight, TextPara } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+import { Colorway, SkinStyleSheet } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 // Explains how to deposit money directly to your Daimo address
 export function DepositAddressBottomSheet() {
@@ -26,6 +27,8 @@ export function DepositAddressBottomSheet() {
 const i18 = i18n.depositAddressBottom;
 
 function DepositAddressBottomSheetInner({ account }: { account: Account }) {
+  const { color, ss } = useTheme();
+
   const dispatcher = useContext(DispatcherContext);
 
   const { tokenSymbol, chainL2 } = env(
@@ -66,6 +69,9 @@ function AddressCopier({
   addr: Address;
   disabled?: boolean;
 }) {
+  const { color, ss, touchHighlightUnderlay } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   const [justCopied, setJustCopied] = useState(false);
   const copy = useCallback(async () => {
     await Clipboard.setStringAsync(addr);
@@ -99,25 +105,26 @@ function AddressCopier({
   );
 }
 
-const styles = StyleSheet.create({
-  address: {
-    flexDirection: "column",
-    gap: 16,
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  addressButton: {
-    borderRadius: 8,
-    backgroundColor: color.ivoryDark,
-    padding: 16,
-  },
-  addressView: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 16,
-  },
-  addressMono: {
-    ...ss.text.mono,
-    flexShrink: 1,
-  },
-});
+const getStyles = (color: Colorway, ss: SkinStyleSheet) =>
+  StyleSheet.create({
+    address: {
+      flexDirection: "column",
+      gap: 16,
+      alignItems: "center",
+      paddingHorizontal: 16,
+    },
+    addressButton: {
+      borderRadius: 8,
+      backgroundColor: color.ivoryDark,
+      padding: 16,
+    },
+    addressView: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      gap: 16,
+    },
+    addressMono: {
+      ...ss.text.mono,
+      flexShrink: 1,
+    },
+  });

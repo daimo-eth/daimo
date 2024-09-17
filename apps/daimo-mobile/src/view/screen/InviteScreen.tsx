@@ -6,7 +6,7 @@ import {
 import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import { Image } from "expo-image";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ImageBackground,
   Linking,
@@ -29,7 +29,6 @@ import { PressableText } from "../shared/PressableText";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import image from "../shared/image";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   DaimoText,
   TextBody,
@@ -39,6 +38,8 @@ import {
   TextLight,
 } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
+import { Colorway, SkinStyleSheet } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.invite;
 
@@ -48,6 +49,7 @@ export function InviteScreen() {
 }
 
 function InviteScreenInner({ account }: { account: Account }) {
+  const { ss } = useTheme();
   const inviteLinkStatus = account.inviteLinkStatus;
 
   console.log(
@@ -83,6 +85,8 @@ function InviteScreenInner({ account }: { account: Account }) {
 
 function InviteeBubble({ invitee }: { invitee: EAccount }) {
   const nav = useNav();
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const onPress = useCallback(() => {
     navToAccountPage(invitee, nav);
@@ -103,6 +107,8 @@ function InviteeBubble({ invitee }: { invitee: EAccount }) {
 
 function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
   const nav = useNav();
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
 
   const displayInvitees = invitees.slice(-3); // Most recent invitees
   const moreInvitees =
@@ -128,6 +134,9 @@ function InviteesBubbles({ invitees }: { invitees: EAccount[] }) {
 }
 
 function HeaderGraphic({ invitees }: { invitees?: EAccount[] }) {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   return invitees && invitees.length > 0 ? (
     <View style={styles.imageContainer}>
       <ImageBackground source={InviteBackground} style={styles.image}>
@@ -147,6 +156,7 @@ function HeaderCountText({
   usesLeft?: number;
 }) {
   const nav = useNav();
+  const { color } = useTheme();
 
   const showInviteesCount = invitees != null && invitees.length > 0;
   const showUsesLeft = usesLeft != null && (showInviteesCount || usesLeft > 0);
@@ -193,6 +203,7 @@ function LockedHeader() {
 
 function LockedFooter() {
   const nav = useNav();
+  const { color } = useTheme();
   const goToSend = () =>
     nav.navigate("SendTab", {
       screen: "SendNav",
@@ -246,6 +257,9 @@ function ReferralButtonsFooter({
   inviteCodeStatus: DaimoInviteCodeStatus;
   account: Account;
 }) {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   const { link, bonusDollarsInvitee, bonusDollarsInviter } = inviteCodeStatus;
   const url = formatDaimoLink(link);
 
@@ -318,6 +332,8 @@ function ReferralButtonsFooter({
 }
 
 function InviteCodeCopier({ code, url }: { code: string; url: string }) {
+  const { color, touchHighlightUnderlay, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const [justCopied, setJustCopied] = useState(false);
 
   const copy = useCallback(async () => {
@@ -347,68 +363,70 @@ function InviteCodeCopier({ code, url }: { code: string; url: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  imageContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  image: {
-    resizeMode: "contain",
-    flex: 1,
-    aspectRatio: 2.2,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  referralButtons: {
-    flexDirection: "row",
-  },
-  referralHalfScreen: {
-    width: "50%",
-    paddingHorizontal: 8,
-  },
-  codeCopier: {
-    paddingHorizontal: 24,
-    paddingVertical: 18,
-    borderRadius: 8,
-    backgroundColor: color.white,
-    borderColor: color.grayLight,
-    borderWidth: 1,
-    ...ss.container.shadow,
-  },
-  codeView: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  codeFont: {
-    fontSize: 16,
-    fontWeight: "bold",
-    letterSpacing: 1,
-    textAlign: "center",
-    color: color.midnight,
-  },
-  rowHeader: {
-    flexDirection: "row",
-    paddingVertical: 8,
-    paddingTop: 16,
-    paddingHorizontal: 2,
-    backgroundColor: color.white,
-  },
-  inviteeContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingLeft: 8,
-  },
-  inviteeBubbleContainer: {
-    width: 63, // 63 = size - 1, as used by ContactBubble
-    height: 63,
-    borderRadius: 99,
-    marginLeft: -8,
-    backgroundColor: color.white,
-    shadowOffset: { height: 2, width: -1 },
-    elevation: 2,
-    shadowOpacity: 0.1,
-  },
-});
+const getStyles = (color: Colorway, ss: SkinStyleSheet) => {
+  return StyleSheet.create({
+    imageContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    image: {
+      resizeMode: "contain",
+      flex: 1,
+      aspectRatio: 2.2,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    referralButtons: {
+      flexDirection: "row",
+    },
+    referralHalfScreen: {
+      width: "50%",
+      paddingHorizontal: 8,
+    },
+    codeCopier: {
+      paddingHorizontal: 24,
+      paddingVertical: 18,
+      borderRadius: 8,
+      backgroundColor: color.white,
+      borderColor: color.grayLight,
+      borderWidth: 1,
+      ...ss.container.shadow,
+    },
+    codeView: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    codeFont: {
+      fontSize: 16,
+      fontWeight: "bold",
+      letterSpacing: 1,
+      textAlign: "center",
+      color: color.midnight,
+    },
+    rowHeader: {
+      flexDirection: "row",
+      paddingVertical: 8,
+      paddingTop: 16,
+      paddingHorizontal: 2,
+      backgroundColor: color.white,
+    },
+    inviteeContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      paddingLeft: 8,
+    },
+    inviteeBubbleContainer: {
+      width: 63, // 63 = size - 1, as used by ContactBubble
+      height: 63,
+      borderRadius: 99,
+      marginLeft: -8,
+      backgroundColor: color.white,
+      shadowOffset: { height: 2, width: -1 },
+      elevation: 2,
+      shadowOpacity: 0.1,
+    },
+  });
+};

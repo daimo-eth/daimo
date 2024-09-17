@@ -6,8 +6,8 @@ import { NotificationRow } from "./NotificationRow";
 import { useNav } from "../../../common/nav";
 import { i18n } from "../../../i18n";
 import { InvitesNotification } from "../../../logic/inAppNotifications";
-import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.invitesNotification;
 
@@ -16,6 +16,7 @@ export function InvitesNotificationRow({
 }: {
   notif: InvitesNotification;
 }) {
+  const { color, touchHighlightUnderlay } = useTheme();
   const nav = useNav();
 
   const inviteCount = notif.inviteLinkStatus.usesLeft || 0;

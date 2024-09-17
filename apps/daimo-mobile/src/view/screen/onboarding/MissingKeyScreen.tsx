@@ -10,13 +10,14 @@ import { EnclaveKeyInfo } from "../../../logic/enclave";
 import { Account } from "../../../storage/account";
 import { ButtonBig } from "../../shared/Button";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
 import { TextH3, TextPara } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 import { AccountHeader } from "../SettingsScreen";
 
 const i18 = i18n.missingKey;
 
 export function MissingKeyScreen() {
+  const { ss } = useTheme();
   const { account, keyInfo } = useAccountAndKeyInfo();
 
   const logout = () => getAccountManager().deleteAccountAndKey();

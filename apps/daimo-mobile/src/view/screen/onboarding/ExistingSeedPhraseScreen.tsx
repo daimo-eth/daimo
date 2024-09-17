@@ -15,12 +15,14 @@ import {
   useSeedPhraseInput,
 } from "../../shared/SeedPhraseDisplay";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.existingSeedPhrase;
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "ExistingSeedPhrase">;
 export function ExistingSeedPhraseScreen({ route }: Props) {
+  const { ss } = useTheme();
+
   // The account we're logging in to
   const { targetAccount } = route.params;
 

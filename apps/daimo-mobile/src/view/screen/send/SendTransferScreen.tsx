@@ -58,9 +58,9 @@ import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { color, ss } from "../../shared/style";
 import { TextCenter, TextLight, TextMeta } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+import { useTheme } from "../../style/theme";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendTransfer">;
 const i18 = i18n.sendTransferScreen;
@@ -90,6 +90,7 @@ function SendScreenInner({
     | null;
 
   const nav = useNav();
+  const { ss } = useTheme();
   const goHome = useExitToHome();
   const goBack = useCallback(() => {
     const goTo = (params: Props["route"]["params"]) =>
@@ -209,6 +210,7 @@ function SendChooseAmount({
   defaultToCoin: ForeignToken;
   edit: "money" | "memo" | "coin";
 }) {
+  const { color } = useTheme();
   // Select how much
   const [money, setMoney] = useState(defaultMoney);
 

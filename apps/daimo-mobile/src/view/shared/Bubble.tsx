@@ -5,12 +5,12 @@ import { Image, ImageStyle } from "expo-image";
 import { useMemo } from "react";
 import { Text, TextStyle, View, ViewStyle } from "react-native";
 
-import { color } from "./style";
 import {
   DaimoContact,
   getContactName,
   getContactProfilePicture,
 } from "../../logic/daimoContacts";
+import { useTheme } from "../style/theme";
 
 export function ContactBubble({
   contact,
@@ -23,6 +23,7 @@ export function ContactBubble({
   isPending?: boolean;
   transparent?: boolean;
 }) {
+  const { color } = useTheme();
   const name = getContactName(contact);
   const image = getContactProfilePicture(contact);
 
@@ -112,6 +113,7 @@ export function Bubble({
   image?: string | { uri: string };
   children: React.ReactNode;
 }) {
+  const { color } = useTheme();
   const col = isPending ? color.primaryBgLight : color.primary;
 
   const style: ViewStyle = useMemo(

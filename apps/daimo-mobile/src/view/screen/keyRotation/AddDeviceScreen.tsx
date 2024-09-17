@@ -12,9 +12,9 @@ import { Account } from "../../../storage/account";
 import { Scanner } from "../../shared/Scanner";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
 import { TextCenter, TextH2, TextPara } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.addDevice;
 
@@ -26,6 +26,8 @@ export function AddDeviceScreen() {
 type KeyAndSlot = { key: Hex; slot: number };
 
 function AddDeviceScreenInner({ account }: { account: Account }) {
+  const { ss } = useTheme();
+
   const [newKeyAndSlot, setNewKeyAndSlot] = useState<KeyAndSlot>();
   const [barCodeStatus, setBarCodeStatus] = useState<
     "idle" | "error" | "scanned"

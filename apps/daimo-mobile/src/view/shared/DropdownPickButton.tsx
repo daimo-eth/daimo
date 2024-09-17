@@ -1,7 +1,7 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { View } from "react-native";
 
-import { color } from "./style";
+import { useTheme } from "../style/theme";
 
 // Dropdown picker button for dropdown
 export function DropdownPickButton({
@@ -11,6 +11,7 @@ export function DropdownPickButton({
   size?: number;
   iconSize?: number;
 }) {
+  const { color } = useTheme();
   return (
     <View
       style={{

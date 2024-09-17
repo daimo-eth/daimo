@@ -6,9 +6,9 @@ import { Linking, View } from "react-native";
 import { Address } from "viem";
 
 import { BadgeButton } from "./Button";
-import { color } from "./style";
 import { TextBtnCaps } from "./text";
 import { env } from "../../env";
+import { useTheme } from "../style/theme";
 
 export function ExplorerBadge({
   daimoChain,
@@ -17,6 +17,7 @@ export function ExplorerBadge({
   daimoChain: DaimoChain;
   address: Address;
 }) {
+  const { color } = useTheme();
   const openExplorer = useCallback(() => {
     const { chainConfig } = env(daimoChain);
     const explorer = chainConfig.chainL2.blockExplorers!.default;

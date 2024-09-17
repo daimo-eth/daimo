@@ -5,9 +5,10 @@ import {
   timeAgo,
 } from "@daimo/common";
 import { DaimoChain, daimoChainFromId } from "@daimo/contract";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import {
   Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   TouchableHighlight,
@@ -39,20 +40,23 @@ import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { PendingDot } from "../shared/StatusDot";
 import { openSupportTG } from "../shared/error";
-import { color, ss, touchHighlightUnderlay } from "../shared/style";
 import {
   TextBody,
   TextBodyMedium,
-  TextColor,
   TextLight,
   TextMeta,
   TextPara,
 } from "../shared/text";
+import { SkinSelector } from "../style/SkinSelector";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.settings;
 
 export function SettingsScreen() {
   const account = useAccount();
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const [showDetails, setShowDetails] = useState(false);
 
@@ -84,6 +88,8 @@ export function SettingsScreen() {
 }
 
 function AccountSection({ account }: { account: Account }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const explorer = chainConfig.chainL2.blockExplorers!.default;
@@ -125,11 +131,12 @@ export function AccountHeader({
   account: Account;
   noLinkedAccounts?: boolean;
 }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   const daimoChain = daimoChainFromId(account.homeChainId);
   const { chainConfig } = env(daimoChain);
   const tokenSymbol = chainConfig.tokenSymbol;
   const l2Name = chainConfig.chainL2.name;
-  const isTestnet = chainConfig.chainL2.testnet;
 
   const eAcc = toEAccount(account);
 
@@ -141,12 +148,7 @@ export function AccountHeader({
         <Spacer h={2} />
         <View style={{ flexDirection: "row", alignItems: "baseline" }}>
           <TextBodyMedium color={color.gray3}>
-            {tokenSymbol} ·{" "}
-            {isTestnet ? (
-              <TextColor color={color.success}>{l2Name}</TextColor>
-            ) : (
-              l2Name
-            )}
+            {tokenSymbol} · {l2Name}
           </TextBodyMedium>
         </View>
         {!noLinkedAccounts && (
@@ -181,11 +183,14 @@ function LinkedAccountsRow({
 
 function DevicesSection({ account }: { account: Account }) {
   const nav = useNav();
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   const dispatcher = useContext(DispatcherContext);
   const addDevice = () => nav.navigate("SettingsTab", { screen: "AddDevice" });
   const createBackup = () => {
     dispatcher.dispatch({ name: "createBackup" });
   };
+  const [showSkinSelector, setShowSkinSelector] = useState(false);
 
   const sortKey: (k: KeyData) => number = (k) => {
     // Our own key always first
@@ -267,19 +272,35 @@ function DevicesSection({ account }: { account: Account }) {
         title={i18.devices.contactSupport.title()}
         message={i18.devices.contactSupport.msg()}
         icon={
-          <Icon
-            name="help-circle"
-            size={24}
-            color={color.gray3}
-            style={{ top: 7 }}
-          />
+          <Pressable
+            style={{ width: 24 }}
+            onPress={() => setShowSkinSelector(!showSkinSelector)}
+          >
+            {showSkinSelector ? (
+              <View style={{ paddingTop: 8 }}>
+                <TextLight>🤫</TextLight>
+              </View>
+            ) : (
+              <Icon
+                name="help-circle"
+                size={24}
+                color={color.gray3}
+                style={{ top: 7 }}
+              />
+            )}
+          </Pressable>
         }
       />
-      <ButtonMed
-        type="subtle"
-        title={i18.devices.contactSupport.button()}
-        onPress={openSupportTG}
-      />
+      {showSkinSelector ? (
+        <SkinSelector />
+      ) : (
+        <ButtonMed
+          type="subtle"
+          title={i18.devices.contactSupport.button()}
+          onPress={openSupportTG}
+        />
+      )}
+
       <View style={styles.separator} />
     </View>
   );
@@ -300,6 +321,8 @@ function DeviceRow({
 }) {
   const nowS = useTime();
   const nav = useNav();
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
 
   const viewDevice = () => {
     if (!pendingRemoval)
@@ -355,6 +378,8 @@ function DeviceRow({
 
 function PendingDeviceRow({ slot }: { slot: number }) {
   const dispName = getSlotLabel(slot);
+  const { color, touchHighlightUnderlay } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
 
   return (
     <View style={styles.rowBorder}>
@@ -379,6 +404,8 @@ function PendingDeviceRow({ slot }: { slot: number }) {
 }
 
 function DetailsSection({ account }: { account: Account }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   const { ask } = useNotificationsAccess();
 
   const [sendDebugLog, debugEnvSummary] = useSendDebugLog(account);
@@ -414,6 +441,8 @@ function DetailsSection({ account }: { account: Account }) {
 }
 
 function KV({ label, value }: { label: string; value: string }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <View style={styles.kvRow}>
       <View style={styles.kvKey}>
@@ -423,67 +452,69 @@ function KV({ label, value }: { label: string; value: string }) {
     </View>
   );
 }
-const styles = StyleSheet.create({
-  pageWrap: {
-    flex: 1,
-    backgroundColor: color.white,
-  },
-  scrollContainer: {
-    alignItems: "stretch",
-    paddingHorizontal: 24,
-  },
-  sectionWrap: {},
-  accountHero: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  listBody: {
-    flex: 1,
-    borderBottomWidth: 1,
-    borderColor: color.grayLight,
-  },
-  headerRow: {
-    paddingBottom: 8,
-    paddingHorizontal: 2,
-  },
-  rowBorder: {
-    borderTopWidth: 1,
-    borderColor: color.grayLight,
-  },
-  separator: {
-    borderTopWidth: 1,
-    borderColor: color.grayLight,
-    marginVertical: 24,
-  },
-  rowWrap: {
-    marginHorizontal: -24,
-  },
-  row: {
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  rowRight: {
-    flexDirection: "row",
-  },
-  kvList: {
-    flexDirection: "column",
-    paddingHorizontal: 4,
-    gap: 8,
-  },
-  kvRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  kvKey: {
-    width: 128,
-  },
-  pendingDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 16,
-    backgroundColor: color.yellow,
-  },
-});
+
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    pageWrap: {
+      flex: 1,
+      backgroundColor: color.white,
+    },
+    scrollContainer: {
+      alignItems: "stretch",
+      paddingHorizontal: 24,
+    },
+    sectionWrap: {},
+    accountHero: {
+      flexDirection: "row",
+      gap: 16,
+    },
+    listBody: {
+      flex: 1,
+      borderBottomWidth: 1,
+      borderColor: color.grayLight,
+    },
+    headerRow: {
+      paddingBottom: 8,
+      paddingHorizontal: 2,
+    },
+    rowBorder: {
+      borderTopWidth: 1,
+      borderColor: color.grayLight,
+    },
+    separator: {
+      borderTopWidth: 1,
+      borderColor: color.grayLight,
+      marginVertical: 24,
+    },
+    rowWrap: {
+      marginHorizontal: -24,
+    },
+    row: {
+      paddingHorizontal: 24,
+      paddingVertical: 24,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    rowRight: {
+      flexDirection: "row",
+    },
+    kvList: {
+      flexDirection: "column",
+      paddingHorizontal: 4,
+      gap: 8,
+    },
+    kvRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    kvKey: {
+      width: 128,
+    },
+    pendingDot: {
+      width: 16,
+      height: 16,
+      borderRadius: 16,
+      backgroundColor: color.yellow,
+    },
+  });

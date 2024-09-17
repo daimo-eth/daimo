@@ -5,13 +5,14 @@ import { i18n } from "../../i18n";
 import { ButtonMed } from "../shared/Button";
 import Spacer from "../shared/Spacer";
 import { openSupportTG } from "../shared/error";
-import { ss } from "../shared/style";
 import { TextH3, TextLight } from "../shared/text";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.debugBottom;
 
 // Global shake gesture > "Send Debug Log" sheet
 export function DebugBottomSheet() {
+  const { ss } = useTheme();
   return (
     <View style={ss.container.padH16}>
       <Spacer h={16} />

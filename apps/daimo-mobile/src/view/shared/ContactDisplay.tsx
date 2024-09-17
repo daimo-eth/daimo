@@ -1,15 +1,16 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { ContactBubble } from "./Bubble";
 import { ButtonCircle } from "./ButtonCircle";
 import { FarcasterButton } from "./FarcasterBubble";
 import Spacer from "./Spacer";
-import { color } from "./style";
 import { TextBtnCaps, TextH2, TextLight } from "./text";
 import { navToAccountPage, useNav } from "../../common/nav";
 import { i18n } from "../../i18n";
 import { DaimoContact, getContactName } from "../../logic/daimoContacts";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.contactDisplay;
 
@@ -24,6 +25,9 @@ export function ContactDisplay({
   requestMemo?: string;
   onPress?: () => void;
 }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
+
   // Show who we're sending to
   const isAccount = contact.type === "eAcc";
   const disp = getContactName(contact);
@@ -90,6 +94,9 @@ export function ContactDisplay({
 }
 
 const SubtitleBubble = ({ subtitle }: { subtitle: string }) => {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
+
   return (
     <View style={styles.subtitleBubble}>
       <TextBtnCaps color={color.grayDark}>{subtitle}</TextBtnCaps>
@@ -97,15 +104,16 @@ const SubtitleBubble = ({ subtitle }: { subtitle: string }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  recipientDisp: {
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  subtitleBubble: {
-    backgroundColor: color.ivoryDark,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    recipientDisp: {
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    subtitleBubble: {
+      backgroundColor: color.ivoryDark,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 8,
+    },
+  });

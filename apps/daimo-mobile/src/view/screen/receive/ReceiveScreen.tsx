@@ -40,9 +40,9 @@ import { ContactDisplay } from "../../shared/ContactDisplay";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
 import { TextCenter, TextLight } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+import { useTheme } from "../../style/theme";
 import { SendMemoButton } from "../send/MemoDisplay";
 
 type Props = NativeStackScreenProps<ParamListHome, "Receive">;
@@ -60,6 +60,8 @@ function RequestScreenInner({
   account: Account;
   fulfiller?: DaimoContact;
 }) {
+  const { ss } = useTheme();
+
   // Nav
   const nav = useNav();
   const goBack = useExitBack();

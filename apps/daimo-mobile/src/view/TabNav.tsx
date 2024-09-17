@@ -55,7 +55,8 @@ import { SendNoteScreen } from "./screen/send/SendNoteScreen";
 import SendTransferScreen from "./screen/send/SendTransferScreen";
 import { IconHome } from "./shared/IconHome";
 import { OctName } from "./shared/InputBig";
-import { color } from "./shared/style";
+import { Colorway, SkinContextType } from "./style/skins";
+import { useTheme } from "./style/theme";
 import {
   ParamListDeposit,
   ParamListHome,
@@ -131,6 +132,8 @@ const MainStack = createStackNavigator<ParamListMain>();
 
 // Main, logged-in bottom tab navigator.
 function MainTabNavigator() {
+  const { theme } = useTheme();
+
   const opts: BottomTabNavigationOptions = {
     // On Android, the tab bar jumps above the keyboard. This prevents that.
     // But on iOS, enabling this option can cause the screen to resize when the
@@ -143,7 +146,7 @@ function MainTabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
-      screenOptions={(props) => getTabOptions(ins, props)}
+      screenOptions={(props) => getTabOptions(ins, props, theme)}
       backBehavior="initialRoute"
     >
       <Tab.Screen name="DepositTab" component={DepositTab} options={opts} />
@@ -262,13 +265,15 @@ function errorBottomSheetInterpolator({
 
 function getTabOptions(
   safeInsets: EdgeInsets,
-  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> }
+  { route }: { route: RouteProp<ParamListTab, keyof ParamListTab> },
+  theme: SkinContextType
 ): BottomTabNavigationOptions {
   const opts: BottomTabNavigationOptions = {
     headerShown: false,
     tabBarStyle: {
       height: TAB_BAR_HEIGHT + safeInsets.bottom,
       paddingBottom: safeInsets.bottom,
+      backgroundColor: theme.color.white,
     },
     tabBarLabelPosition: "below-icon",
     tabBarItemStyle: {
@@ -281,9 +286,10 @@ function getTabOptions(
       fontWeight: "600",
       width: 100,
       textTransform: "none",
+      fontFamily: theme.font,
     },
-    tabBarActiveTintColor: color.primary,
-    tabBarInactiveTintColor: color.grayMid,
+    tabBarActiveTintColor: theme.color.primary,
+    tabBarInactiveTintColor: theme.color.grayMid,
     tabBarIconStyle: {
       alignItems: "center",
     },
@@ -294,11 +300,15 @@ function getTabOptions(
     case "DepositTab":
       return {
         title: i18.deposit(),
-        tabBarIcon: getIcon("plus-circle"),
+        tabBarIcon: getIcon(theme.color, "plus-circle"),
         ...opts,
       };
     case "InviteTab":
-      return { title: i18.invite(), tabBarIcon: getIcon("mail"), ...opts };
+      return {
+        title: i18.invite(),
+        tabBarIcon: getIcon(theme.color, "mail"),
+        ...opts,
+      };
     case "HomeTab":
       return {
         title: i18.home(),
@@ -310,17 +320,21 @@ function getTabOptions(
     case "SendTab":
       return {
         title: i18.send(),
-        tabBarIcon: getIcon("paper-airplane"),
+        tabBarIcon: getIcon(theme.color, "paper-airplane"),
         ...opts,
       };
     case "SettingsTab":
-      return { title: i18.settings(), tabBarIcon: getIcon("gear"), ...opts };
+      return {
+        title: i18.settings(),
+        tabBarIcon: getIcon(theme.color, "gear"),
+        ...opts,
+      };
     default:
       assertUnreachable(route.name);
   }
 }
 
-function getIcon(name: OctName, focusName?: OctName) {
+function getIcon(color: Colorway, name: OctName, focusName?: OctName) {
   return ({ focused }: { focused: boolean }) => (
     <Octicons
       size={24}

@@ -30,13 +30,14 @@ import { IconRow } from "../../shared/IconRow";
 import { InputBig } from "../../shared/InputBig";
 import Spacer from "../../shared/Spacer";
 import image from "../../shared/image";
-import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextBtnCaps, TextCenter } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.onboardingChooseName;
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "CreateChooseName">;
 export function OnboardingChooseNameScreen({ route }: Props) {
+  const { ss } = useTheme();
   const daimoChain = useDaimoChain();
   const [name, setName] = useState("");
   const { inviteLink } = route.params;
@@ -82,6 +83,7 @@ export function OnboardingChooseNameScreen({ route }: Props) {
 }
 
 function Instructions() {
+  const { color } = useTheme();
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
@@ -102,6 +104,8 @@ function NamePicker({
   onChange: (name: string) => void;
   onChoose: () => void;
 }) {
+  const { color } = useTheme();
+
   // First, validate the name & check if it's available
   let error = "";
   try {

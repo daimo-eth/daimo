@@ -1,7 +1,7 @@
 import { StyleProp, ViewStyle } from "react-native";
 import { Svg, Path } from "react-native-svg";
 
-import { color as baseColor } from "../shared/style";
+import { useTheme } from "../style/theme";
 
 const icons = {
   "bell-01": (
@@ -38,6 +38,7 @@ export function Icon({
   color?: string;
   style?: StyleProp<ViewStyle>;
 }) {
+  const baseColor = useTheme().theme.color;
   return (
     <Svg
       width={size}

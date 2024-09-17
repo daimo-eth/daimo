@@ -12,8 +12,8 @@ import { InputBig } from "../../shared/InputBig";
 import { SearchResultRow } from "../../shared/SearchResults";
 import Spacer from "../../shared/Spacer";
 import { ErrorRowCentered } from "../../shared/error";
-import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter, TextLight } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.existingChooseAccount;
 
@@ -35,6 +35,7 @@ export function ExistingChooseAccountScreen() {
 }
 
 function SelectAccount({ setEAcc }: { setEAcc: (eAcc: EAccount) => void }) {
+  const { color, ss } = useTheme();
   const [prefix, setPrefix] = useState("");
 
   return (

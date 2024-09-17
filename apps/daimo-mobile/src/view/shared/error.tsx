@@ -1,12 +1,14 @@
 import { appStoreLinks } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import { useMemo } from "react";
 import { Linking, Platform, StyleSheet, View } from "react-native";
 
 import { ButtonBig } from "./Button";
 import Spacer from "./Spacer";
-import { color } from "./style";
 import { DaimoText, TextCenter, TextError, TextH3 } from "./text";
 import { useExitToHome } from "../../common/nav";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function ErrorRowCentered({
   error,
@@ -44,6 +46,9 @@ export function ErrorBanner({
   showDownloadButton?: boolean;
   onGoHome?: () => void;
 }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
+
   const exitToHome = useExitToHome();
   const goHomeScreen = onGoHome || exitToHome;
   const goAppStore = () => {
@@ -96,37 +101,38 @@ export function openSupportTG() {
   Linking.openURL("https://t.me/daimo_support");
 }
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    alignItems: "center",
-  },
-  closeCircle: {
-    height: 128,
-    width: 128,
-    borderWidth: 1,
-    borderColor: color.danger,
-    borderRadius: 64,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  closeIcon: {
-    height: 36,
-    width: 36,
-  },
-  message: {
-    textAlign: "center",
-    fontWeight: "600",
-    color: color.grayMid,
-    lineHeight: 24,
-    fontSize: 16,
-  },
-  messageContainer: {
-    paddingTop: 16,
-  },
-  buttonContainer: {
-    width: "100%",
-    marginTop: 24,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    container: {
+      width: "100%",
+      alignItems: "center",
+    },
+    closeCircle: {
+      height: 128,
+      width: 128,
+      borderWidth: 1,
+      borderColor: color.danger,
+      borderRadius: 64,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 24,
+    },
+    closeIcon: {
+      height: 36,
+      width: 36,
+    },
+    message: {
+      textAlign: "center",
+      fontWeight: "600",
+      color: color.grayMid,
+      lineHeight: 24,
+      fontSize: 16,
+    },
+    messageContainer: {
+      paddingTop: 16,
+    },
+    buttonContainer: {
+      width: "100%",
+      marginTop: 24,
+    },
+  });

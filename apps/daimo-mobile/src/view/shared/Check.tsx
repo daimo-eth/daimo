@@ -1,8 +1,9 @@
-import React, { ReactNode, useCallback } from "react";
+import React, { ReactNode, useCallback, useMemo } from "react";
 import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 
-import { color } from "./style";
 import { TextBody } from "./text";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function CheckLabel({
   value,
@@ -13,6 +14,9 @@ export function CheckLabel({
   setValue: (val: boolean) => void;
   children: ReactNode;
 }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
+
   const toggle = useCallback(() => setValue(!value), [value, setValue]);
 
   return (
@@ -25,23 +29,25 @@ export function CheckLabel({
   );
 }
 
-const checkbox = {
-  width: 18,
-  height: 18,
-  borderRadius: 6,
-  borderWidth: 2,
-  borderColor: color.primary,
-};
+const getStyles = (color: Colorway) => {
+  const checkbox = {
+    width: 18,
+    height: 18,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: color.primary,
+  };
 
-const styles = StyleSheet.create({
-  checkLabel: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  checked: {
-    ...checkbox,
-    backgroundColor: color.primary,
-  },
-  unchecked: checkbox,
-});
+  return StyleSheet.create({
+    checkLabel: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+    checked: {
+      ...checkbox,
+      backgroundColor: color.primary,
+    },
+    unchecked: checkbox,
+  });
+};

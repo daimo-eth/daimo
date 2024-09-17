@@ -5,7 +5,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { color } from "./style";
+import { useTheme } from "../style/theme";
 
 export function ProgressBlobs({
   activeStep,
@@ -30,6 +30,8 @@ export function ProgressBlobs({
 }
 
 function ProgressBlob({ active, done }: { active: boolean; done: boolean }) {
+  const { color } = useTheme();
+
   const width = useSharedValue(20);
   const bg = useSharedValue(color.primary);
 

@@ -2,14 +2,15 @@ import { Octicons } from "@expo/vector-icons";
 import { View, StyleSheet } from "react-native";
 
 import { OctName } from "./InputBig";
-import { color } from "./style";
 import { TextBody } from "./text";
+import { useTheme } from "../style/theme";
 
 export function IconRow(props: {
   icon?: OctName;
   color?: string;
   title: string;
 }) {
+  const { color } = useTheme();
   const { icon, title } = props;
   const col = props.color || color.grayMid;
   return (

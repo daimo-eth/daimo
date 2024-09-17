@@ -1,5 +1,5 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback, useEffect } from "react";
+import { RefObject, useCallback, useEffect, useMemo } from "react";
 import { Keyboard, StyleSheet, TextInput, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Animated, {
@@ -11,11 +11,12 @@ import Animated, {
 import { AnimatedSearchInput } from "./AnimatedSearchInput";
 import { ButtonCircle } from "./ButtonCircle";
 import { Icon } from "./Icon";
-import { color } from "./style";
 import { useNav } from "../../common/nav";
 import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
 import { useInAppNotifications } from "../../logic/inAppNotifications";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const animationConfig = { duration: 150 };
 
@@ -29,6 +30,9 @@ export function SearchHeader({
   setPrefix: (prefix?: string) => void;
   innerRef?: RefObject<TextInput>;
 }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
+
   const isFocused = useSharedValue(prefix != null);
   const nav = useNav();
 
@@ -133,6 +137,9 @@ export function SearchHeader({
 }
 
 function NotificationBadge() {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
+
   return (
     <View style={styles.badgeBorder}>
       <View style={styles.badge} />
@@ -140,38 +147,39 @@ function NotificationBadge() {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 16,
-  },
-  circleButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: color.grayLight,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  badge: {
-    backgroundColor: "red",
-    borderRadius: 4,
-    height: 6,
-    width: 6,
-  },
-  badgeBorder: {
-    backgroundColor: "white",
-    height: 10,
-    width: 10,
-    borderRadius: 5,
-    position: "absolute",
-    top: 10,
-    right: 14,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    header: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginHorizontal: 16,
+    },
+    circleButton: {
+      width: 50,
+      height: 50,
+      borderRadius: 50,
+      borderWidth: 1,
+      borderColor: color.grayLight,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    badge: {
+      backgroundColor: "red",
+      borderRadius: 4,
+      height: 6,
+      width: 6,
+    },
+    badgeBorder: {
+      backgroundColor: "white",
+      height: 10,
+      width: 10,
+      borderRadius: 5,
+      position: "absolute",
+      top: 10,
+      right: 14,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });

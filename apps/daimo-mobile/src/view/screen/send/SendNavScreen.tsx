@@ -8,12 +8,13 @@ import { i18n } from "../../../i18n";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { SearchScreen } from "../../shared/SearchScreen";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
+import { useTheme } from "../../style/theme";
 
 type Props = NativeStackScreenProps<ParamListSend, "SendNav">;
 const i18 = i18n.sendNav;
 
 export function SendNavScreen({ route }: Props) {
+  const { ss } = useTheme();
   const { autoFocus } = route.params || {};
 
   // Search prefix

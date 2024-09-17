@@ -1,13 +1,14 @@
 import { Pressable, PressableProps } from "react-native";
 
-import { color } from "./style";
 import { TextBody } from "./text";
+import { useTheme } from "../style/theme";
 
 type PressableTextProps = PressableProps & {
   text: string;
 };
 
 export function PressableText({ text, onPress, ...props }: PressableTextProps) {
+  const { color } = useTheme();
   return (
     <Pressable
       style={{ marginLeft: 16 }}

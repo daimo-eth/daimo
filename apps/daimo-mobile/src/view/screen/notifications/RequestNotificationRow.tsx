@@ -25,8 +25,8 @@ import { RequestNotification } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { ContactBubble } from "../../shared/Bubble";
 import Spacer from "../../shared/Spacer";
-import { color, touchHighlightUnderlay } from "../../shared/style";
 import { TextBody, TextMeta } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.requestNotification;
 
@@ -37,6 +37,7 @@ export function RequestNotificationRow({
   notif: RequestNotification;
   account: Account;
 }) {
+  const { color, touchHighlightUnderlay } = useTheme();
   const nav = useNav();
 
   const type =
@@ -137,6 +138,8 @@ function RequestNotificationMessage({
   otherAcc: EAccount;
   reqStatus: DaimoRequestV2Status;
 }) {
+  const { color } = useTheme();
+
   const otherAccVerb =
     otherAcc.label === AddrLabel.RequestLink
       ? i18.msgVerb.via()

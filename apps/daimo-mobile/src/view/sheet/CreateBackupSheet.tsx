@@ -15,8 +15,9 @@ import { ButtonBig } from "../shared/Button";
 import { OctName } from "../shared/InputBig";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color } from "../shared/style";
 import { TextBody, TextCenter, TextH3 } from "../shared/text";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.createBackup;
 
@@ -58,6 +59,8 @@ function AddKeyButton({ slotType }: { slotType: SlotType }) {
 }
 
 function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   return (
     <Animated.View
       entering={FadeIn}
@@ -91,6 +94,7 @@ function CreateBackupContent({ setStep }: { setStep: (value: 0 | 1) => void }) {
 }
 
 function BulletRow({ text }: { text: string }) {
+  const { color } = useTheme();
   return (
     <View style={{ flexDirection: "row" }}>
       <TextBody color={color.grayMid}>•</TextBody>
@@ -107,6 +111,8 @@ function OfflineBackupContent({
 }: {
   setStep: (value: 0 | 1) => void;
 }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);
 
@@ -162,6 +168,8 @@ function BackupOptionRow({
   title: string;
   recommended?: boolean;
 }) {
+  const { color } = useTheme();
+  const styles = useMemo(() => getStyles(color), [color]);
   const { width } = useSafeAreaFrame();
   const isCompact = width < 400;
 
@@ -184,17 +192,18 @@ function BackupOptionRow({
   );
 }
 
-const styles = StyleSheet.create({
-  keyCircle: {
-    backgroundColor: color.grayLight,
-    height: 40,
-    width: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  separator: {
-    borderBottomWidth: 0.5,
-    borderBottomColor: color.grayLight,
-  },
-});
+const getStyles = (color: Colorway) =>
+  StyleSheet.create({
+    keyCircle: {
+      backgroundColor: color.grayLight,
+      height: 40,
+      width: 40,
+      borderRadius: 20,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    separator: {
+      borderBottomWidth: 0.5,
+      borderBottomColor: color.grayLight,
+    },
+  });

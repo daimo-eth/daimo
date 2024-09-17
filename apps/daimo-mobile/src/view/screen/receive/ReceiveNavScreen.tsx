@@ -7,11 +7,13 @@ import { i18n } from "../../../i18n";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { SearchScreen } from "../../shared/SearchScreen";
 import Spacer from "../../shared/Spacer";
-import { ss } from "../../shared/style";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.receiveNav;
 
 export function ReceiveNavScreen() {
+  const { ss } = useTheme();
+
   // Search prefix
   // Clear prefix on back button
   const [prefix, setPrefix] = useState("");

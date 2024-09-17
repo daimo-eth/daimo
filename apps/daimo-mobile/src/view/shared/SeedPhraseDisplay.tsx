@@ -1,13 +1,17 @@
 import { assert } from "@daimo/common";
 import { Map } from "immutable";
-import { memo, useCallback, useReducer } from "react";
+import { memo, useCallback, useMemo, useReducer } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
 
 import Spacer from "./Spacer";
-import { color, ss } from "./style";
 import { TextBody } from "./text";
+import { Colorway, SkinStyleSheet } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function SeedPhraseDisplay({ words }: { words: string[] }) {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   const renderCell = useCallback(
     (index: number) => (
       <SeedPhraseCell
@@ -43,6 +47,9 @@ export function SeedPhraseEntry({
   state: Map<number, string>;
   dispatch: (a: { key: number; value: string }) => void;
 }) {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   const handleInputChange = (index: number, text: string) => {
     dispatch({ key: index, value: text });
   };
@@ -87,6 +94,9 @@ function SeedPhraseCellInner({
   num: number;
   onChangeText?: (text: string) => void;
 }) {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   return (
     <View style={styles.boxInputWrapper}>
       <View style={{ width: 24 }}>
@@ -129,42 +139,43 @@ export function useSeedPhraseInput(indices?: number[]) {
   );
 }
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: color.white,
-    paddingHorizontal: 24,
-  },
-  box: {
-    borderWidth: 1,
-    borderColor: color.grayLight,
-    borderRadius: 8,
-    flexDirection: "row",
-    gap: 24,
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    backgroundColor: color.white,
-    ...ss.container.shadow,
-  },
-  boxColumn: {
-    flex: 1,
-  },
-  boxInputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomColor: color.grayLight,
-    borderBottomWidth: 2,
-    marginBottom: 8,
-    paddingVertical: 4,
-  },
-  boxInput: {
-    flex: 1,
-    ...ss.text.body,
-  },
-  copyButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    flexDirection: "row",
-    borderRadius: 4,
-  },
-});
+const getStyles = (color: Colorway, ss: SkinStyleSheet) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: color.white,
+      paddingHorizontal: 24,
+    },
+    box: {
+      borderWidth: 1,
+      borderColor: color.grayLight,
+      borderRadius: 8,
+      flexDirection: "row",
+      gap: 24,
+      paddingVertical: 20,
+      paddingHorizontal: 24,
+      backgroundColor: color.white,
+      ...ss.container.shadow,
+    },
+    boxColumn: {
+      flex: 1,
+    },
+    boxInputWrapper: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderBottomColor: color.grayLight,
+      borderBottomWidth: 2,
+      marginBottom: 8,
+      paddingVertical: 4,
+    },
+    boxInput: {
+      flex: 1,
+      ...ss.text.body,
+    },
+    copyButton: {
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      flexDirection: "row",
+      borderRadius: 4,
+    },
+  });

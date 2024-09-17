@@ -14,8 +14,8 @@ import { useNotificationsAccess } from "../../../logic/notify";
 import { ButtonBig, TextButton } from "../../shared/Button";
 import { CoverVideo } from "../../shared/CoverGraphic";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
 import { TextBodyMedium, TextCenter } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 type Props = NativeStackScreenProps<ParamListOnboarding, "AllowNotifs">;
 const i18 = i18n.allowNotifs;
@@ -23,6 +23,8 @@ const i18 = i18n.allowNotifs;
 // This screen shows final steps for onboarding (eg allow notifications),
 // then a spinner while waiting for account creation, or error.
 export function AllowNotifsScreen({ route }: Props) {
+  const { ss } = useTheme();
+
   const { showProgressBar } = route.params;
   const notificationsAccess = useNotificationsAccess();
 
@@ -68,6 +70,7 @@ function RequestNotificationsPage({
   skip: () => void;
   displayMacVideo: boolean;
 }) {
+  const { ss } = useTheme();
   return (
     <View style={ss.container.topBottom}>
       <View key="top" style={ss.container.padH24}>
@@ -105,6 +108,7 @@ function RequestNotificationsPage({
 }
 
 function Instructions() {
+  const { color } = useTheme();
   return (
     <TextCenter>
       <TextBodyMedium color={color.grayMid}>
@@ -115,6 +119,7 @@ function Instructions() {
 }
 
 function MacNotificationsVideo() {
+  const { color } = useTheme();
   const video = useRef(null);
   return (
     <Video

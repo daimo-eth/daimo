@@ -1,5 +1,12 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Dimensions,
   LayoutChangeEvent,
@@ -18,8 +25,9 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { OctName } from "./InputBig";
-import { color, ss } from "./style";
 import { MAX_FONT_SIZE_MULTIPLIER } from "./text";
+import { Colorway, SkinStyleSheet } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const INITIAL_WIDTH = SCREEN_WIDTH - 16 * 2;
@@ -55,6 +63,9 @@ export const AnimatedSearchInput = ({
   innerRef,
   style,
 }: AnimatedSearchInputProps) => {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   const closedWidth = useSharedValue(INITIAL_WIDTH - ICONS);
   const openWidth = useSharedValue(INITIAL_WIDTH - BACK_ICON);
   const animatedWidth = useSharedValue(closedWidth.value);
@@ -168,50 +179,52 @@ export const AnimatedSearchInput = ({
   );
 };
 
-const inputRow = {
-  height: 48,
-  backgroundColor: color.ivoryDark,
-  borderRadius: 99,
-  borderColor: color.grayLight,
-  borderWidth: 1,
-  paddingHorizontal: 20,
-  paddingVertical: 12,
-} as const;
+const getStyles = (color: Colorway, ss: SkinStyleSheet) => {
+  const inputRow = {
+    height: 48,
+    backgroundColor: color.ivoryDark,
+    borderRadius: 99,
+    borderColor: color.grayLight,
+    borderWidth: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  } as const;
 
-const input = {
-  ...ss.text.body,
-  position: "absolute",
-  top: 0,
-  bottom: 0,
-  left: 48,
-  right: 16,
-  paddingTop: 0,
-  paddingVertical: 0,
-} as const;
-
-const styles = StyleSheet.create({
-  inputRow,
-  inputRowFocused: {
-    ...inputRow,
-    borderColor: color.primary,
-  },
-  input,
-  inputCentered: {
-    ...input,
-    textAlign: "center",
-    left: 40,
-  },
-  inputIcon: {
+  const input = {
+    ...ss.text.body,
     position: "absolute",
-    top: 13,
-    left: 20,
-    width: 16,
-    alignContent: "center",
-    justifyContent: "center",
-  },
-  wrapperStyle: {
-    width: "100%",
-    alignItems: "center",
-    zIndex: 11,
-  },
-});
+    top: 0,
+    bottom: 0,
+    left: 48,
+    right: 16,
+    paddingTop: 0,
+    paddingVertical: 0,
+  } as const;
+
+  return StyleSheet.create({
+    inputRow,
+    inputRowFocused: {
+      ...inputRow,
+      borderColor: color.primary,
+    },
+    input,
+    inputCentered: {
+      ...input,
+      textAlign: "center",
+      left: 40,
+    },
+    inputIcon: {
+      position: "absolute",
+      top: 13,
+      left: 20,
+      width: 16,
+      alignContent: "center",
+      justifyContent: "center",
+    },
+    wrapperStyle: {
+      width: "100%",
+      alignItems: "center",
+      zIndex: 11,
+    },
+  });
+};

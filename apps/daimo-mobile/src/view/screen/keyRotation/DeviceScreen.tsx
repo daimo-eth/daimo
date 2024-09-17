@@ -27,7 +27,6 @@ import { ButtonBig } from "../../shared/Button";
 import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
 import {
   TextBody,
   TextCenter,
@@ -35,11 +34,14 @@ import {
   TextH3,
   TextLight,
 } from "../../shared/text";
+import { useTheme } from "../../style/theme";
 
 type Props = NativeStackScreenProps<ParamListSettings, "Device">;
 const i18 = i18n.device;
 
 export function DeviceScreen({ route, navigation }: Props) {
+  const { color, ss } = useTheme();
+
   const account = useAccount();
   const nav = useNav();
 

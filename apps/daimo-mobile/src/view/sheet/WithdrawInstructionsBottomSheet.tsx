@@ -6,14 +6,15 @@ import { i18n } from "../../i18n";
 import { Badge } from "../shared/Badge";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
 import { TextBold, TextLight, TextPara } from "../shared/text";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.withdrawInstructionsBottom;
 
 // Explains how to withdraw money from your Daimo account, using another wallet
 // or exchange.
 export function WithdrawInstructionsBottomSheet() {
+  const { color, ss } = useTheme();
   const dispatcher = useContext(DispatcherContext);
   const BB = Platform.OS === "android" ? TextBold : Badge;
 

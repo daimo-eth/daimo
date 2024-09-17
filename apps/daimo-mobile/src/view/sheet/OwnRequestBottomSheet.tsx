@@ -22,8 +22,8 @@ import { TitleAmount } from "../shared/Amount";
 import { ButtonMed } from "../shared/Button";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
-import { color, ss } from "../shared/style";
 import { TextBodyCaps, TextCenter } from "../shared/text";
+import { useTheme } from "../style/theme";
 
 const i18 = i18n.ownRequestBottom;
 
@@ -33,6 +33,7 @@ export function OwnRequestBottomSheet({
 }: {
   reqStatus: DaimoRequestV2Status;
 }) {
+  const { color, ss } = useTheme();
   const account = useAccount();
   const nav = useNav();
   const dispatcher = useContext(DispatcherContext);

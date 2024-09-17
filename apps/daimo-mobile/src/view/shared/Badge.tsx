@@ -1,23 +1,20 @@
 import { useMemo } from "react";
 import { View } from "react-native";
 
-import { color } from "./style";
 import { TextBtnCaps } from "./text";
-
-const defaultColor = color.grayDark;
-const defaultBgColor = color.ivoryDark;
+import { useTheme } from "../style/theme";
 
 export function Badge({
   children,
   color,
-  bgColor,
 }: {
   children: React.ReactNode;
   color?: string;
-  bgColor?: string;
 }) {
-  color = color || defaultColor;
-  bgColor = bgColor || defaultBgColor;
+  const defaultColorway = useTheme().theme;
+
+  color = color || defaultColorway.color.grayDark;
+  const bgColor = defaultColorway.color.ivoryDark;
 
   const styleWrap = useMemo(
     () => ({

@@ -1,6 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { Icon } from "@expo/vector-icons/build/createIconSet";
-import { RefObject, useCallback, useRef, useState } from "react";
+import { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import {
   Platform,
   StyleSheet,
@@ -10,8 +10,9 @@ import {
 } from "react-native";
 import Animated, { LinearTransition } from "react-native-reanimated";
 
-import { color, ss } from "./style";
 import { MAX_FONT_SIZE_MULTIPLIER } from "./text";
+import { Colorway, SkinStyleSheet } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export type OctName = typeof Octicons extends Icon<infer G, any> ? G : never;
 
@@ -38,6 +39,9 @@ export function InputBig({
   innerRef?: RefObject<TextInput>;
   style?: ViewStyle;
 }) {
+  const { color, ss } = useTheme();
+  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
+
   const [isFocused, setIsFocused] = useState(false);
   const onInputFocus = useCallback(() => {
     setIsFocused(true);
@@ -95,46 +99,48 @@ export function InputBig({
   );
 }
 
-const inputRow = {
-  flexGrow: 1,
-  height: 48,
-  backgroundColor: color.ivoryDark,
-  borderRadius: 99,
-  borderColor: color.grayLight,
-  borderWidth: 1,
-  paddingHorizontal: 20,
-  paddingVertical: 12,
-} as const;
+const getStyles = (color: Colorway, ss: SkinStyleSheet) => {
+  const inputRow = {
+    flexGrow: 1,
+    height: 48,
+    backgroundColor: color.ivoryDark,
+    borderRadius: 99,
+    borderColor: color.grayLight,
+    borderWidth: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  } as const;
 
-const input = {
-  ...ss.text.body,
-  position: "absolute",
-  top: 0,
-  bottom: 0,
-  left: 48,
-  right: 16,
-  paddingTop: 0,
-  paddingVertical: 0,
-} as const;
-
-const styles = StyleSheet.create({
-  inputRow,
-  inputRowFocused: {
-    ...inputRow,
-    borderColor: color.primary,
-  },
-  input,
-  inputCentered: {
-    ...input,
-    textAlign: "center",
-    left: 40,
-  },
-  inputIcon: {
+  const input = {
+    ...ss.text.body,
     position: "absolute",
-    top: 13,
-    left: 20,
-    width: 16,
-    alignContent: "center",
-    justifyContent: "center",
-  },
-});
+    top: 0,
+    bottom: 0,
+    left: 48,
+    right: 16,
+    paddingTop: 0,
+    paddingVertical: 0,
+  } as const;
+
+  return StyleSheet.create({
+    inputRow,
+    inputRowFocused: {
+      ...inputRow,
+      borderColor: color.primary,
+    },
+    input,
+    inputCentered: {
+      ...input,
+      textAlign: "center",
+      left: 40,
+    },
+    inputIcon: {
+      position: "absolute",
+      top: 13,
+      left: 20,
+      width: 16,
+      alignContent: "center",
+      justifyContent: "center",
+    },
+  });
+};

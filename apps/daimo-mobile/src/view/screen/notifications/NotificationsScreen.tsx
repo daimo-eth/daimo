@@ -12,9 +12,9 @@ import { useInAppNotifications } from "../../../logic/inAppNotifications";
 import { Account } from "../../../storage/account";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
-import { color, ss } from "../../shared/style";
 import { TextCenter, TextH3 } from "../../shared/text";
 import { useWithAccount } from "../../shared/withAccount";
+import { useTheme } from "../../style/theme";
 
 const i18 = i18n.notifications;
 
@@ -26,6 +26,7 @@ export function NotificationsScreen() {
 
 function NotificationsScreenInner({ account }: { account: Account }) {
   const nav = useNav();
+  const { color, ss } = useTheme();
 
   const { unread, notifications, markRead } = useInAppNotifications();
 

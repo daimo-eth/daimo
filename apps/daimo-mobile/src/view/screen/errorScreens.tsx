@@ -8,7 +8,7 @@ import { i18n } from "../../i18n";
 import ScrollPellet from "../shared/ScrollPellet";
 import Spacer from "../shared/Spacer";
 import { ErrorBanner } from "../shared/error";
-import { ss } from "../shared/style";
+import { useTheme } from "../style/theme";
 
 type Props = NativeStackScreenProps<ParamListMain, "LinkErrorModal">;
 const i18 = i18n.error;
@@ -47,6 +47,22 @@ export function renderErrorFallback({
   error: Error;
   resetErrorBoundary: () => void;
 }) {
+  return (
+    <ErrorFallbackComponent
+      error={error}
+      resetErrorBoundary={resetErrorBoundary}
+    />
+  );
+}
+
+function ErrorFallbackComponent({
+  error,
+  resetErrorBoundary,
+}: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) {
+  const { ss } = useTheme();
   return (
     <View style={ss.container.screen}>
       <View style={ss.container.padH8}>

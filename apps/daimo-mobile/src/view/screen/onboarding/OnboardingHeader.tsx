@@ -3,7 +3,7 @@ import { BackHandler, View, StyleSheet, Platform } from "react-native";
 
 import { ProgressBlobs } from "../../shared/ProgressBlobs";
 import { ScreenHeader } from "../../shared/ScreenHeader";
-import { ss } from "../../shared/style";
+import { useTheme } from "../../style/theme";
 
 export function getNumOnboardingSteps() {
   return Platform.OS === "ios" ? 3 : 4;
@@ -20,6 +20,8 @@ export function OnboardingHeader({
   steps?: number;
   activeStep?: number;
 }) {
+  const { ss } = useTheme();
+
   /* On Android, listen for the native back button. */
   useEffect(() => {
     if (!onPrev) return;
