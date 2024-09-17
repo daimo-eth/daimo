@@ -396,7 +396,7 @@ function CompleteOnboarding() {
           ...styles.checklistAction,
           backgroundColor: pressed
             ? touchHighlightUnderlay.subtle.underlayColor
-            : undefined,
+            : color.white,
         },
       ]}
     >

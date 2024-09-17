@@ -16,9 +16,9 @@ import {
 import {
   greenColorway,
   blueColorway,
-  purpleColorway,
   orangeColorway,
   darkColorway,
+  yellowColorway,
 } from "./colorway";
 
 export type Colorway = typeof blueColorway;
@@ -45,9 +45,9 @@ export const Skin = {
   usdc: "usdc",
   doge: "doge",
   usdt: "usdt",
-  maddox: "maddox",
   bitcoin: "bitcoin",
   penguin: "penguin",
+  duck: "duck",
 } as const;
 
 export type SkinName = (typeof Skin)[keyof typeof Skin];
@@ -87,19 +87,19 @@ export const skins: Record<SkinName, SkinContextType> = {
       uri: "https://assets.coingecko.com/coins/images/32883/large/wbtc.png",
     },
   }),
-  // Daimo Dog
-  [Skin.maddox]: createSkin({
-    name: Skin.maddox,
-    color: purpleColorway,
-    font: fonts.chalkboard,
-    logo: require("../../../assets/skins/maddox.png"),
-  }),
   // Club Penguin, just for kicks
   [Skin.penguin]: createSkin({
     name: Skin.penguin,
     color: blueColorway,
     font: fonts.arial,
     logo: require("../../../assets/skins/penguin2.png"),
+  }),
+  // Rubber ducky
+  [Skin.duck]: createSkin({
+    name: Skin.duck,
+    color: yellowColorway,
+    font: fonts.arial,
+    logo: require("../../../assets/skins/duck.png"),
   }),
   // ADD MORE SKINS HERE
 };

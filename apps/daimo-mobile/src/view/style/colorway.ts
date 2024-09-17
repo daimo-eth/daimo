@@ -29,12 +29,6 @@ const blueColorway = {
   ...baseColorway,
 };
 
-const purpleColorway = {
-  primary: "#4527A0",
-  primaryBgLight: "#D1C4E9",
-  ...baseColorway,
-};
-
 // Dark mode has the opposite colors
 const darkColorway = {
   primary: "#f7931a",
@@ -62,10 +56,16 @@ const orangeColorway = {
   ...baseColorway,
 };
 
+const yellowColorway = {
+  primary: "#ffd12f",
+  primaryBgLight: "#FFEEB3",
+  ...baseColorway,
+};
+
 export {
   greenColorway,
   blueColorway,
-  purpleColorway,
   darkColorway,
   orangeColorway,
+  yellowColorway,
 };
