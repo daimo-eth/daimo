@@ -268,7 +268,7 @@ export const en = {
     screenHeader: () => `Existing Account`,
     generatingKeys: () => `Generating keys...`,
     scanQR: () =>
-      `Scan this QR code from another device to add this phone to an existing Daimo account.`,
+      `Scan this QR code from another device to add this phone to an existing Daimo account. Go to your Daimo Settings > Add a Device to scan.`,
     useBackup: () => `Use Backup`,
   },
   // ExistingSeedPhraseScreen.tsx

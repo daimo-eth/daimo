@@ -270,7 +270,7 @@ export const es: LanguageDefinition = {
     screenHeader: () => `Cuenta existente`,
     generatingKeys: () => `Generando claves...`,
     scanQR: () =>
-      `Escanea este QR desde otro dispositivo para añadir este teléfono a una cuenta de Daimo.`,
+      `Escanea este QR desde otro dispositivo para añadir este teléfono a una cuenta de Daimo. Ve a tu Configuración de Daimo > Agregar un dispositivo para escanear.`,
     useBackup: () => `Usar Copia de Seguridad`,
   },
   // ExistingSeedPhraseScreen.tsx
