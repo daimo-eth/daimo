@@ -13,7 +13,8 @@ export type Action =
   | { name: "createBackup" }
   | { name: "hideBottomSheet" }
   | { name: "swap"; swap: ProposedSwap }
-  | { name: "bitrefill"; address: Address; amount: DollarStr };
+  | { name: "bitrefill"; address: Address; amount: DollarStr }
+  | { name: "tronAddress" };
 
 type ActionName = Action["name"];
 

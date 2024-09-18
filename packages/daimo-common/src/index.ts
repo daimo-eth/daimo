@@ -27,3 +27,4 @@ export * from "./retryBackoff";
 export * from "./sendPair";
 export * from "./time";
 export * from "./viemClient";
+export * from "./receivingAddress";

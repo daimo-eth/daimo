@@ -7,7 +7,13 @@ import {
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   ImageSourcePropType,
@@ -161,10 +167,9 @@ function getOnDemandExchanges(
     return [];
   }
 
-  const progressId = "loading-binance-deposit";
-
-  const onClick = async () => {
-    setProgress(progressId);
+  const binanceProgressId = "loading-binance-deposit";
+  const onClickBinance = async () => {
+    setProgress(binanceProgressId);
     const url = await rpcFunc.getExchangeURL.query({
       addr: account.address,
       platform,
@@ -188,10 +193,10 @@ function getOnDemandExchanges(
       logo: {
         uri: `${daimoDomainAddress}/assets/deposit/binance.png`,
       },
-      loadingId: progressId,
+      loadingId: binanceProgressId,
       isExternal: true,
       sortId: 2,
-      onClick,
+      onClick: onClickBinance,
     },
   ];
 }
@@ -206,6 +211,17 @@ function DepositList({ account }: { account: Account }) {
 
   const [progress, setProgress] = useState<Progress>("idle");
 
+  const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
+  const [tronAllowed, setTronAllowed] = useState(false);
+
+  useEffect(() => {
+    const checkTron = async () => {
+      const ipInBannedArea = await rpcFunc.ipInBannedArea.query();
+      setTronAllowed(!ipInBannedArea);
+    };
+    checkTron();
+  }, [rpcFunc]);
+
   const openExchange = (url: string) => {
     Linking.openURL(url);
     setProgress("started");
@@ -215,6 +231,9 @@ function DepositList({ account }: { account: Account }) {
 
   const openAddressDeposit = () => {
     dispatcher.dispatch({ name: "depositAddress" });
+  };
+  const openTronAddress = () => {
+    dispatcher.dispatch({ name: "tronAddress" });
   };
 
   const defaultLogo = IconDepositWallet;
@@ -241,12 +260,22 @@ function DepositList({ account }: { account: Account }) {
       })),
       ...getOnDemandExchanges(account, setProgress)
     );
+    if (tronAllowed) {
+      options.push({
+        cta: i18.tron.cta(),
+        title: i18.tron.title(),
+        logo: {
+          uri: "https://assets.coingecko.com/coins/images/32884/large/USDT.PNG",
+        },
+        onClick: openTronAddress,
+      });
+    }
     options.sort((a, b) => (a.sortId || 0) - (b.sortId || 0));
   }
 
   return (
     <View style={styles.section}>
-      <TextBody color={color.gray3}>Deposit</TextBody>
+      <TextBody color={color.gray3}>{i18.header()}</TextBody>
       {progress === "started" && (
         <>
           <Spacer h={16} />

@@ -138,9 +138,12 @@ export interface PaymentLinkClog extends ClogBase {
   memo?: string;
 }
 
+/** Offchain transfer trypes */
+type OffChainTransferType = "landline" | "tronBridge";
+
 /** A transfer that happens offchain or on a non-Daimo chain (e.g. TRON). */
 export interface OffchainTransfer {
-  type: "landline"; // future: "tron-bridge", ...
+  type: OffChainTransferType;
 
   transferType: "deposit" | "withdrawal";
   status: "processing" | "completed" | "failed" | "returned";
@@ -158,37 +161,6 @@ export interface OffchainTransfer {
   /** Unix seconds. Time the remote transfer was completed */
   timeFinish?: number;
 }
-
-/**
- * Represents a token swap between two accounts on the same chain.
- * Same chain, different coins.
- *
- * A token swap can be inbound swap (e.g. a Daimo account receives a foreign
- * token transfer in their inbox) or outbound swap (e.g. account Alice sends a
- * foreign token transfer to Bob).
- */
-// export interface SwapClog extends ClogBase {
-//   type: "inboundSwap" | "outboundSwap";
-
-//   from: Address;
-//   to: Address;
-
-//   /** TODO: use bigint? Unnecessary for USDC. MAX_SAFE_INT = $9,007,199,254 */
-//   amount: number; // amount that affects the user
-
-//   /** "Other" coin involved in the swap (i.e. not homeCoin) */
-//   coinOther: ForeignToken;
-
-//   /** Amount of the coinOther in the swap (in native unit of coinOther)
-//    * Uses BigIntStr to avoid number type overflows */
-//   amountOther: BigIntStr;
-
-//   /** Userop nonce, if this transfer occurred in a userop */
-//   nonceMetadata?: Hex;
-
-//   /** Memo, user-generated text for the transfer */
-//   memo?: string;
-// }
 
 export interface KeyRotationClog extends ClogBase {
   type: "keyRotation";
@@ -269,7 +241,8 @@ export type TransferClogType =
   | "transfer"
   | "createLink"
   | "claimLink"
-  | "landline";
+  | "landline"
+  | "tronBridge";
 
 export function getTransferClogType(clog: TransferClog): TransferClogType {
   if (clog.type === "createLink" || clog.type === "claimLink") {

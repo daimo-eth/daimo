@@ -4,7 +4,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import * as Clipboard from "expo-clipboard";
 import React, { useCallback, useContext, useMemo, useState } from "react";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
-import { Address } from "viem";
+import { isAddress } from "viem";
 
 import { DispatcherContext } from "../../action/dispatch";
 import { env } from "../../env";
@@ -62,11 +62,11 @@ function DepositAddressBottomSheetInner({ account }: { account: Account }) {
   );
 }
 
-function AddressCopier({
+export function AddressCopier({
   addr,
   disabled,
 }: {
-  addr: Address;
+  addr: string;
   disabled?: boolean;
 }) {
   const { color, ss, touchHighlightUnderlay } = useTheme();
@@ -81,7 +81,9 @@ function AddressCopier({
 
   const col = disabled ? color.gray3 : color.midnight;
 
-  const addrContracted = getAddressContraction(addr, 12);
+  const addrContracted = isAddress(addr)
+    ? getAddressContraction(addr, 12)
+    : addr.substring(0, 8) + "…" + addr.substring(addr.length - 8);
 
   return (
     <View style={styles.address}>

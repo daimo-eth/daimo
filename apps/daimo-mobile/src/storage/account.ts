@@ -10,6 +10,7 @@ import {
   LandlineAccount,
   LinkedAccount,
   ProposedSwap,
+  ReceivingAddress,
   RecommendedExchange,
   SuggestedAction,
   TransferClog,
@@ -120,6 +121,9 @@ export type Account = {
   landlineSessionURL: string;
   /** Bank accounts connected to the Landline onramp/offramp app **/
   landlineAccounts: LandlineAccount[];
+
+  /** Receiving addresses */
+  receivingAddresses?: ReceivingAddress[] | null;
 };
 
 export function toEAccount(account: Account): EAccount {
@@ -193,6 +197,8 @@ export function parseAccount(accountJSON?: string): Account | null {
 
     landlineSessionURL: a.landlineSessionURL ?? "",
     landlineAccounts: a.landlineAccounts,
+
+    receivingAddresses: a.receivingAddresses,
   };
 }
 
@@ -241,6 +247,8 @@ export function serializeAccount(account: Account | null): string {
 
     landlineSessionURL: account.landlineSessionURL,
     landlineAccounts: account.landlineAccounts,
+
+    receivingAddresses: account.receivingAddresses,
   };
 
   return JSON.stringify(model);
@@ -304,5 +312,7 @@ export function createEmptyAccount(
 
     landlineSessionURL: "",
     landlineAccounts: [],
+
+    receivingAddresses: [],
   };
 }

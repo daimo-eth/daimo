@@ -513,6 +513,7 @@ export const es: LanguageDefinition = {
     screenHeader: () => `Deposite o Retire`,
     go: () => `Ir`,
     continue: () => `Continuar`,
+    header: () => `Deposite`,
     landline: {
       cta: () => `Conectar con Landline`,
       title: () => `Deposite o retire directamente de un banco americano`,
@@ -541,6 +542,22 @@ export const es: LanguageDefinition = {
       cta: () => `Retire con Bitrefill`,
       title: () => `Compre tarjetas de regalo con USDC`,
       success: () => `éxitoso, esperando confirmación`,
+    },
+    tron: {
+      cta: () => `Depositar con Tron USDT`,
+      title: () => `Crear una dirección de recepción de Tron`,
+      createAddress: () => `Crear Dirección de Tron`,
+      description:
+        () => `Cualquier fondo que se envíe a esta dirección en Tron se depositará en tu cuenta
+        de Daimo.`,
+      addressDescription: () =>
+        `Cualquier fondo que se envíe en Tron a esta dirección se depositará en tu cuenta`,
+      createDescription: () =>
+        `Necesitas crear una dirección de recepción de Tron antes de poder depositar a través de Tron.`,
+      kycDescription: () => `⚠️ KYC requerido para transferencias > $1500.`,
+      kycRequired: () => `⚠️ KYC requerido`,
+      kycRequiredDescription: () =>
+        `Límite de depósito superior: KYC requerido.`,
     },
   },
   // errorScreens.tsx

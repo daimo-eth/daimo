@@ -27,6 +27,7 @@ import { Telemetry, zUserAction } from "./telemetry";
 import { TokenRegistry } from "./tokenRegistry";
 import { trpcT } from "./trpc";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
+import { createReceivingAddress } from "../api/createReceivingAddress";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
 import { getAccountHistory } from "../api/getAccountHistory";
@@ -35,6 +36,7 @@ import { getLinkStatus } from "../api/getLinkStatus";
 import { getMemo } from "../api/getMemo";
 import { getSwapQuote } from "../api/getSwapRoute";
 import { healthCheck, healthDebug } from "../api/healthCheck";
+import { ipInBannedArea } from "../api/ip";
 import { ProfileCache } from "../api/profile";
 import { search } from "../api/search";
 import { sendUserOpV2 } from "../api/sendUserOpV2";
@@ -577,6 +579,22 @@ export function createRouter(
         notifier.sendPushNotificationForRequestCreated(status);
         return { txHash, status };
       }),
+
+    createReceivingAddress: publicProcedure
+      .input(
+        z.object({
+          daimoAddr: zAddress,
+          type: z.enum(["tron"]),
+        })
+      )
+      .mutation(async (opts) => {
+        const { type, daimoAddr } = opts.input;
+        return await createReceivingAddress(type, daimoAddr);
+      }),
+
+    ipInBannedArea: publicProcedure.query(async (opts) => {
+      return ipInBannedArea(opts.ctx);
+    }),
 
     updateProfileLinks: publicProcedure
       .input(

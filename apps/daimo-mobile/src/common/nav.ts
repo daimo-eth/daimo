@@ -103,6 +103,7 @@ export type ParamListDeposit = {
   Deposit: undefined;
   LandlineTransfer: LandlineTransferNavProp;
   BitrefillWebView: undefined;
+  LandlineWebView: undefined;
 };
 
 export type ParamListInvite = {

@@ -510,6 +510,7 @@ export const en = {
     screenHeader: () => `Deposit or Withdraw`,
     go: () => `Go`,
     continue: () => `Continue`,
+    header: () => `Deposit`,
     landline: {
       cta: () => `Connect with Landline`,
       title: () => `Deposit or withdraw directly from a US bank account`,
@@ -539,6 +540,19 @@ export const en = {
       cta: () => `Withdraw with Bitrefill`,
       title: () => `Buy gift cards with USDC`,
       success: () => `success, waiting for confirmation`,
+    },
+    tron: {
+      cta: () => `Deposit Tron USDT`,
+      title: () => `Create a Tron receiving address`,
+      createAddress: () => `Create Tron Address`,
+      description: () => `Send USDT TRC-20 to your Daimo account.`,
+      addressDescription: () =>
+        `Any funds sent on Tron to this address will deposit to your Daimo account as USDC.`,
+      createDescription: () =>
+        `You need to create a Tron receiving address before you can deposit via Tron.`,
+      kycDescription: () => `⚠️ KYC required for transfers > $1500.`,
+      kycRequired: () => `⚠️ KYC required`,
+      kycRequiredDescription: () => `Over deposit limit: KYC required.`,
     },
   },
   // errorScreens.tsx

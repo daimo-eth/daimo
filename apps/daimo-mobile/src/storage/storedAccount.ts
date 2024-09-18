@@ -1,3 +1,4 @@
+import { ReceivingAddress } from "@daimo/common";
 import { Address, Hex } from "viem";
 
 import { StoredModel } from "./storedModel";
@@ -65,4 +66,6 @@ export interface StoredV16Account extends StoredModel {
 
   landlineSessionURL?: string;
   landlineAccounts: StoredV15LandlineAccount[];
+
+  receivingAddresses?: ReceivingAddress[] | null;
 }

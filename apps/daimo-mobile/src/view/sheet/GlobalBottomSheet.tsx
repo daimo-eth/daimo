@@ -25,6 +25,7 @@ import { HelpBottomSheet } from "./HelpBottomSheet";
 import { OnboardingChecklistBottomSheet } from "./OnboardingChecklistBottomSheet";
 import { OwnRequestBottomSheet } from "./OwnRequestBottomSheet";
 import { SwapBottomSheet } from "./SwapBottomSheet";
+import { TronBottomSheet } from "./TronBottomSheet";
 import { WithdrawInstructionsBottomSheet } from "./WithdrawInstructionsBottomSheet";
 import { Action, DispatcherContext } from "../../action/dispatch";
 import ScrollPellet from "../shared/ScrollPellet";
@@ -63,6 +64,9 @@ const bottomSheetSettings = {
   bitrefill: {
     dismissable: true,
   },
+  tronAddress: {
+    dismissable: true,
+  },
 } as const;
 
 type DisplayedSheet =
@@ -90,7 +94,8 @@ type DisplayedSheet =
   | {
       action: "bitrefill";
       payload: { address: Address; amount: `${number}` };
-    };
+    }
+  | { action: "tronAddress" };
 
 // Shows the main, global bottom sheet. This ensures that only a single of
 // these sheets is visible at a time. The global sheet appears above any screen
@@ -181,6 +186,10 @@ export function GlobalBottomSheet() {
         setSheet(null);
         break;
       }
+      case "tronAddress": {
+        openBottomSheet({ action: "tronAddress" });
+        break;
+      }
       default: {
         throw new Error(`Unknown action: ${JSON.stringify(action)}`);
       }
@@ -200,6 +209,7 @@ export function GlobalBottomSheet() {
     dispatcher.register("createBackup", handleDispatch);
     dispatcher.register("swap", handleDispatch);
     dispatcher.register("bitrefill", handleDispatch);
+    dispatcher.register("tronAddress", handleDispatch);
   }, []);
 
   console.log(`[APP] rendering bottomSheet=${sheet?.action}`);
@@ -265,6 +275,7 @@ export function GlobalBottomSheet() {
               amount={sheet.payload.amount}
             />
           )}
+          {sheet?.action === "tronAddress" && <TronBottomSheet />}
         </BottomSheetView>
       </BottomSheet>
     </View>

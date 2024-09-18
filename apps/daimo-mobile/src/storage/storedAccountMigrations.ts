@@ -345,6 +345,8 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionURL: "",
       landlineAccounts: [],
+
+      receivingAddresses: [],
     };
   } else if (model.storageVersion === 9) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -389,6 +391,8 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionURL: "",
       landlineAccounts: [],
+
+      receivingAddresses: [],
     };
   } else if (model.storageVersion === 10) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -433,6 +437,8 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionURL: "",
       landlineAccounts: [],
+
+      receivingAddresses: [],
     };
   } else if (model.storageVersion === 11) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -478,6 +484,8 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionURL: "",
       landlineAccounts: [],
+
+      receivingAddresses: [],
     };
   } else if (model.storageVersion === 12) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -522,6 +530,8 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionURL: "",
       landlineAccounts: [],
+
+      receivingAddresses: [],
     };
   } else if (model.storageVersion === 13) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -567,6 +577,8 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionURL: "",
       landlineAccounts: [],
+
+      receivingAddresses: [],
     };
   } else if (model.storageVersion === 14) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -612,6 +624,8 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionURL: "",
       landlineAccounts: [],
+
+      receivingAddresses: [],
     };
   } else if (model.storageVersion === 15) {
     console.log(`[ACCOUNT] MIGRATING v${model.storageVersion} account`);
@@ -656,6 +670,8 @@ export function migrateOldAccount(model: StoredModel): Account {
 
       landlineSessionURL: a.landlineSessionURL || "",
       landlineAccounts: a.landlineAccounts || [],
+
+      receivingAddresses: [],
     };
   } else {
     throw new Error(`Unhandled old storageVersion: ${model.storageVersion}`);

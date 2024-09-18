@@ -31,6 +31,7 @@ import { SettingsScreen } from "./screen/SettingsScreen";
 import { YourInvitesScreen } from "./screen/YourInvitesScreen";
 import { BitrefillWebView } from "./screen/deposit/BitrefillWebview";
 import DepositScreen from "./screen/deposit/DepositScreen";
+import { LandlineWebView } from "./screen/deposit/LandlineWebview";
 import { ErrorScreen } from "./screen/errorScreens";
 import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
 import { DeviceScreen } from "./screen/keyRotation/DeviceScreen";
@@ -363,6 +364,7 @@ function DepositTab() {
         name="BitrefillWebView"
         component={BitrefillWebView}
       />
+      <DepositStack.Screen name="LandlineWebView" component={LandlineWebView} />
     </DepositStack.Navigator>
   );
 }
