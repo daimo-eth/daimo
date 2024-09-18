@@ -268,7 +268,7 @@ export const en = {
     screenHeader: () => `Existing Account`,
     generatingKeys: () => `Generating keys...`,
     scanQR: () =>
-      `Scan this QR code from another device to add this phone to an existing Daimo account.`,
+      `Scan this QR code from another device to add this phone to an existing Daimo account. Go to your Daimo Settings > Add a Device to scan.`,
     useBackup: () => `Use Backup`,
   },
   // ExistingSeedPhraseScreen.tsx
@@ -320,7 +320,7 @@ export const en = {
   onboardingChooseName: {
     screenHeader: () => `Choose Username`,
     instructions: () =>
-      `Choose a username you'll go by on Daimo. Your username is public.`,
+      `Choose a username you'll go by on Daimo. Your username is public & on-chain.`,
     picker: {
       title: () => `choose a username`,
       createButton: () => `CREATE ACCOUNT`,

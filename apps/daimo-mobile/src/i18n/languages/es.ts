@@ -270,7 +270,7 @@ export const es: LanguageDefinition = {
     screenHeader: () => `Cuenta existente`,
     generatingKeys: () => `Generando claves...`,
     scanQR: () =>
-      `Escanea este QR desde otro dispositivo para añadir este teléfono a una cuenta de Daimo.`,
+      `Escanea este QR desde otro dispositivo para añadir este teléfono a una cuenta de Daimo. Ve a tu Configuración de Daimo > Agregar un dispositivo para escanear.`,
     useBackup: () => `Usar Copia de Seguridad`,
   },
   // ExistingSeedPhraseScreen.tsx
@@ -323,7 +323,7 @@ export const es: LanguageDefinition = {
   onboardingChooseName: {
     screenHeader: () => `Elija su Usuario`,
     instructions: () =>
-      `Elija a un nombre de usuario que utilizará en Daimo. Tu usuario es publico.`,
+      `Elija a un nombre de usuario que utilizará en Daimo. Tu usuario es publico & en cadena.`,
     picker: {
       title: () => `elija un usuario`,
       createButton: () => `CREAR CUENTA`,
