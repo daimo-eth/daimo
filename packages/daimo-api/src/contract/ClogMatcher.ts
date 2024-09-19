@@ -1,5 +1,5 @@
 import { assertNotNull, debugJson, retryBackoff } from "@daimo/common";
-import { daimoFastCctpAddress } from "@daimo/userop/dist/daimoOpSender";
+import { daimoFastCctpAddress } from "@daimo/contract";
 import { Kysely } from "kysely";
 import {
   Address,
