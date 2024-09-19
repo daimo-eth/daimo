@@ -155,7 +155,7 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
   useInitNavLinks();
 
   return (
-    <ThemeBackground>
+    <ThemeBackground hide={searchPrefix != null}>
       <View>
         <OfflineHeader dontTakeUpSpace offlineExtraMarginBottom={16} />
         <Animated.ScrollView

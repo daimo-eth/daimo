@@ -12,8 +12,16 @@ import { useTheme } from "../theme";
  * Wraps the home screen components with the skin background.
  */
 
-export function ThemeBackground({ children }: { children: React.ReactNode }) {
+export function ThemeBackground({
+  children,
+  hide,
+}: {
+  children: React.ReactNode;
+  hide?: boolean;
+}) {
   const { theme } = useTheme();
+
+  if (hide) return <View style={styles.background}>{children}</View>;
 
   switch (theme.name) {
     case Skin.doge:
