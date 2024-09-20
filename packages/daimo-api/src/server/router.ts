@@ -60,7 +60,11 @@ import { DB } from "../db/db";
 import { ExternalApiCache } from "../db/externalApiCache";
 import { IndexWatcher } from "../db/indexWatcher";
 import { getEnvApi } from "../env";
-import { landlineDeposit } from "../landline/connector";
+import {
+  ShouldFastFinishResponse,
+  landlineDeposit,
+  validateLandlineDeposit,
+} from "../landline/connector";
 import { runWithLogContext } from "../logging";
 import { BinanceClient } from "../network/binanceClient";
 import { BundlerClient } from "../network/bundlerClient";
@@ -717,6 +721,20 @@ export function createRouter(
           action.memo
         );
 
+        return response;
+      }),
+
+    validateOffchainDeposit: publicProcedure
+      .input(
+        z.object({
+          daimoAddress: zAddress,
+          amount: zBigIntStr,
+        })
+      )
+      .query(async (opts) => {
+        const { daimoAddress, amount } = opts.input;
+        const response: ShouldFastFinishResponse =
+          await validateLandlineDeposit({ daimoAddress, amount });
         return response;
       }),
 
