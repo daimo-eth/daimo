@@ -598,6 +598,13 @@ export const en = {
       minimumDeposit: () => `Minimum deposit of 1 USD`,
       minimumWithdraw: () => `Minimum withdrawal of 1 USDC`,
     },
+    depositStatus: {
+      shouldFastFinish: () => `Funds will arrive instantly.`,
+      txLimit: () =>
+        `⚠️ This deposit exceeds maximum instant deposit limit ($1000). Expect funds to arrive in 1-3 business days.`,
+      monthlyLimit: () =>
+        `⚠️ This deposit will exceed your monthly instant deposit limit ($5000/mo). Expect funds to arrive in 1-3 business days.`,
+    },
   },
   // ProfileScreen.tsx
   profile: {

@@ -1,4 +1,4 @@
-import { LandlineAccount, LandlineTransfer } from "@daimo/common";
+import { LandlineAccount, LandlineTransfer, debugJson } from "@daimo/common";
 import { Address } from "viem";
 
 import { landlineTrpc } from "./trpc";
@@ -117,5 +117,39 @@ export async function landlineDeposit(
     console.error(`[LANDLINE] error making deposit`, err);
     // Gracefully return error status
     return { status: "error" };
+  }
+}
+
+// TODO: remove all duplicate types across repos
+export type FastFinishRejectReason = "tx-limit" | "monthly-limit";
+export type ShouldFastFinishResponse = {
+  shouldFastFinish: boolean;
+  reason: FastFinishRejectReason | null;
+};
+
+/**
+ * Performs any necessary validations before initiating a Landline deposit.
+ * @param daimoAddress destination address of the deposit (Daimo account)
+ * @param amount amount in the units of the destination token (USDC)
+ * @returns
+ */
+export async function validateLandlineDeposit(args: {
+  daimoAddress: Address;
+  amount: string;
+}) {
+  console.log(`[LANDLINE] validating deposit ${debugJson(args)}`);
+  try {
+    const response: ShouldFastFinishResponse =
+      // @ts-ignore
+      await landlineTrpc.shouldFastDeposit.query({
+        daimoAddress: args.daimoAddress,
+        amount: args.amount,
+      });
+    console.log(
+      `[LANDLINE] validateLandlineDeposit ${debugJson({ args, response })}`
+    );
+    return response;
+  } catch (err: any) {
+    throw new Error("[LANDLINE] error validating deposit", err);
   }
 }
