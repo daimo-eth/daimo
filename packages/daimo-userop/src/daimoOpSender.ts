@@ -12,7 +12,7 @@ import {
 import * as Contracts from "@daimo/contract";
 import {
   DAv2Chain,
-  daimoFastCctpABI,
+  daimoFastCctpV1ABI,
   daimoFastCctpV1Address,
   erc20ABI,
   getBridgeCoin,
@@ -437,7 +437,7 @@ export class DaimoOpSender {
           dest: daimoFastCctpV1Address,
           value: 0n,
           data: encodeFunctionData({
-            abi: daimoFastCctpABI,
+            abi: daimoFastCctpV1ABI,
             functionName: "startTransfer",
             args: [
               cctpMessengerAddr,
