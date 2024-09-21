@@ -11,6 +11,8 @@ import {
 } from "react-native";
 
 import { LandlineDepositButton } from "./send/LandlineDepositButton";
+import { MemoPellet, SendMemoButton } from "./send/MemoDisplay";
+import { SendTransferButton } from "./send/SendTransferButton";
 import {
   LandlineTransferNavProp,
   ParamListDeposit,
@@ -28,8 +30,6 @@ import {
 import { MoneyEntry, zeroUSDEntry } from "../../logic/moneyEntry";
 import { getRpcHook } from "../../logic/trpc";
 import { Account } from "../../storage/account";
-import { MemoPellet, SendMemoButton } from "../screen/send/MemoDisplay";
-import { SendTransferButton } from "../screen/send/SendTransferButton";
 import { AmountChooser } from "../shared/AmountInput";
 import { ButtonBig } from "../shared/Button";
 import { ContactDisplay } from "../shared/ContactDisplay";
@@ -77,11 +77,7 @@ function LandlineTransferScreenInner({
   }, [nav, money, recipient]);
 
   const sendDisplay = (() => {
-    if (
-      money == null ||
-      bankTransferOption === undefined ||
-      depositStatus == null
-    )
+    if (money == null || bankTransferOption === undefined) {
       return (
         <SendChooseAmount
           recipient={recipient}
@@ -89,7 +85,7 @@ function LandlineTransferScreenInner({
           daimoChain={daimoChain}
         />
       );
-    else
+    } else {
       return (
         <SendConfirm
           {...{
@@ -102,6 +98,7 @@ function LandlineTransferScreenInner({
           }}
         />
       );
+    }
   })();
 
   return (
@@ -274,7 +271,7 @@ function SendConfirm({
   money: MoneyEntry;
   memo: string | undefined;
   bankTransferOption: BankTransferOptions;
-  depositStatus: ShouldFastFinishResponse;
+  depositStatus?: ShouldFastFinishResponse;
 }) {
   const nav = useNav();
   const { ss } = useTheme();
@@ -345,15 +342,23 @@ function SendConfirm({
         <Spacer h={40} />
       )}
       <Spacer h={16} />
-      <TextLight>{getDepositStatusText(depositStatus)}</TextLight>
+      <TextCenter>
+        <TextLight>
+          {bankTransferOption === BankTransferOptions.Deposit
+            ? getDepositStatusText(depositStatus)
+            : i18.withdrawStatus.standard()}
+        </TextLight>
+      </TextCenter>
       <Spacer h={16} />
       {button}
     </View>
   );
 }
 
-function getDepositStatusText(status: ShouldFastFinishResponse): string {
-  if (status.shouldFastFinish) {
+function getDepositStatusText(status?: ShouldFastFinishResponse): string {
+  if (status == null) {
+    return "...";
+  } else if (status.shouldFastFinish) {
     return i18.depositStatus.shouldFastFinish();
   } else if (status.reason === "tx-limit") {
     return i18.depositStatus.txLimit();

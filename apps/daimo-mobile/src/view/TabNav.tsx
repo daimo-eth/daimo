@@ -23,7 +23,7 @@ import { EdgeInsets, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import HomeScreen from "./screen/HomeScreen";
 import { InviteScreen } from "./screen/InviteScreen";
-import LandlineTransferScreen from "./screen/LandlineBankTransfer";
+import LandlineTransferScreen from "./screen/LandlineTransferScreen";
 import { ProfileScreen } from "./screen/ProfileScreen";
 import { QRScreen } from "./screen/QRScreen";
 import { SeedPhraseScreen } from "./screen/SeedPhraseScreen";

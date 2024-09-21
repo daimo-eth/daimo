@@ -601,9 +601,12 @@ export const en = {
     depositStatus: {
       shouldFastFinish: () => `Funds will arrive instantly.`,
       txLimit: () =>
-        `⚠️ This deposit exceeds maximum instant deposit limit ($1000). Expect funds to arrive in 1-3 business days.`,
+        `This deposit exceeds maximum instant deposit limit ($1000). Funds arrive in 1-3 business days.`,
       monthlyLimit: () =>
-        `⚠️ This deposit will exceed your monthly instant deposit limit ($5000/mo). Expect funds to arrive in 1-3 business days.`,
+        `This deposit will exceed your monthly instant deposit limit ($5000/mo). Funds arrive in 1-3 business days.`,
+    },
+    withdrawStatus: {
+      standard: () => `Funds arrive within 3 business days.`,
     },
   },
   // ProfileScreen.tsx
