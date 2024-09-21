@@ -30,7 +30,6 @@ contract DummySwapper is IDaimoSwapper {
 
     function swapToCoin(
         IERC20 tokenIn,
-        uint256 amountIn,
         IERC20 tokenOut,
         bytes calldata extraData
     ) external payable returns (uint256 amountOut) {
@@ -48,7 +47,7 @@ contract DummySwapper is IDaimoSwapper {
 
         require(tokenIn == expectedTokenIn, "wrong tokenIn");
         require(tokenOut == expectedTokenOut, "wrong tokenOut");
-        tokenIn.transferFrom(msg.sender, address(this), amountIn);
+        uint256 amountIn = tokenIn.balanceOf(address(this));
 
         if (extraData.length > 0) {
             // Call the reentrant swapAndTip() function

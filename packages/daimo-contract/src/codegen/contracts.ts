@@ -2034,7 +2034,6 @@ export const daimoFlexSwapperABI = [
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
-      { name: 'amountIn', internalType: 'uint256', type: 'uint256' },
       { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
       { name: 'extraData', internalType: 'bytes', type: 'bytes' },
     ],
@@ -2943,7 +2942,6 @@ export const dummySwapperABI = [
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
-      { name: 'amountIn', internalType: 'uint256', type: 'uint256' },
       { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
       { name: 'extraData', internalType: 'bytes', type: 'bytes' },
     ],
