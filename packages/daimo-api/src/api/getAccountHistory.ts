@@ -14,6 +14,7 @@ import {
   TransferClog,
   appStoreLinks,
   assert,
+  assertNotNull,
   daimoDomainAddress,
   formatDaimoLink,
   getLandlineAccountName,
@@ -164,9 +165,6 @@ export async function getAccountHistory(
   // Prefetch info required to send operations > fast at time of sending.
   const chainGasConstants = await paymaster.calculateChainGasConstants(eAcc);
 
-  // Prefetch info required to deposit to your Daimo account.
-  const recommendedExchanges = fetchRecommendedExchanges(eAcc, lang);
-
   // Get linked accounts
   const linkedAccounts = profileCache.getLinkedAccounts(address);
   const inviteLinkStatus = inviteCode
@@ -205,9 +203,9 @@ export async function getAccountHistory(
   let landlineSessionURL = "";
   let landlineAccounts: LandlineAccount[] = [];
 
-  const showLandline = FeatFlag.landline(eAcc);
-  if (getEnvApi().LANDLINE_API_URL && showLandline) {
-    const landlineSessionKey = (await getLandlineSession(address)).key;
+  let landlineSessionKey: string | undefined;
+  if (getEnvApi().LANDLINE_API_URL) {
+    landlineSessionKey = (await getLandlineSession(address)).key;
     landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts(address);
     // Support for displaying landline transfers in the mobile app was added
@@ -229,6 +227,13 @@ export async function getAccountHistory(
     landlineAccounts,
     nameReg
   );
+
+  // Prefetch info required to deposit to your Daimo account.
+  const recommendedExchanges = await fetchRecommendedExchanges({
+    account: eAcc,
+    language: lang,
+    landlineSessionKey,
+  });
 
   const ret: AccountHistoryResult = {
     address,
@@ -357,13 +362,18 @@ function getCoinbaseURL(account: EAccount) {
   });
 }
 
-function fetchRecommendedExchanges(
-  account: EAccount,
-  lang?: string
-): RecommendedExchange[] {
-  const i18 = i18n(lang).recommendedExchange;
+function fetchRecommendedExchanges({
+  account,
+  language,
+  landlineSessionKey,
+}: {
+  account: EAccount;
+  language?: string;
+  landlineSessionKey?: string;
+}): RecommendedExchange[] {
+  const i18 = i18n(landlineSessionKey).recommendedExchange;
 
-  return [
+  const ret = [
     {
       cta: i18.bridge.cta(),
       title: i18.bridge.title(),
@@ -384,7 +394,20 @@ function fetchRecommendedExchanges(
       cta: i18.ramp.cta(),
       url: getRampNetworkURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/usdc.png`,
-      sortId: 3,
+      sortId: 4,
     },
   ];
+
+  if (landlineSessionKey != null && FeatFlag.tronramp(account)) {
+    const llHost = assertNotNull(getEnvApi().LANDLINE_DOMAIN);
+    ret.push({
+      title: `Preview · Tron Deposit`,
+      cta: `Get a USDT TRC-20 receiving address`,
+      url: `${llHost}/tron/${account.addr}/${landlineSessionKey}`,
+      logo: `${daimoDomainAddress}/assets/deposit/usdt-tron.png`,
+      sortId: 3,
+    });
+  }
+
+  return ret;
 }

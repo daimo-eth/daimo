@@ -150,5 +150,5 @@ export class Telemetry {
 
 function getIpCountry(ipAddr: string) {
   const ipGeo = geoIP.lookup(ipAddr);
-  return ipGeo?.country || "Atlantis";
+  return ipGeo?.country || "Unknown";
 }

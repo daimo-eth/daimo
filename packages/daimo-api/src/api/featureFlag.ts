@@ -1,7 +1,7 @@
 import { EAccount } from "@daimo/common";
 
 export class FeatFlag {
-  public static landline(account: EAccount & { name: string }) {
+  public static tronramp(account: EAccount) {
     return [
       "dcposch",
       "klee",
@@ -10,6 +10,8 @@ export class FeatFlag {
       "hanna",
       "sfl",
       "sbg",
-    ].includes(account.name);
+      "ansgar",
+      "liam",
+    ].includes(account.name || "");
   }
 }
