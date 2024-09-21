@@ -603,6 +603,13 @@ export const es: LanguageDefinition = {
       minimumDeposit: () => `La cantidad mínima para depositar es 1 USD`,
       minimumWithdraw: () => `La cantidad mínima para retirar es 1 USDC`,
     },
+    depositStatus: {
+      shouldFastFinish: () => `Los fondos llegarán instantáneamente.`,
+      txLimit: () =>
+        `⚠️ Este depósito excede el límite máximo de depósito instantáneo ($1000). Espere que los fondos lleguen en 1-3 días hábiles.`,
+      monthlyLimit: () =>
+        `⚠️ Este depósito excederá su límite mensual de depósito instantáneo ($5000/mes). Espere que los fondos lleguen en 1-3 días hábiles.`,
+    },
   },
   // ProfileScreen.tsx
   profile: {

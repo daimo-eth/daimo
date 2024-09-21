@@ -1,3 +1,5 @@
+import { ShouldFastFinishResponse } from "@daimo/api/src/landline/connector";
+import { dollarsToAmount } from "@daimo/common";
 import { baseUSDC, DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
@@ -16,6 +18,7 @@ import {
   useNav,
 } from "../../common/nav";
 import { i18n } from "../../i18n";
+import { useAccount } from "../../logic/accountManager";
 import { BankTransferOptions } from "../../logic/bankTransferOptions";
 import {
   DaimoContact,
@@ -54,6 +57,7 @@ function LandlineTransferScreenInner({
   memo,
   account,
   bankTransferOption,
+  depositStatus,
 }: LandlineTransferNavProp & { account: Account }) {
   // TODO(andrew): add check that landlineAccount chain is the same as daimoChain
   const daimoChain = daimoChainFromId(account.homeChainId);
@@ -73,7 +77,11 @@ function LandlineTransferScreenInner({
   }, [nav, money, recipient]);
 
   const sendDisplay = (() => {
-    if (money == null || bankTransferOption === undefined)
+    if (
+      money == null ||
+      bankTransferOption === undefined ||
+      depositStatus == null
+    )
       return (
         <SendChooseAmount
           recipient={recipient}
@@ -84,7 +92,14 @@ function LandlineTransferScreenInner({
     else
       return (
         <SendConfirm
-          {...{ account, recipient, memo, money, bankTransferOption }}
+          {...{
+            account,
+            recipient,
+            memo,
+            money,
+            bankTransferOption,
+            depositStatus,
+          }}
         />
       );
   })();
@@ -133,6 +148,8 @@ function SendChooseAmount({
   daimoChain: DaimoChain;
   onCancel: () => void;
 }) {
+  const account = useAccount();
+
   // Deposit or withdrawal?
   const [selectedTransferOption, setSelectedTransferOption] =
     useState<BankTransferOptions>(BankTransferOptions.Deposit);
@@ -157,6 +174,7 @@ function SendChooseAmount({
         money,
         memo,
         bankTransferOption: selectedTransferOption,
+        depositStatus,
       },
     });
 
@@ -164,6 +182,14 @@ function SendChooseAmount({
   const rpcHook = getRpcHook(daimoChain);
   const result = rpcHook.validateMemo.useQuery({ memo });
   const memoStatus = result.data;
+
+  // Check instant deposit limits
+  if (account == null) return null;
+  const depositCheck = rpcHook.validateOffchainDeposit.useQuery({
+    daimoAddress: account.address,
+    amount: dollarsToAmount(money.dollars).toString(),
+  });
+  const depositStatus = depositCheck.data;
 
   return (
     <View>
@@ -241,12 +267,14 @@ function SendConfirm({
   money,
   memo,
   bankTransferOption,
+  depositStatus,
 }: {
   account: Account;
   recipient: LandlineBankAccountContact;
   money: MoneyEntry;
   memo: string | undefined;
   bankTransferOption: BankTransferOptions;
+  depositStatus: ShouldFastFinishResponse;
 }) {
   const nav = useNav();
   const { ss } = useTheme();
@@ -317,9 +345,22 @@ function SendConfirm({
         <Spacer h={40} />
       )}
       <Spacer h={16} />
+      <TextLight>{getDepositStatusText(depositStatus)}</TextLight>
+      <Spacer h={16} />
       {button}
     </View>
   );
+}
+
+function getDepositStatusText(status: ShouldFastFinishResponse): string {
+  if (status.shouldFastFinish) {
+    return i18.depositStatus.shouldFastFinish();
+  } else if (status.reason === "tx-limit") {
+    return i18.depositStatus.txLimit();
+  } else if (status.reason === "monthly-limit") {
+    return i18.depositStatus.monthlyLimit();
+  }
+  return "";
 }
 
 const styles = StyleSheet.create({

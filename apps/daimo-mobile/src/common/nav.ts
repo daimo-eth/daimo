@@ -1,3 +1,4 @@
+import { ShouldFastFinishResponse } from "@daimo/api/src/landline/connector";
 import {
   DaimoLink,
   DaimoLinkAccount,
@@ -140,6 +141,7 @@ export interface LandlineTransferNavProp {
   money?: MoneyEntry;
   memo?: string;
   bankTransferOption?: BankTransferOptions;
+  depositStatus?: ShouldFastFinishResponse;
 }
 
 export type ParamListTab = {
