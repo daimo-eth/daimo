@@ -1,13 +1,9 @@
-import {
-  AccountChain,
-  assert,
-  debugJson,
-  getAccountChain,
-} from "@daimo/common";
 import fs from "node:fs/promises";
 import { getAddress, Hex, isAddress } from "viem";
 
-import { ForeignToken, baseUSDbC, baseUSDC } from "../src/foreignToken";
+import { assert } from "./util";
+import { DAv2Chain, getDAv2Chain } from "../src";
+import { baseUSDbC, baseUSDC, ForeignToken } from "../src/foreignToken";
 
 const tokenListURLs = [
   "https://tokens.coingecko.com/ethereum/all.json",
@@ -42,7 +38,7 @@ async function main() {
   for (const url of tokenListURLs) {
     // Add coins from token list
     const tokenList = (await fetchJson(url)) as TokenListResponse;
-    const chain = getAccountChain(tokenList.tokens[0].chainId);
+    const chain = getDAv2Chain(tokenList.tokens[0].chainId);
     assert(!chain.isTestnet, "Token lists used only for mainnet chains");
 
     const tokens = tokenList.tokens
@@ -69,12 +65,12 @@ async function fetchJson(url: string) {
 const customOverrides = [baseUSDC, baseUSDbC] as ForeignToken[];
 
 function getForeignToken(
-  chain: AccountChain,
+  chain: DAv2Chain,
   token: TokenListToken
 ): ForeignToken | null {
   assert(
     token.chainId === chain.chainId,
-    `Unsupported: ${debugJson({ token, chain })}`
+    `Unsupported: ${JSON.stringify({ token, chain })}`
   );
   const largeLogo = token.logoURI?.split("?")[0].replace("thumb", "large");
 

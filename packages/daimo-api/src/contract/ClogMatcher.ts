@@ -1,5 +1,5 @@
 import { assertNotNull, debugJson, retryBackoff } from "@daimo/common";
-import { daimoFastCctpAddress } from "@daimo/contract";
+import { daimoFastCCTPAddrs } from "@daimo/contract";
 import { Kysely } from "kysely";
 import {
   Address,
@@ -247,7 +247,7 @@ export class ClogMatcher {
     if (!transfers || transfers.length === 0) return null;
 
     // First check whether the transfer is cross-chain.
-    if (to === daimoFastCctpAddress || isInbound) {
+    if (daimoFastCCTPAddrs.includes(to) || isInbound) {
       return transfers.find(
         (t) => t.foreignToken.chainId !== chainConfig.chainL2.id
       );

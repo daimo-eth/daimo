@@ -1,3 +1,5 @@
+import { Address } from "viem";
+
 import {
   daimoNameRegistryABI,
   daimoNameRegistryProxyAddress,
@@ -37,8 +39,21 @@ export const nameRegistryProxyConfig = {
 } as const;
 
 // CREATE3 addresses
-export const daimoFastCctpAddress =
+
+/** Latest DaimoFastCCTP address */
+export const daimoFastCctpV1Address =
   "0x92275f59CEB72DD132de54F726f767ab6ba9559f";
+
+/** Old DaimoFastCCTP address */
+export const daimoFastCCTPV0Address =
+  "0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B";
+
+/** All DaimoFastCCTP addresses */
+export const daimoFastCCTPAddrs: Address[] = [
+  daimoFastCCTPV0Address,
+  daimoFastCctpV1Address,
+];
+
 export const daimoFlexSwapperAddress =
   "0x52A7Fb58f1F26fd57B4a3aAE55d6c51a38A73610";
 export const daimoCctpBridgerAddress =

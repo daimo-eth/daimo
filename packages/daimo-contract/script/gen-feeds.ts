@@ -1,4 +1,3 @@
-import { assert, debugJson, optimismWETH } from "@daimo/common";
 import fs from "node:fs/promises";
 import {
   Address,
@@ -12,6 +11,7 @@ import {
 import { arbitrum, base, mainnet, optimism, polygon } from "viem/chains";
 
 import { ChainlinkFeed, PricedToken } from "./scriptModels";
+import { assert, assertNotNull } from "./util";
 import {
   aggregatorV2V3InterfaceABI,
   arbitrumWETH,
@@ -20,7 +20,8 @@ import {
   erc20ABI,
   ethereumWETH,
   ForeignToken,
-  getAccountChain,
+  getDAv2Chain,
+  optimismWETH,
   polygonWETH,
   polygonWMATIC,
 } from "../src";
@@ -218,7 +219,7 @@ function parseChainlinkFeeds(rawJsons: any[]): ChainlinkFeed[] {
       }
 
       if (rFeed.docs.blockchainName !== chainName) {
-        console.log(`Skipping feed, wrong chain: ${debugJson(rFeed)}`);
+        console.log(`Skipping feed, wrong chain: ${JSON.stringify(rFeed)}`);
         continue;
       }
       assert(
@@ -289,7 +290,7 @@ async function priceTokens(
       blockTimestamp = Number(block.timestamp);
     }
 
-    const accChain = getAccountChain(token.chainId);
+    const accChain = getDAv2Chain(token.chainId);
     const usdcAddr = accChain.bridgeCoin.token;
 
     // Get Chainlink price feed for this token, if available
@@ -414,7 +415,7 @@ async function quoteToken({
     chainId: token.chainId,
     tokenSymbol: token.symbol,
     tokenAddress,
-    tokenName: token.name,
+    tokenName: assertNotNull(token.name),
     tokenDecimals: tokenDec,
     logoURI: token.logoURI,
     blockNumber,

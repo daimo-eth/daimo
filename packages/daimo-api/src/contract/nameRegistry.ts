@@ -10,7 +10,11 @@ import {
   retryBackoff,
   validateName,
 } from "@daimo/common";
-import { nameRegistryProxyConfig, teamDaimoFaucetAddr } from "@daimo/contract";
+import {
+  daimoFastCCTPAddrs,
+  nameRegistryProxyConfig,
+  teamDaimoFaucetAddr,
+} from "@daimo/contract";
 import { Kysely } from "kysely";
 import {
   Address,
@@ -60,6 +64,9 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   "0xb4CB800910B228ED3d0834cF79D697127BBB00e5": AddrLabel.UniswapETHPool,
   // Known Binance addresses on Base
   "0x3304E22DDaa22bCdC5fCa2269b418046aE7b566A": AddrLabel.Binance,
+  // Cross-chain FastCCTP addresses
+  "0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B": AddrLabel.FastCCTP,
+  "0x92275f59CEB72DD132de54F726f767ab6ba9559f": AddrLabel.FastCCTP,
 };
 
 // Validate that current addresses are correctly recorded.
@@ -71,7 +78,7 @@ export const specialAddrLabels: { [_: Address]: AddrLabel } = {
   assertEqual(s[chainConfig.notesV1Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.notesV2Address], AddrLabel.PaymentLink);
   assertEqual(s[chainConfig.uniswapETHPoolAddress], AddrLabel.UniswapETHPool);
-  // TODO: assertEqual(s[daimoFastCctpAddress], AddrLabel.FastCCTP);
+  daimoFastCCTPAddrs.forEach((a) => assertEqual(s[a], AddrLabel.FastCCTP));
 }
 
 // Represents a Daimo name registration.
