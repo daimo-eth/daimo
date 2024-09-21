@@ -205,14 +205,19 @@ export async function getAccountHistory(
 
   let landlineSessionKey: string | undefined;
   if (getEnvApi().LANDLINE_API_URL) {
-    landlineSessionKey = (await getLandlineSession(address)).key;
+    const daimoAddress = address;
+    const llSession = await getLandlineSession({ daimoAddress }, ctx);
+    landlineSessionKey = llSession.key;
     landlineSessionURL = getLandlineURL(address, landlineSessionKey);
-    landlineAccounts = await getLandlineAccounts(address);
+    landlineAccounts = await getLandlineAccounts({ daimoAddress }, ctx);
     // Support for displaying landline transfers in the mobile app was added
     // in version 1.9.7 and doesn't support backcompat.
     // Only add landline transfers if the app version is > 1.9.6
     if (appVersion && semver.gt(appVersion, "1.9.6")) {
-      const landlineTransfers = await getLandlineTransfers(address);
+      const landlineTransfers = await getLandlineTransfers(
+        { daimoAddress },
+        ctx
+      );
       transferClogs = addLandlineTransfers(
         landlineTransfers,
         transferClogs,

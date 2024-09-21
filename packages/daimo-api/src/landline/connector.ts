@@ -3,6 +3,7 @@ import { Address } from "viem";
 
 import { landlineTrpc } from "./trpc";
 import { getEnvApi } from "../env";
+import { TrpcRequestContext } from "../server/trpc";
 
 export interface LandlineSessionKey {
   key: string;
@@ -21,15 +22,25 @@ export function getLandlineURL(daimoAddress: string, sessionKey: string) {
 }
 
 export async function getLandlineSession(
-  daimoAddress: Address
+  {
+    daimoAddress,
+  }: {
+    daimoAddress: Address;
+  },
+  context: TrpcRequestContext
 ): Promise<LandlineSessionKey> {
   console.log(`[LANDLINE] getting session key for ${daimoAddress}`);
 
   try {
     // @ts-ignore
-    const sessionKey = await landlineTrpc.getOrCreateSessionKey.mutate({
-      daimoAddress,
-    });
+    const sessionKey = await landlineTrpc.getOrCreateSessionKey.mutate(
+      {
+        daimoAddress,
+      },
+      {
+        context,
+      }
+    );
     console.log(`[LANDLINE] got session key for ${daimoAddress}`);
     return sessionKey;
   } catch (err: any) {
@@ -43,16 +54,26 @@ export async function getLandlineSession(
 }
 
 export async function getLandlineAccounts(
-  daimoAddress: Address
+  {
+    daimoAddress,
+  }: {
+    daimoAddress: Address;
+  },
+  context: TrpcRequestContext
 ): Promise<LandlineAccount[]> {
   console.log(`[LANDLINE] getting external accounts for ${daimoAddress}`);
 
   try {
     const landlineAccounts =
       // @ts-ignore
-      await landlineTrpc.getExternalAccountsTransferInfo.query({
-        daimoAddress,
-      });
+      await landlineTrpc.getExternalAccountsTransferInfo.query(
+        {
+          daimoAddress,
+        },
+        {
+          context,
+        }
+      );
     console.log(`[LANDLINE] got external accounts for ${daimoAddress}`);
     // TODO: change to number. Currently a string for backcompat
     return landlineAccounts.map((account: any) => ({
@@ -70,28 +91,47 @@ export async function getLandlineAccounts(
 }
 
 export async function getLandlineTransfers(
-  daimoAddress: Address,
-  createdAfter?: number
+  {
+    daimoAddress,
+    createdAfterS,
+  }: {
+    daimoAddress: Address;
+    createdAfterS?: number;
+  },
+  context: TrpcRequestContext
 ): Promise<LandlineTransfer[]> {
   // Convert createdAfter from Unix seconds to a Date object if it's provided
-  const createdAfterDate = createdAfter
-    ? new Date(createdAfter * 1000)
+  const createdAfter = createdAfterS
+    ? new Date(createdAfterS * 1000)
     : undefined;
 
   const transfers =
     // @ts-ignore
-    await landlineTrpc.getAllLandlineTransfers.query({
-      daimoAddress,
-      createdAfter: createdAfterDate,
-    });
+    await landlineTrpc.getAllLandlineTransfers.query(
+      {
+        daimoAddress,
+        createdAfter,
+      },
+      {
+        context,
+      }
+    );
   return transfers;
 }
 
 export async function landlineDeposit(
-  daimoAddress: Address,
-  landlineAccountUuid: string,
-  amount: string,
-  memo: string | undefined
+  {
+    daimoAddress,
+    landlineAccountUuid,
+    amount,
+    memo,
+  }: {
+    daimoAddress: Address;
+    landlineAccountUuid: string;
+    amount: string;
+    memo?: string;
+  },
+  context: TrpcRequestContext
 ): Promise<LandlineDepositResponse> {
   console.log("[LANDLINE] making deposit", {
     daimoAddress,
@@ -102,12 +142,17 @@ export async function landlineDeposit(
 
   try {
     // @ts-ignore
-    const depositResponse = await landlineTrpc.deposit.mutate({
-      daimoAddress,
-      landlineAccountUuid,
-      amount,
-      memo,
-    });
+    const depositResponse = await landlineTrpc.deposit.mutate(
+      {
+        daimoAddress,
+        landlineAccountUuid,
+        amount,
+        memo,
+      },
+      {
+        context,
+      }
+    );
     console.log(
       `[LANDLINE] created deposit for ${daimoAddress}, landlineAccountUuid: ${landlineAccountUuid}, amount: ${amount}, memo: ${memo}`,
       depositResponse
@@ -133,18 +178,26 @@ export type ShouldFastFinishResponse = {
  * @param amount amount in the units of the destination token (USDC)
  * @returns
  */
-export async function validateLandlineDeposit(args: {
-  daimoAddress: Address;
-  amount: string;
-}) {
+export async function validateLandlineDeposit(
+  args: {
+    daimoAddress: Address;
+    amount: string;
+  },
+  context: TrpcRequestContext
+) {
   console.log(`[LANDLINE] validating deposit ${debugJson(args)}`);
   try {
     const response: ShouldFastFinishResponse =
       // @ts-ignore
-      await landlineTrpc.shouldFastDeposit.query({
-        daimoAddress: args.daimoAddress,
-        amount: args.amount,
-      });
+      await landlineTrpc.shouldFastDeposit.query(
+        {
+          daimoAddress: args.daimoAddress,
+          amount: args.amount,
+        },
+        {
+          context,
+        }
+      );
     console.log(
       `[LANDLINE] validateLandlineDeposit ${debugJson({ args, response })}`
     );

@@ -715,10 +715,13 @@ export function createRouter(
         assert(action.type === "landlineDeposit", "Invalid action type");
 
         const response = await landlineDeposit(
-          daimoAddress,
-          action.landlineAccountUuid,
-          action.amount,
-          action.memo
+          {
+            daimoAddress,
+            landlineAccountUuid: action.landlineAccountUuid,
+            amount: action.amount,
+            memo: action.memo,
+          },
+          opts.ctx
         );
 
         return response;
@@ -734,7 +737,7 @@ export function createRouter(
       .query(async (opts) => {
         const { daimoAddress, amount } = opts.input;
         const response: ShouldFastFinishResponse =
-          await validateLandlineDeposit({ daimoAddress, amount });
+          await validateLandlineDeposit({ daimoAddress, amount }, opts.ctx);
         return response;
       }),
 
