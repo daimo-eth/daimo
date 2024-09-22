@@ -3,13 +3,14 @@ import {
   DaimoNoteStatus,
   amountToDollars,
   assertNotNull,
+  bytesToAddr,
   debugJson,
   getEAccountStr,
   getNoteId,
   retryBackoff,
 } from "@daimo/common";
 import { Kysely } from "kysely";
-import { Address, Hex, bytesToHex, getAddress } from "viem";
+import { Address, Hex, bytesToHex } from "viem";
 
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
@@ -99,11 +100,11 @@ export class NoteIndexer extends Indexer {
       transactionIndex: Number(r.tx_idx),
       logIndex: Number(r.log_idx),
       transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
-      from: getAddress(bytesToHex(r.creator, { size: 20 })),
-      redeemer: r.redeemer && getAddress(bytesToHex(r.redeemer, { size: 20 })),
-      ephemeralOwner: getAddress(bytesToHex(r.ephemeral_owner, { size: 20 })),
+      from: bytesToAddr(r.creator),
+      redeemer: r.redeemer && bytesToAddr(r.redeemer),
+      ephemeralOwner: bytesToAddr(r.ephemeral_owner),
       amount: BigInt(r.amount),
-      logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
+      logAddr: bytesToAddr(r.log_addr),
     }));
   }
 

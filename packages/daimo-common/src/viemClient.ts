@@ -1,4 +1,11 @@
-import { extractChain, Chain } from "viem";
+import {
+  extractChain,
+  Chain,
+  getAddress,
+  bytesToHex,
+  ByteArray,
+  Address,
+} from "viem";
 import {
   mainnet,
   sepolia,
@@ -62,3 +69,13 @@ const alchemyChainNames: Record<number, string> = {
   [optimismSepolia.id]: "opt-sepolia",
 };
 const supportedChainIds = Object.keys(alchemyChainNames).map(Number);
+
+/** Converts a buffer to a viem Address. Zero-length buffer = zero addr.
+ * Any length other than 0 or 20 bytes = throws an error.
+ */
+export function bytesToAddr(bytes: ByteArray): Address {
+  if (bytes.length !== 0 && bytes.length !== 20) {
+    throw new Error(`invalid address byte[], got ${bytes.length} bytes`);
+  }
+  return getAddress(bytesToHex(bytes, { size: 20 }));
+}

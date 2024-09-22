@@ -5,6 +5,7 @@ import {
   PreSwapTransfer,
   TransferClog,
   assertNotNull,
+  bytesToAddr,
   guessTimestampFromNum,
   hexToBuffer,
   retryBackoff,
@@ -98,9 +99,9 @@ export class HomeCoinIndexer extends Indexer {
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         transactionIndex: Number(row.tx_idx),
         logIndex: Number(row.sort_idx) / 2,
-        address: getAddress(bytesToHex(assertNotNull(row.token), { size: 20 })),
-        from: getAddress(bytesToHex(row.f, { size: 20 })),
-        to: getAddress(bytesToHex(row.t, { size: 20 })),
+        address: bytesToAddr(assertNotNull(row.token)),
+        from: bytesToAddr(row.f),
+        to: bytesToAddr(row.t),
         value: BigInt(row.amount),
       };
       txHashes.add(transferLog.transactionHash);

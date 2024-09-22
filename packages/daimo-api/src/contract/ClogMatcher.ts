@@ -1,14 +1,12 @@
-import { assertNotNull, debugJson, retryBackoff } from "@daimo/common";
+import {
+  assertNotNull,
+  bytesToAddr,
+  debugJson,
+  retryBackoff,
+} from "@daimo/common";
 import { daimoFastCctpAddrs } from "@daimo/contract";
 import { Kysely } from "kysely";
-import {
-  Address,
-  bytesToHex,
-  getAddress,
-  Hex,
-  hexToBytes,
-  zeroAddress,
-} from "viem";
+import { Address, bytesToHex, Hex, hexToBytes, zeroAddress } from "viem";
 
 import { ForeignTokenTransfer } from "./foreignCoinIndexer";
 import { DB as IndexDB } from "../codegen/dbIndex";
@@ -72,12 +70,9 @@ export class ClogMatcher {
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         transactionIndex: Number(row.tx_idx),
         logIndex: Number(row.sort_idx),
-        address:
-          row.token == null
-            ? zeroAddress
-            : getAddress(bytesToHex(row.token, { size: 20 })),
-        from: getAddress(bytesToHex(row.f, { size: 20 })),
-        to: getAddress(bytesToHex(row.t, { size: 20 })),
+        address: row.token == null ? zeroAddress : bytesToAddr(row.token),
+        from: bytesToAddr(row.f),
+        to: bytesToAddr(row.t),
         value: BigInt(row.amount),
       };
       const token = this.tokenReg.getToken(transferLog.address, chainId);
@@ -114,11 +109,9 @@ export class ClogMatcher {
         transactionHash: bytesToHex(row.tx_hash, { size: 32 }),
         transactionIndex: Number(row.tx_idx),
         logIndex: Number(row.log_idx),
-        address: getAddress(bytesToHex(row.to_token, { size: 20 })),
-        from: getAddress(
-          bytesToHex(assertNotNull(row.from_addr), { size: 20 })
-        ),
-        to: getAddress(bytesToHex(row.to_addr, { size: 20 })),
+        address: bytesToAddr(row.to_token),
+        from: bytesToAddr(assertNotNull(row.from_addr)),
+        to: bytesToAddr(row.to_addr),
         value: BigInt(row.to_amount),
       };
 
@@ -201,13 +194,9 @@ export class ClogMatcher {
         transactionHash: bytesToHex(assertNotNull(row.tx_hash), { size: 32 }),
         transactionIndex: Number(row.tx_idx),
         logIndex: Number(row.log_idx),
-        address: getAddress(
-          bytesToHex(assertNotNull(row.from_token), { size: 20 })
-        ),
-        from: getAddress(
-          bytesToHex(assertNotNull(row.from_addr), { size: 20 })
-        ),
-        to: getAddress(bytesToHex(assertNotNull(row.to_addr), { size: 20 })),
+        address: bytesToAddr(assertNotNull(row.from_token)),
+        from: bytesToAddr(assertNotNull(row.from_addr)),
+        to: bytesToAddr(assertNotNull(row.to_addr)),
         value: BigInt(assertNotNull(row.to_amount)),
       };
       const crossChainToken = this.tokenReg.getToken(

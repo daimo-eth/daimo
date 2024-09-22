@@ -2,6 +2,7 @@ import {
   amountToDollars,
   assertNotNull,
   BigIntStr,
+  bytesToAddr,
   debugJson,
   EAccount,
   guessTimestampFromNum,
@@ -104,9 +105,9 @@ export class ForeignCoinIndexer extends Indexer {
         address:
           row.token == null
             ? zeroAddress // ETH / native token transfer
-            : getAddress(bytesToHex(row.token, { size: 20 })), // ERC-20
-        from: getAddress(bytesToHex(row.f, { size: 20 })),
-        to: getAddress(bytesToHex(row.t, { size: 20 })),
+            : bytesToAddr(row.token), // ERC-20
+        from: bytesToAddr(row.f),
+        to: bytesToAddr(row.t),
         value: BigInt(row.amount),
       }))
       .filter((t) => t.address !== chainConfig.tokenAddress) // not home coin

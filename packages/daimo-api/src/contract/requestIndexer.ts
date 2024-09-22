@@ -4,6 +4,7 @@ import {
   DaimoRequestV2Status,
   amountToDollars,
   assertNotNull,
+  bytesToAddr,
   debugJson,
   decodeRequestIdString,
   encodeRequestId,
@@ -14,7 +15,7 @@ import {
   retryBackoff,
 } from "@daimo/common";
 import { Kysely } from "kysely";
-import { Address, Hex, bytesToHex, getAddress } from "viem";
+import { Address, Hex, bytesToHex } from "viem";
 
 import { Indexer } from "./indexer";
 import { NameRegistry } from "./nameRegistry";
@@ -92,13 +93,11 @@ export class RequestIndexer extends Indexer {
         transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
         logIndex: Number(r.log_idx),
         id: BigInt(r.id),
-        recipient: getAddress(
-          bytesToHex(assertNotNull(r.recipient), { size: 20 })
-        ),
-        creator: getAddress(bytesToHex(assertNotNull(r.creator), { size: 20 })),
+        recipient: bytesToAddr(assertNotNull(r.recipient)),
+        creator: bytesToAddr(assertNotNull(r.creator)),
         amount: BigInt(assertNotNull(r.amount)),
         metadata: bytesToHex(r.metadata || Buffer.from([])),
-        logAddr: getAddress(bytesToHex(r.log_addr, { size: 20 })),
+        logAddr: bytesToAddr(r.log_addr),
         blockNumber: BigInt(r.block_num),
         blockTime: Number(r.block_ts),
       }));
@@ -108,9 +107,7 @@ export class RequestIndexer extends Indexer {
         transactionHash: bytesToHex(r.tx_hash, { size: 32 }),
         logIndex: Number(r.log_idx),
         id: BigInt(r.id),
-        fulfiller: getAddress(
-          bytesToHex(assertNotNull(r.fulfiller), { size: 20 })
-        ),
+        fulfiller: bytesToAddr(assertNotNull(r.fulfiller)),
         blockNumber: BigInt(r.block_num),
         blockTime: Number(r.block_ts),
       }));

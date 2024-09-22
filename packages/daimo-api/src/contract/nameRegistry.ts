@@ -5,6 +5,7 @@ import {
   EAccount,
   assertEqual,
   assertNotNull,
+  bytesToAddr,
   isValidName,
   now,
   retryBackoff,
@@ -18,7 +19,6 @@ import {
 import { Kysely } from "kysely";
 import {
   Address,
-  bytesToHex,
   bytesToString,
   encodeFunctionData,
   getAddress,
@@ -133,7 +133,7 @@ export class NameRegistry extends Indexer {
       return {
         timestamp: Number(r.block_ts),
         name: bytesToString(r.name, { size: 32 }),
-        addr: getAddress(bytesToHex(r.addr, { size: 20 })),
+        addr: bytesToAddr(r.addr),
       };
     });
     this.logs.push(...names);
