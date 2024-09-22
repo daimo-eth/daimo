@@ -253,7 +253,7 @@ function SendChooseAmount({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={setMoney}
-        toCoin={toCoin}
+        showCurrencyPicker
         showAmountAvailable
         autoFocus={edit === "money"}
       />
@@ -424,7 +424,7 @@ function SendConfirm({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={useCallback(() => {}, [])}
-        toCoin={toCoin}
+        showCurrencyPicker
         disabled
         showAmountAvailable={false}
         autoFocus={false}

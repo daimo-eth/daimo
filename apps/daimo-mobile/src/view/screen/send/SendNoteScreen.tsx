@@ -136,6 +136,7 @@ export function SendNoteScreen({ route }: Props) {
             moneyEntry={noteMoney}
             onSetEntry={setNoteMoney}
             showAmountAvailable
+            showCurrencyPicker
             autoFocus
             disabled={amountChosen}
             innerRef={textInputRef}
@@ -147,6 +148,7 @@ export function SendNoteScreen({ route }: Props) {
             onSetEntry={setNoteMoney}
             disabled
             showAmountAvailable={false}
+            showCurrencyPicker
             autoFocus={false}
             onFocus={resetAmount}
           />

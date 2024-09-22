@@ -36,9 +36,13 @@ import { ContactDisplay } from "../shared/ContactDisplay";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import { SegmentSlider } from "../shared/SegmentSlider";
 import Spacer from "../shared/Spacer";
-import { TextCenter, TextH3, TextLight } from "../shared/text";
+import { TextBody, TextCenter, TextH3, TextLight } from "../shared/text";
 import { useWithAccount } from "../shared/withAccount";
 import { useTheme } from "../style/theme";
+
+const MIN_DOLLARS = 1;
+const MAX_DOLLARS_DEPOSIT = 1e3;
+const MAX_DOLLARS_WITHDRAW = 1e4;
 
 type Props = NativeStackScreenProps<ParamListDeposit, "LandlineTransfer">;
 const i18 = i18n.landlineBankTransfer;
@@ -79,8 +83,11 @@ function LandlineTransferScreenInner({
   const sendDisplay = (() => {
     if (money == null || bankTransferOption === undefined) {
       return (
-        <SendChooseAmount
-          recipient={recipient}
+        <LLChooseAmount
+          llAccount={recipient}
+          defaultTransferOption={
+            bankTransferOption || BankTransferOptions.Deposit
+          }
           onCancel={goBack}
           daimoChain={daimoChain}
         />
@@ -135,21 +142,22 @@ function BankTransferSegmentSlider({
     </View>
   );
 }
-
-function SendChooseAmount({
-  recipient,
+function LLChooseAmount({
+  llAccount,
   daimoChain,
   onCancel,
+  defaultTransferOption,
 }: {
-  recipient: LandlineBankAccountContact;
+  llAccount: LandlineBankAccountContact;
   daimoChain: DaimoChain;
   onCancel: () => void;
+  defaultTransferOption: BankTransferOptions;
 }) {
   const account = useAccount();
 
   // Deposit or withdrawal?
   const [selectedTransferOption, setSelectedTransferOption] =
-    useState<BankTransferOptions>(BankTransferOptions.Deposit);
+    useState<BankTransferOptions>(defaultTransferOption);
 
   // Select how much
   const [money, setMoney] = useState(zeroUSDEntry);
@@ -157,8 +165,29 @@ function SendChooseAmount({
   // Select what for
   const [memo, setMemo] = useState<string | undefined>(undefined);
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const onSegementedControlChange = (selectedOption: BankTransferOptions) => {
     setSelectedTransferOption(selectedOption);
+    validateAmount(money, selectedOption);
+  };
+
+  const validateAmount = (newMoney: MoneyEntry, tab?: BankTransferOptions) => {
+    tab = tab || selectedTransferOption;
+    if (
+      tab === BankTransferOptions.Deposit &&
+      newMoney.dollars >= MAX_DOLLARS_DEPOSIT
+    ) {
+      setErrorMessage(`Max deposit < $${MAX_DOLLARS_DEPOSIT}`);
+    } else if (
+      tab === BankTransferOptions.Withdraw &&
+      newMoney.dollars >= MAX_DOLLARS_WITHDRAW
+    ) {
+      setErrorMessage(`Max withdrawal < $${MAX_DOLLARS_WITHDRAW}`);
+    } else {
+      setErrorMessage(null);
+    }
+    setMoney(newMoney);
   };
 
   // Once done, update nav
@@ -167,7 +196,7 @@ function SendChooseAmount({
     nav.navigate("DepositTab", {
       screen: "LandlineTransfer",
       params: {
-        recipient,
+        recipient: llAccount,
         money,
         memo,
         bankTransferOption: selectedTransferOption,
@@ -191,7 +220,7 @@ function SendChooseAmount({
   return (
     <View>
       <Spacer h={24} />
-      <ContactDisplay contact={recipient} />
+      <ContactDisplay contact={llAccount} />
       <Spacer h={24} />
       <BankTransferSegmentSlider
         selectedTransferOption={selectedTransferOption}
@@ -200,10 +229,19 @@ function SendChooseAmount({
       <Spacer h={48} />
       <AmountChooser
         moneyEntry={money}
-        onSetEntry={setMoney}
-        showAmountAvailable
+        onSetEntry={validateAmount}
+        showAmountAvailable={
+          selectedTransferOption === BankTransferOptions.Withdraw &&
+          errorMessage == null
+        }
+        showCurrencyPicker={false}
         autoFocus
       />
+      {errorMessage && (
+        <TextCenter>
+          <TextBody>{errorMessage}</TextBody>
+        </TextCenter>
+      )}
       <Spacer h={16} />
       <SendMemoButton memo={memo} memoStatus={memoStatus} setMemo={setMemo} />
       <Spacer h={16} />
@@ -221,7 +259,9 @@ function SendChooseAmount({
             title={i18n.shared.buttonAction.confirm()}
             onPress={setSendAmount}
             disabled={
-              money.dollars === 0 || (memoStatus && memoStatus !== "ok")
+              money.dollars < MIN_DOLLARS ||
+              errorMessage !== null ||
+              (memoStatus && memoStatus !== "ok")
             }
           />
         </View>
@@ -318,7 +358,7 @@ function SendConfirm({
       <Spacer h={24} />
       <ContactDisplay contact={recipient} />
       <Spacer h={24} />
-      <View style={{}}>
+      <View>
         <TextH3 style={ss.text.center}>
           {bankTransferOption === BankTransferOptions.Deposit
             ? i18.title.deposit()
@@ -332,6 +372,7 @@ function SendConfirm({
         onSetEntry={useCallback(() => {}, [])}
         disabled
         showAmountAvailable={false}
+        showCurrencyPicker={false}
         autoFocus={false}
         onFocus={navToInput}
       />

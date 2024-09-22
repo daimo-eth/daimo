@@ -1,5 +1,4 @@
 import { CurrencyExchangeRate, currencyRateUSD } from "@daimo/common";
-import { ForeignToken } from "@daimo/contract";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -32,7 +31,7 @@ export function AmountChooser({
   moneyEntry,
   onSetEntry,
   showAmountAvailable,
-  toCoin,
+  showCurrencyPicker,
   autoFocus,
   disabled,
   innerRef,
@@ -41,7 +40,7 @@ export function AmountChooser({
   moneyEntry: MoneyEntry;
   onSetEntry: (entry: MoneyEntry) => void;
   showAmountAvailable: boolean;
-  toCoin?: ForeignToken;
+  showCurrencyPicker: boolean;
   autoFocus: boolean;
   disabled?: boolean;
   innerRef?: React.RefObject<TextInput>;
@@ -73,6 +72,7 @@ export function AmountChooser({
         innerRef={innerRef}
         autoFocus={autoFocus}
         onFocus={onFocus}
+        showCurrencyPicker={showCurrencyPicker}
       />
       <Spacer h={4} />
       <View style={{ flexDirection: "row", justifyContent: "center" }}>
@@ -96,6 +96,7 @@ function AmountInput({
   autoFocus,
   disabled,
   onFocus,
+  showCurrencyPicker,
 }: {
   moneyEntry: LocalMoneyEntry;
   onChange: (dollars: LocalMoneyEntry) => void;
@@ -103,6 +104,7 @@ function AmountInput({
   autoFocus?: boolean;
   disabled?: boolean;
   onFocus?: () => void;
+  showCurrencyPicker?: boolean;
 }) {
   const { color } = useTheme();
   const styles = useMemo(() => getStyles(color), [color]);
@@ -184,7 +186,7 @@ function AmountInput({
   const onSetCurrency = (currency: CurrencyExchangeRate) => {
     onChange({ currency, localUnits });
   };
-  const showPicker = !disabled;
+  const showPicker = !disabled && showCurrencyPicker !== false;
 
   return (
     <TouchableWithoutFeedback onPress={focus} accessible={false}>

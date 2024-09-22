@@ -151,6 +151,7 @@ function RequestScreenInner({
           moneyEntry={money}
           onSetEntry={setMoney}
           showAmountAvailable={false}
+          showCurrencyPicker
           innerRef={textInputRef}
           disabled={as.status !== "idle"}
           autoFocus={false}

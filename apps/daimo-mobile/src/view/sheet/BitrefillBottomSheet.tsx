@@ -59,7 +59,7 @@ function BitrefillBottomSheetInner({
       <AmountChooser
         moneyEntry={money}
         onSetEntry={() => {}}
-        toCoin={toCoin}
+        showCurrencyPicker={false}
         disabled
         showAmountAvailable={false}
         autoFocus={false}
