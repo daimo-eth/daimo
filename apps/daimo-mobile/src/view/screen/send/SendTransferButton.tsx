@@ -71,7 +71,8 @@ export function SendTransferButton({
   // Note whether the transfer has a swap or not for op creation.
   const homeCoin = getHomeCoin(account);
   const isBridge = toCoin.chainId !== homeCoin.chainId;
-  const isSwap = homeCoin.token !== toCoin.token;
+  const toChain = getDAv2Chain(toCoin.chainId);
+  const isSwap = toChain.bridgeCoin.token !== toCoin.token;
   // TODO: handle case with swap and bridge
   assert(!(isSwap && isBridge), "swap+bridge unsupported");
 
