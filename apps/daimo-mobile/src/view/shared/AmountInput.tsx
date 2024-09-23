@@ -1,4 +1,9 @@
-import { CurrencyExchangeRate, currencyRateUSD } from "@daimo/common";
+import {
+  CurrencyExchangeRate,
+  currencyRateUSD,
+  LocalMoneyEntry,
+  MoneyEntry,
+} from "@daimo/common";
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -19,7 +24,6 @@ import Spacer from "./Spacer";
 import { DaimoText, MAX_FONT_SIZE_MULTIPLIER, TextLight } from "./text";
 import { i18n } from "../../i18n";
 import { useAccount } from "../../logic/accountManager";
-import { LocalMoneyEntry, MoneyEntry } from "../../logic/moneyEntry";
 import { Colorway } from "../style/skins";
 import { useTheme } from "../style/theme";
 

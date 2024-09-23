@@ -2,6 +2,9 @@ import {
   dollarsToAmount,
   encodeRequestId,
   generateRequestId,
+  getFullMemo,
+  MoneyEntry,
+  zeroUSDEntry,
 } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -30,8 +33,6 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
-import { getFullMemo } from "../../../logic/memo";
-import { MoneyEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
 import { AmountChooser } from "../../shared/AmountInput";
@@ -105,11 +106,12 @@ function RequestScreenInner({
     setAS("loading", i18.sendRequest.loading());
 
     // Create-request transaction
+    const fullMemo = getFullMemo({ memo, money });
     const { txHash, pendingRequestStatus } = await createRequestOnChain(
       account,
       money,
       fulfiller,
-      getFullMemo(memo, money)
+      fullMemo
     );
     console.log(`[REQUEST] txHash ${txHash}`);
 

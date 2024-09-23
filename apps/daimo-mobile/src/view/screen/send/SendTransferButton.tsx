@@ -3,11 +3,13 @@ import {
   canSendTo,
   dollarsToAmount,
   EAccount,
+  getFullMemo,
   hasAccountName,
+  MoneyEntry,
   OpStatus,
   ProposedSwap,
 } from "@daimo/common";
-import { ForeignToken, getDAv2Chain, getTokenByAddress } from "@daimo/contract";
+import { ForeignToken, getDAv2Chain } from "@daimo/contract";
 import {
   DaimoNonce,
   DaimoNonceMetadata,
@@ -27,7 +29,7 @@ import {
   EAccountContact,
   LandlineBankAccountContact,
 } from "../../../logic/daimoContacts";
-import { Account } from "../../../storage/account";
+import { Account, getHomeCoin } from "../../../storage/account";
 import { getAmountText } from "../../shared/Amount";
 import { LongPressBigButton } from "../../shared/Button";
 import { ButtonWithStatus } from "../../shared/ButtonWithStatus";
@@ -38,7 +40,7 @@ const i18 = i18n.sendTransferButton;
 export function SendTransferButton({
   account,
   recipient,
-  dollars,
+  money,
   toCoin,
   memo,
   minTransferAmount = 0,
@@ -47,19 +49,18 @@ export function SendTransferButton({
 }: {
   account: Account;
   recipient: EAccountContact | LandlineBankAccountContact;
-  dollars: number;
+  money: MoneyEntry;
   toCoin: ForeignToken;
   memo?: string;
   minTransferAmount?: number;
   route?: ProposedSwap | null;
   onSuccess?: () => void;
 }) {
-  console.log(`[SEND] rendering SendButton ${dollars}`);
-
   // Get exact amount. No partial cents.
-  assert(dollars > 0);
+  const { dollars } = money;
   const maxDecimals = 2;
   const dollarsStr = dollars.toFixed(maxDecimals) as `${number}`;
+  assert(dollarsStr !== "0.00", "Can't send $0.00");
 
   // Generate nonce
   const nonce = useMemo(
@@ -68,17 +69,20 @@ export function SendTransferButton({
   );
 
   // Note whether the transfer has a swap or not for op creation.
-  const { homeChainId, homeCoinAddress } = account;
-  const homeCoin = getTokenByAddress(homeChainId, homeCoinAddress);
-  const isBridge = toCoin.chainId !== homeChainId;
-  const isSwap = !isBridge && homeCoin.token !== toCoin.token;
+  const homeCoin = getHomeCoin(account);
+  const isBridge = toCoin.chainId !== homeCoin.chainId;
+  const isSwap = homeCoin.token !== toCoin.token;
+  // TODO: handle case with swap and bridge
+  assert(!(isSwap && isBridge), "swap+bridge unsupported");
+
+  const fullMemo = getFullMemo({ memo, money });
 
   // Pending swap, appears immediately > replaced by onchain data
   const pendingOpBase = {
     from: account.address,
     to: recipient.addr,
     amount: Number(dollarsToAmount(dollarsStr)),
-    memo,
+    memo: fullMemo,
     status: OpStatus.pending,
     timestamp: 0,
   };
@@ -96,10 +100,7 @@ export function SendTransferButton({
         chainGasConstants: account.chainGasConstants,
       };
 
-      if (toCoin.chainId !== homeChainId) {
-        // TODO: handle case with swap and bridge
-        assert(toCoin.symbol === homeCoin.symbol);
-
+      if (isBridge) {
         const toChain = getDAv2Chain(toCoin.chainId);
         console.log(`[ACTION] sending via FastCCTP to chain ${toChain.name}`);
         return opSender.sendUsdcToOtherChain(

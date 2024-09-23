@@ -1,4 +1,4 @@
-import { CurrencyExchangeRate, currencyRateUSD } from "@daimo/common";
+import { CurrencyExchangeRate, currencyRateUSD } from "./currencies";
 
 // Represents a user-entered amount in local currency, eg "¥100"
 export interface LocalMoneyEntry {

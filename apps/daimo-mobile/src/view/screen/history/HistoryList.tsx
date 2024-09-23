@@ -5,7 +5,7 @@ import {
   TransferClog,
   assert,
   getDisplayFromTo,
-  getSynthesizedMemo,
+  getTransferSummary,
   getTransferClogStatus,
   now,
   timeAgo,
@@ -267,7 +267,7 @@ function TransferClogRow({
     opTitle = i18.op.cancelledLink();
   }
 
-  const opMemo = getSynthesizedMemo(
+  const opSummary = getTransferSummary(
     transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
     i18NLocale,
@@ -298,10 +298,10 @@ function TransferClogRow({
             </TouchableOpacity>
             <View style={{ flexDirection: "column" }}>
               <TextBody color={textCol}>{opTitle}</TextBody>
-              {opMemo && (
+              {opSummary && (
                 <>
                   <Spacer h={2} />
-                  <TextMeta color={memoCol}>{opMemo}</TextMeta>
+                  <TextMeta color={memoCol}>{opSummary}</TextMeta>
                 </>
               )}
             </View>

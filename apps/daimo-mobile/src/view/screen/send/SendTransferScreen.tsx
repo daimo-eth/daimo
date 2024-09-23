@@ -11,6 +11,11 @@ import {
   now,
 } from "@daimo/common";
 import {
+  MoneyEntry,
+  usdEntry,
+  zeroUSDEntry,
+} from "@daimo/common/src/moneyEntry";
+import {
   DaimoChain,
   ForeignToken,
   daimoChainFromId,
@@ -45,8 +50,6 @@ import {
   getContactName,
 } from "../../../logic/daimoContacts";
 import { useFetchLinkStatus } from "../../../logic/linkStatus";
-import { getFullMemo } from "../../../logic/memo";
-import { MoneyEntry, usdEntry, zeroUSDEntry } from "../../../logic/moneyEntry";
 import { useSwapRoute } from "../../../logic/swapRoute";
 import { getRpcFunc, getRpcHook } from "../../../logic/trpc";
 import { Account } from "../../../storage/account";
@@ -370,9 +373,9 @@ function SendConfirm({
     button = (
       <SendTransferButton
         account={account}
-        memo={getFullMemo(memo, money)}
+        memo={memo}
         recipient={recipient}
-        dollars={money.dollars}
+        money={money}
         toCoin={toCoin}
         route={route}
       />

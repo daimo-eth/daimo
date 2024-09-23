@@ -12,7 +12,7 @@ import {
   assertNotNull,
   daysUntil,
   getAccountName,
-  getSynthesizedMemo,
+  getTransferSummary,
   getTransferClogStatus,
   getTransferClogType,
   tryOrNull,
@@ -336,7 +336,7 @@ function TransferBody({
     subtitleElems.splice(i, 0, space);
   }
 
-  const memoText = getSynthesizedMemo(
+  const opSummary = getTransferSummary(
     transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
     i18NLocale
@@ -363,11 +363,11 @@ function TransferBody({
           <TextBodyCaps color={color.grayMid}>{subtitleElems}</TextBodyCaps>
         </TextCenter>
       </TouchableOpacity>
-      {memoText && (
+      {opSummary && (
         <>
           <Spacer h={16} />
           <TextCenter>
-            <TextBodyCaps color={color.grayMid}>{memoText}</TextBodyCaps>
+            <TextBodyCaps color={color.grayMid}>{opSummary}</TextBodyCaps>
           </TextCenter>
         </>
       )}

@@ -1,4 +1,3 @@
-import { ShouldFastFinishResponse } from "@daimo/api/src/landline/connector";
 import {
   DaimoLink,
   DaimoLinkAccount,
@@ -9,6 +8,7 @@ import {
   DaimoLinkRequestV2,
   DaimoLinkTag,
   EAccount,
+  MoneyEntry,
   TransferClog,
   getEAccountStr,
   parseDaimoLink,
@@ -35,7 +35,6 @@ import {
   markInitialDeepLinkHandled,
 } from "../logic/deeplink";
 import { fetchInviteLinkStatus, fetchLinkStatus } from "../logic/linkStatus";
-import { MoneyEntry } from "../logic/moneyEntry";
 import { Account } from "../storage/account";
 
 export type ParamListOnboarding = {
@@ -143,6 +142,11 @@ export interface LandlineTransferNavProp {
   bankTransferOption?: BankTransferOptions;
   depositStatus?: ShouldFastFinishResponse;
 }
+
+export type ShouldFastFinishResponse = {
+  shouldFastFinish: boolean;
+  reason: "tx-limit" | "monthly-limit" | null;
+};
 
 export type ParamListTab = {
   DepositTab: NavigatorScreenParams<ParamListDeposit>;

@@ -1,7 +1,39 @@
 import assert from "node:assert";
 import test from "node:test";
 
+import { assertNotNull } from "../src/assert";
+import { CurrencyExchangeRate, nonUsdCurrencies } from "../src/currencies";
 import { debugJson } from "../src/debug";
+import { getFullMemo } from "../src/format";
+import { usdEntry } from "../src/moneyEntry";
+
+test("getFullMemo", async (t) => {
+  const ars = assertNotNull(nonUsdCurrencies.find((c) => c.symbol === "ARS"));
+  const arsRate: CurrencyExchangeRate = { ...ars, rateUSD: 1000 };
+
+  await t.test("none", () => {
+    const ret = getFullMemo({
+      money: usdEntry(123),
+    });
+    assert.strictEqual(ret, "");
+  });
+
+  await t.test("basic", () => {
+    const ret = getFullMemo({
+      memo: "🔥 bbq",
+      money: usdEntry(123),
+    });
+    assert.strictEqual(ret, "🔥 bbq");
+  });
+
+  await t.test("foreign currency", () => {
+    const ret = getFullMemo({
+      memo: "🔥 asado",
+      money: { currency: arsRate, dollars: 0.2, localUnits: 200 },
+    });
+    assert.strictEqual(ret, "🔥 asado · ARS200");
+  });
+});
 
 test("debugJson", async (t) => {
   await t.test("should convert simple object to JSON", () => {

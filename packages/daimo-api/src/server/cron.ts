@@ -6,7 +6,7 @@ import {
   formatDaimoLink,
   getAccountName,
   getForeignCoinDisplayAmount,
-  getSynthesizedMemo,
+  getTransferSummary,
 } from "@daimo/common";
 import {
   daimoPaymasterV2Address,
@@ -181,7 +181,7 @@ export class Crontab {
       } available)`;
     };
 
-    const memo = getSynthesizedMemo(opEvent, chainConfig);
+    const opSummary = getTransferSummary(opEvent, chainConfig);
 
     // Post to Clippy
     const parts = [
@@ -193,7 +193,7 @@ export class Crontab {
       opEvent.type === "transfer" &&
         opEvent.requestStatus &&
         `for ${formatDaimoLink(opEvent.requestStatus.link)}`,
-      memo && `: ${memo}`,
+      opSummary && `: ${opSummary}`,
       opEvent.blockNumber != null &&
         opEvent.logIndex != null &&
         `https://ethreceipts.org/l/${chainConfig.chainL2.id}/${opEvent.blockNumber}/${opEvent.logIndex}`,

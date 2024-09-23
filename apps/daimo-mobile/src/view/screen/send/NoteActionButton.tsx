@@ -1,12 +1,14 @@
 import {
   AddrLabel,
+  Clog,
   DaimoLink,
   DaimoNoteState,
-  Clog,
+  MoneyEntry,
   OpStatus,
   assertNotNull,
   dollarsToAmount,
   generateNoteSeedAddress,
+  getFullMemo,
   getNoteId,
   now,
 } from "@daimo/common";
@@ -39,26 +41,26 @@ const i18 = i18n.noteAction;
 
 /** Creates a Note. User picks amount, then sends link via SMS, mail or ShareSheet. */
 export function NoteActionButton({
-  dollars,
+  money,
   memo,
   externalAction,
 }: {
-  dollars: number;
+  money: MoneyEntry;
   memo?: string;
   externalAction: ExternalAction;
 }) {
   const Inner = useWithAccount(NoteActionButtonInner);
-  return <Inner {...{ dollars, memo, externalAction }} />;
+  return <Inner {...{ money, memo, externalAction }} />;
 }
 
 function NoteActionButtonInner({
   account,
-  dollars,
+  money,
   memo,
   externalAction,
 }: {
   account: Account;
-  dollars: number;
+  money: MoneyEntry;
   memo?: string;
   externalAction: ExternalAction;
 }) {
@@ -69,11 +71,15 @@ function NoteActionButtonInner({
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
   );
 
+  // Check if we need to approve() first
   const notesV2Addr = assertNotNull(notesV2AddressMap.get(account.homeChainId));
-
   const notesV2isApproved = account.recentTransfers.some(
     (op) => op.type === "createLink" && op.to === notesV2Addr
   );
+
+  // Get the dollar amount + the memo
+  const { dollars } = money;
+  const fullMemo = getFullMemo({ memo, money });
 
   const link: DaimoLink = {
     type: "notev2",
@@ -94,7 +100,7 @@ function NoteActionButtonInner({
           nonce,
           chainGasConstants: account.chainGasConstants,
         },
-        memo
+        fullMemo
       );
     },
     pendingOp: {
@@ -113,7 +119,7 @@ function NoteActionButtonInner({
         contractAddress: notesV2Addr,
         ephemeralOwner: noteAddress,
         id: noteId,
-        memo,
+        memo: fullMemo,
       },
     },
     accountTransform: (account: Account, pendingOp: Clog) => {

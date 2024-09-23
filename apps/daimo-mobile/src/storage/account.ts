@@ -16,7 +16,12 @@ import {
   assert,
   now,
 } from "@daimo/common";
-import { DaimoChain, daimoPaymasterV2Address } from "@daimo/contract";
+import {
+  DaimoChain,
+  ForeignToken,
+  daimoPaymasterV2Address,
+  getTokenByAddress,
+} from "@daimo/contract";
 import { Address, Hex, getAddress } from "viem";
 
 import { StoredV16Account } from "./storedAccount";
@@ -122,12 +127,20 @@ export type Account = {
   landlineAccounts: LandlineAccount[];
 };
 
+/** Extracts a named EAccount = this account as it appears in search. */
 export function toEAccount(account: Account): EAccount {
   return {
     addr: account.address,
     name: account.name,
     profilePicture: account.profilePicture,
   };
+}
+
+/** Gets the home coin + home chain for this account. */
+export function getHomeCoin(account: Account): ForeignToken {
+  const { homeChainId, homeCoinAddress } = account;
+  const homeCoin = getTokenByAddress(homeChainId, homeCoinAddress);
+  return homeCoin;
 }
 
 export function parseAccount(accountJSON?: string): Account | null {

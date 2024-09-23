@@ -1,4 +1,4 @@
-import { assert } from "@daimo/common";
+import { assert, zeroUSDEntry } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -20,8 +20,6 @@ import {
   getComposeExternalAction,
   shareURL,
 } from "../../../logic/externalAction";
-import { getFullMemo } from "../../../logic/memo";
-import { zeroUSDEntry } from "../../../logic/moneyEntry";
 import { getRpcHook } from "../../../logic/trpc";
 import { AmountChooser } from "../../shared/AmountInput";
 import { ButtonBig, HelpButton } from "../../shared/Button";
@@ -176,8 +174,8 @@ export function SendNoteScreen({ route }: Props) {
         )}
         {amountChosen && memoChosen && (
           <NoteActionButton
-            dollars={noteMoney.dollars}
-            memo={getFullMemo(memo, noteMoney)}
+            money={noteMoney}
+            memo={memo}
             externalAction={externalAction}
           />
         )}

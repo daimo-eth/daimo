@@ -1,5 +1,4 @@
-import { ShouldFastFinishResponse } from "@daimo/api/src/landline/connector";
-import { dollarsToAmount } from "@daimo/common";
+import { dollarsToAmount, MoneyEntry, zeroUSDEntry } from "@daimo/common";
 import { baseUSDC, DaimoChain, daimoChainFromId } from "@daimo/contract";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReactNode, useCallback, useState } from "react";
@@ -16,6 +15,7 @@ import { SendTransferButton } from "./send/SendTransferButton";
 import {
   LandlineTransferNavProp,
   ParamListDeposit,
+  ShouldFastFinishResponse,
   useExitToHome,
   useNav,
 } from "../../common/nav";
@@ -27,7 +27,6 @@ import {
   getContactName,
   LandlineBankAccountContact,
 } from "../../logic/daimoContacts";
-import { MoneyEntry, zeroUSDEntry } from "../../logic/moneyEntry";
 import { getRpcHook } from "../../logic/trpc";
 import { Account } from "../../storage/account";
 import { AmountChooser } from "../shared/AmountInput";
@@ -323,24 +322,16 @@ function SendConfirm({
     });
   };
 
-  const memoParts = [] as string[];
-  if (money.currency.currency !== "USD") {
-    memoParts.push(`${money.currency.symbol}${money.localUnits}`);
-  }
-  if (memo != null) {
-    memoParts.push(memo);
-  }
-
   const button: ReactNode =
     bankTransferOption === BankTransferOptions.Withdraw ? (
       <SendTransferButton
         account={account}
-        memo={memoParts.join(" · ")}
+        memo={memo}
         recipient={recipient}
-        dollars={money.dollars}
+        money={money}
         // Minimum USDC withdrawal amount specified by bridgexyz
         // https://apidocs.bridge.xyz/docs/liquidation-address
-        minTransferAmount={1.0}
+        minTransferAmount={MIN_DOLLARS}
         toCoin={baseUSDC} // TODO: get home coin from account
       />
     ) : (
@@ -348,8 +339,8 @@ function SendConfirm({
         account={account}
         recipient={recipient}
         dollars={money.dollars}
-        memo={memoParts.join(" · ")}
-        minTransferAmount={1.0}
+        memo={memo}
+        minTransferAmount={MIN_DOLLARS}
       />
     );
 

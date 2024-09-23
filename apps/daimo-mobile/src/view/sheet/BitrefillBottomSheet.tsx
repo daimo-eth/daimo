@@ -1,4 +1,4 @@
-import { DollarStr } from "@daimo/common";
+import { DollarStr, usdEntry } from "@daimo/common";
 import { polygonUSDC } from "@daimo/contract";
 import { useState } from "react";
 import { View } from "react-native";
@@ -6,7 +6,6 @@ import { Address } from "viem";
 
 import { i18n } from "../../i18n";
 import { EAccountContact } from "../../logic/daimoContacts";
-import { usdEntry } from "../../logic/moneyEntry";
 import { Account } from "../../storage/account";
 import { CoinPellet } from "../screen/send/CoinDisplay";
 import { SendTransferButton } from "../screen/send/SendTransferButton";
@@ -72,7 +71,7 @@ function BitrefillBottomSheetInner({
         account={account}
         memo="Bitrefill"
         recipient={recipient}
-        dollars={money.dollars}
+        money={money}
         toCoin={toCoin}
         onSuccess={() => setSuccess(true)}
       />
