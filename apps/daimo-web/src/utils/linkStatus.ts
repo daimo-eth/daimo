@@ -143,7 +143,8 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
       }
     }
     case "requestv2": {
-      const { recipient, fulfilledBy, status } = res as DaimoRequestV2Status;
+      const { recipient, fulfilledBy, status, memo } =
+        res as DaimoRequestV2Status;
       const name = getAccountName(recipient);
 
       switch (status) {
@@ -154,7 +155,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             action: i18n.link.actions.requesting(),
             dollars: `${res.link.dollars}`,
             description: i18n.link.responses.requestsv2.created(),
-            memo: res.link.memo,
+            memo,
           };
         }
         case DaimoRequestState.Cancelled: {
@@ -165,7 +166,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             description: i18n.link.responses.requestsv2.canceled(
               getAccountName(recipient)
             ),
-            memo: res.link.memo,
+            memo,
           };
         }
         case DaimoRequestState.Fulfilled: {
@@ -176,7 +177,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             description: i18n.link.responses.requestsv2.fulfilled(
               getAccountName(fulfilledBy!)
             ),
-            memo: res.link.memo,
+            memo,
           };
         }
         default: {
