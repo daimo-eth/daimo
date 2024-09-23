@@ -177,12 +177,16 @@ function LLChooseAmount({
       tab === BankTransferOptions.Deposit &&
       newMoney.dollars >= MAX_DOLLARS_DEPOSIT
     ) {
-      setErrorMessage(`Max deposit < $${MAX_DOLLARS_DEPOSIT}`);
+      setErrorMessage(
+        `${i18.depositStatus.maxDeposit()} <$${MAX_DOLLARS_DEPOSIT}`
+      );
     } else if (
       tab === BankTransferOptions.Withdraw &&
       newMoney.dollars >= MAX_DOLLARS_WITHDRAW
     ) {
-      setErrorMessage(`Max withdrawal < $${MAX_DOLLARS_WITHDRAW}`);
+      setErrorMessage(
+        `${i18.withdrawStatus.maxWithdrawal()} <$${MAX_DOLLARS_WITHDRAW}`
+      );
     } else {
       setErrorMessage(null);
     }

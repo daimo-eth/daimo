@@ -8,6 +8,7 @@ import {
   MoneyEntry,
   OpStatus,
   ProposedSwap,
+  TransferSwapClog,
 } from "@daimo/common";
 import { ForeignToken, getDAv2Chain } from "@daimo/contract";
 import {
@@ -79,7 +80,8 @@ export function SendTransferButton({
   const fullMemo = getFullMemo({ memo, money });
 
   // Pending swap, appears immediately > replaced by onchain data
-  const pendingOpBase = {
+  const pendingOp: TransferSwapClog = {
+    type: "transfer",
     from: account.address,
     to: recipient.addr,
     amount: Number(dollarsToAmount(dollarsStr)),
@@ -87,6 +89,13 @@ export function SendTransferButton({
     status: OpStatus.pending,
     timestamp: 0,
   };
+  if (isSwap || isBridge) {
+    pendingOp.postSwapTransfer = {
+      amount: `${BigInt(route?.toAmount || pendingOp.amount)}`,
+      to: recipient.addr,
+      coin: toCoin,
+    };
+  }
 
   // On exec, request signature from device enclave, send transfer.
   const { status, message, cost, exec } = useSendWithDeviceKeyAsync({
@@ -128,7 +137,7 @@ export function SendTransferButton({
         memo
       );
     },
-    pendingOp: { type: "transfer", ...pendingOpBase },
+    pendingOp,
     accountTransform: transferAccountTransform(
       hasAccountName(recipient) ? [recipient as EAccount] : []
     ),

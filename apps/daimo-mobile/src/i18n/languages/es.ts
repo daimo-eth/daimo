@@ -609,9 +609,11 @@ export const es: LanguageDefinition = {
         `Este depósito excede el límite máximo de depósito instantáneo ($1000). Los fondos lleguen en 1-3 días hábiles.`,
       monthlyLimit: () =>
         `Este depósito excederá su límite mensual de depósito instantáneo ($5000/mes). Los fondos lleguen en 1-3 días hábiles.`,
+      maxDeposit: () => `Depósito máximo`,
     },
     withdrawStatus: {
       standard: () => `Los fondos llegan dentro de 3 días hábiles.`,
+      maxWithdrawal: () => `Retiro máximo`,
     },
   },
   // ProfileScreen.tsx
