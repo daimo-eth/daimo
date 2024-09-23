@@ -30,12 +30,13 @@ export interface SkinContextType {
   color: Colorway;
   ss: SkinStyleSheet;
   touchHighlightUnderlay: TouchHighlightUnderlay;
-  font: string;
   logo: ImageSourcePropType; // Skin Selector Logo
+  font?: string;
 }
 
-const fonts = {
-  neue: "NeueMontreal-Regular", // default
+// Only for iOS devices
+const iosFonts = {
+  default: "San Francisco",
   chalkboard: "ChalkboardSE-Light",
   courier: "CourierNewPSMT",
   arial: "Arial Rounded MT Bold",
@@ -57,7 +58,10 @@ export const skins: Record<SkinName, SkinContextType> = {
   [Skin.usdc]: createSkin({
     name: Skin.usdc,
     color: blueColorway,
-    font: fonts.neue,
+    font: Platform.select({
+      ios: iosFonts.default,
+      default: undefined,
+    }),
     logo: {
       uri: "https://daimo.com/assets/deposit/usdc.png",
     },
@@ -66,7 +70,10 @@ export const skins: Record<SkinName, SkinContextType> = {
   [Skin.usdt]: createSkin({
     name: Skin.usdt,
     color: greenColorway,
-    font: fonts.neue,
+    font: Platform.select({
+      ios: iosFonts.default,
+      default: undefined,
+    }),
     logo: {
       uri: "https://assets.coingecko.com/coins/images/32884/large/USDT.PNG",
     },
@@ -75,14 +82,20 @@ export const skins: Record<SkinName, SkinContextType> = {
   [Skin.doge]: createSkin({
     name: Skin.doge,
     color: orangeColorway,
-    font: fonts.chalkboard,
+    font: Platform.select({
+      ios: iosFonts.chalkboard,
+      default: undefined,
+    }),
     logo: require("../../../assets/skins/dogecoin.png"),
   }),
   // Bitcoin is soooo BACK
   [Skin.bitcoin]: createSkin({
     name: Skin.bitcoin,
     color: darkColorway,
-    font: fonts.courier,
+    font: Platform.select({
+      ios: iosFonts.courier,
+      default: undefined,
+    }),
     logo: {
       uri: "https://assets.coingecko.com/coins/images/32883/large/wbtc.png",
     },
@@ -91,14 +104,20 @@ export const skins: Record<SkinName, SkinContextType> = {
   [Skin.penguin]: createSkin({
     name: Skin.penguin,
     color: blueColorway,
-    font: fonts.arial,
+    font: Platform.select({
+      ios: iosFonts.arial,
+      default: undefined,
+    }),
     logo: require("../../../assets/skins/penguin2.png"),
   }),
   // Rubber ducky
   [Skin.duck]: createSkin({
     name: Skin.duck,
     color: yellowColorway,
-    font: fonts.arial,
+    font: Platform.select({
+      ios: iosFonts.arial,
+      default: undefined,
+    }),
     logo: require("../../../assets/skins/duck.png"),
   }),
   // ADD MORE SKINS HERE
@@ -109,13 +128,13 @@ export const skins: Record<SkinName, SkinContextType> = {
 function createSkin({
   name,
   color,
-  font,
   logo,
+  font,
 }: {
   name: SkinName;
   color: Colorway;
-  font: string;
   logo: ImageSourcePropType;
+  font?: string;
 }): SkinContextType {
   return {
     name,
@@ -127,12 +146,14 @@ function createSkin({
   };
 }
 
-function getSS(color: Colorway, font: string) {
-  const textBase: TextStyle = {
-    fontFamily: font,
+function getSS(color: Colorway, font?: string) {
+  const textBaseWithoutFont: TextStyle = {
     fontVariant: ["tabular-nums"],
     color: color.midnight,
   };
+  const textBase = font
+    ? { ...textBaseWithoutFont, fontFamily: font }
+    : textBaseWithoutFont;
 
   return {
     container: StyleSheet.create({
