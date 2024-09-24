@@ -203,27 +203,25 @@ export async function getAccountHistory(
   let landlineSessionURL = "";
   let landlineAccounts: LandlineAccount[] = [];
 
+  // Landline supported starting in 1.9.11
   let landlineSessionKey: string | undefined;
-  if (getEnvApi().LANDLINE_API_URL) {
+  if (
+    getEnvApi().LANDLINE_API_URL &&
+    appVersion &&
+    semver.gte(appVersion, "1.9.11")
+  ) {
     const daimoAddress = address;
     const llSession = await getLandlineSession({ daimoAddress }, ctx);
     landlineSessionKey = llSession.key;
     landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts({ daimoAddress }, ctx);
-    // Support for displaying landline transfers in the mobile app was added
-    // in version 1.9.7 and doesn't support backcompat.
-    // Only add landline transfers if the app version is > 1.9.6
-    if (appVersion && semver.gt(appVersion, "1.9.6")) {
-      const landlineTransfers = await getLandlineTransfers(
-        { daimoAddress },
-        ctx
-      );
-      transferClogs = addLandlineTransfers(
-        landlineTransfers,
-        transferClogs,
-        chainConfig.daimoChain
-      );
-    }
+
+    const landlineTransfers = await getLandlineTransfers({ daimoAddress }, ctx);
+    transferClogs = addLandlineTransfers(
+      landlineTransfers,
+      transferClogs,
+      chainConfig.daimoChain
+    );
   }
 
   // Get named accounts
@@ -395,8 +393,8 @@ function fetchRecommendedExchanges({
     },
     // 2 is Binance, loaded client-side on demand.
     {
-      title: i18.ramp.title(),
       cta: i18.ramp.cta(),
+      title: i18.ramp.title(),
       url: getRampNetworkURL(account),
       logo: `${daimoDomainAddress}/assets/deposit/usdc.png`,
       sortId: 4,
@@ -406,8 +404,8 @@ function fetchRecommendedExchanges({
   if (landlineSessionKey != null && FeatFlag.tronramp(account)) {
     const llHost = assertNotNull(getEnvApi().LANDLINE_DOMAIN);
     ret.push({
-      title: `Preview · Tron Deposit`,
-      cta: `Get a USDT TRC-20 receiving address`,
+      cta: `Preview · Tron Deposit`,
+      title: `Receive USDT TRC-20`,
       url: `${llHost}/tron/${account.addr}/${landlineSessionKey}`,
       logo: `${daimoDomainAddress}/assets/deposit/usdt-tron.png`,
       sortId: 3,
