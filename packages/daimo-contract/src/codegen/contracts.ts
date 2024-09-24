@@ -2,41 +2,41 @@
 // AggregatorInterface
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const aggregatorInterfaceABI = [
+export const aggregatorInterfaceAbi = [
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'roundId', internalType: 'uint256', type: 'uint256' }],
     name: 'getAnswer',
     outputs: [{ name: '', internalType: 'int256', type: 'int256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'roundId', internalType: 'uint256', type: 'uint256' }],
     name: 'getTimestamp',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'latestAnswer',
     outputs: [{ name: '', internalType: 'int256', type: 'int256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'latestRound',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'latestTimestamp',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
     type: 'event',
@@ -94,30 +94,29 @@ export const aggregatorInterfaceABI = [
 // AggregatorV2V3Interface
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const aggregatorV2V3InterfaceABI = [
+export const aggregatorV2V3InterfaceAbi = [
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'decimals',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'description',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'roundId', internalType: 'uint256', type: 'uint256' }],
     name: 'getAnswer',
     outputs: [{ name: '', internalType: 'int256', type: 'int256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '_roundId', internalType: 'uint80', type: 'uint80' }],
     name: 'getRoundData',
@@ -128,30 +127,30 @@ export const aggregatorV2V3InterfaceABI = [
       { name: 'updatedAt', internalType: 'uint256', type: 'uint256' },
       { name: 'answeredInRound', internalType: 'uint80', type: 'uint80' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'roundId', internalType: 'uint256', type: 'uint256' }],
     name: 'getTimestamp',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'latestAnswer',
     outputs: [{ name: '', internalType: 'int256', type: 'int256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'latestRound',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'latestRoundData',
@@ -162,20 +161,21 @@ export const aggregatorV2V3InterfaceABI = [
       { name: 'updatedAt', internalType: 'uint256', type: 'uint256' },
       { name: 'answeredInRound', internalType: 'uint80', type: 'uint80' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'latestTimestamp',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'version',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
     type: 'event',
@@ -233,23 +233,22 @@ export const aggregatorV2V3InterfaceABI = [
 // AggregatorV3Interface
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const aggregatorV3InterfaceABI = [
+export const aggregatorV3InterfaceAbi = [
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'decimals',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'description',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '_roundId', internalType: 'uint80', type: 'uint80' }],
     name: 'getRoundData',
@@ -260,9 +259,9 @@ export const aggregatorV3InterfaceABI = [
       { name: 'updatedAt', internalType: 'uint256', type: 'uint256' },
       { name: 'answeredInRound', internalType: 'uint80', type: 'uint80' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'latestRoundData',
@@ -273,13 +272,14 @@ export const aggregatorV3InterfaceABI = [
       { name: 'updatedAt', internalType: 'uint256', type: 'uint256' },
       { name: 'answeredInRound', internalType: 'uint80', type: 'uint80' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'version',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
 ] as const
 
@@ -287,9 +287,8 @@ export const aggregatorV3InterfaceABI = [
 // DaimoAccountFactoryV2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoAccountFactoryV2ABI = [
+export const daimoAccountFactoryV2Abi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       {
@@ -298,18 +297,18 @@ export const daimoAccountFactoryV2ABI = [
         type: 'address',
       },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'accountImplementation',
     outputs: [
       { name: '', internalType: 'contract DaimoAccountV2', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'homeChain', internalType: 'uint256', type: 'uint256' },
@@ -332,18 +331,18 @@ export const daimoAccountFactoryV2ABI = [
     outputs: [
       { name: 'ret', internalType: 'contract DaimoAccountV2', type: 'address' },
     ],
+    stateMutability: 'payable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'entryPoint',
     outputs: [
       { name: '', internalType: 'contract IEntryPoint', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'homeChain', internalType: 'uint256', type: 'uint256' },
@@ -364,6 +363,7 @@ export const daimoAccountFactoryV2ABI = [
     ],
     name: 'getAddress',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
     type: 'event',
@@ -422,16 +422,15 @@ export const daimoAccountFactoryV2Address =
 
 export const daimoAccountFactoryV2Config = {
   address: daimoAccountFactoryV2Address,
-  abi: daimoAccountFactoryV2ABI,
+  abi: daimoAccountFactoryV2Abi,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoAccountV2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoAccountV2ABI = [
+export const daimoAccountV2Abi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       {
@@ -440,10 +439,10 @@ export const daimoAccountV2ABI = [
         type: 'address',
       },
     ],
-  },
-  { stateMutability: 'payable', type: 'receive' },
-  {
     stateMutability: 'nonpayable',
+  },
+  { type: 'receive', stateMutability: 'payable' },
+  {
     type: 'function',
     inputs: [
       { name: 'slot', internalType: 'uint8', type: 'uint8' },
@@ -451,18 +450,18 @@ export const daimoAccountV2ABI = [
     ],
     name: 'addSigningKey',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'bridger',
     outputs: [
       { name: '', internalType: 'contract IDaimoBridger', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -473,18 +472,18 @@ export const daimoAccountV2ABI = [
     ],
     name: 'collect',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'entryPoint',
     outputs: [
       { name: '', internalType: 'contract IEntryPoint', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -500,25 +499,25 @@ export const daimoAccountV2ABI = [
     ],
     name: 'executeBatch',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
     ],
     name: 'forward',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'forwardingAddress',
     outputs: [{ name: '', internalType: 'address payable', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'getActiveSigningKeys',
@@ -534,23 +533,23 @@ export const daimoAccountV2ABI = [
         type: 'uint8[]',
       },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'homeChain',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'homeCoin',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_homeChain', internalType: 'uint256', type: 'uint256' },
@@ -570,9 +569,9 @@ export const daimoAccountV2ABI = [
     ],
     name: 'initialize',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'message', internalType: 'bytes32', type: 'bytes32' },
@@ -580,9 +579,9 @@ export const daimoAccountV2ABI = [
     ],
     name: 'isValidSignature',
     outputs: [{ name: 'magicValue', internalType: 'bytes4', type: 'bytes4' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'keySlot', internalType: 'uint8', type: 'uint8' },
@@ -590,39 +589,39 @@ export const daimoAccountV2ABI = [
     ],
     name: 'keys',
     outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'maxKeys',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'numActiveKeys',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'slot', internalType: 'uint8', type: 'uint8' }],
     name: 'removeSigningKey',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'newAddr', internalType: 'address payable', type: 'address' },
     ],
     name: 'setForwardingAddress',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -640,9 +639,9 @@ export const daimoAccountV2ABI = [
     ],
     name: 'signatureStruct',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -651,27 +650,27 @@ export const daimoAccountV2ABI = [
     ],
     name: 'swapToHomeCoin',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'swapper',
     outputs: [
       { name: '', internalType: 'contract IDaimoSwapper', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'newHomeCoin', internalType: 'contract IERC20', type: 'address' },
     ],
     name: 'updateHomeCoin',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -705,6 +704,7 @@ export const daimoAccountV2ABI = [
     outputs: [
       { name: 'validationData', internalType: 'uint256', type: 'uint256' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'event',
@@ -917,24 +917,23 @@ export const daimoAccountV2ABI = [
 // DaimoCCTPBridger
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoCctpBridgerABI = [
-  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+export const daimoCctpBridgerAbi = [
+  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'UPGRADE_INTERFACE_VERSION',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'acceptOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'chainID', internalType: 'uint256', type: 'uint256' },
@@ -943,9 +942,9 @@ export const daimoCctpBridgerABI = [
     ],
     name: 'addCCTPDomain',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'chainId', internalType: 'uint256', type: 'uint256' }],
     name: 'cctpDomainMapping',
@@ -953,9 +952,9 @@ export const daimoCctpBridgerABI = [
       { name: 'domain', internalType: 'uint32', type: 'uint32' },
       { name: 'token', internalType: 'contract IERC20', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'cctpMessenger',
@@ -966,32 +965,32 @@ export const daimoCctpBridgerABI = [
         type: 'address',
       },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'fastCCTP',
     outputs: [
       { name: '', internalType: 'contract DaimoFastCCTP', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'fastCCTPNonce',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'implementation',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_initialOwner', internalType: 'address', type: 'address' },
@@ -1015,37 +1014,37 @@ export const daimoCctpBridgerABI = [
     ],
     name: 'init',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'pendingOwner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'proxiableUUID',
     outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -1055,16 +1054,16 @@ export const daimoCctpBridgerABI = [
     ],
     name: 'sendToChain',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'newImplementation', internalType: 'address', type: 'address' },
@@ -1072,6 +1071,7 @@ export const daimoCctpBridgerABI = [
     ],
     name: 'upgradeToAndCall',
     outputs: [],
+    stateMutability: 'payable',
   },
   {
     type: 'event',
@@ -1180,16 +1180,15 @@ export const daimoCctpBridgerABI = [
 // DaimoEphemeralNotes
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoEphemeralNotesABI = [
+export const daimoEphemeralNotesAbi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       { name: '_token', internalType: 'contract IERC20', type: 'address' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
@@ -1197,9 +1196,9 @@ export const daimoEphemeralNotesABI = [
     ],
     name: 'claimNote',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
@@ -1207,9 +1206,9 @@ export const daimoEphemeralNotesABI = [
     ],
     name: 'createNote',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'address', type: 'address' }],
     name: 'notes',
@@ -1218,13 +1217,14 @@ export const daimoEphemeralNotesABI = [
       { name: 'from', internalType: 'address', type: 'address' },
       { name: 'amount', internalType: 'uint256', type: 'uint256' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'token',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
     type: 'event',
@@ -1291,23 +1291,22 @@ export const daimoEphemeralNotesAddress =
 
 export const daimoEphemeralNotesConfig = {
   address: daimoEphemeralNotesAddress,
-  abi: daimoEphemeralNotesABI,
+  abi: daimoEphemeralNotesAbi,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoEphemeralNotesV2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoEphemeralNotesV2ABI = [
+export const daimoEphemeralNotesV2Abi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       { name: '_token', internalType: 'contract IERC20', type: 'address' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
@@ -1316,18 +1315,18 @@ export const daimoEphemeralNotesV2ABI = [
     ],
     name: 'claimNoteRecipient',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
     ],
     name: 'claimNoteSelf',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_ephemeralOwner', internalType: 'address', type: 'address' },
@@ -1335,9 +1334,9 @@ export const daimoEphemeralNotesV2ABI = [
     ],
     name: 'createNote',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'address', type: 'address' }],
     name: 'notes',
@@ -1346,13 +1345,14 @@ export const daimoEphemeralNotesV2ABI = [
       { name: 'from', internalType: 'address', type: 'address' },
       { name: 'amount', internalType: 'uint256', type: 'uint256' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'token',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
     type: 'event',
@@ -1419,23 +1419,22 @@ export const daimoEphemeralNotesV2Address =
 
 export const daimoEphemeralNotesV2Config = {
   address: daimoEphemeralNotesV2Address,
-  abi: daimoEphemeralNotesV2ABI,
+  abi: daimoEphemeralNotesV2Abi,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoFastCCTP
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoFastCctpABI = [
+export const daimoFastCctpAbi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       { name: '_tokenMinter', internalType: 'address', type: 'address' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'fromChainID', internalType: 'uint256', type: 'uint256' },
@@ -1448,9 +1447,9 @@ export const daimoFastCctpABI = [
     ],
     name: 'claimTransfer',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'fromChainID', internalType: 'uint256', type: 'uint256' },
@@ -1463,9 +1462,9 @@ export const daimoFastCctpABI = [
     ],
     name: 'fastFinishTransfer',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'fromChainID', internalType: 'uint256', type: 'uint256' },
@@ -1479,23 +1478,23 @@ export const daimoFastCctpABI = [
     ],
     name: 'getHandoffAddr',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'handoffAddr', internalType: 'address', type: 'address' }],
     name: 'handoffSent',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'handoffAddr', internalType: 'address', type: 'address' }],
     name: 'handoffToRecipient',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -1514,15 +1513,16 @@ export const daimoFastCctpABI = [
     ],
     name: 'startTransfer',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'tokenMinter',
     outputs: [
       { name: '', internalType: 'contract ITokenMinter', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
     type: 'event',
@@ -1718,33 +1718,32 @@ export const daimoFastCctpABI = [
 // DaimoFlexSwapper
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoFlexSwapperABI = [
-  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+export const daimoFlexSwapperAbi = [
+  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'UPGRADE_INTERFACE_VERSION',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'acceptOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'token', internalType: 'contract IERC20', type: 'address' },
     ],
     name: 'addOutputToken',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'pool', internalType: 'address', type: 'address' },
@@ -1759,9 +1758,9 @@ export const daimoFlexSwapperABI = [
         type: 'uint128',
       },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -1776,9 +1775,9 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'extraDataStruct',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'tokenA', internalType: 'contract IERC20', type: 'address' },
@@ -1792,9 +1791,9 @@ export const daimoFlexSwapperABI = [
       { name: 'bestFee', internalType: 'uint24', type: 'uint24' },
       { name: 'bestAmountOut', internalType: 'uint128', type: 'uint128' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'token', internalType: 'contract IERC20', type: 'address' },
@@ -1804,9 +1803,9 @@ export const daimoFlexSwapperABI = [
       { name: 'price', internalType: 'uint256', type: 'uint256' },
       { name: 'decimals', internalType: 'uint8', type: 'uint8' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -1817,23 +1816,23 @@ export const daimoFlexSwapperABI = [
     outputs: [
       { name: 'refAmountOut', internalType: 'uint256', type: 'uint256' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     name: 'hopTokens',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'implementation',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: '_initialOwner', internalType: 'address', type: 'address' },
@@ -1881,18 +1880,18 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'init',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'token', internalType: 'contract IERC20', type: 'address' },
     ],
     name: 'isOutputToken',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
     name: 'knownTokens',
@@ -1905,60 +1904,60 @@ export const daimoFlexSwapperABI = [
       { name: 'isStablecoin', internalType: 'bool', type: 'bool' },
       { name: 'skipUniswap', internalType: 'bool', type: 'bool' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     name: 'oracleFeeTiers',
     outputs: [{ name: '', internalType: 'uint24', type: 'uint24' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'oraclePeriod',
     outputs: [{ name: '', internalType: 'uint32', type: 'uint32' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'oraclePoolFactory',
     outputs: [
       { name: '', internalType: 'contract IUniswapV3Factory', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     name: 'outputTokens',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'pendingOwner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'proxiableUUID',
     outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -1970,9 +1969,9 @@ export const daimoFlexSwapperABI = [
       { name: 'amountOut', internalType: 'uint256', type: 'uint256' },
       { name: 'swapPath', internalType: 'bytes', type: 'bytes' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -1984,9 +1983,9 @@ export const daimoFlexSwapperABI = [
       { name: 'amountOut', internalType: 'uint128', type: 'uint128' },
       { name: 'fee', internalType: 'uint24', type: 'uint24' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -1998,16 +1997,16 @@ export const daimoFlexSwapperABI = [
       { name: 'amountOut', internalType: 'uint256', type: 'uint256' },
       { name: 'swapPath', internalType: 'bytes', type: 'bytes' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'tokenAddr', internalType: 'contract IERC20', type: 'address' },
@@ -2028,9 +2027,9 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'setKnownToken',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -2042,16 +2041,16 @@ export const daimoFlexSwapperABI = [
     outputs: [
       { name: 'swapAmountOut', internalType: 'uint256', type: 'uint256' },
     ],
+    stateMutability: 'payable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'newImplementation', internalType: 'address', type: 'address' },
@@ -2059,13 +2058,14 @@ export const daimoFlexSwapperABI = [
     ],
     name: 'upgradeToAndCall',
     outputs: [],
+    stateMutability: 'payable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'wrappedNativeToken',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
     type: 'event',
@@ -2218,17 +2218,16 @@ export const daimoFlexSwapperABI = [
 // DaimoNameRegistry
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoNameRegistryABI = [
-  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+export const daimoNameRegistryAbi = [
+  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'UPGRADE_INTERFACE_VERSION',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'name', internalType: 'bytes32', type: 'bytes32' },
@@ -2236,39 +2235,39 @@ export const daimoNameRegistryABI = [
     ],
     name: 'forceRegister',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'implementation',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'initialOwner', internalType: 'address', type: 'address' },
     ],
     name: 'init',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'proxiableUUID',
     outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'name', internalType: 'bytes32', type: 'bytes32' },
@@ -2276,44 +2275,44 @@ export const daimoNameRegistryABI = [
     ],
     name: 'register',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'name', internalType: 'bytes32', type: 'bytes32' }],
     name: 'registerSelf',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'name', internalType: 'bytes32', type: 'bytes32' }],
     name: 'resolveAddr',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'addr', internalType: 'address', type: 'address' }],
     name: 'resolveName',
     outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'newImplementation', internalType: 'address', type: 'address' },
@@ -2321,6 +2320,7 @@ export const daimoNameRegistryABI = [
     ],
     name: 'upgradeToAndCall',
     outputs: [],
+    stateMutability: 'payable',
   },
   {
     type: 'event',
@@ -2415,23 +2415,23 @@ export const daimoNameRegistryAddress =
 
 export const daimoNameRegistryConfig = {
   address: daimoNameRegistryAddress,
-  abi: daimoNameRegistryABI,
+  abi: daimoNameRegistryAbi,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoNameRegistryProxy
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoNameRegistryProxyABI = [
+export const daimoNameRegistryProxyAbi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       { name: '_logic', internalType: 'address', type: 'address' },
       { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
+    stateMutability: 'nonpayable',
   },
-  { stateMutability: 'payable', type: 'fallback' },
+  { type: 'fallback', stateMutability: 'payable' },
   {
     type: 'event',
     anonymous: false,
@@ -2466,16 +2466,15 @@ export const daimoNameRegistryProxyAddress =
 
 export const daimoNameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
-  abi: daimoNameRegistryProxyABI,
+  abi: daimoNameRegistryProxyAbi,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoPaymasterV2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoPaymasterV2ABI = [
+export const daimoPaymasterV2Abi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       {
@@ -2485,55 +2484,55 @@ export const daimoPaymasterV2ABI = [
       },
       { name: '_owner', internalType: 'address', type: 'address' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'unstakeDelaySec', internalType: 'uint32', type: 'uint32' },
     ],
     name: 'addStake',
     outputs: [],
+    stateMutability: 'payable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'address', type: 'address' }],
     name: 'bundlerWhitelist',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [],
     name: 'deposit',
     outputs: [],
+    stateMutability: 'payable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'entryPoint',
     outputs: [
       { name: '', internalType: 'contract IEntryPoint', type: 'address' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'getDeposit',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -2551,16 +2550,16 @@ export const daimoPaymasterV2ABI = [
     ],
     name: 'postOp',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'addresses', internalType: 'address[]', type: 'address[]' },
@@ -2568,23 +2567,23 @@ export const daimoPaymasterV2ABI = [
     ],
     name: 'setBundlerWhitelist',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'unlockStake',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -2619,9 +2618,9 @@ export const daimoPaymasterV2ABI = [
       { name: 'context', internalType: 'bytes', type: 'bytes' },
       { name: 'validationData', internalType: 'uint256', type: 'uint256' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -2632,9 +2631,9 @@ export const daimoPaymasterV2ABI = [
     ],
     name: 'withdrawStake',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -2646,6 +2645,7 @@ export const daimoPaymasterV2ABI = [
     ],
     name: 'withdrawTo',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'event',
@@ -2702,23 +2702,22 @@ export const daimoPaymasterV2Address =
 
 export const daimoPaymasterV2Config = {
   address: daimoPaymasterV2Address,
-  abi: daimoPaymasterV2ABI,
+  abi: daimoPaymasterV2Abi,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoRequest
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoRequestABI = [
+export const daimoRequestAbi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       { name: '_token', internalType: 'contract IERC20', type: 'address' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'id', internalType: 'uint256', type: 'uint256' },
@@ -2728,16 +2727,16 @@ export const daimoRequestABI = [
     ],
     name: 'createRequest',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'id', internalType: 'uint256', type: 'uint256' }],
     name: 'fulfillRequest',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     name: 'requests',
@@ -2746,16 +2745,16 @@ export const daimoRequestABI = [
       { name: 'amount', internalType: 'uint256', type: 'uint256' },
       { name: 'status', internalType: 'enum RequestStatus', type: 'uint8' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'token',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'id', internalType: 'uint256', type: 'uint256' },
@@ -2763,6 +2762,7 @@ export const daimoRequestABI = [
     ],
     name: 'updateRequest',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'event',
@@ -2836,53 +2836,52 @@ export const daimoRequestAddress =
 
 export const daimoRequestConfig = {
   address: daimoRequestAddress,
-  abi: daimoRequestABI,
+  abi: daimoRequestAbi,
 } as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DummyBridger
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const dummyBridgerABI = [
+export const dummyBridgerAbi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
       { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
       { name: 'extraData', internalType: 'bytes', type: 'bytes' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'address', type: 'address' }],
     name: 'bridges',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'expectedExtraData',
     outputs: [{ name: '', internalType: 'bytes', type: 'bytes' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'expectedToChainId',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'expectedTokenIn',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -2892,6 +2891,7 @@ export const dummyBridgerABI = [
     ],
     name: 'sendToChain',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
 ] as const
 
@@ -2899,9 +2899,8 @@ export const dummyBridgerABI = [
 // DummySwapper
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const dummySwapperABI = [
+export const dummySwapperAbi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       { name: 'tokenInA', internalType: 'contract IERC20', type: 'address' },
@@ -2909,37 +2908,37 @@ export const dummySwapperABI = [
       { name: 'tokenInB', internalType: 'contract IERC20', type: 'address' },
       { name: 'tokenOutB', internalType: 'contract IERC20', type: 'address' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'expectedTokenInA',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'expectedTokenInB',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'expectedTokenOutA',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'expectedTokenOutB',
     outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -2949,6 +2948,7 @@ export const dummySwapperABI = [
     ],
     name: 'swapToCoin',
     outputs: [{ name: 'amountOut', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'payable',
   },
 ] as const
 
@@ -2956,13 +2956,13 @@ export const dummySwapperABI = [
 // ERC165
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const erc165ABI = [
+export const erc165Abi = [
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'interfaceId', internalType: 'bytes4', type: 'bytes4' }],
     name: 'supportsInterface',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
   },
 ] as const
 
@@ -2970,16 +2970,16 @@ export const erc165ABI = [
 // ERC1967Proxy
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const erc1967ProxyABI = [
+export const erc1967ProxyAbi = [
   {
-    stateMutability: 'payable',
     type: 'constructor',
     inputs: [
       { name: 'implementation', internalType: 'address', type: 'address' },
       { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
+    stateMutability: 'payable',
   },
-  { stateMutability: 'payable', type: 'fallback' },
+  { type: 'fallback', stateMutability: 'payable' },
   {
     type: 'event',
     anonymous: false,
@@ -3013,7 +3013,7 @@ export const erc1967ProxyABI = [
 // ERC1967Utils
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const erc1967UtilsABI = [
+export const erc1967UtilsAbi = [
   {
     type: 'error',
     inputs: [{ name: 'admin', internalType: 'address', type: 'address' }],
@@ -3038,9 +3038,8 @@ export const erc1967UtilsABI = [
 // ERC20
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const erc20ABI = [
+export const erc20Abi = [
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'owner', internalType: 'address', type: 'address' },
@@ -3048,9 +3047,9 @@ export const erc20ABI = [
     ],
     name: 'allowance',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'spender', internalType: 'address', type: 'address' },
@@ -3058,44 +3057,44 @@ export const erc20ABI = [
     ],
     name: 'approve',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
     name: 'balanceOf',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'decimals',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'name',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'symbol',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'totalSupply',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'to', internalType: 'address', type: 'address' },
@@ -3103,9 +3102,9 @@ export const erc20ABI = [
     ],
     name: 'transfer',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'from', internalType: 'address', type: 'address' },
@@ -3114,6 +3113,7 @@ export const erc20ABI = [
     ],
     name: 'transferFrom',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'event',
@@ -3199,26 +3199,25 @@ export const erc20ABI = [
 // EntryPoint
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const entryPointABI = [
-  { stateMutability: 'payable', type: 'receive' },
+export const entryPointAbi = [
+  { type: 'receive', stateMutability: 'payable' },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'unstakeDelaySec', internalType: 'uint32', type: 'uint32' },
     ],
     name: 'addStake',
     outputs: [],
+    stateMutability: 'payable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
     name: 'balanceOf',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'target', internalType: 'address', type: 'address' },
@@ -3226,16 +3225,16 @@ export const entryPointABI = [
     ],
     name: 'delegateAndRevert',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
     name: 'depositTo',
     outputs: [],
+    stateMutability: 'payable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: '', internalType: 'address', type: 'address' }],
     name: 'deposits',
@@ -3246,9 +3245,9 @@ export const entryPointABI = [
       { name: 'unstakeDelaySec', internalType: 'uint32', type: 'uint32' },
       { name: 'withdrawTime', internalType: 'uint48', type: 'uint48' },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
     name: 'getDepositInfo',
@@ -3266,9 +3265,9 @@ export const entryPointABI = [
         ],
       },
     ],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'sender', internalType: 'address', type: 'address' },
@@ -3276,16 +3275,16 @@ export const entryPointABI = [
     ],
     name: 'getNonce',
     outputs: [{ name: 'nonce', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'initCode', internalType: 'bytes', type: 'bytes' }],
     name: 'getSenderAddress',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       {
@@ -3315,9 +3314,9 @@ export const entryPointABI = [
     ],
     name: 'getUserOpHash',
     outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -3365,9 +3364,9 @@ export const entryPointABI = [
     ],
     name: 'handleAggregatedOps',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -3398,16 +3397,16 @@ export const entryPointABI = [
     ],
     name: 'handleOps',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'key', internalType: 'uint192', type: 'uint192' }],
     name: 'incrementNonce',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'callData', internalType: 'bytes', type: 'bytes' },
@@ -3473,9 +3472,9 @@ export const entryPointABI = [
     outputs: [
       { name: 'actualGasCost', internalType: 'uint256', type: 'uint256' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: '', internalType: 'address', type: 'address' },
@@ -3483,23 +3482,23 @@ export const entryPointABI = [
     ],
     name: 'nonceSequenceNumber',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'interfaceId', internalType: 'bytes4', type: 'bytes4' }],
     name: 'supportsInterface',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'unlockStake',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -3510,9 +3509,9 @@ export const entryPointABI = [
     ],
     name: 'withdrawStake',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       {
@@ -3524,6 +3523,7 @@ export const entryPointABI = [
     ],
     name: 'withdrawTo',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'event',
@@ -3861,9 +3861,8 @@ export const entryPointABI = [
 // EphemeralHandoff
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const ephemeralHandoffABI = [
+export const ephemeralHandoffAbi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [
       { name: '', internalType: 'uint256', type: 'uint256' },
@@ -3875,13 +3874,14 @@ export const ephemeralHandoffABI = [
       { name: '', internalType: 'uint256', type: 'uint256' },
       { name: '', internalType: 'uint256', type: 'uint256' },
     ],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'receiveTransferAndSelfDestruct',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'error',
@@ -3894,49 +3894,48 @@ export const ephemeralHandoffABI = [
 // SwapbotLP
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const swapbotLpABI = [
+export const swapbotLpAbi = [
   {
-    stateMutability: 'nonpayable',
     type: 'constructor',
     inputs: [{ name: '_owner', internalType: 'address', type: 'address' }],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'acceptOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'pendingOwner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'swapbotAction', internalType: 'bytes', type: 'bytes' }],
     name: 'run',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'payable',
     type: 'function',
     inputs: [
       { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
@@ -3947,13 +3946,14 @@ export const swapbotLpABI = [
     ],
     name: 'swapAndTip',
     outputs: [],
+    stateMutability: 'payable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
     name: 'transferOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'event',
@@ -4106,10 +4106,9 @@ export const swapbotLpABI = [
 // TestUSDC
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const testUsdcABI = [
-  { stateMutability: 'nonpayable', type: 'constructor', inputs: [] },
+export const testUsdcAbi = [
+  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [
       { name: 'owner', internalType: 'address', type: 'address' },
@@ -4117,9 +4116,9 @@ export const testUsdcABI = [
     ],
     name: 'allowance',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'spender', internalType: 'address', type: 'address' },
@@ -4127,44 +4126,44 @@ export const testUsdcABI = [
     ],
     name: 'approve',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
     name: 'balanceOf',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'pure',
     type: 'function',
     inputs: [],
     name: 'decimals',
     outputs: [{ name: '', internalType: 'uint8', type: 'uint8' }],
+    stateMutability: 'pure',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'name',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'symbol',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'view',
     type: 'function',
     inputs: [],
     name: 'totalSupply',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'to', internalType: 'address', type: 'address' },
@@ -4172,9 +4171,9 @@ export const testUsdcABI = [
     ],
     name: 'transfer',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
   {
-    stateMutability: 'nonpayable',
     type: 'function',
     inputs: [
       { name: 'from', internalType: 'address', type: 'address' },
@@ -4183,6 +4182,7 @@ export const testUsdcABI = [
     ],
     name: 'transferFrom',
     outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'event',

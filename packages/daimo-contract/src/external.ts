@@ -6,7 +6,7 @@ export const pimlicoPaymasterAbi = parseAbi([
   "function token() view returns (address)",
 ]);
 
-export const cctpMessageTransmitterABI = parseAbi([
+export const cctpMessageTransmitterAbi = parseAbi([
   "function receiveMessage(bytes calldata message, bytes calldata attestation)",
 ]);
 

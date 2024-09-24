@@ -13,7 +13,7 @@ import {
 import { mainnet } from "viem/chains";
 
 import { ethereumWETH } from "../dist";
-import { daimoFlexSwapperABI, ethereumUSDC, ForeignToken } from "../src";
+import { daimoFlexSwapperAbi, ethereumUSDC, ForeignToken } from "../src";
 import tokensJson from "../src/codegen/tokens.json";
 
 async function main() {
@@ -95,7 +95,7 @@ class QuotePrinter {
     const { client, daimoFlexSwapperAddr, blockNumber } = this;
     const [quote, path] = await client.readContract({
       address: daimoFlexSwapperAddr,
-      abi: daimoFlexSwapperABI,
+      abi: daimoFlexSwapperAbi,
       functionName: "quote",
       args: [tokA.token, 10n ** BigInt(tokA.decimals), tokB.token],
       blockNumber,
@@ -110,7 +110,7 @@ class QuotePrinter {
     const { client, daimoFlexSwapperAddr, blockNumber } = this;
     const [pool, , fee, amountOut] = await client.readContract({
       address: daimoFlexSwapperAddr,
-      abi: daimoFlexSwapperABI,
+      abi: daimoFlexSwapperAbi,
       functionName: "getBestPoolTick",
       args: [tokA.token, 10n ** BigInt(tokA.decimals), tokB.token],
       blockNumber,

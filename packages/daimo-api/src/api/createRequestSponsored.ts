@@ -8,7 +8,7 @@ import {
   encodeRequestId,
   now,
 } from "@daimo/common";
-import { daimoRequestABI, daimoRequestAddress } from "@daimo/contract";
+import { daimoRequestAbi, daimoRequestAddress } from "@daimo/contract";
 import { Address, Hex } from "viem";
 
 import { NameRegistry } from "../contract/nameRegistry";
@@ -47,7 +47,7 @@ export async function createRequestSponsored(
   // Create onchain request
   console.log(`[API] creating req ${id} ${recipient} ${amount} ${fulfiller}`);
   const txHash = await vc.writeContract({
-    abi: daimoRequestABI,
+    abi: daimoRequestAbi,
     address: daimoRequestAddress,
     functionName: "createRequest",
     args: [id, recipient, BigInt(amount), metadata],

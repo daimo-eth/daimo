@@ -5,7 +5,7 @@ import {
   SlotType,
   signWithMnemonic,
 } from "@daimo/common";
-import { daimoAccountABI } from "@daimo/contract";
+import { daimoAccountAbi } from "@daimo/contract";
 import * as ExpoEnclave from "@daimo/expo-enclave";
 import { SigningCallback } from "@daimo/userop";
 import { base64urlnopad } from "@scure/base";
@@ -83,7 +83,7 @@ function wrapRawSignerAsWebauthn(
     const responseTypeLocation = BigInt(clientDataJSON.indexOf('"type":'));
 
     const signatureStruct = getAbiItem({
-      abi: daimoAccountABI,
+      abi: daimoAccountAbi,
       name: "signatureStruct",
     }).inputs;
 

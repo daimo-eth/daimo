@@ -1,4 +1,4 @@
-import { AccountHistoryResult } from "@daimo/api";
+import type { AccountHistoryResult } from "@daimo/api";
 import {
   EAccount,
   OpStatus,

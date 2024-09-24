@@ -1,7 +1,7 @@
 import { UserOpHex, debugJson } from "@daimo/common";
 import {
-  entryPointABI,
-  entryPointV06ABI,
+  entryPointAbi,
+  entryPointV06Abi,
   entryPointV06Address,
   entryPointV07Address,
 } from "@daimo/contract";
@@ -67,13 +67,13 @@ export class BundlerClient {
   async getOpHash(op: UserOpHex, publicClient: PublicClient) {
     // TODO: use v0.6 for DAv1, v0.7 for DAv2
     const hashV06 = await publicClient.readContract({
-      abi: entryPointV06ABI,
+      abi: entryPointV06Abi,
       address: entryPointV06Address,
       functionName: "getUserOpHash",
       args: [userOpV06FromHex(op)],
     });
     const hashV07 = await publicClient.readContract({
-      abi: entryPointABI,
+      abi: entryPointAbi,
       address: entryPointV07Address,
       functionName: "getUserOpHash",
       args: [packedUserOpFromHex(op)],
@@ -91,7 +91,7 @@ export class BundlerClient {
     const beneficiary = viemClient.account.address;
     try {
       const txHash = await viemClient.writeContract({
-        abi: entryPointV06ABI,
+        abi: entryPointV06Abi,
         address: entryPointV06Address as Address,
         functionName: "handleOps",
         args: [[userOpV06FromHex(op)], beneficiary],

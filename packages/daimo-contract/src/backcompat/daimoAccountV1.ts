@@ -5,7 +5,7 @@
 // DaimoAccount
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoAccountABI = [
+export const daimoAccountAbi = [
   {
     stateMutability: "nonpayable",
     type: "constructor",
@@ -357,7 +357,7 @@ export const daimoAccountABI = [
 // DaimoAccountFactory
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const daimoAccountFactoryABI = [
+export const daimoAccountFactoryAbi = [
   {
     stateMutability: "nonpayable",
     type: "constructor",
@@ -452,5 +452,5 @@ export const daimoAccountFactoryAddress =
 
 export const daimoAccountFactoryConfig = {
   address: daimoAccountFactoryAddress,
-  abi: daimoAccountFactoryABI,
+  abi: daimoAccountFactoryAbi,
 } as const;

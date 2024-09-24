@@ -10,6 +10,8 @@ on:
 
 jobs:
   api-deploy:
+    # master and prod only, no tags
+    if: startsWith(github.ref, 'refs/heads/')
     name: API Deploy
     runs-on: ubuntu-latest
     steps:

@@ -6,7 +6,7 @@ import {
   getInviteStatus,
   retryBackoff,
 } from "@daimo/common";
-import { erc20ABI } from "@daimo/contract";
+import { erc20Abi } from "@daimo/contract";
 import { Address, Hex, encodeFunctionData } from "viem";
 
 import { AccountFactory } from "../contract/accountFactory";
@@ -51,7 +51,7 @@ export async function deployWallet(
       dest: chainConfig.tokenAddress,
       value: 0n,
       data: encodeFunctionData({
-        abi: erc20ABI,
+        abi: erc20Abi,
         functionName: "approve",
         args: [chainConfig.notesV2Address, maxUint256],
       }),
@@ -63,7 +63,7 @@ export async function deployWallet(
       dest: chainConfig.tokenAddress,
       value: 0n,
       data: encodeFunctionData({
-        abi: erc20ABI,
+        abi: erc20Abi,
         functionName: "approve",
         args: [chainConfig.pimlicoPaymasterAddress, maxUint256],
       }),

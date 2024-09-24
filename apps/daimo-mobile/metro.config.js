@@ -9,7 +9,6 @@ config.resolver = {
     stream: require.resolve("stream-browserify"), // For CBOR React Native
   },
   assetExts: [...config.resolver.assetExts, "ttf", "woff", "woff2"], // Include font extensions
-  unstable_enablePackageExports: true,
 };
 
 module.exports = config;

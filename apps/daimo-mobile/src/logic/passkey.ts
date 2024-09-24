@@ -4,7 +4,7 @@ import {
   getSlotType,
   parseAndNormalizeSig,
 } from "@daimo/common";
-import { DaimoChain, daimoAccountABI } from "@daimo/contract";
+import { DaimoChain, daimoAccountAbi } from "@daimo/contract";
 import * as ExpoPasskeys from "@daimo/expo-passkeys";
 import { SigningCallback } from "@daimo/userop";
 import { base64 } from "@scure/base";
@@ -98,7 +98,7 @@ export function getWrappedPasskeySigner(
     const { r, s } = parseAndNormalizeSig(derSig);
 
     const signatureStruct = getAbiItem({
-      abi: daimoAccountABI,
+      abi: daimoAccountAbi,
       name: "signatureStruct",
     }).inputs;
 

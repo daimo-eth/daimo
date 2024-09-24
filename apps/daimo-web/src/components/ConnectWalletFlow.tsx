@@ -12,23 +12,18 @@ import {
   getNoteClaimSignatureFromSeed,
 } from "@daimo/common";
 import {
+  daimoEphemeralNotesAbi,
+  daimoEphemeralNotesV2Abi,
+  daimoRequestAbi,
   daimoRequestAddress,
-  daimoRequestABI,
-  daimoEphemeralNotesV2ABI,
-  notesV2AddressMap,
-  daimoEphemeralNotesABI,
+  erc20Abi,
   notesV1AddressMap,
+  notesV2AddressMap,
 } from "@daimo/contract";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Address, Hex, InsufficientFundsError, parseUnits } from "viem";
-import {
-  useNetwork,
-  usePrepareContractWrite,
-  useContractWrite,
-  useAccount,
-  erc20ABI,
-} from "wagmi";
+import { useAccount, useSimulateContract, useWriteContract } from "wagmi";
 
 import { SecondaryButton, TextButton } from "./buttons";
 import { chainConfig } from "../env";
@@ -132,9 +127,15 @@ function WagmiButton({
 }) {
   const i18n = useI18N();
   const i18 = i18n.components.connectWallet;
-  const { chain } = useNetwork();
-  const { config, error } = usePrepareContractWrite(wagmiPrep);
-  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+  const { chain } = useAccount();
+  const { data, error } = useSimulateContract(wagmiPrep);
+  const {
+    writeContract,
+    isPending,
+    isSuccess,
+    data: txHash,
+  } = useWriteContract();
+  // const { data, isLoading, isSuccess, write } = usweWrite(wagmiPrep);
 
   const humanReadableError = useMemo(() => {
     if (!error || !error.message) return undefined;
@@ -156,26 +157,26 @@ function WagmiButton({
   }, [isSuccess, incrementStep]);
 
   useEffect(() => {
-    if (isLoading || isSuccess) setSecondary();
-  }, [isLoading, isSuccess, setSecondary]);
+    if (isPending || isSuccess) setSecondary();
+  }, [isPending, isSuccess, setSecondary]);
 
   return (
     <>
       {humanReadableError === undefined && (
         <>
           <SecondaryButton
-            disabled={!write || isLoading}
+            disabled={writeContract == null || isPending}
             onClick={() => {
-              if (isSuccess && data?.hash)
+              if (isSuccess && txHash != null)
                 window.open(
-                  chain?.blockExplorers!.default.url + "/tx/" + data?.hash,
+                  chain?.blockExplorers!.default.url + "/tx/" + txHash,
                   "_blank"
                 );
-              else write?.();
+              else writeContract(data!.request);
             }}
             buttonType={isSuccess ? "success" : undefined}
           >
-            {isLoading
+            {isPending
               ? i18.misc.sending()
               : isSuccess && !incrementStep
               ? i18.misc.viewInExplorer()
@@ -304,7 +305,7 @@ async function linkStatusToAction(
       return [
         {
           address: chainConfig.tokenAddress,
-          abi: erc20ABI as readonly unknown[],
+          abi: erc20Abi as readonly unknown[],
           functionName: "transfer" as const,
           args: [recipient.addr, parsedAmount] as const,
         },
@@ -321,13 +322,13 @@ async function linkStatusToAction(
       return [
         {
           address: chainConfig.tokenAddress,
-          abi: erc20ABI as readonly unknown[],
+          abi: erc20Abi as readonly unknown[],
           functionName: "approve" as const,
           args: [daimoRequestAddress, parsedAmount] as const,
         },
         {
           address: daimoRequestAddress,
-          abi: daimoRequestABI,
+          abi: daimoRequestAbi,
           functionName: "fulfillRequest" as const,
           args: [id] as const,
         },
@@ -351,7 +352,7 @@ async function linkStatusToAction(
         );
         return [
           {
-            abi: daimoEphemeralNotesV2ABI,
+            abi: daimoEphemeralNotesV2Abi,
             address: assertNotNull(notesV2AddressMap.get(chainId)),
             functionName: "claimNoteRecipient" as const,
             args: [ephemeralOwner, selfAddress, signature] as const,
@@ -360,7 +361,7 @@ async function linkStatusToAction(
       } else {
         return [
           {
-            abi: daimoEphemeralNotesABI,
+            abi: daimoEphemeralNotesAbi,
             address: assertNotNull(notesV1AddressMap.get(chainId)),
             functionName: "claimNote" as const,
             args: [ephemeralOwner, signature] as const,

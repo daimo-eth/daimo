@@ -1,6 +1,6 @@
 import { BigIntStr, EAccount, ProposedSwap, assert, now } from "@daimo/common";
 import {
-  daimoFlexSwapperABI,
+  daimoFlexSwapperAbi,
   daimoFlexSwapperAddress,
   getDAv2Chain,
   swapRouter02Abi,
@@ -65,7 +65,7 @@ export async function getSwapQuote({
 
   // Onchain Uniswap quoter.
   const swapQuote = await vc.publicClient.readContract({
-    abi: daimoFlexSwapperABI,
+    abi: daimoFlexSwapperAbi,
     address: daimoFlexSwapperAddress,
     functionName: "quote",
     args: [

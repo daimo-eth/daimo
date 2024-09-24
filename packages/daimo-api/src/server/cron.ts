@@ -10,9 +10,9 @@ import {
 } from "@daimo/common";
 import {
   daimoPaymasterV2Address,
-  entryPointV06ABI,
+  entryPointV06Abi,
   entryPointV06Address,
-  erc20ABI,
+  erc20Abi,
 } from "@daimo/contract";
 import { CronJob } from "cron";
 import { Hex, formatEther, getAddress } from "viem";
@@ -87,7 +87,7 @@ export class Crontab {
   async checkPaymasterDeposit() {
     const depositInfo = await this.vc.publicClient.readContract({
       address: entryPointV06Address as Hex,
-      abi: entryPointV06ABI,
+      abi: entryPointV06Abi,
       functionName: "getDepositInfo",
       args: [daimoPaymasterV2Address],
     });
@@ -119,7 +119,7 @@ export class Crontab {
     );
 
     const balanceUSDC = await this.vc.publicClient.readContract({
-      abi: erc20ABI,
+      abi: erc20Abi,
       address: chainConfig.tokenAddress,
       functionName: "balanceOf",
       args: [faucetAddr],

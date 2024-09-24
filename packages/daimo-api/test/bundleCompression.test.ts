@@ -28,7 +28,7 @@ test("compress example bundle", () => {
     "0xA1B349c566C44769888948aDC061ABCdB54497F7"
   );
 
-  // INPUT: UserOp, 700+ bytes ABI-encoded
+  // INPUT: UserOp, 700+ bytes Abi-encoded
   const input: UserOpHex = {
     sender: "0x8bFfa71A959AF0b15C6eaa10d244d80BF23cb6A2",
     nonce: "0x501c58693b65f1374631a2fca7bb7dc60000000000000000",

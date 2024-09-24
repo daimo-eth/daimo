@@ -8,7 +8,7 @@ import {
   now,
   retryBackoff,
 } from "@daimo/common";
-import { erc20ABI } from "@daimo/contract";
+import { erc20Abi } from "@daimo/contract";
 import { Address, Hex } from "viem";
 
 import { NameRegistry } from "../contract/nameRegistry";
@@ -87,7 +87,7 @@ export class InviteCodeTracker {
   async trySendUSDC(to: Address, dollars: number) {
     try {
       return await this.vc.writeContract({
-        abi: erc20ABI,
+        abi: erc20Abi,
         address: chainConfig.tokenAddress,
         functionName: "transfer",
         args: [to, dollarsToAmount(dollars)],

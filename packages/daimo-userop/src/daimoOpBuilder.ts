@@ -5,7 +5,7 @@ import {
   DaimoAccountCall,
   assert,
 } from "@daimo/common";
-import { daimoAccountABI } from "@daimo/contract";
+import { daimoAccountAbi } from "@daimo/contract";
 import { IUserOperationMiddlewareCtx, UserOperationBuilder } from "userop";
 import {
   Address,
@@ -99,7 +99,7 @@ export class DaimoOpBuilder extends UserOperationBuilder {
   executeBatch(calls: DaimoAccountCall[], opMetadata: DaimoOpMetadata) {
     return this.setOpMetadata(opMetadata).setCallData(
       encodeFunctionData({
-        abi: daimoAccountABI,
+        abi: daimoAccountAbi,
         functionName: "executeBatch",
         args: [calls],
       })

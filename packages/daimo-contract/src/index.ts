@@ -1,8 +1,8 @@
 import { Address } from "viem";
 
 import {
-  daimoFastCctpABI,
-  daimoNameRegistryABI,
+  daimoFastCctpAbi,
+  daimoNameRegistryAbi,
   daimoNameRegistryProxyAddress,
 } from "./codegen/contracts";
 
@@ -14,28 +14,28 @@ export const teamDaimoFaucetAddr = "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7";
 
 // Latest contracts
 export {
-  aggregatorV2V3InterfaceABI,
-  daimoAccountFactoryV2ABI,
+  aggregatorV2V3InterfaceAbi,
+  daimoAccountFactoryV2Abi,
   daimoAccountFactoryV2Address,
   daimoAccountFactoryV2Config,
-  daimoAccountV2ABI,
-  daimoCctpBridgerABI,
-  daimoEphemeralNotesABI,
-  daimoEphemeralNotesV2ABI,
-  daimoFlexSwapperABI,
-  daimoPaymasterV2ABI,
+  daimoAccountV2Abi,
+  daimoCctpBridgerAbi,
+  daimoEphemeralNotesAbi,
+  daimoEphemeralNotesV2Abi,
+  daimoFlexSwapperAbi,
+  daimoPaymasterV2Abi,
   daimoPaymasterV2Address,
-  daimoRequestABI,
+  daimoRequestAbi,
   daimoRequestAddress,
   daimoRequestConfig,
-  entryPointABI,
-  erc20ABI,
-  swapbotLpABI,
+  entryPointAbi,
+  erc20Abi,
+  swapbotLpAbi,
 } from "./codegen/contracts";
 
 export const nameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
-  abi: daimoNameRegistryABI,
+  abi: daimoNameRegistryAbi,
 } as const;
 
 // CREATE3 addresses
@@ -43,12 +43,12 @@ export const nameRegistryProxyConfig = {
 /** Latest DaimoFastCCTP address */
 export const daimoFastCctpV1Address =
   "0x92275f59CEB72DD132de54F726f767ab6ba9559f";
-export const daimoFastCctpV1ABI = daimoFastCctpABI;
+export const daimoFastCctpV1Abi = daimoFastCctpAbi;
 
 /** Old DaimoFastCCTP address */
 export const daimoFastCctpV0Address =
   "0xAC58C46A40ff5c2cb5e1CD40179CEB8E6207BF0B";
-// ABI matches new address.
+// Abi matches new address.
 
 /** All DaimoFastCCTP addresses */
 export const daimoFastCctpAddrs: Address[] = [

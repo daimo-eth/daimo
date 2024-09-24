@@ -1,4 +1,4 @@
-import { erc20ABI, nameRegistryProxyConfig } from "@daimo/contract";
+import { erc20Abi, nameRegistryProxyConfig } from "@daimo/contract";
 import { Constants } from "userop";
 import {
   Address,
@@ -54,7 +54,7 @@ export async function checkAccount() {
 
   // Get balance from coin contract
   const bal = await publicClient.readContract({
-    abi: erc20ABI,
+    abi: erc20Abi,
     address: chainConfig.tokenAddress,
     functionName: "balanceOf",
     args: [addr],

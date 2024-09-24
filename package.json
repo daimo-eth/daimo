@@ -13,9 +13,9 @@
     "build:mobile": "turbo run build --filter @daimo/mobile",
     "build:clippy": "turbo run build --filter @daimo/clippy",
     "test": "turbo test",
-    "lint": "turbo lint && syncpack list-mismatches",
+    "lint": "turbo lint && syncpack list-mismatches --filter='^(?!react-native$).*$'",
     "codegen": "turbo codegen",
-    "fix:deps": "syncpack fix-mismatches",
+    "fix:deps": "syncpack fix-mismatches --filter='^(?!react-native$).*$'",
     "docker:api": "docker build -t daimo-api -f packages/daimo-api/Dockerfile ."
   },
   "dependencies": {
@@ -24,7 +24,7 @@
     "prettier": "^2.8.8",
     "syncpack": "^10.6.1",
     "turbo": "^1.10.15",
-    "typescript": "^5.3.0"
+    "typescript": "5.3.3"
   },
   "workspaces": [
     "packages/*",

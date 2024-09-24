@@ -5,15 +5,15 @@ import {
   connectorsForWallets,
   getDefaultWallets,
 } from "@rainbow-me/rainbowkit";
+import { ConnectorsForWalletsParameters } from "@rainbow-me/rainbowkit/dist/wallets/connectorsForWallets";
 import * as React from "react";
 import { useMemo } from "react";
 import { Chain } from "viem/chains";
-import { WagmiConfig, configureChains, createConfig } from "wagmi";
-import { publicProvider } from "wagmi/providers/public";
+import { createConfig, WagmiProvider } from "wagmi";
 
 import { chainConfig } from "../env";
 
-export const chainsDaimoL2 = [chainConfig.chainL2];
+export const chainsDaimoL2 = [chainConfig.chainL2] as const;
 
 const appInfo = {
   appName: "Daimo",
@@ -24,40 +24,32 @@ export function Providers({
   chains,
   children,
 }: {
-  chains: Chain[];
+  chains: readonly [Chain, ...Chain[]];
   children: React.ReactNode;
 }) {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
   const wagmiConfig = useMemo(() => {
-    const { publicClient, webSocketPublicClient } = configureChains(chains, [
-      publicProvider(),
-    ]);
-
-    const walletConnectProjectId = "06d134eadbbacc1f9dd4575541dda90c";
-
-    const { wallets } = getDefaultWallets({
+    const walletConnectParams: ConnectorsForWalletsParameters = {
       appName: "Daimo",
-      projectId: walletConnectProjectId,
-      chains,
-    });
-
-    const connectors = connectorsForWallets([...wallets]);
+      projectId: "06d134eadbbacc1f9dd4575541dda90c",
+    };
+    const { wallets } = getDefaultWallets(walletConnectParams);
+    const connectors = connectorsForWallets([...wallets], walletConnectParams);
 
     return createConfig({
-      autoConnect: true,
       connectors,
-      publicClient,
-      webSocketPublicClient,
+      chains,
+      transports: [],
     });
   }, [chains]);
 
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider chains={chains} appInfo={appInfo}>
+    <WagmiProvider config={wagmiConfig}>
+      <RainbowKitProvider appInfo={appInfo}>
         {mounted && children}
       </RainbowKitProvider>
-    </WagmiConfig>
+    </WagmiProvider>
   );
 }

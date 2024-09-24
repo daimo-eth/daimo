@@ -1,6 +1,6 @@
 export const entryPointV06Address =
   "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
-export const entryPointV06ABI = [
+export const entryPointV06Abi = [
   { stateMutability: "payable", type: "receive" },
   {
     stateMutability: "view",

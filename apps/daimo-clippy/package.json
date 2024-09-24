@@ -6,7 +6,7 @@
     "dev": "echo Use 'npm start' for Clippy dev",
     "start": "tsx src/index.ts",
     "lint": "npm run lint:deps && npm run lint:style",
-    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
+    "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape",
     "lint:style": "eslint . --max-warnings=0"
   },
   "license": "GPL-3.0-or-later",
@@ -17,6 +17,6 @@
     "@slack/bolt": "^3.17.1",
     "@trpc/client": "^11.0.0-next-beta.318",
     "dotenv": "^16.4.5",
-    "viem": "^1.19.15"
+    "viem": "^2.18.2"
   }
 }

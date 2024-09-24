@@ -12,9 +12,9 @@ import {
 import * as Contracts from "@daimo/contract";
 import {
   DAv2Chain,
-  daimoFastCctpV1ABI,
+  daimoFastCctpV1Abi,
   daimoFastCctpV1Address,
-  erc20ABI,
+  erc20Abi,
   getBridgeCoin,
 } from "@daimo/contract";
 import { Utils } from "userop";
@@ -118,7 +118,7 @@ export class DaimoOpSender {
       dest: tokenAddress,
       value: 0n,
       data: encodeFunctionData({
-        abi: erc20ABI,
+        abi: erc20Abi,
         functionName: "approve",
         args: [dest, amount],
       }),
@@ -139,7 +139,7 @@ export class DaimoOpSender {
           dest: this.getAddress(),
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.daimoAccountABI,
+            abi: Contracts.daimoAccountAbi,
             functionName: "addSigningKey",
             args: [slot, contractFriendlyKey],
           }),
@@ -159,7 +159,7 @@ export class DaimoOpSender {
           dest: this.getAddress(),
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.daimoAccountABI,
+            abi: Contracts.daimoAccountAbi,
             functionName: "removeSigningKey",
             args: [slot],
           }),
@@ -189,7 +189,7 @@ export class DaimoOpSender {
           dest: tokenAddress,
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.erc20ABI,
+            abi: Contracts.erc20Abi,
             functionName: "transfer",
             args: [to, parsedAmount],
           }),
@@ -219,7 +219,7 @@ export class DaimoOpSender {
         dest: notesAddressV2,
         value: 0n,
         data: encodeFunctionData({
-          abi: Contracts.daimoEphemeralNotesV2ABI,
+          abi: Contracts.daimoEphemeralNotesV2Abi,
           functionName: "createNote",
           args: [ephemeralOwner, parsedAmount],
         }),
@@ -249,7 +249,7 @@ export class DaimoOpSender {
           dest: this.opConfig.notesAddressV1,
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.daimoEphemeralNotesABI,
+            abi: Contracts.daimoEphemeralNotesAbi,
             functionName: "claimNote",
             args: [ephemeralOwner, signature],
           }),
@@ -273,7 +273,7 @@ export class DaimoOpSender {
           dest: this.opConfig.notesAddressV2,
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.daimoEphemeralNotesV2ABI,
+            abi: Contracts.daimoEphemeralNotesV2Abi,
             functionName: "claimNoteSelf",
             args: [ephemeralOwner],
           }),
@@ -300,7 +300,7 @@ export class DaimoOpSender {
           dest: notesAddressV2,
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.daimoEphemeralNotesV2ABI,
+            abi: Contracts.daimoEphemeralNotesV2Abi,
             functionName: "claimNoteRecipient",
             args: [ephemeralOwner, accountAddress, signature],
           }),
@@ -428,7 +428,7 @@ export class DaimoOpSender {
           dest: tokenAddress,
           value: 0n,
           data: encodeFunctionData({
-            abi: Contracts.erc20ABI,
+            abi: Contracts.erc20Abi,
             functionName: "approve",
             args: [daimoFastCctpV1Address, fromAmount],
           }),
@@ -437,7 +437,7 @@ export class DaimoOpSender {
           dest: daimoFastCctpV1Address,
           value: 0n,
           data: encodeFunctionData({
-            abi: daimoFastCctpV1ABI,
+            abi: daimoFastCctpV1Abi,
             functionName: "startTransfer",
             args: [
               cctpMessengerAddr,

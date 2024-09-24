@@ -1,4 +1,4 @@
-import { daimoAccountABI } from "@daimo/contract";
+import { daimoAccountAbi } from "@daimo/contract";
 import { Address, Hex } from "viem";
 
 import { ViemClient } from "../network/viemClient";
@@ -15,7 +15,7 @@ export async function verifyERC1271Signature(
   signature: Hex
 ): Promise<boolean> {
   const verifySigResult = await vc.publicClient.readContract({
-    abi: daimoAccountABI,
+    abi: daimoAccountAbi,
     address: addr,
     functionName: "isValidSignature",
     args: [messageHash, signature],

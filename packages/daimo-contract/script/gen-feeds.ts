@@ -13,11 +13,11 @@ import { arbitrum, base, mainnet, optimism, polygon } from "viem/chains";
 import { ChainlinkFeed, PricedToken } from "./scriptModels";
 import { assert, assertNotNull } from "./util";
 import {
-  aggregatorV2V3InterfaceABI,
+  aggregatorV2V3InterfaceAbi,
   arbitrumWETH,
   baseWETH,
-  daimoFlexSwapperABI,
-  erc20ABI,
+  daimoFlexSwapperAbi,
+  erc20Abi,
   ethereumWETH,
   ForeignToken,
   getDAv2Chain,
@@ -341,7 +341,7 @@ async function quoteToken({
   const [uniQuote, tokenDec] = await client.multicall({
     contracts: [
       {
-        abi: daimoFlexSwapperABI,
+        abi: daimoFlexSwapperAbi,
         address: swapperAddr,
         functionName: "quote",
         args: [
@@ -351,7 +351,7 @@ async function quoteToken({
         ],
       },
       {
-        abi: erc20ABI,
+        abi: erc20Abi,
         address: tokenAddress,
         functionName: "decimals",
       },
@@ -376,12 +376,12 @@ async function quoteToken({
     const [clDec, clRoundData] = await client.multicall({
       contracts: [
         {
-          abi: aggregatorV2V3InterfaceABI,
+          abi: aggregatorV2V3InterfaceAbi,
           address: feed.feedAddress,
           functionName: "decimals",
         },
         {
-          abi: aggregatorV2V3InterfaceABI,
+          abi: aggregatorV2V3InterfaceAbi,
           address: feed.feedAddress,
           functionName: "latestRoundData",
         },
