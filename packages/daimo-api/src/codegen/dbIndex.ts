@@ -1,5 +1,11 @@
 import type { ColumnType } from "kysely";
 
+export type Int8 = ColumnType<
+  string,
+  bigint | number | string,
+  bigint | number | string
+>;
+
 export type Numeric = ColumnType<string, number | string, number | string>;
 
 export interface IndexDaimoAcct {
@@ -39,13 +45,22 @@ export interface IndexDaimoAcctUpdate {
   tx_idx: Numeric;
 }
 
+export interface IndexDaimoBlock {
+  chain_id: Int8;
+  hash: Buffer;
+  inserted_at: Int8 | null;
+  number: Int8;
+  parent_hash: Buffer;
+  timestamp: Int8;
+}
+
 export interface IndexDaimoFastCctp {
   block_hash: Buffer;
   block_num: Numeric;
   block_ts: Numeric;
   chain_id: Numeric;
   final_recipient: Buffer | null;
-  from_addr: Buffer | null;
+  from_addr: Buffer;
   from_amount: Numeric;
   from_chain_id: Numeric;
   from_token: Buffer | null;
@@ -162,6 +177,7 @@ export interface IndexDaimoTransferTx {
 export interface DB {
   "index.daimo_acct": IndexDaimoAcct;
   "index.daimo_acct_update": IndexDaimoAcctUpdate;
+  "index.daimo_block": IndexDaimoBlock;
   "index.daimo_fast_cctp": IndexDaimoFastCctp;
   "index.daimo_index": IndexDaimoIndex;
   "index.daimo_name": IndexDaimoName;

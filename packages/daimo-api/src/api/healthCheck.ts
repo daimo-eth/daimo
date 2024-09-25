@@ -64,10 +64,12 @@ async function healthCheckInner(
 
   if (showDetailedDebug) {
     const nPromises = await countPromises();
+    const latencies = await watcher.getLatency();
     ret = {
       ...ret,
       nPromises,
       trpcReqsInFlight: trpcReqsInFlight.slice(),
+      ...latencies,
     } as any;
   }
 
