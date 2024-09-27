@@ -179,6 +179,39 @@ export class IndexWatcher {
     return Number(result?.latest_block_num || 0);
   }
 
+  // Get the block write to postgres latency over the last numBlocks
+  async getLatency() {
+    // Get the block times and latencies for the last 1000 blocks
+    const blockTimes = await retryBackoff(`get-block-db-latency`, () =>
+      this.kdb
+        .selectFrom("index.daimo_block")
+        .select(["timestamp", "inserted_at"])
+        .where("chain_id", "=", "" + chainConfig.chainL2.id)
+        .where("inserted_at", "is not", null)
+        .orderBy("number", "desc") // Primary key scan: (chain_id, number)
+        .limit(100)
+        .execute()
+    );
+    if (blockTimes.length === 0) return {};
+
+    const latencies = blockTimes.map((blockTime) =>
+      Math.abs(
+        Number(BigInt(blockTime.timestamp) - BigInt(blockTime.inserted_at!))
+      )
+    );
+
+    // Latency stats
+    const avgLatency =
+      latencies.reduce((sum, latency) => sum + latency, 0) / latencies.length;
+    const maxLatency = Math.max(...latencies);
+    const minLatency = Math.min(...latencies);
+    return {
+      avgLatency,
+      maxLatency,
+      minLatency,
+    };
+  }
+
   getStatus() {
     const { lastGoodTickS, indexLatest, rpcLatest } = this;
     const { idleCount, totalCount, waitingCount } = this.pg;
@@ -222,6 +255,7 @@ export class IndexWatcher {
         hash BYTEA NOT NULL,
         parent_hash BYTEA NOT NULL,
         timestamp NUMERIC NOT NULL,
+        inserted_at BYTEA NOT NULL,
         PRIMARY KEY (chain_id, number, hash)
       );
 
