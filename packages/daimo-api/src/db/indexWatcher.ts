@@ -188,7 +188,7 @@ export class IndexWatcher {
         .select(["timestamp", "inserted_at"])
         .where("chain_id", "=", "" + chainConfig.chainL2.id)
         .where("inserted_at", "is not", null)
-        .orderBy("block_num", "desc") // Primary key scan: (chain_id, block_num)
+        .orderBy("number", "desc") // Primary key scan: (chain_id, number)
         .limit(100)
         .execute()
     );
