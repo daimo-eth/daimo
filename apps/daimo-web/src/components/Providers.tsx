@@ -7,11 +7,12 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { ConnectorsForWalletsParameters } from "@rainbow-me/rainbowkit/dist/wallets/connectorsForWallets";
 import * as React from "react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Chain } from "viem/chains";
 import { createConfig, WagmiProvider } from "wagmi";
 
 import { chainConfig } from "../env";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const chainsDaimoL2 = [chainConfig.chainL2] as const;
 
@@ -45,11 +46,15 @@ export function Providers({
     });
   }, [chains]);
 
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <WagmiProvider config={wagmiConfig}>
-      <RainbowKitProvider appInfo={appInfo}>
-        {mounted && children}
-      </RainbowKitProvider>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider appInfo={appInfo}>
+          {mounted && children}
+        </RainbowKitProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }
