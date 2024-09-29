@@ -1,16 +1,13 @@
 import { Span } from "@opentelemetry/api";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
-import { CreateWSSContextFnOptions } from "@trpc/server/adapters/ws";
 
 import { Telemetry } from "./telemetry";
 
 export type TrpcRequestContext = Awaited<ReturnType<typeof createContext>>;
 
 /** Request context */
-export const createContext = async (
-  opts: CreateHTTPContextOptions | CreateWSSContextFnOptions
-) => {
+export const createContext = async (opts: CreateHTTPContextOptions) => {
   const ipAddr = getXForwardedIP(opts) || opts.req.socket.remoteAddress || "";
   const userAgent = getHeader(opts.req.headers["user-agent"]);
   const daimoPlatform = getHeader(opts.req.headers["x-daimo-platform"]);
@@ -59,9 +56,7 @@ export function onTrpcError(telemetry: Telemetry) {
   };
 }
 
-function getXForwardedIP(
-  opts: CreateHTTPContextOptions | CreateWSSContextFnOptions
-) {
+function getXForwardedIP(opts: CreateHTTPContextOptions) {
   let xForwardedFor = opts.req.headers["x-forwarded-for"];
   if (xForwardedFor == null) return null;
   if (Array.isArray(xForwardedFor)) xForwardedFor = xForwardedFor[0];

@@ -31,7 +31,6 @@
     "@trpc/server": "^11.0.0-next-beta.318",
     "@types/cors": "^2.8.17",
     "@types/geoip-lite": "^1.4.4",
-    "@types/ws": "^8.5.12",
     "await-lock": "^2.2.2",
     "cors": "^2.8.5",
     "cron": "^3.1.7",
@@ -46,7 +45,6 @@
     "semver": "^7.6.3",
     "userop": "^0.3.2",
     "viem": "^2.18.2",
-    "ws": "^8.17.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
