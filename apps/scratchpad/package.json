@@ -18,12 +18,12 @@
     "@types/tape": "^5.6.0",
     "csvtojson": "^2.0.10",
     "depcheck": "^1.4.3",
-    "eslint": "^8.44.0",
+    "eslint": "^8.56.0",
     "lodash": "^4.17.21",
     "tape": "^5.6.3",
     "ts-node": "^10.9.2",
     "userop": "^0.3.2",
-    "viem": "^2.18.2",
+    "viem": "^2.21.10",
     "zod": "^3.23.8"
   },
   "devDependencies": {

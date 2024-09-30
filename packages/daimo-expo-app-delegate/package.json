@@ -26,7 +26,7 @@
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/daimo-eth/daimo#readme",
   "devDependencies": {
-    "@types/react": "~18.2.45",
+    "@types/react": "^18.2.47",
     "expo-module-scripts": "^3.0.11"
   },
   "peerDependencies": {

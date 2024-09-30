@@ -31,8 +31,11 @@
     "apps/*"
   ],
   "overrides": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-native": "0.73.4",
-    "@types/react-native": "0.73.0"
+    "@types/react-native": "0.73.0",
+    "zod": "^3.23.8"
   },
   "engines": {
     "node": ">=20.3.0",

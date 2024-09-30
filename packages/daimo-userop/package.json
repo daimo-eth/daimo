@@ -14,7 +14,7 @@
     "@daimo/common": "*",
     "@daimo/contract": "*",
     "userop": "^0.3.2",
-    "viem": "^2.18.2"
+    "viem": "^2.21.10"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",

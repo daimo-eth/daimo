@@ -17,6 +17,6 @@
     "@slack/bolt": "^3.17.1",
     "@trpc/client": "^11.0.0-next-beta.318",
     "dotenv": "^16.4.5",
-    "viem": "^2.18.2"
+    "viem": "^2.21.10"
   }
 }
