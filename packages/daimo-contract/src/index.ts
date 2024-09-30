@@ -31,6 +31,12 @@ export {
   entryPointAbi,
   erc20Abi,
   swapbotLpAbi,
+  crepeBotLpAbi,
+  crepeBotLpAddress,
+  crepeBotLpConfig,
+  crepeFastCctpAbi,
+  crepeHandoffAbi,
+  crepeHandoffFactoryAbi,
 } from "./codegen/contracts";
 
 export const nameRegistryProxyConfig = {
@@ -55,6 +61,13 @@ export const daimoFastCctpAddrs: Address[] = [
   daimoFastCctpV0Address,
   daimoFastCctpV1Address,
 ];
+
+/** Daimo Pay FastCCTP address */
+export const crepeFastCctpAddress =
+  "0x1C19B74cF09BBbb80AdE88F33F053bd09872Ac6F";
+/** Daimo Pay factory address */
+export const crepeHandoffFactoryAddress =
+  "0x8B7bB875169B6fd583A7AD36f5025Af970818E02";
 
 export const daimoFlexSwapperAddress =
   "0x52A7Fb58f1F26fd57B4a3aAE55d6c51a38A73610";

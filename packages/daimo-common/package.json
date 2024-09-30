@@ -1,9 +1,11 @@
 {
   "name": "@daimo/common",
   "version": "0.2.10",
-  "description": "Shared between web and mobile",
+  "description": "Daimo shared models and utilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "",
+  "license": "MIT",
   "scripts": {
     "build": "tsc",
     "test": "tape -r ts-node/register/transpile-only test/**/*.test.ts",
@@ -11,8 +13,6 @@
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
     "lint:style": "eslint . --max-warnings=0"
   },
-  "author": "",
-  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
     "@types/tape": "^5.6.0",

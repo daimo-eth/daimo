@@ -26,6 +26,7 @@ export type ForeignToken = {
 export enum TokenLogo {
   ETH = "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
   USDC = "https://assets.coingecko.com/coins/images/6319/large/usdc.png",
+  EURC = "https://assets.coingecko.com/coins/images/26045/large/euro.png",
   USDT = "https://assets.coingecko.com/coins/images/325/large/tether.png",
   DAI = "https://assets.coingecko.com/coins/images/9956/large/dai-multi-collateral-mcd.png",
   MATIC = "https://assets.coingecko.com/coins/images/4713/large/polygon.png",
@@ -84,7 +85,16 @@ export const ethereumUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-const ethereumTokens = [ethereumETH, ethereumWETH, ethereumUSDC];
+export const ethereumEURC: ForeignToken = {
+  chainId: 1,
+  token: getAddress("0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c"),
+  decimals: 6,
+  name: "EURC",
+  symbol: "EURC",
+  logoURI: TokenLogo.EURC,
+};
+
+const ethereumTokens = [ethereumETH, ethereumWETH, ethereumUSDC, ethereumEURC];
 
 //
 // Base Sepolia
@@ -132,6 +142,15 @@ export const baseUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
+export const baseEURC: ForeignToken = {
+  chainId: 8453,
+  token: getAddress("0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42"),
+  decimals: 6,
+  name: "EURC",
+  symbol: "EURC",
+  logoURI: TokenLogo.EURC,
+};
+
 export const baseUSDbC: ForeignToken = {
   chainId: 8453,
   token: getAddress("0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA"),
@@ -156,7 +175,15 @@ export const baseUSDT: ForeignToken = {
   logoURI: TokenLogo.USDT,
 };
 
-const baseTokens = [baseETH, baseWETH, baseUSDC, baseUSDbC, baseDAI, baseUSDT];
+const baseTokens = [
+  baseETH,
+  baseWETH,
+  baseUSDC,
+  baseEURC,
+  baseUSDbC,
+  baseDAI,
+  baseUSDT,
+];
 
 //
 // Arbitrum Mainnet

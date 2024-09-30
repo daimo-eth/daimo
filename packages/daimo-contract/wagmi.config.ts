@@ -3,6 +3,9 @@ import { foundry } from "@wagmi/cli/plugins";
 
 import latestAccountFactoryV2 from "../contract/broadcast/DeployAccountFactoryV2.s.sol/8453/run-latest.json";
 import latestCCTPBridger from "../contract/broadcast/DeployCCTPBridger.s.sol/8453/run-latest.json";
+import latestCrepeFastCCTP from "../contract/broadcast/DeployCrepeFastCCTP.s.sol/8453/run-latest.json";
+import latestCrepeHandoffFactory from "../contract/broadcast/DeployCrepeHandoffFactory.s.sol/8453/run-latest.json";
+import latestCrepeLPBot from "../contract/broadcast/DeployCrepeLPBot.s.sol/8453/run-latest.json";
 import latestEphemeralNotes from "../contract/broadcast/DeployEphemeralNotes.s.sol/8453/run-latest.json";
 import latestEphemeralNotesV2 from "../contract/broadcast/DeployEphemeralNotesV2.s.sol/8453/run-latest.json";
 import latestFastCCTP from "../contract/broadcast/DeployFastCCTP.s.sol/8453/run-latest.json";
@@ -26,6 +29,9 @@ const deployments = Object.fromEntries(
     ...latestFlexSwapper.transactions,
     ...latestCCTPBridger.transactions,
     ...latestFastCCTP.transactions,
+    ...latestCrepeFastCCTP.transactions,
+    ...latestCrepeHandoffFactory.transactions,
+    ...latestCrepeLPBot.transactions,
   ]
     .filter((t) => t.transactionType === "CREATE2")
     .map((r) => [r.contractName, r.contractAddress as `0x${string}`])
@@ -40,6 +46,7 @@ export default defineConfig({
       forge: { build: false },
       include: [
         "Daimo*.sol/*",
+        "Crepe*.sol/*",
         "ERC*.sol/*",
         "EntryPoint.sol/*",
         "AggregatorV2V3Interface.sol/*",
