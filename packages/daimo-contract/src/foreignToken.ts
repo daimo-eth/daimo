@@ -17,7 +17,7 @@ import codegenTokens from "./codegen/tokens.json";
 export type ForeignToken = {
   chainId: number;
   token: Address;
-  name: string;
+  name?: string;
   symbol: string;
   decimals: number;
   logoURI?: string;
