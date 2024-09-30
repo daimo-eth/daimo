@@ -116,7 +116,7 @@ function SendScreenInner({
       } else if (requestStatus != null) {
         const recipient = addLastTransferTimes(
           account,
-          requestStatus.recipient
+          requestStatus.recipient,
         );
         if (requestStatus.link.type === "requestv2") {
           const statusV2 = requestStatus as DaimoRequestV2Status;

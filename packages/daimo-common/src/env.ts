@@ -5,7 +5,7 @@ export function getEnvVars<T extends ZodRawShape>(
   obj: T,
   envObj?: {
     [K in keyof T]: string | undefined;
-  }
+  },
 ): z.infer<ZodObject<T>> {
   const zObj = z.object(obj);
   return zObj.parse(envObj || process.env);

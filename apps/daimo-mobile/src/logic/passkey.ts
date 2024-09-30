@@ -32,7 +32,7 @@ const AASA_BUG_MESSAGE = "iOS system error. Restart the app, then try again.";
 export async function createPasskey(
   daimoChain: DaimoChain,
   accountName: string,
-  keySlot: number
+  keySlot: number,
 ) {
   const useSecurityKey = getSlotType(keySlot) === SlotType.SecurityKeyBackup;
   console.log(
@@ -40,7 +40,7 @@ export async function createPasskey(
     accountName,
     keySlot,
     env(daimoChain).passkeyDomain,
-    useSecurityKey
+    useSecurityKey,
   );
   const passkeyName = `${accountName}.${keySlot}`;
 
@@ -62,7 +62,7 @@ export async function createPasskey(
       }),
     5,
     matchAASABugError,
-    AASA_BUG_MESSAGE
+    AASA_BUG_MESSAGE,
   );
 
   console.log("[PASSKEY] Got creation result from expo module", result);
@@ -73,7 +73,7 @@ export async function createPasskey(
 // @daimo/userop compatible Signer for Webauthn signatures
 export function getWrappedPasskeySigner(
   daimoChain: DaimoChain,
-  useSecurityKey: boolean
+  useSecurityKey: boolean,
 ): SigningCallback {
   return async (challengeHex: Hex) => {
     const bChallenge = hexToBytes(challengeHex);
@@ -91,7 +91,7 @@ export function getWrappedPasskeySigner(
     } = await requestPasskeySignature(
       challengeB64,
       env(daimoChain).passkeyDomain,
-      useSecurityKey
+      useSecurityKey,
     );
     console.log("[PASSKEY] Got signature", derSig, accountName, keySlot);
 
@@ -123,7 +123,7 @@ export function getWrappedPasskeySigner(
 async function requestPasskeySignature(
   challengeB64: string,
   domain: string,
-  useSecurityKey: boolean
+  useSecurityKey: boolean,
 ) {
   const result = await Log.retryBackoff(
     "ExpoPasskeysSign",
@@ -135,7 +135,7 @@ async function requestPasskeySignature(
       }),
     5,
     matchAASABugError,
-    AASA_BUG_MESSAGE
+    AASA_BUG_MESSAGE,
   );
   console.log("[PASSKEY] Got signature result from expo module", result);
 

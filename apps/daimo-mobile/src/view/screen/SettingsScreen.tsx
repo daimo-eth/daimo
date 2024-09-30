@@ -210,7 +210,7 @@ function DevicesSection({ account }: { account: Account }) {
         chain={daimoChainFromId(account.homeChainId)}
         pendingRemoval={
           account.pendingKeyRotation.find(
-            (k) => k.rotationType === "remove" && k.slot === keyData.slot
+            (k) => k.rotationType === "remove" && k.slot === keyData.slot,
           ) !== undefined
         }
       />

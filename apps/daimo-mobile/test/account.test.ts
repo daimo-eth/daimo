@@ -156,7 +156,7 @@ describe("LargeAccount", () => {
     expect(acc?.proposedSwaps.length).toBe(1);
     const swap = assertNotNull(acc).proposedSwaps[0];
     expect(swap.fromCoin.token).toBe(
-      "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed"
+      "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed",
     );
   });
 });

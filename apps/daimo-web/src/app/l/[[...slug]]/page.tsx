@@ -20,7 +20,7 @@ import { loadLinkStatusDesc } from "../../../utils/linkStatus";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(
-  props: LinkPageProps
+  props: LinkPageProps,
 ): Promise<Metadata> {
   console.log(`[LINK] req headers: ${debugJson(getReqHeaders())}`);
   const i18n = getI18N(getReqLang());

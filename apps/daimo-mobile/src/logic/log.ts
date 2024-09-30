@@ -7,7 +7,10 @@ interface LogAction {
 }
 
 export class NamedError extends Error {
-  constructor(message: string, public name: string) {
+  constructor(
+    message: string,
+    public name: string,
+  ) {
     super(message);
 
     // Set the prototype explicitly.
@@ -46,7 +49,7 @@ export class Log {
     fn: () => Promise<T>,
     retries: number,
     matchError?: (e: string) => boolean,
-    failureMessage?: string
+    failureMessage?: string,
   ) {
     for (let i = 0; i < retries; i++) {
       try {
@@ -57,7 +60,7 @@ export class Log {
           await new Promise((r) => setTimeout(r, 200 * 2 ** i));
         } else {
           console.log(
-            `[LOG] ${type} trial ${i}, quitting: ${getErrMessage(e)}`
+            `[LOG] ${type} trial ${i}, quitting: ${getErrMessage(e)}`,
           );
           throw new NamedError(getErrMessage(e), type);
         }

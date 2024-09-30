@@ -13,7 +13,7 @@ export function timeAgo(
   sinceS: number,
   locale?: Locale,
   nowS?: number,
-  long?: boolean
+  long?: boolean,
 ): string {
   const i18 = i18n(locale).time;
   if (nowS == null) nowS = now();
@@ -33,7 +33,7 @@ export function daysUntil(
   untilS: number,
   locale?: Locale,
   nowS?: number,
-  long?: boolean
+  long?: boolean,
 ): string {
   const i18 = i18n(locale).time;
   if (nowS == null) nowS = now();
@@ -73,7 +73,7 @@ export function timeMonth(s: number) {
  */
 export function guessTimestampFromNum(
   blockNum: number | bigint,
-  chain: DaimoChain
+  chain: DaimoChain,
 ): number {
   if (typeof blockNum === "bigint") blockNum = Number(blockNum);
   switch (chain) {
@@ -93,7 +93,7 @@ export function guessTimestampFromNum(
  * */
 export function guessNumFromTimestamp(
   timestamp: number,
-  chain: DaimoChain
+  chain: DaimoChain,
 ): number {
   switch (chain) {
     case "baseSepolia":

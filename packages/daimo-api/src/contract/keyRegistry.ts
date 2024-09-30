@@ -52,7 +52,7 @@ export class KeyRegistry extends Indexer {
         .where((eb) => eb.between("block_num", "" + from, "" + to))
         .orderBy("block_num")
         .orderBy("log_idx")
-        .execute()
+        .execute(),
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -111,7 +111,7 @@ export class KeyRegistry extends Indexer {
           }
           this.addrToKeyData.set(
             addr,
-            keyData.filter((k) => k.pubKey !== derKey)
+            keyData.filter((k) => k.pubKey !== derKey),
           );
           this.keyToAddr.delete(derKey);
           break;
@@ -125,7 +125,7 @@ export class KeyRegistry extends Indexer {
 
     const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[KEY-REG] loaded ${changes.length} key changes in ${elapsedMs}ms`
+      `[KEY-REG] loaded ${changes.length} key changes in ${elapsedMs}ms`,
     );
 
     this.listeners.forEach((l) => l(changes));

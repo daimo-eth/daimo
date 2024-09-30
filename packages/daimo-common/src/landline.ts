@@ -69,13 +69,13 @@ export interface LandlineTransfer {
 
 /** Returns eg "Chase ****1234" */
 export function getLandlineAccountName(
-  landlineAccount: LandlineAccount
+  landlineAccount: LandlineAccount,
 ): string {
   return `${landlineAccount.bankName} ****${landlineAccount.accountNumberLastFour}`;
 }
 
 export function landlineTransferToOffchainTransfer(
-  landlineTransfer: LandlineTransfer
+  landlineTransfer: LandlineTransfer,
 ): OffchainTransfer {
   const offchainTransfer: OffchainTransfer = {
     type: "landline",
@@ -100,7 +100,7 @@ export function landlineTransferToTransferClog(
   landlineTransfer: LandlineTransfer,
   chain: DaimoChain,
   /** Tx (potentially) already sent onchain, show as PENDING. */
-  isPending: boolean
+  isPending: boolean,
 ): TransferClog {
   // Default to a Coinbase address so that old versions of the mobile app will
   // show coinbase as the sender for landline deposits

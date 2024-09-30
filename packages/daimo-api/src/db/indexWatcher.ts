@@ -49,7 +49,10 @@ export class IndexWatcher {
   public readonly pg: Pool;
   public readonly kdb: Kysely<IndexDB>;
 
-  constructor(private rpcClient: PublicClient, dbUrl?: string) {
+  constructor(
+    private rpcClient: PublicClient,
+    dbUrl?: string,
+  ) {
     const { poolConfig, dbConfig } = getIndexDBConfig(dbUrl);
     this.pg = new Pool(poolConfig);
     this.kdb = new Kysely<IndexDB>({
@@ -78,7 +81,7 @@ export class IndexWatcher {
       if (this.latest >= blockNumber) {
         tS = (Date.now() - t0) | 0;
         console.log(
-          `[WATCHER] waiting for block ${blockNumber}, found after ${tS}ms`
+          `[WATCHER] waiting for block ${blockNumber}, found after ${tS}ms`,
         );
         return true;
       }
@@ -86,7 +89,7 @@ export class IndexWatcher {
     }
     tS = (Date.now() - t0) | 0;
     console.log(
-      `[WATCHER] waiting for block ${blockNumber}, NOT FOUND, still on ${this.latest} after ${tS}ms`
+      `[WATCHER] waiting for block ${blockNumber}, NOT FOUND, still on ${this.latest} after ${tS}ms`,
     );
     return false;
   }
@@ -99,7 +102,7 @@ export class IndexWatcher {
   // Watches IndexDB for new blocks, loads into in-memory index.
   async watch() {
     this.notifications.on(DB_EVENT_NEW_BLOCK, async () =>
-      this.tick("tick-db-notify")
+      this.tick("tick-db-notify"),
     );
 
     // DB notifications unreliable. Backup tick.
@@ -159,11 +162,11 @@ export class IndexWatcher {
     console.log(`[WATCHER] loading ${start} to ${start + limit}`);
     for (const [, layer] of this.indexerLayers.entries()) {
       await Promise.all(
-        layer.map((i) => i.load(this.kdb, start, start + limit))
+        layer.map((i) => i.load(this.kdb, start, start + limit)),
       );
     }
     console.log(
-      `[WATCHER] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`
+      `[WATCHER] loaded ${start} to ${start + limit} in ${Date.now() - t0}ms`,
     );
     return start + limit;
   }
@@ -174,7 +177,7 @@ export class IndexWatcher {
         .selectFrom("index.daimo_index")
         .select(["latest_block_num"])
         .where("chain_id", "=", "" + chainConfig.chainL2.id)
-        .executeTakeFirst()
+        .executeTakeFirst(),
     );
     return Number(result?.latest_block_num || 0);
   }
@@ -190,14 +193,14 @@ export class IndexWatcher {
         .where("inserted_at", "is not", null)
         .orderBy("number", "desc") // Primary key scan: (chain_id, number)
         .limit(100)
-        .execute()
+        .execute(),
     );
     if (blockTimes.length === 0) return {};
 
     const latencies = blockTimes.map((blockTime) =>
       Math.abs(
-        Number(BigInt(blockTime.timestamp) - BigInt(blockTime.inserted_at!))
-      )
+        Number(BigInt(blockTime.timestamp) - BigInt(blockTime.inserted_at!)),
+      ),
     );
 
     // Latency stats

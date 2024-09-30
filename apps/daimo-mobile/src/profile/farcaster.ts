@@ -67,7 +67,7 @@ export class FarcasterClient {
     for (let retry = 1; retry <= maxRetries; retry++) {
       try {
         console.log(
-          `[FARCASTER] polling status for channel ${channelToken}, try #${retry}`
+          `[FARCASTER] polling status for channel ${channelToken}, try #${retry}`,
         );
         const resp = await appClient.status({ channelToken });
         if (resp.isError) {

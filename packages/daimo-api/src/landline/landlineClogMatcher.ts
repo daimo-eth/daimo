@@ -24,16 +24,16 @@ import { DaimoChain } from "@daimo/contract";
 export function addLandlineTransfers(
   llTransfers: LandlineTransfer[],
   transferClogs: TransferClog[],
-  chain: DaimoChain
+  chain: DaimoChain,
 ): TransferClog[] {
   const fullTransferClogs: TransferClog[] = [];
 
   // First, index by txHash
   const hashToLandlineTransfer = new Map(
-    llTransfers.filter((lt) => lt.txHash != null).map((lt) => [lt.txHash, lt])
+    llTransfers.filter((lt) => lt.txHash != null).map((lt) => [lt.txHash, lt]),
   );
   const hashToClog = new Map(
-    transferClogs.filter((t) => t.txHash != null).map((t) => [t.txHash, t])
+    transferClogs.filter((t) => t.txHash != null).map((t) => [t.txHash, t]),
   );
 
   // Add all unmatched Landline transfers = PENDING or PROCESSING
@@ -66,7 +66,7 @@ export function addLandlineTransfers(
 
 function mergeLandlineTransfer(
   landlineTransfer: LandlineTransfer,
-  transferClog: TransferSwapClog
+  transferClog: TransferSwapClog,
 ): TransferClog {
   const offchainTransfer = landlineTransferToOffchainTransfer(landlineTransfer);
   return {

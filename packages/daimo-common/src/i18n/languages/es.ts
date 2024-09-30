@@ -13,7 +13,7 @@ export const es: LanguageDefinition = {
       readableAmount: string,
       otherCoinSymbol: string,
       homeCoinSymbol: string,
-      chain?: string
+      chain?: string,
     ) =>
       `Aceptado ${readableAmount} ${otherCoinSymbol}${
         chain ? ` en ${chain}` : ""
@@ -21,7 +21,7 @@ export const es: LanguageDefinition = {
     sentOutbound: (
       readableAmount: string,
       coinSymbol: string,
-      chain?: string
+      chain?: string,
     ) =>
       `Envidado ${readableAmount} ${coinSymbol}${chain ? ` en ${chain}` : ""}`,
   },

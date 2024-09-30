@@ -7,7 +7,7 @@ export interface IExternalApiCache {
     apiType: string,
     key: string,
     execFn: () => Promise<string>,
-    expiryS?: number
+    expiryS?: number,
   ): Promise<string | undefined>;
 }
 
@@ -16,7 +16,7 @@ export class StubExternalApiCache implements IExternalApiCache {
     apiType: string,
     key: string,
     execFn: () => Promise<string>,
-    expiryS?: number
+    expiryS?: number,
   ): Promise<string | undefined> {
     return await execFn();
   }
@@ -35,7 +35,7 @@ export class ExternalApiCache {
     apiType: string,
     key: string,
     execFn: () => Promise<string>,
-    expiryS?: number
+    expiryS?: number,
   ) {
     const row = await this.kdb
       .selectFrom("external_api_cache")
@@ -72,7 +72,7 @@ export class ExternalApiCache {
               value: ret,
               updated_at: updatedAt,
               expires_at: expiresAt,
-            })
+            }),
           )
           .execute();
       } catch (e) {

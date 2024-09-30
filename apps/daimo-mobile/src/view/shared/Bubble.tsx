@@ -127,7 +127,7 @@ export function Bubble({
       alignItems: "center",
       justifyContent: "center",
     }),
-    [size, col]
+    [size, col],
   );
 
   const textStyle: TextStyle = useMemo(
@@ -138,7 +138,7 @@ export function Bubble({
       textAlign: "center",
       color: col,
     }),
-    [size, col]
+    [size, col],
   );
 
   const imageStyle: ImageStyle = useMemo(
@@ -148,7 +148,7 @@ export function Bubble({
       width: size - 1,
       borderRadius: 99,
     }),
-    [size]
+    [size],
   );
 
   return (

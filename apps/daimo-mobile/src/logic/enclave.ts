@@ -11,7 +11,7 @@ export interface EnclaveKeyInfo {
 
 // Returns a public key, plus the security level of the key.
 export async function loadOrCreateEnclaveKey(
-  keyName: string
+  keyName: string,
 ): Promise<EnclaveKeyInfo> {
   let keyInfo = await loadEnclaveKey(keyName);
 
@@ -29,7 +29,7 @@ export async function loadOrCreateEnclaveKey(
 async function createEnclaveKey(enclaveKeyName: string) {
   const pubKey = await Log.promise(
     "createEnclaveKey",
-    ExpoEnclave.createKeyPair(enclaveKeyName)
+    ExpoEnclave.createKeyPair(enclaveKeyName),
   );
   const pubKeyHex = `0x${pubKey}` as Hex;
 
@@ -40,14 +40,14 @@ async function createEnclaveKey(enclaveKeyName: string) {
 
 /** Fetches device pubkey, plus security level, from the secure enclave. */
 export async function loadEnclaveKey(
-  enclaveKeyName: string
+  enclaveKeyName: string,
 ): Promise<EnclaveKeyInfo> {
   const [ret, hwSecLevel] = await Log.promise(
     "loadEnclaveKey",
     Promise.all([
       ExpoEnclave.fetchPublicKey(enclaveKeyName),
       ExpoEnclave.getHardwareSecurityLevel(),
-    ])
+    ]),
   );
 
   console.log(`[ENCLAVE] loaded ${enclaveKeyName} = ${ret}`);
@@ -63,7 +63,7 @@ export async function deleteEnclaveKey(enclaveKeyName: string) {
   console.log(`[ENCLAVE] deleting key ${enclaveKeyName}`);
   await Log.promise(
     "ExpoEnclave.deleteKeyPair",
-    ExpoEnclave.deleteKeyPair(enclaveKeyName)
+    ExpoEnclave.deleteKeyPair(enclaveKeyName),
   );
   console.log(`[ENCLAVE] deleted key ${enclaveKeyName}`);
 }
@@ -72,7 +72,7 @@ export async function deleteEnclaveKey(enclaveKeyName: string) {
 export async function getHardwareSec(): Promise<ExpoEnclave.HardwareSecurityLevel> {
   const result = await Log.promise(
     "getHardwareSec",
-    ExpoEnclave.getHardwareSecurityLevel()
+    ExpoEnclave.getHardwareSecurityLevel(),
   );
   return result;
 }

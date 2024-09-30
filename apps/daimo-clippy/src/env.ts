@@ -4,5 +4,5 @@ dotenv.config();
 
 // || prevents build failures during CI
 export const chainConfig = getChainConfig(
-  (process.env.DAIMO_CHAIN || "baseSepolia") as DaimoChain
+  (process.env.DAIMO_CHAIN || "baseSepolia") as DaimoChain,
 );

@@ -48,7 +48,7 @@ const i18 = i18n.landlineBankTransfer;
 
 export default function LandlineTransferScreen({ route }: Props) {
   console.log(
-    `[SEND] rendering LandlineTransferScreen ${JSON.stringify(route.params)}}`
+    `[SEND] rendering LandlineTransferScreen ${JSON.stringify(route.params)}}`,
   );
   const Inner = useWithAccount(LandlineTransferScreenInner);
   return <Inner {...route.params} />;
@@ -178,14 +178,14 @@ function LLChooseAmount({
       newMoney.dollars >= MAX_DOLLARS_DEPOSIT
     ) {
       setErrorMessage(
-        `${i18.depositStatus.maxDeposit()} <$${MAX_DOLLARS_DEPOSIT}`
+        `${i18.depositStatus.maxDeposit()} <$${MAX_DOLLARS_DEPOSIT}`,
       );
     } else if (
       tab === BankTransferOptions.Withdraw &&
       newMoney.dollars >= MAX_DOLLARS_WITHDRAW
     ) {
       setErrorMessage(
-        `${i18.withdrawStatus.maxWithdrawal()} <$${MAX_DOLLARS_WITHDRAW}`
+        `${i18.withdrawStatus.maxWithdrawal()} <$${MAX_DOLLARS_WITHDRAW}`,
       );
     } else {
       setErrorMessage(null);

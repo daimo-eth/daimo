@@ -135,7 +135,7 @@ function formatDaimoLinkInner(link: DaimoLink, linkBase: string): string {
     }
     case "requestv2": {
       const base = [linkBase, "r", link.recipient, link.dollars, link.id].join(
-        "/"
+        "/",
       );
       if (link.memo) return `${base}?memo=${encodeURIComponent(link.memo)}`;
       else return base;
@@ -262,7 +262,7 @@ function parseDaimoLinkInner(link: string): DaimoLink | null {
         const parsedDollars = zDollarStr.safeParse(parts[2]);
         if (!parsedDollars.success) return null;
         const previewDollars = parseFloat(parsedDollars.data).toFixed(
-          2
+          2,
         ) as DollarStr;
         const ephemeralOwner = getAddress(parts[3]);
 

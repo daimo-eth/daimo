@@ -164,7 +164,7 @@ function Checkbox({ active, toggle }: { active: boolean; toggle(): void }) {
       borderColor: color.primary,
       backgroundColor: active ? color.primary : color.white,
     }),
-    [active]
+    [active],
   );
 
   return <Pressable style={boxStyle} onPress={toggle} />;
@@ -195,7 +195,7 @@ function VerifySeedPhraseInner({ account }: { account: Account }) {
 
   const seedPhraseSlot = useMemo(
     () => findAccountUnusedSlot(account, SlotType.SeedPhraseBackup),
-    []
+    [],
   );
 
   return (

@@ -183,7 +183,7 @@ export function useNav<RouteName extends keyof AllRoutes = keyof AllRoutes>() {
 }
 
 export function useOnboardingNav<
-  RouteName extends keyof ParamListOnboarding = keyof ParamListOnboarding
+  RouteName extends keyof ParamListOnboarding = keyof ParamListOnboarding,
 >() {
   return useNavigation<
     NativeStackNavigationProp<ParamListOnboarding, RouteName>
@@ -219,7 +219,7 @@ export function useOnboardingDeepLinkHandler(dc: DaimoChain) {
 export async function handleOnboardingDeepLink(
   dc: DaimoChain,
   nav: OnboardingNav,
-  str: string
+  str: string,
 ) {
   console.log(`[INTRO] paste invite link: '${str}'`);
   try {
@@ -250,7 +250,7 @@ export function handleDeepLink(
   nav: MainNav,
   dispatcher: Dispatcher,
   url: string,
-  homeChainId: number
+  homeChainId: number,
 ) {
   const link = parseDaimoLink(url);
   if (link == null) {
@@ -267,7 +267,7 @@ async function goTo(
   nav: MainNav,
   dispatcher: Dispatcher,
   link: DaimoLink,
-  homeChainId: number
+  homeChainId: number,
 ) {
   const { type } = link;
   switch (type) {
@@ -303,7 +303,7 @@ async function goTo(
       // TODO: pass link status through so child pages don't need to fetch status again
       const linkStatus = await fetchLinkStatus(
         link,
-        daimoChainFromId(homeChainId)
+        daimoChainFromId(homeChainId),
       );
       goTo(nav, dispatcher, linkStatus.link, homeChainId);
       break;

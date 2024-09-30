@@ -35,7 +35,7 @@ import {
  */
 export function addLandlineTransfers(
   oldLogs: TransferClog[],
-  newLogs: TransferClog[]
+  newLogs: TransferClog[],
 ): {
   logs: TransferClog[];
   remaining: TransferClog[];

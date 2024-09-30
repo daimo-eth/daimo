@@ -7,7 +7,7 @@ export function UserBubble({
   pfpUrl?: string;
 }) {
   const inBubbleText = String.fromCodePoint(
-    name.codePointAt(0) || "?".charCodeAt(0)
+    name.codePointAt(0) || "?".charCodeAt(0),
   ).toUpperCase();
 
   // Show pfp if it exists

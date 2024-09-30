@@ -247,7 +247,7 @@ export function daimoChainToId(chain: DaimoChain): number {
 export function getChainDisplayName(
   chain: DAv2Chain,
   short?: boolean,
-  noSepolia?: boolean
+  noSepolia?: boolean,
 ): string {
   const name = short ? chain.shortName : chain.name;
   let displayName = name.charAt(0).toUpperCase() + name.slice(1);

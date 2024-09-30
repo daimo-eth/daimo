@@ -98,7 +98,7 @@ async function metrics() {
     requestIndexer,
     foreignCoinIndexer,
     paymentMemoTracker,
-    clogMatcher
+    clogMatcher,
   );
 
   console.log(`[METRICS] using ${vc.publicClient.chain.name}`);
@@ -137,7 +137,7 @@ async function metrics() {
 function addMetric(
   metrics: Map<string, number>,
   tsUnix: number,
-  value: number
+  value: number,
 ) {
   const week = getWeek(tsUnix * 1000);
   metrics.set(week, (metrics.get(week) || 0) + value);

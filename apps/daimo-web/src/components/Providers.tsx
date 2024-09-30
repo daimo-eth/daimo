@@ -43,7 +43,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       chains,
       transports,
     });
-  }, [chains]);
+  }, []);
 
   const [queryClient] = useState(() => new QueryClient());
 

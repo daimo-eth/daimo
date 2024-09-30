@@ -37,7 +37,7 @@ export async function getHardwareSecurityLevel(): Promise<HardwareSecurityLevel>
  * no key pair is attached to accountName.
  */
 export async function fetchPublicKey(
-  accountName: string
+  accountName: string,
 ): Promise<string | undefined> {
   return ExpoEnclaveModule.fetchPublicKey(accountName);
 }
@@ -72,7 +72,7 @@ export async function deleteKeyPair(accountName: string): Promise<void> {
 export async function sign(
   accountName: string,
   hexMessage: string,
-  promptCopy: PromptCopy
+  promptCopy: PromptCopy,
 ): Promise<string> {
   return ExpoEnclaveModule.sign(accountName, hexMessage, promptCopy);
 }
@@ -89,7 +89,7 @@ export async function sign(
 export async function verify(
   accountName: string,
   hexSignature: string,
-  hexMessage: string
+  hexMessage: string,
 ): Promise<boolean> {
   return ExpoEnclaveModule.verify(accountName, hexSignature, hexMessage);
 }

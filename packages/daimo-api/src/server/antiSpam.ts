@@ -15,7 +15,7 @@ export class AntiSpam {
     const faucetUrl = new URL("/faucet", AntiSpam.url);
     const resp = await AntiSpam.tryQuery<{ sendFaucet: boolean }>(
       faucetUrl,
-      reqInfo
+      reqInfo,
     );
     const sendFaucet = !!resp?.sendFaucet;
     const sendFaucetStr = sendFaucet ? "allow" : "DENY";
@@ -32,7 +32,7 @@ export class AntiSpam {
     const faucetUrl = new URL("/api-protection", AntiSpam.url);
     const resp = await AntiSpam.tryQuery<{ allowAPI: boolean }>(
       faucetUrl,
-      reqInfo
+      reqInfo,
     );
     return resp == null || resp.allowAPI;
   }

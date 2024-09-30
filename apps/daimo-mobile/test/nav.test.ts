@@ -10,7 +10,7 @@ describe("nav", () => {
   const nav: MainNav = {
     navigate: (
       tab: string,
-      { screen, params }: { screen: string; params: any }
+      { screen, params }: { screen: string; params: any },
     ) => {
       history.push({ tab, screen, params });
     },
@@ -24,7 +24,7 @@ describe("nav", () => {
   const assertNav = (
     tab: string,
     screen: string,
-    params: { link: DaimoLink }
+    params: { link: DaimoLink },
   ) => {
     expect(history).toStrictEqual([{ tab, screen, params }]);
   };
@@ -57,7 +57,7 @@ describe("nav", () => {
       nav,
       dispatcher,
       "daimo://note/alice/1.23/0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-      8453
+      8453,
     );
     assertNav("HomeTab", "Note", {
       link: {

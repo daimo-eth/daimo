@@ -27,7 +27,7 @@ export async function getFids() {
 
 async function getFidsForAddrs(addrs: Address[]): Promise<number[]> {
   const client = new NeynarAPIClient(
-    assertNotNull(process.env.DAIMO_NEYNAR_KEY)
+    assertNotNull(process.env.DAIMO_NEYNAR_KEY),
   );
   const fids = [] as number[];
   for (const chunk of _.chunk(addrs, 300)) {

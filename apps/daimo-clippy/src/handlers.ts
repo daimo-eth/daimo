@@ -146,7 +146,7 @@ let tokenListPromise: Promise<TokenList> | null = null;
 async function getTokenList(): Promise<TokenList> {
   if (tokenListPromise == null) {
     tokenListPromise = fetch("https://tokens.coingecko.com/base/all.json").then(
-      (a) => a.json()
+      (a) => a.json(),
     );
   }
   return tokenListPromise;
@@ -187,12 +187,13 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
   const tokens =
     chainConfig.daimoChain === "base" ? (await getTokenList()).tokens : [];
   const fromToken = tokens.find(
-    (t) => t.symbol === strFromToken || t.address === strFromToken.toLowerCase()
+    (t) =>
+      t.symbol === strFromToken || t.address === strFromToken.toLowerCase(),
   );
   if (fromToken == null) return `Token '${strFromToken}' not found`;
 
   const toToken = tokens.find(
-    (t) => t.symbol === strToToken || t.address === strToToken.toLowerCase()
+    (t) => t.symbol === strToToken || t.address === strToToken.toLowerCase(),
   );
   if (toToken == null) return `Token '${strToToken}' not found`;
 
@@ -206,7 +207,7 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
       addr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
     },
     toAddr: getAddress("0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddead"),
-    chainId: chainConfig.daimoChain.id,
+    chainId: chainConfig.chainL2.id,
   });
 
   if (!route) {
@@ -223,7 +224,7 @@ async function getSwapQuote(kwargs: Map<string, string>): Promise<string> {
     `Fetched route for ${fromStr} to ${toToken.symbol}: ${JSON.stringify(
       route,
       null,
-      2
+      2,
     )}`,
   ].join("\n");
 }
@@ -244,7 +245,7 @@ async function grantInvite(kwargs: Map<string, string>): Promise<string> {
   const maxUses = 10;
 
   console.log(
-    `[SLACK-BOT] granting invite to ${name}: ${code}, $${dollars}, max ${maxUses} uses`
+    `[SLACK-BOT] granting invite to ${name}: ${code}, $${dollars}, max ${maxUses} uses`,
   );
 
   await createInviteCode(code, dollars, dollars, maxUses, addr);
@@ -257,10 +258,10 @@ async function grantInvite(kwargs: Map<string, string>): Promise<string> {
 async function createInvite(kwargs: Map<string, string>): Promise<string> {
   const code = assertNotNull(kwargs.get("code"));
   const bonusDollarsInvitee = Number(
-    assertNotNull(kwargs.get("bonus_dollars_invitee"))
+    assertNotNull(kwargs.get("bonus_dollars_invitee")),
   );
   const bonusDollarsInviter = Number(
-    assertNotNull(kwargs.get("bonus_dollars_inviter"))
+    assertNotNull(kwargs.get("bonus_dollars_inviter")),
   );
   const maxUses = Number(assertNotNull(kwargs.get("max_uses")));
   const inviter = getAddress(assertNotNull(kwargs.get("inviter")));
@@ -270,7 +271,7 @@ async function createInvite(kwargs: Map<string, string>): Promise<string> {
     bonusDollarsInvitee,
     bonusDollarsInviter,
     maxUses,
-    inviter
+    inviter,
   );
 }
 
@@ -279,7 +280,7 @@ export async function createInviteCode(
   bonusDollarsInvitee: number,
   bonusDollarsInviter: number,
   maxUses: number,
-  inviter: Address
+  inviter: Address,
 ) {
   const res = await rpc.createInviteLink.mutate({
     apiKey,
@@ -292,7 +293,7 @@ export async function createInviteCode(
   const inviteStatus = await rpc.getLinkStatus.query({ url: res });
 
   return `Successfully created invite: ${res}\n\n ${getJSONblock(
-    inviteStatus
+    inviteStatus,
   )}`;
 }
 
@@ -392,7 +393,7 @@ async function disableInviteBonus(kwargs: Map<string, string>) {
   const inviteStatus = await rpc.getLinkStatus.query({ url: res });
 
   return `Successfully disabled invite bonus: ${res}\n\n${getJSONblock(
-    inviteStatus
+    inviteStatus,
   )}`;
 }
 

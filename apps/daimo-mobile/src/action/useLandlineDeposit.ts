@@ -36,7 +36,7 @@ export function useLandlineDeposit({
 
   const exec = useCallback(async () => {
     console.log(
-      `[LANDLINE] Creating deposit for ${account.name} to ${recipient.landlineAccountUuid} for $${dollarsStr}`
+      `[LANDLINE] Creating deposit for ${account.name} to ${recipient.landlineAccountUuid} for $${dollarsStr}`,
     );
     setAS("loading", i18.depositStatus.creating());
 
@@ -83,12 +83,12 @@ export function useLandlineDeposit({
 
 function depositAccountTransform(
   account: Account,
-  landlineTransfer: LandlineTransfer
+  landlineTransfer: LandlineTransfer,
 ): Account {
   const transferClog = landlineTransferToTransferClog(
     landlineTransfer,
     daimoChainFromId(account.homeChainId),
-    true
+    true,
   );
   return {
     ...account,

@@ -59,7 +59,7 @@ export class PushNotifier {
     private noteIndexer: NoteIndexer,
     private requestIndexer: RequestIndexer,
     private keyReg: KeyRegistry,
-    private db: DB
+    private db: DB,
   ) {}
 
   async init() {
@@ -71,7 +71,7 @@ export class PushNotifier {
 
     // Load Expo push notification tokens
     const rows = await retryBackoff(`loadPushTokens`, () =>
-      this.db.loadPushTokens()
+      this.db.loadPushTokens(),
     );
     console.log(`[PUSH] loaded ${rows.length} push tokens from DB`);
     for (const row of rows) {
@@ -169,7 +169,7 @@ export class PushNotifier {
 
     await Promise.all([
       retryBackoff(`savePushToken`, () =>
-        this.db.savePushToken({ address: addr, pushtoken: pushToken })
+        this.db.savePushToken({ address: addr, pushtoken: pushToken }),
       ),
       this.maybeSendNotifications([
         {
@@ -201,7 +201,7 @@ export class PushNotifier {
   }
 
   getPushNotificationForRequestCreated(
-    log: DaimoRequestV2Status
+    log: DaimoRequestV2Status,
   ): PushNotification[] {
     const key = `req-created-${log.link.id}`;
 
@@ -219,7 +219,7 @@ export class PushNotifier {
       recipientAddr,
       key,
       "Request created",
-      `Requesting $${dollars} ${tokenSymbol}${fromStr}`
+      `Requesting $${dollars} ${tokenSymbol}${fromStr}`,
     );
   }
 
@@ -239,7 +239,7 @@ export class PushNotifier {
 
   async getPushNotifsFromTransfer(
     log: Transfer,
-    addr: Address
+    addr: Address,
   ): Promise<PushNotification[]> {
     const transferClog = this.coinIndexer.createTransferClog(log, addr);
 
@@ -293,7 +293,7 @@ export class PushNotifier {
         // Transfer fulilling request
         if (transferClog.requestStatus) {
           assert(
-            transferClog.requestStatus.status === DaimoRequestState.Fulfilled
+            transferClog.requestStatus.status === DaimoRequestState.Fulfilled,
           );
           if (amount > 0) {
             return `Your ${dollars} ${tokenSymbol} request was fulfilled`;
@@ -335,14 +335,14 @@ export class PushNotifier {
   }
 
   async getPushNotifsFromForeignCoinTransfer(
-    log: ForeignTokenTransfer
+    log: ForeignTokenTransfer,
   ): Promise<PushNotification[]> {
     const pushTokens = this.pushTokens.get(getAddress(log.to));
     if (!pushTokens || pushTokens.length === 0) return [];
 
     const readableAmount = getForeignCoinDisplayAmount(
       log.value.toString() as `${bigint}`,
-      log.foreignToken
+      log.foreignToken,
     );
     const swap = await this.foreignCoinIndexer.getProposedSwapForLog(log);
     if (swap == null) return [];
@@ -372,7 +372,7 @@ export class PushNotifier {
   }
 
   private getPushNotifsFromRequests(
-    logs: DaimoRequestV2Status[]
+    logs: DaimoRequestV2Status[],
   ): PushNotification[] {
     const messages = [];
     const { tokenSymbol } = chainConfig;
@@ -397,8 +397,8 @@ export class PushNotifier {
             fulfiller,
             key,
             "Request received",
-            `${log.recipient.name} requested $${dollars} ${tokenSymbol}`
-          )
+            `${log.recipient.name} requested $${dollars} ${tokenSymbol}`,
+          ),
         );
       }
     }
@@ -432,15 +432,15 @@ export class PushNotifier {
             key,
             addMemo(`$${dollars} sent`, memo),
             `${getAccountName(
-              claimer
-            )} accepted your ${dollars} ${symbol} payment link`
+              claimer,
+            )} accepted your ${dollars} ${symbol} payment link`,
           ),
           ...this.getPushNotifs(
             claimer.addr,
             key,
             addMemo(`Received $${dollars}`, memo),
-            `You received ${dollars} ${symbol} from ${getAccountName(sender)}`
-          )
+            `You received ${dollars} ${symbol} from ${getAccountName(sender)}`,
+          ),
         );
       } else {
         // To Alice: "You cancelled your $1.00 payment link"
@@ -453,8 +453,8 @@ export class PushNotifier {
             sender.addr,
             key,
             addMemo(`Reclaimed $${dollars}`, memo),
-            `You cancelled your ${dollars} ${symbol} payment link`
-          )
+            `You cancelled your ${dollars} ${symbol} payment link`,
+          ),
         );
       }
     }
@@ -491,7 +491,7 @@ export class PushNotifier {
     address: Address,
     key: string,
     title: string,
-    body: string
+    body: string,
   ): PushNotification[] {
     const pushTokens = this.pushTokens.get(address);
     if (pushTokens == null) return [];
