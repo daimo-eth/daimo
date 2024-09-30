@@ -16,7 +16,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 
 import { CallToAction } from "../../../components/CallToAction";
-import { Providers, chainsDaimoL2 } from "../../../components/Providers";
+import { Providers } from "../../../components/Providers";
 import { getI18N } from "../../../i18n";
 import { getReqLang } from "../../../i18n/server";
 import { getAbsoluteUrl } from "../../../utils/getAbsoluteUrl";
@@ -86,7 +86,7 @@ export async function generateMetadata(props: LinkProps): Promise<Metadata> {
 
 export default async function LinkPage(props: LinkProps) {
   return (
-    <Providers chains={chainsDaimoL2}>
+    <Providers>
       <LinkPageInner {...props} />
     </Providers>
   );

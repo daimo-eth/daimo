@@ -135,10 +135,11 @@ function WagmiButton({
     isSuccess,
     data: txHash,
   } = useWriteContract();
-  // const { data, isLoading, isSuccess, write } = usweWrite(wagmiPrep);
 
   const humanReadableError = useMemo(() => {
-    if (!error || !error.message) return undefined;
+    if (error == null) return undefined;
+
+    console.warn("Connect wallet error", error);
     if (error.message.match(/ERC20: transfer amount exceeds balance/)) {
       return i18.errors.notEnoughFunds();
     } else if (error.message.match(/note does not exist/)) {
@@ -148,7 +149,7 @@ function WagmiButton({
     } else if (error instanceof InsufficientFundsError) {
       return i18.errors.insufficientEth();
     } else {
-      return error.message;
+      return error.message || "Unknown error";
     }
   }, [error, i18]);
 

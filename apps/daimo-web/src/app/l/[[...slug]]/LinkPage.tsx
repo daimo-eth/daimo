@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 import { CallToAction } from "../../../components/CallToAction";
-import { chainsDaimoL2, Providers } from "../../../components/Providers";
+import { Providers } from "../../../components/Providers";
 import { I18NProvider, useI18N } from "../../../i18n/context";
 import { LinkStatusDesc } from "../../../utils/linkStatus";
 
@@ -17,7 +17,7 @@ export default function LinkPage({
   pfp: string | undefined;
 }) {
   return (
-    <Providers chains={chainsDaimoL2}>
+    <Providers>
       <I18NProvider lang={lang}>
         <LinkPageInner {...{ statusDesc, pfp }} />
       </I18NProvider>
