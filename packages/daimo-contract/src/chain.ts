@@ -8,28 +8,40 @@
 import { DaimoChain } from "./chainConfig";
 import {
   ForeignToken,
+  arbitrumETH,
+  arbitrumSepoliaETH,
   arbitrumSepoliaUSDC,
   arbitrumSepoliaWETH,
   arbitrumUSDC,
   arbitrumWETH,
+  avalancheAVAX,
+  avalancheFujiAVAX,
   avalancheFujiUSDC,
   avalancheFujiWAVAX,
   avalancheUSDC,
   avalancheWAVAX,
+  baseETH,
+  baseSepoliaETH,
   baseSepoliaUSDC,
   baseSepoliaWETH,
   baseUSDC,
   baseWETH,
+  ethereumETH,
+  ethereumSepoliaETH,
   ethereumSepoliaUSDC,
   ethereumSepoliaWETH,
   ethereumUSDC,
   ethereumWETH,
+  optimismETH,
+  optimismSepoliaETH,
   optimismSepoliaUSDC,
   optimismSepoliaWETH,
   optimismUSDC,
   optimismWETH,
+  polygonAmoyMATIC,
   polygonAmoyUSDC,
   polygonAmoyWMATIC,
+  polygonMATIC,
   polygonUSDC,
   polygonWMATIC,
 } from "./foreignToken";
@@ -41,6 +53,7 @@ export type DAv2Chain = {
   shortName: string;
   cctpDomain: number;
   bridgeCoin: ForeignToken;
+  nativeToken: ForeignToken;
   wrappedNativeToken: ForeignToken;
   isTestnet?: boolean;
 };
@@ -51,6 +64,7 @@ export const ethereum: DAv2Chain = {
   shortName: "eth",
   cctpDomain: 0,
   bridgeCoin: ethereumUSDC,
+  nativeToken: ethereumETH,
   wrappedNativeToken: ethereumWETH,
 };
 
@@ -60,6 +74,7 @@ export const ethereumSepolia: DAv2Chain = {
   shortName: "eth",
   cctpDomain: 0,
   bridgeCoin: ethereumSepoliaUSDC,
+  nativeToken: ethereumSepoliaETH,
   wrappedNativeToken: ethereumSepoliaWETH,
   isTestnet: true,
 };
@@ -70,6 +85,7 @@ export const base: DAv2Chain = {
   shortName: "base",
   cctpDomain: 6,
   bridgeCoin: baseUSDC,
+  nativeToken: baseETH,
   wrappedNativeToken: baseWETH,
 };
 
@@ -79,6 +95,7 @@ export const baseSepolia: DAv2Chain = {
   shortName: "base",
   cctpDomain: 6,
   bridgeCoin: baseSepoliaUSDC,
+  nativeToken: baseSepoliaETH,
   wrappedNativeToken: baseSepoliaWETH,
   isTestnet: true,
 };
@@ -89,6 +106,7 @@ export const arbitrum: DAv2Chain = {
   shortName: "arb",
   cctpDomain: 3,
   bridgeCoin: arbitrumUSDC,
+  nativeToken: arbitrumETH,
   wrappedNativeToken: arbitrumWETH,
 };
 
@@ -98,6 +116,7 @@ export const arbitrumSepolia: DAv2Chain = {
   shortName: "arb",
   cctpDomain: 3,
   bridgeCoin: arbitrumSepoliaUSDC,
+  nativeToken: arbitrumSepoliaETH,
   wrappedNativeToken: arbitrumSepoliaWETH,
   isTestnet: true,
 };
@@ -108,6 +127,7 @@ export const optimism: DAv2Chain = {
   shortName: "op",
   cctpDomain: 2,
   bridgeCoin: optimismUSDC,
+  nativeToken: optimismETH,
   wrappedNativeToken: optimismWETH,
 };
 
@@ -117,6 +137,7 @@ export const optimismSepolia: DAv2Chain = {
   shortName: "op",
   cctpDomain: 2,
   bridgeCoin: optimismSepoliaUSDC,
+  nativeToken: optimismSepoliaETH,
   wrappedNativeToken: optimismSepoliaWETH,
   isTestnet: true,
 };
@@ -127,6 +148,7 @@ export const polygon: DAv2Chain = {
   shortName: "poly",
   cctpDomain: 7,
   bridgeCoin: polygonUSDC,
+  nativeToken: polygonMATIC,
   wrappedNativeToken: polygonWMATIC,
 };
 
@@ -136,6 +158,7 @@ export const polygonAmoy: DAv2Chain = {
   shortName: "poly",
   cctpDomain: 7,
   bridgeCoin: polygonAmoyUSDC,
+  nativeToken: polygonAmoyMATIC,
   wrappedNativeToken: polygonAmoyWMATIC,
   isTestnet: true,
 };
@@ -146,6 +169,7 @@ export const avalanche: DAv2Chain = {
   shortName: "avax",
   cctpDomain: 1,
   bridgeCoin: avalancheUSDC,
+  nativeToken: avalancheAVAX,
   wrappedNativeToken: avalancheWAVAX,
 };
 
@@ -155,6 +179,7 @@ export const avalancheFuji: DAv2Chain = {
   shortName: "avax",
   cctpDomain: 1,
   bridgeCoin: avalancheFujiUSDC,
+  nativeToken: avalancheFujiAVAX,
   wrappedNativeToken: avalancheFujiWAVAX,
   isTestnet: true,
 };
