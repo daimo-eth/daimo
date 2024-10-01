@@ -85,6 +85,7 @@ export enum ExternalPaymentOptions {
   Daimo = "Daimo",
   Coinbase = "Coinbase",
   RampNetwork = "RampNetwork",
+  Binance = "Binance",
 }
 
 export interface DaimoPayToken extends ForeignToken {
