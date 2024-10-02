@@ -38,6 +38,7 @@ export type DaimoPayDehydratedOrder = {
   destNonce: bigint;
   intent: string;
   itemsJson: string | null;
+  paymentOptionsJson: string;
   redirectUri: string | null;
 };
 
@@ -59,6 +60,7 @@ export type DaimoPayHydratedOrder = {
   destClaimTxHash: Hex | null;
   intent: string;
   itemsJson: string | null;
+  paymentOptionsJson: string;
   redirectUri: string | null;
 };
 
