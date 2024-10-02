@@ -12,7 +12,7 @@ set -e
 
 SCRIPTS=(
     # "script/DeployCrepeHandoffFactory.s.sol"
-    # "script/DeployCrepeFastCCTP.s.sol"
+    "script/DeployCrepeFastCCTP.s.sol"
     # "script/DeployFlexSwapper.s.sol"
     # "script/DeployCCTPBridger.s.sol"
     # "script/DeployAccountFactoryV2.s.sol"
@@ -20,7 +20,7 @@ SCRIPTS=(
 
     # SWAPBOT (ensure private key is swapbot EOA)
     # "script/DeploySwapbotLP.s.sol" 
-    "script/DeployCrepeBotLP.s.sol"
+    # "script/DeployCrepeBotLP.s.sol"
 )
 CHAINS=(
     # MAINNETS

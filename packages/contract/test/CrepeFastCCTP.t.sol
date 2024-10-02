@@ -105,6 +105,8 @@ contract CrepeFastCCTPTest is Test {
             nonce: _nonce
         });
 
+        vm.expectEmit();
+        emit CrepeFastCCTP.ActionCompleted(HANDOFF_ADDR, _bob);
         fc.fastFinishAction({
             destination: destination,
             swapCall: Call({to: address(0), value: 0, data: ""})

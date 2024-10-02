@@ -924,6 +924,44 @@ export const crepeFastCctpAbi = [
         indexed: true,
       },
       {
+        name: 'refundAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'ActionBounced',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'handoffAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'destinationAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'ActionCompleted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'handoffAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
         name: 'finalRecipient',
         internalType: 'address',
         type: 'address',

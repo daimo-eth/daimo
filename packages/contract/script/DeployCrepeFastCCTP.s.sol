@@ -21,7 +21,7 @@ contract DeployCrepeFastCCTPScript is Script {
         console.log("using handoff factory at", handoffFactory);
 
         address fastCCTP = CREATE3.deploy(
-            keccak256("CrepeFastCCTP-test3"),
+            keccak256("CrepeFastCCTP-test4"),
             abi.encodePacked(
                 type(CrepeFastCCTP).creationCode,
                 abi.encode(tokenMinter, tokenMessenger, handoffFactory)

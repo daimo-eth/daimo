@@ -69,6 +69,19 @@ contract CrepeFastCCTP {
         Destination destination
     );
 
+    // When the action is completed as expected, emit this event
+    event ActionCompleted(
+        address indexed handoffAddr,
+        address indexed destinationAddress
+    );
+
+    // When the action is a call that fails, we bounce the funds to the 
+    // specified refund address and emit this event
+    event ActionBounced(
+        address indexed handoffAddr,
+        address indexed refundAddress
+    );
+
     constructor(
         ITokenMinter _tokenMinter,
         ICCTPTokenMessenger _cctpMessenger,
@@ -169,7 +182,7 @@ contract CrepeFastCCTP {
             address(this),
             destination.mintToken.amount
         );
-        completeAction(destination, swapCall);
+        completeAction(handoffAddr, destination, swapCall);
 
         emit FastFinish({
             handoffAddr: handoffAddr,
@@ -203,7 +216,7 @@ contract CrepeFastCCTP {
             recipient = destination.finalCall.to;
 
             handoffToRecipient[address(handoff)] = recipient;
-            completeAction(destination, swapCall);
+            completeAction(address(handoff), destination, swapCall);
         } else {
             // Otherwise, the LP fastFinished the action, give them the recieved
             // amount.
@@ -224,6 +237,7 @@ contract CrepeFastCCTP {
     // Then, if an action is a call, make the action call with the given token
     // approved. Otherwise, transfer the token to the action address.
     function completeAction(
+        address handoffAddr,
         Destination calldata destination,
         Call calldata swapCall
     ) internal {
@@ -261,21 +275,36 @@ contract CrepeFastCCTP {
                 value: destination.finalCall.value
             }(destination.finalCall.data);
 
-            // If the intent fails, refund the final tokens
-            if (!success) {
+            if (success) {
+                emit ActionCompleted({
+                    handoffAddr: handoffAddr,
+                    destinationAddress: destination.finalCall.to
+                });
+            } else {
                 CrepeTokenUtils.transfer(
                     destination.finalCallToken.addr,
                     payable(destination.refundAddress),
                     destination.finalCallToken.amount
                 );
+
+                emit ActionBounced({
+                    handoffAddr: handoffAddr,
+                    refundAddress: destination.refundAddress
+                });
             }
         } else {
             // If the final call is a transfer, transfer the token
+            // Transfers can never bounce.
             CrepeTokenUtils.transfer(
                 destination.finalCallToken.addr,
                 payable(destination.finalCall.to),
                 destination.finalCallToken.amount
             );
+
+            emit ActionCompleted({
+                handoffAddr: handoffAddr,
+                destinationAddress: destination.finalCall.to
+            });
         }
     }
 

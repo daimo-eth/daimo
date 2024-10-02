@@ -62,7 +62,7 @@ export const daimoFastCctpAddrs: Address[] = [
 
 /** Daimo Pay FastCCTP address */
 export const crepeFastCctpAddress =
-  "0x1C19B74cF09BBbb80AdE88F33F053bd09872Ac6F";
+  "0x5575a46Ad9930e6E8C3327CEA8325878ba533d05";
 /** Daimo Pay factory address */
 export const crepeHandoffFactoryAddress =
   "0x8B7bB875169B6fd583A7AD36f5025Af970818E02";
