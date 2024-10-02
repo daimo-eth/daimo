@@ -32,8 +32,6 @@ export {
   erc20Abi,
   swapbotLpAbi,
   crepeBotLpAbi,
-  crepeBotLpAddress,
-  crepeBotLpConfig,
   crepeFastCctpAbi,
   crepeHandoffAbi,
   crepeHandoffFactoryAbi,
@@ -68,6 +66,7 @@ export const crepeFastCctpAddress =
 /** Daimo Pay factory address */
 export const crepeHandoffFactoryAddress =
   "0x8B7bB875169B6fd583A7AD36f5025Af970818E02";
+export const crepeBotLpAddress = "0x499259F91D023aEF99A5E48930C99e6Df226769c";
 
 export const daimoFlexSwapperAddress =
   "0x52A7Fb58f1F26fd57B4a3aAE55d6c51a38A73610";

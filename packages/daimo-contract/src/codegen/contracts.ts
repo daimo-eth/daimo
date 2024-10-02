@@ -290,7 +290,10 @@ export const aggregatorV3InterfaceAbi = [
 export const crepeBotLpAbi = [
   {
     type: 'constructor',
-    inputs: [{ name: '_owner', internalType: 'address', type: 'address' }],
+    inputs: [
+      { name: '_owner', internalType: 'address', type: 'address' },
+      { name: '_usdc', internalType: 'contract IERC20', type: 'address' },
+    ],
     stateMutability: 'nonpayable',
   },
   { type: 'receive', stateMutability: 'payable' },
@@ -514,6 +517,13 @@ export const crepeBotLpAbi = [
     stateMutability: 'nonpayable',
   },
   {
+    type: 'function',
+    inputs: [],
+    name: 'usdc',
+    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
     type: 'event',
     anonymous: false,
     inputs: [
@@ -567,14 +577,6 @@ export const crepeBotLpAbi = [
     name: 'SafeERC20FailedOperation',
   },
 ] as const
-
-export const crepeBotLpAddress =
-  '0x88f00747336702466091f7Bf26A9613660B8bB44' as const
-
-export const crepeBotLpConfig = {
-  address: crepeBotLpAddress,
-  abi: crepeBotLpAbi,
-} as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CrepeFastCCTP

@@ -14,8 +14,11 @@ import "./CrepeUtils.sol";
  */
 contract CrepeBotLP is Ownable2Step {
     using SafeERC20 for IERC20;
+    IERC20 public usdc;
 
-    constructor(address _owner) Ownable(_owner) {}
+    constructor(address _owner, IERC20 _usdc) Ownable(_owner) {
+        usdc = _usdc;
+    }
 
     // Handles two cases:
     // Exact output: input extra USDC from owner to make up for difference
@@ -28,14 +31,14 @@ contract CrepeBotLP is Ownable2Step {
         uint256 maxTip,
         Call calldata innerSwap
     ) external payable {
-        require(tx.origin == owner(), "DSLP: only usable by owner");
+        require(tx.origin == owner(), "CBLP: only usable by owner");
 
         // Claim amountIn from msg.sender & approve swap
         if (address(requiredTokenIn.addr) == address(0)) {
             // Should never require extra input from owner
             require(
                 requiredTokenIn.amount == msg.value,
-                "DSLP: wrong msg.value"
+                "CBLP: wrong msg.value"
             );
         } else {
             CrepeTokenUtils.transferFrom(
@@ -46,10 +49,11 @@ contract CrepeBotLP is Ownable2Step {
             );
 
             if (suppliedTokenInAmount < requiredTokenIn.amount) {
-                // Exact output: input extra USDC from owner to make up for difference
+                // Input more USDC from owner.
                 uint256 inShortfall = requiredTokenIn.amount -
                     suppliedTokenInAmount;
-                require(inShortfall <= maxTip, "DSLP: excessive tip");
+                require(inShortfall <= maxTip, "CBLP: excessive tip");
+                require(requiredTokenIn.addr == usdc, "CBLP: asked to input wrong token");
                 CrepeTokenUtils.transferFrom(
                     requiredTokenIn.addr,
                     owner(),
@@ -57,6 +61,9 @@ contract CrepeBotLP is Ownable2Step {
                     inShortfall
                 );
             }
+            // if we're about to send more tokens than required, it's fine -- 
+            // we'll just get more output back, allowing us to account for 
+            // expected slippage.
 
             // forceApprove() not necessary, we check correct tokenOut amount
             requiredTokenIn.addr.approve(innerSwap.to, requiredTokenIn.amount);
@@ -75,25 +82,34 @@ contract CrepeBotLP is Ownable2Step {
             requiredTokenOut.addr,
             address(this)
         ) - amountPre;
-        require(swapAmountOut > 0, "DSLP: swap produced no output");
-        require(swapAmountOut < type(uint128).max, "DSLP: excessive output");
-        CrepeTokenUtils.transfer(
-            requiredTokenOut.addr,
-            payable(msg.sender),
-            swapAmountOut
-        );
 
         // Tip the difference; make sure it's not too much.
         if (swapAmountOut < requiredTokenOut.amount) {
+            // Output more USDC from owner.
             uint256 outShortfall = requiredTokenOut.amount - swapAmountOut;
-            require(outShortfall <= maxTip, "DSLP: excessive tip");
+            require(outShortfall <= maxTip, "CBLP: excessive tip");
+            require(requiredTokenOut.addr == usdc, "CBLP: asked to output wrong token");
             CrepeTokenUtils.transferFrom(
                 requiredTokenOut.addr,
                 owner(),
-                payable(msg.sender),
+                address(this),
                 outShortfall
             );
+        } else {
+            // Input excess tokens to owner.
+            uint256 tip = swapAmountOut - requiredTokenOut.amount;
+            CrepeTokenUtils.transfer(
+                requiredTokenOut.addr,
+                payable(owner()),
+                tip
+            );
         }
+
+        CrepeTokenUtils.transfer(
+            requiredTokenOut.addr,
+            payable(msg.sender),
+            requiredTokenOut.amount
+        );
     }
 
     function fastFinish(

@@ -14,7 +14,6 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@pimlico/erc20-paymaster": "^0.1.1",
     "@tsconfig/node20": "^20.1.4",
     "@wagmi/cli": "^2.1.15",
     "tsx": "^4.19.1",
