@@ -140,7 +140,7 @@ export function writeDaimoPayOrderID(id: bigint): string {
   return base58.encode(numberToBytes(id));
 }
 
-const zUUID = z.string().uuid();
+export const zUUID = z.string().uuid();
 
 export type UUID = z.infer<typeof zUUID>;
 
@@ -151,8 +151,8 @@ export type PaymentStartedEvent = {
   txHash: Hex;
 };
 
-export type PaymentFinishedEvent = {
-  type: "payment_finished";
+export type PaymentCompletedEvent = {
+  type: "payment_completed";
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex;
@@ -167,7 +167,7 @@ export type PaymentBouncedEvent = {
 
 export type WebhookEventBody =
   | PaymentStartedEvent
-  | PaymentFinishedEvent
+  | PaymentCompletedEvent
   | PaymentBouncedEvent;
 
 export interface WebhookEndpoint {
@@ -176,6 +176,7 @@ export interface WebhookEndpoint {
   url: string;
   token: string;
   createdAt: Date;
+  deletedAt: Date | null;
 }
 
 // Lifecycle: Pending (just created) -> (if failing) Retrying (exponential backoff) -> Successful or Failed
