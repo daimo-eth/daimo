@@ -1,6 +1,7 @@
 import { ForeignToken } from "@daimo/contract";
 import { base58 } from "@scure/base";
 import { Address, bytesToBigInt, Hex, numberToBytes, zeroAddress } from "viem";
+import z from "zod";
 
 import { BigIntStr } from "./model";
 
@@ -23,6 +24,11 @@ export enum DaimoPayOrderMode {
   CHOOSE_AMOUNT = "choose_amount", // let the user specify the amount to pay
   HYDRATED = "hydrated", // once hydrated, the order is final and all parameters are known and immutable
 }
+
+export type DaimoPayOrderUpdate =
+  | DaimoPayOrderMode
+  | DaimoPayOrderStatusSource
+  | DaimoPayOrderStatusDest;
 
 export interface DaimoPayOrderItem {
   name: string;
@@ -121,10 +127,78 @@ export const emptyOnChainCall: OnChainCall = {
   value: 0n,
 };
 
-export function readEncodedDaimoPayID(id: string): bigint {
+// base58 encoded bigint
+const zDaimoPayOrderID = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]+$/);
+
+export type DaimoPayOrderID = z.infer<typeof zDaimoPayOrderID>;
+
+export function readDaimoPayOrderID(id: string): bigint {
   return bytesToBigInt(base58.decode(id));
 }
 
-export function writeEncodedDaimoPayID(id: bigint): string {
+export function writeDaimoPayOrderID(id: bigint): string {
   return base58.encode(numberToBytes(id));
+}
+
+const zUUID = z.string().uuid();
+
+export type UUID = z.infer<typeof zUUID>;
+
+export type PaymentStartedEvent = {
+  type: "payment_started";
+  paymentId: DaimoPayOrderID;
+  chainId: number;
+  txHash: Hex;
+};
+
+export type PaymentFinishedEvent = {
+  type: "payment_finished";
+  paymentId: DaimoPayOrderID;
+  chainId: number;
+  txHash: Hex;
+};
+
+export type PaymentBouncedEvent = {
+  type: "payment_bounced";
+  paymentId: DaimoPayOrderID;
+  chainId: number;
+  txHash: Hex;
+};
+
+export type WebhookEventBody =
+  | PaymentStartedEvent
+  | PaymentFinishedEvent
+  | PaymentBouncedEvent;
+
+export interface WebhookEndpoint {
+  id: UUID;
+  orgId: UUID;
+  url: string;
+  token: string;
+  createdAt: Date;
+}
+
+// Lifecycle: Pending (just created) -> (if failing) Retrying (exponential backoff) -> Successful or Failed
+export enum WebhookEventStatus {
+  PENDING = "pending", // waiting to be delivered
+  RETRYING = "retrying", // currently in exponential backoff queue
+  SUCCESSFUL = "successful", // successfully delivered
+  FAILED = "failed", // gave up after retrying
+}
+
+export interface WebhookEvent {
+  id: UUID;
+  endpoint: WebhookEndpoint;
+  body: WebhookEventBody;
+  status: WebhookEventStatus;
+  deliveries: WebhookDelivery[];
+  createdAt: Date;
+}
+
+export interface WebhookDelivery {
+  id: UUID;
+  eventId: UUID;
+  httpStatus: number | null;
+  body: string | null;
+  createdAt: Date;
 }
