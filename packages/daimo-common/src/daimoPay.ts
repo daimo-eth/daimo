@@ -40,6 +40,8 @@ export type DaimoPayDehydratedOrder = {
   itemsJson: string | null;
   paymentOptionsJson: string;
   redirectUri: string | null;
+  orgId: string | null;
+  createdAt: Date;
 };
 
 export type DaimoPayHydratedOrder = {
@@ -51,6 +53,7 @@ export type DaimoPayHydratedOrder = {
   destFinalCall: OnChainCall;
   destRefundAddr: Address;
   destNonce: bigint;
+  sourceFulfillerAddr: Address | null;
   sourceTokenAmount: DaimoPayTokenAmount | null;
   sourceInitiateTxHash: Hex | null;
   sourceStartTxHash: Hex | null;
@@ -62,6 +65,8 @@ export type DaimoPayHydratedOrder = {
   itemsJson: string | null;
   paymentOptionsJson: string;
   redirectUri: string | null;
+  orgId: string | null;
+  createdAt: Date;
 };
 
 export type DaimoPayHydratedOrderWithoutHandoffAddr = Omit<
