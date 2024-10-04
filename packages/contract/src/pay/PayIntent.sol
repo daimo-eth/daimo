@@ -5,7 +5,7 @@ import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./TokenUtils.sol";
-import "../interfaces/IDaimoBridger.sol";
+import "../interfaces/IDaimoPayBridger.sol";
 
 /// @dev Asset amount, eg $100 USDC or 0.1 ETH
 struct TokenAmount {
@@ -37,14 +37,14 @@ struct PayIntent {
     ///     (token, amount) is approved. Otherwise, it's transferred to dest.to
     Call finalCall;
     /// @dev Escrow contract for fast-finish.
-    address escrow;
+    address payable escrow;
     /// @dev Address to refund tokens if call fails, or zero.
     address refundAddress;
     /// @dev Nonce. PayIntent receiving addresses are one-time use.
     uint256 nonce;
 }
 
-IDaimoBridger bridger = IDaimoBridger(address(0)); // TODO
+IDaimoPayBridger constant bridger = IDaimoPayBridger(address(0)); // TODO
 
 /// @dev This is an ephemeral intent contract. Any supported tokens sent to this
 ///      address on any supported chain are forwarded, via a combination of
@@ -72,9 +72,9 @@ contract PayIntentContract is Initializable {
         Call[] calldata swapCalls,
         bytes calldata bridgeExtraData
     ) public {
+        require(keccak256(abi.encode(intent)) == intentHash, "FCCTP: intent");
         require(msg.sender == intent.escrow, "FCCTP: only escrow");
         require(block.chainid != intent.chainId, "FCCTP: only foreign chain");
-        require(keccak256(abi.encode(intent)) == intentHash, "FCCTP: intent");
 
         // Run arbitrary calls provided by the LP. These will generally swap if
         // necessary, then approve tokens to the bridger.
@@ -96,14 +96,14 @@ contract PayIntentContract is Initializable {
         // This use of SELFDESTRUCT is compatible with EIP-6780. Ephemeral
         // contracts are deployed, then destroyed in the same transaction.
         // solhint-disable-next-line
-        selfdestruct(creator);
+        selfdestruct(intent.escrow);
     }
 
     /// One step: receive mintToken and send to creator
     function receiveAndSelfDestruct(PayIntent calldata intent) public {
-        require(msg.sender == creator, "FCCTP: only creator");
-        require(block.chainid == intent.chainId, "FCCTP: only dest chain");
         require(keccak256(abi.encode(intent)) == intentHash, "FCCTP: intent");
+        require(msg.sender == intent.escrow, "FCCTP: only creator");
+        require(block.chainid == intent.chainId, "FCCTP: only dest chain");
 
         IERC20 bridgeTok = intent.bridgeToken.addr;
         uint256 amount = TokenUtils.getBalanceOf(bridgeTok, address(this));
@@ -122,5 +122,5 @@ contract PayIntentContract is Initializable {
     }
 
     /// Accept native-token (eg ETH) inputs
-    fallback() external payable {}
+    receive() external payable {}
 }
