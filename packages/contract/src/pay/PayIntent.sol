@@ -7,9 +7,9 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./TokenUtils.sol";
 import "../interfaces/IDaimoPayBridger.sol";
 
-/// @dev Asset amount, eg $100 USDC or 0.1 ETH
+/// @dev Asset amount, e.g. $100 USDC or 0.1 ETH
 struct TokenAmount {
-    /// @dev Zero address = native asset, eg ETH
+    /// @dev Zero address = native asset, e.g. ETH
     IERC20 addr;
     uint256 amount;
 }
@@ -66,25 +66,25 @@ contract PayIntentContract is Initializable {
         intentHash = _intentHash;
     }
 
-    /// Can only be called on foreign chains. Sends funds to dest chain.
+    /// Called on the source chain to initiate the intent. Sends funds to dest
+    /// chain.
     function sendAndSelfDestruct(
         PayIntent calldata intent,
         Call[] calldata swapCalls,
         bytes calldata bridgeExtraData
     ) public {
-        require(keccak256(abi.encode(intent)) == intentHash, "FCCTP: intent");
-        require(msg.sender == intent.escrow, "FCCTP: only escrow");
-        require(block.chainid != intent.chainId, "FCCTP: only foreign chain");
+        require(keccak256(abi.encode(intent)) == intentHash, "PI: intent");
+        require(msg.sender == intent.escrow, "PI: only escrow");
+        require(block.chainid != intent.chainId, "PI: only foreign chain");
 
         // Run arbitrary calls provided by the LP. These will generally swap if
         // necessary, then approve tokens to the bridger.
         for (uint256 i = 0; i < swapCalls.length; ++i) {
             Call calldata call = swapCalls[i];
             (bool success, ) = call.to.call{value: call.value}(call.data);
-            require(success, "FCCTP: swap call failed");
+            require(success, "PI: swap call failed");
         }
 
-        // Bridge (via CCTP, etc)
         bridger.sendToChain({
             toChainId: intent.chainId,
             toAddress: address(this),
@@ -101,15 +101,15 @@ contract PayIntentContract is Initializable {
 
     /// One step: receive mintToken and send to creator
     function receiveAndSelfDestruct(PayIntent calldata intent) public {
-        require(keccak256(abi.encode(intent)) == intentHash, "FCCTP: intent");
-        require(msg.sender == intent.escrow, "FCCTP: only creator");
-        require(block.chainid == intent.chainId, "FCCTP: only dest chain");
+        require(keccak256(abi.encode(intent)) == intentHash, "PI: intent");
+        require(msg.sender == intent.escrow, "PI: only creator");
+        require(block.chainid == intent.chainId, "PI: only dest chain");
 
         IERC20 bridgeTok = intent.bridgeToken.addr;
         uint256 amount = TokenUtils.getBalanceOf(bridgeTok, address(this));
         require(
             amount >= intent.bridgeToken.amount,
-            "FCCTP: insufficient bridge token received"
+            "PI: insufficient bridge token received"
         );
 
         // Send to escrow contract, which will forward to current recipient

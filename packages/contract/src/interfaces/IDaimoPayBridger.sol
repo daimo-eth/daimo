@@ -6,7 +6,16 @@ import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 /// @notice Bridges assets automatically. Specifically, it lets any market maker
 /// initiate a bridge transaction to another chain.
 interface IDaimoPayBridger {
-    /// @dev Initiates a bridge. Guarantees that (toToken, toAmount) shows up
+    /// @notice Emitted when a bridge transaction is initiated
+    event BridgeInitiated(
+        address indexed sender,
+        uint256 indexed toChainId,
+        address indexed toAddress,
+        address toToken,
+        uint256 toAmount
+    );
+
+    /// @dev Initiate a bridge. Guarantees that (toToken, toAmount) shows up
     ///      in (toAddress) on (toChainId). Otherwise, reverts.
     function sendToChain(
         uint256 toChainId,
