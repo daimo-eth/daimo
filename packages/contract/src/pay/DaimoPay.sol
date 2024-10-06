@@ -5,14 +5,15 @@ import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 
-import "../vendor/cctp/ICCTPReceiver.sol";
-import "../vendor/cctp/ICCTPTokenMessenger.sol";
-import "../vendor/cctp/ITokenMinter.sol";
-import "./CrepeHandoff.sol";
-import "./CrepeHandoffFactory.sol";
-import "./CrepeUtils.sol";
+import "../../vendor/cctp/ICCTPReceiver.sol";
+import "../../vendor/cctp/ICCTPTokenMessenger.sol";
+import "../../vendor/cctp/ITokenMinter.sol";
+import "./DaimoPayBridger.sol";
+import "./PayIntent.sol";
+import "./PayIntentFactory.sol";
+import "./TokenUtils.sol";
 
-// a Crepe transfer is 4 steps:
+// A Daimo Pay transfer has 4 steps:
 // 1. Alice sends (tokenIn, amountIn) to handoff address on chain A -- simple erc20 transfer
 // 2. LP swaps tokenIn to bridgeTokenIn and burns on chain A -- LP runs this in sendAndSelfDestruct
 //    - LP doesnt need approve or anything else, just quote and swap.
@@ -29,67 +30,61 @@ import "./CrepeUtils.sol";
 
 // To be nice Alice can put a a slightly worse quote than the market price to incentive LP.
 
-/// @title Wraps Circle's Cross-Chain Transfer Protocol (CCTP) for fast cross-chain actions
+/// @title Daimo Pay contract for creating and fulfilling cross-chain actions
 /// @author The Daimo team
 /// @custom:security-contact security@daimo.com
 ///
-/// Wraps CCTP. Allows optimistic fast actions. Alice initiates a transfer by
-/// calling `startAction` on chain A. After the CCTP delay (currently 10+ min),
-/// funds arrive at the DaimoFastCCTP contract deployed on chain B. Bob can call
-/// `claimAction` function to perform Bob's action. Alternately, immediately after the first
-/// call, an LP can call `fastFinishAction` to perform Bob's action immediately.
-/// Later, when the funds arrive from CCTP, the LP (rather than Bob) will claim.
-contract CrepeFastCCTP {
+/// Allows optimistic fast actions. Alice initiates a transfer by calling
+/// `startAction` on chain A. After the bridging delay (10+ min for CCTP),
+/// funds arrive at the intent address deployed on chain B. Bob can call
+/// `claimAction` function to perform Bob's action. Alternatively, immediately
+/// after the first call, an LP can call `fastFinishAction` to perform Bob's
+/// action immediately. Later, when the funds arrive from the bridge, the LP
+/// (rather than Bob) will claim.
+contract DaimoPay {
     using SafeERC20 for IERC20;
 
-    /// The CCTP contracts.
-    ITokenMinter public immutable tokenMinter;
-    ICCTPTokenMessenger public immutable cctpMessenger;
-    CrepeHandoffFactory public immutable handoffFactory;
+    PayIntentFactory public immutable intentFactory;
+    DaimoPayBridger public immutable bridger;
 
-    /// Commit to transfer details in a handoff address. See CrepeHandoff.
-    mapping(address handoffAddr => bool) public handoffSent;
-    /// On the receiving chain, map each transfer to a recipient (LP or Bob).
-    mapping(address handoffAddr => address) public handoffToRecipient;
+    /// Commit to transfer details in an intent address.
+    mapping(address intentAddr => bool) public intentSent;
+    /// On the receiving chain, map each intent to a recipient (LP or Bob).
+    mapping(address intentAddr => address) public intentToRecipient;
 
     // Action initiated on chain A
-    event Start(address indexed handoffAddr, Destination destination);
+    event Start(address indexed intentAddr, PayIntent intent);
 
     // Action completed ~immediately on chain B
     event FastFinish(
-        address indexed handoffAddr,
+        address indexed intentAddr,
         address indexed newRecipient,
-        Destination destination
+        PayIntent intent
     );
 
-    // Action settled later, once the underlying CCTP transfer completes.
+    // Action settled later, once the underlying bridge transfer completes.
     event Claim(
-        address indexed handoffAddr,
+        address indexed intentAddr,
         address indexed finalRecipient,
-        Destination destination
+        PayIntent intent
     );
 
     // When the action is completed as expected, emit this event
     event ActionCompleted(
-        address indexed handoffAddr,
+        address indexed intentAddr,
         address indexed destinationAddress
     );
 
-    // When the action is a call that fails, we bounce the funds to the 
+    // When the action is a call that fails, we bounce the funds to the
     // specified refund address and emit this event
     event ActionBounced(
-        address indexed handoffAddr,
+        address indexed intentAddr,
         address indexed refundAddress
     );
 
-    constructor(
-        ITokenMinter _tokenMinter,
-        ICCTPTokenMessenger _cctpMessenger,
-        CrepeHandoffFactory _handoffFactory
-    ) {
-        tokenMinter = _tokenMinter;
-        cctpMessenger = _cctpMessenger;
-        handoffFactory = _handoffFactory;
+    constructor(PayIntentFactory _intentFactory, DaimoPayBridger _bridger) {
+        intentFactory = _intentFactory;
+        bridger = _bridger;
     }
 
     // Helper functions to convert between address and bytes32
@@ -102,208 +97,171 @@ contract CrepeFastCCTP {
         return address(uint160(uint256(b)));
     }
 
-    // getCurrentChainCCTPToken gets the CCTP token for the current chain
-    // corresponding to the destination chain's CCTP token.
-    function getCurrentChainCCTPToken(
-        Destination calldata destination
-    ) public view returns (IERC20) {
-        if (destination.chainId == block.chainid) {
-            return destination.mintToken.addr;
-        } else {
-            return
-                IERC20(
-                    tokenMinter.getLocalToken(
-                        destination.domain,
-                        addressToBytes32(address(destination.mintToken.addr))
-                    )
-                );
-        }
-    }
-
     function startAction(
-        TokenAmount[] calldata approvals,
-        Call calldata swapCall,
-        Destination calldata destination
+        PayIntent calldata intent,
+        Call[] calldata swapCalls,
+        bytes calldata bridgeExtraData
     ) public {
-        TokenAmount memory expectedBurn = TokenAmount({
-            addr: getCurrentChainCCTPToken(destination),
-            amount: destination.mintToken.amount
-        });
-
-        CrepeHandoff handoff = handoffFactory.createHandoff(
-            payable(address(this)),
-            destination
-        );
+        PayIntentContract intentContract = intentFactory.createIntent(intent);
 
         // Ensure we don't reuse a nonce in the case where Alice is sending to
         // same destination with the same nonce multiple times.
-        require(!handoffSent[address(handoff)], "FCCTP: already sent");
-        handoffSent[address(handoff)] = true;
+        require(!intentSent[address(intentContract)], "DP: already sent");
+        intentSent[address(intentContract)] = true;
 
-        handoff.sendAndSelfDestruct(
-            cctpMessenger,
-            approvals,
-            swapCall,
-            expectedBurn
+        intentContract.sendAndSelfDestruct(
+            intent,
+            bridger,
+            swapCalls,
+            bridgeExtraData
         );
 
-        emit Start({handoffAddr: address(handoff), destination: destination});
+        emit Start({intentAddr: address(intentContract), intent: intent});
     }
 
     // Pays Bob immediately on chain B. The caller LP sends (toToken, toAmount).
-    // Later, when the slower CCTP transfer arrives, the LP will be able to claim
+    // Later, when the slower bridge transfer arrives, the LP will be able to claim
     // (toToken, fromAmount), keeping the spread (if any) between the amounts.
     function fastFinishAction(
-        Destination calldata destination,
-        Call calldata swapCall
+        PayIntent calldata intent,
+        Call[] calldata swapCalls
     ) public {
-        require(destination.chainId == block.chainid, "FCCTP: wrong chain");
+        require(intent.chainId == block.chainid, "DP: wrong chain");
 
         // Calculate handoff address
-        address handoffAddr = handoffFactory.getHandoffAddress(
-            payable(address(this)),
-            destination
-        );
+        address intentAddr = intentFactory.getIntentAddress(intent);
 
         // Optimistic fast finish is only for transfers which haven't already
         // been fastFinished or claimed.
         require(
-            handoffToRecipient[handoffAddr] == address(0),
-            "FCCTP: already finished"
+            intentToRecipient[intentAddr] == address(0),
+            "DP: already finished"
         );
 
         // Record LP as new recipient
-        handoffToRecipient[handoffAddr] = msg.sender;
+        intentToRecipient[intentAddr] = msg.sender;
 
-        // LP fast-deposits mintToken
-        CrepeTokenUtils.transferFrom(
-            destination.mintToken.addr,
+        // LP fast-deposits  bridgeTokenOut
+        intent.bridgeTokenOut.addr.safeTransferFrom(
             msg.sender,
             address(this),
-            destination.mintToken.amount
+            intent.bridgeTokenOut.amount
         );
-        completeAction(handoffAddr, destination, swapCall);
+        completeAction(intentAddr, intent, swapCalls);
 
         emit FastFinish({
-            handoffAddr: handoffAddr,
+            intentAddr: intentAddr,
             newRecipient: msg.sender,
-            destination: destination
+            intent: intent
         });
     }
 
-    // Claims a CCTP transfer to its current recipient. If FastFinish happened
+    // Claims a bridge transfer to its current recipient. If FastFinish happened
     // for this transfer, then the recipient is the LP who fronted the amount.
-    // Otherwise, the recipient remains the original toAddr. The CCTP message
-    // must already have been relayed; coins are already in handoff.
+    // Otherwise, the recipient remains the original toAddr. The bridge transfer
+    // must already have been completed; coins are already in intent contract.
     function claimAction(
-        Destination calldata destination,
-        Call calldata swapCall
+        PayIntent calldata intent,
+        Call[] calldata swapCalls
     ) public {
-        require(destination.chainId == block.chainid, "FCCTP: wrong chain");
+        require(intent.chainId == block.chainid, "DP: wrong chain");
 
-        CrepeHandoff handoff = handoffFactory.createHandoff(
-            payable(address(this)),
-            destination
-        );
+        PayIntentContract intentContract = intentFactory.createIntent(intent);
 
-        // Transfer from handoff to FastCCTP
-        handoff.receiveAndSelfDestruct();
+        // Transfer from intent contract to this contract
+        intentContract.receiveAndSelfDestruct(intent);
 
         // Finally, forward the balance to the current recipient
-        address recipient = handoffToRecipient[address(handoff)];
+        address recipient = intentToRecipient[address(intentContract)];
         if (recipient == address(0)) {
             // No LP showed up, so just complete the action.
-            recipient = destination.finalCall.to;
+            recipient = intent.finalCall.to;
 
-            handoffToRecipient[address(handoff)] = recipient;
-            completeAction(address(handoff), destination, swapCall);
+            intentToRecipient[address(intentContract)] = recipient;
+            completeAction(address(intentContract), intent, swapCalls);
         } else {
             // Otherwise, the LP fastFinished the action, give them the recieved
             // amount.
-            destination.mintToken.addr.safeTransfer(
+            intent.bridgeTokenOut.addr.safeTransfer(
                 recipient,
-                destination.mintToken.amount
+                intent.bridgeTokenOut.amount
             );
         }
 
         emit Claim({
-            handoffAddr: address(handoff),
+            intentAddr: address(intentContract),
             finalRecipient: recipient,
-            destination: destination
+            intent: intent
         });
     }
 
-    // swap mintToken to finalCallToken
-    // Then, if an action is a call, make the action call with the given token
-    // approved. Otherwise, transfer the token to the action address.
+    // Swap  bridgeTokenOut to finalCallToken
+    // Then, if the action has calls, make the action calls.
+    // Otherwise, transfer the token to the action address.
     function completeAction(
-        address handoffAddr,
-        Destination calldata destination,
-        Call calldata swapCall
+        address intentAddr,
+        PayIntent calldata intent,
+        Call[] calldata swapCalls
     ) internal {
-        // Swap mintToken to finalCallToken
-        if (swapCall.data.length > 0) {
-            destination.mintToken.addr.forceApprove(
-                address(swapCall.to),
-                destination.mintToken.amount
-            );
-            (bool success, ) = swapCall.to.call{value: swapCall.value}(
-                swapCall.data
-            );
-            require(success, "FCCTP: swap failed");
+        // Run arbitrary calls provided by the LP. These will generally approve
+        // the swap contract and swap if necessary
+        for (uint256 i = 0; i < swapCalls.length; ++i) {
+            Call calldata call = swapCalls[i];
+            (bool success, ) = call.to.call{value: call.value}(call.data);
+            require(success, "DP: swap call failed");
         }
 
-        // Check swap had a fair price
-        uint256 finalCallTokenBalance = CrepeTokenUtils.getBalanceOf(
-            destination.finalCallToken.addr,
+        // Check that swap had a fair price
+        uint256 finalCallTokenBalance = TokenUtils.getBalanceOf(
+            intent.finalCallToken.addr,
             address(this)
         );
 
         require(
-            finalCallTokenBalance >= destination.finalCallToken.amount,
-            "FCCTP: insufficient final call token received"
+            finalCallTokenBalance >= intent.finalCallToken.amount,
+            "DP: insufficient final call token received"
         );
 
-        if (destination.finalCall.data.length > 0) {
+        if (intent.finalCall.data.length > 0) {
             // If the intent is a call, approve the final token and make the call
-            CrepeTokenUtils.approve(
-                destination.finalCallToken.addr,
-                address(destination.finalCall.to),
-                destination.finalCallToken.amount
+            TokenUtils.approve(
+                intent.finalCallToken.addr,
+                address(intent.finalCall.to),
+                intent.finalCallToken.amount
             );
-            (bool success, ) = destination.finalCall.to.call{
-                value: destination.finalCall.value
-            }(destination.finalCall.data);
+            (bool success, ) = intent.finalCall.to.call{
+                value: intent.finalCall.value
+            }(intent.finalCall.data);
 
             if (success) {
                 emit ActionCompleted({
-                    handoffAddr: handoffAddr,
-                    destinationAddress: destination.finalCall.to
+                    intentAddr: intentAddr,
+                    destinationAddress: intent.finalCall.to
                 });
             } else {
-                CrepeTokenUtils.transfer(
-                    destination.finalCallToken.addr,
-                    payable(destination.refundAddress),
-                    destination.finalCallToken.amount
+                TokenUtils.transfer(
+                    intent.finalCallToken.addr,
+                    payable(intent.refundAddress),
+                    intent.finalCallToken.amount
                 );
 
                 emit ActionBounced({
-                    handoffAddr: handoffAddr,
-                    refundAddress: destination.refundAddress
+                    intentAddr: intentAddr,
+                    refundAddress: intent.refundAddress
                 });
             }
         } else {
             // If the final call is a transfer, transfer the token
             // Transfers can never bounce.
-            CrepeTokenUtils.transfer(
-                destination.finalCallToken.addr,
-                payable(destination.finalCall.to),
-                destination.finalCallToken.amount
+            TokenUtils.transfer(
+                intent.finalCallToken.addr,
+                payable(intent.finalCall.to),
+                intent.finalCallToken.amount
             );
 
             emit ActionCompleted({
-                handoffAddr: handoffAddr,
-                destinationAddress: destination.finalCall.to
+                intentAddr: intentAddr,
+                destinationAddress: intent.finalCall.to
             });
         }
     }

@@ -11,6 +11,8 @@ interface IDaimoPayBridger {
         address indexed sender,
         uint256 indexed toChainId,
         address indexed toAddress,
+        address fromToken,
+        uint256 fromAmount,
         address toToken,
         uint256 toAmount
     );
@@ -18,6 +20,8 @@ interface IDaimoPayBridger {
     /// @dev Initiate a bridge. Guarantees that (toToken, toAmount) shows up
     ///      in (toAddress) on (toChainId). Otherwise, reverts.
     function sendToChain(
+        address fromToken,
+        uint256 fromAmount,
         uint256 toChainId,
         address toAddress,
         address toToken,

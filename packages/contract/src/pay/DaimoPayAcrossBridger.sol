@@ -3,8 +3,6 @@ pragma solidity ^0.8.12;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "../interfaces/IDaimoPayBridger.sol";
 import "../../vendor/across/V3SpokePoolInterface.sol";
@@ -18,8 +16,6 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
     using SafeERC20 for IERC20;
 
     struct ExtraData {
-        address fromToken;
-        uint256 fromAmount;
         address exclusiveRelayer;
         uint32 quoteTimestamp;
         uint32 fillDeadline;
@@ -36,6 +32,8 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
 
     /// Initiate a bridge to a destination chain using Across Protocol.
     function sendToChain(
+        address fromToken,
+        uint256 fromAmount,
         uint256 toChainId,
         address toAddress,
         address toToken,
@@ -51,22 +49,22 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
 
         // Move input token from caller to this contract and approve the
         // SpokePool contract.
-        IERC20(extra.fromToken).safeTransferFrom({
+        IERC20(fromToken).safeTransferFrom({
             from: msg.sender,
             to: address(this),
-            value: extra.fromAmount
+            value: fromAmount
         });
-        IERC20(extra.fromToken).forceApprove({
+        IERC20(fromToken).forceApprove({
             spender: address(spokePool),
-            value: extra.fromAmount
+            value: fromAmount
         });
 
         spokePool.depositV3({
             depositor: address(this),
             recipient: toAddress,
-            inputToken: extra.fromToken,
+            inputToken: fromToken,
             outputToken: toToken,
-            inputAmount: extra.fromAmount,
+            inputAmount: fromAmount,
             outputAmount: toAmount,
             destinationChainId: toChainId,
             exclusiveRelayer: extra.exclusiveRelayer,
@@ -80,6 +78,8 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
             msg.sender,
             toChainId,
             toAddress,
+            fromToken,
+            fromAmount,
             toToken,
             toAmount
         );
