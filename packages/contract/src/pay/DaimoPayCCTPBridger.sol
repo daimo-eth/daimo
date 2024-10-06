@@ -3,8 +3,6 @@ pragma solidity ^0.8.12;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "../interfaces/IDaimoPayBridger.sol";
 import "../../vendor/cctp/ITokenMinter.sol";
@@ -106,6 +104,8 @@ contract DaimoPayCCTPBridger is IDaimoPayBridger {
 
     /// Initiate a bridge to a destination chain using CCTP.
     function sendToChain(
+        address fromToken,
+        uint256 fromAmount,
         uint256 toChainId,
         address toAddress,
         address toToken,
@@ -114,23 +114,23 @@ contract DaimoPayCCTPBridger is IDaimoPayBridger {
     ) public {
         require(toChainId != block.chainid, "DPCCTPB: same chain");
         require(toAmount > 0, "DPCCTPB: zero amount");
+        require(fromAmount >= toAmount, "DPCCTPB: insufficient fromAmount");
 
         uint32 toDomain = _getDomain(toChainId);
-        IERC20 fromToken = getCurrentChainCCTPToken(toDomain, toToken);
 
         // Move input token from caller to this contract and approve CCTP.
         IERC20(fromToken).safeTransferFrom({
             from: msg.sender,
             to: address(this),
-            value: toAmount
+            value: fromAmount
         });
         IERC20(fromToken).forceApprove({
             spender: address(cctpMessenger),
-            value: toAmount
+            value: fromAmount
         });
 
         cctpMessenger.depositForBurn({
-            amount: toAmount,
+            amount: fromAmount,
             destinationDomain: toDomain,
             mintRecipient: addressToBytes32(toAddress),
             burnToken: address(fromToken)
@@ -140,6 +140,8 @@ contract DaimoPayCCTPBridger is IDaimoPayBridger {
             msg.sender,
             toChainId,
             toAddress,
+            fromToken,
+            fromAmount,
             toToken,
             toAmount
         );

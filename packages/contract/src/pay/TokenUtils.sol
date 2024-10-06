@@ -20,6 +20,13 @@ library TokenUtils {
         }
     }
 
+    /** Approves a token transfer. */
+    function approve(IERC20 token, address spender, uint256 amount) internal {
+        if (address(token) != address(0)) {
+            token.approve(spender, amount);
+        } // Do nothing for native token.
+    }
+
     /** Sends an ERC20 or ETH transfer. For ETH, verify call success. */
     function transfer(
         IERC20 token,

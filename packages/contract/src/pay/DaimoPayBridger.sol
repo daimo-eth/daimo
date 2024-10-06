@@ -3,8 +3,6 @@ pragma solidity ^0.8.12;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-import "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/UUPSUpgradeable.sol";
 
 import "../interfaces/IDaimoPayBridger.sol";
 import "./TokenUtils.sol";
@@ -21,7 +19,8 @@ contract DaimoPayBridger is IDaimoPayBridger {
     address public immutable owner;
 
     // Map chainId to the contract address of an IDaimoPayBridger implementation
-    mapping(uint256 chainId => IDaimoPayBridger bridger) public bridgerMapping;
+    mapping(uint256 chainId => IDaimoPayBridger bridger)
+        public chainIdToBridger;
 
     event BridgeAdded(uint256 indexed chainId, address bridger);
 
@@ -60,7 +59,7 @@ contract DaimoPayBridger is IDaimoPayBridger {
 
     function _addBridger(uint256 chainId, IDaimoPayBridger bridger) private {
         require(chainId != 0, "DPB: missing chainId");
-        bridgerMapping[chainId] = bridger;
+        chainIdToBridger[chainId] = bridger;
         emit BridgeAdded(chainId, address(bridger));
     }
 
@@ -68,6 +67,8 @@ contract DaimoPayBridger is IDaimoPayBridger {
 
     /// Initiate a bridge to a supported destination chain.
     function sendToChain(
+        address fromToken,
+        uint256 fromAmount,
         uint256 toChainId,
         address toAddress,
         address toToken,
@@ -76,15 +77,29 @@ contract DaimoPayBridger is IDaimoPayBridger {
     ) public {
         require(toAmount > 0, "DPB: zero amount");
 
+        // Move tokens from caller
+        IERC20(fromToken).safeTransferFrom({
+            from: msg.sender,
+            to: address(this),
+            value: fromAmount
+        });
+
         if (toChainId == block.chainid) {
             // Same chain. Transfer token to toAddress.
+            require(fromToken == toToken, "DPB: transfer token mismatch");
+            require(fromAmount == toAmount, "DPB: transfer amount mismatch");
             TokenUtils.transfer(IERC20(toToken), payable(toAddress), toAmount);
         } else {
-            // Different chains. Bridge (via CCTP, etc)
-            IDaimoPayBridger bridger = bridgerMapping[toChainId];
+            // Different chains. Get the specific bridger implementation for
+            // toChain (CCTP, etc)
+            IDaimoPayBridger bridger = chainIdToBridger[toChainId];
             require(address(bridger) != address(0), "DPB: missing bridger");
 
+            // Approve tokens to the bridge contract and intiate bridging
+            TokenUtils.approve(IERC20(fromToken), address(bridger), fromAmount);
             bridger.sendToChain(
+                fromToken,
+                fromAmount,
                 toChainId,
                 toAddress,
                 toToken,

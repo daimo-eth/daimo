@@ -4,27 +4,26 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/utils/Create2.sol";
 import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-import "./CrepeHandoff.sol";
+import "./PayIntent.sol";
 
-contract CrepeHandoffFactory {
-    CrepeHandoff public immutable handoffImplementation;
+contract PayIntentFactory {
+    PayIntentContract public immutable intentImpl;
 
     constructor() {
-        handoffImplementation = new CrepeHandoff();
+        intentImpl = new PayIntentContract();
     }
 
-    function createHandoff(
-        address payable creator,
-        Destination calldata destination
-    ) public returns (CrepeHandoff ret) {
-        ret = CrepeHandoff(
+    function createIntent(
+        PayIntent calldata intent
+    ) public returns (PayIntentContract ret) {
+        ret = PayIntentContract(
             payable(
                 address(
                     new ERC1967Proxy{salt: bytes32(0)}(
-                        address(handoffImplementation),
+                        address(intentImpl),
                         abi.encodeCall(
-                            CrepeHandoff.initialize,
-                            (creator, destination)
+                            PayIntentContract.initialize,
+                            (calcIntentHash(intent))
                         )
                     )
                 )
@@ -32,9 +31,8 @@ contract CrepeHandoffFactory {
         );
     }
 
-    function getHandoffAddress(
-        address payable creator,
-        Destination calldata destination
+    function getIntentAddress(
+        PayIntent calldata intent
     ) public view returns (address) {
         return
             Create2.computeAddress(
@@ -43,10 +41,10 @@ contract CrepeHandoffFactory {
                     abi.encodePacked(
                         type(ERC1967Proxy).creationCode,
                         abi.encode(
-                            address(handoffImplementation),
+                            address(intentImpl),
                             abi.encodeCall(
-                                CrepeHandoff.initialize,
-                                (creator, destination)
+                                PayIntentContract.initialize,
+                                (calcIntentHash(intent))
                             )
                         )
                     )
