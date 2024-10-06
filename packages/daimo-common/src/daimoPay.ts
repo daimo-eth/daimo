@@ -41,7 +41,7 @@ export type DaimoPayDehydratedOrder = {
   paymentOptionsJson: string;
   redirectUri: string | null;
   orgId: string | null;
-  createdAt: Date;
+  createdAt: number | null;
 };
 
 export type DaimoPayHydratedOrder = {
@@ -66,7 +66,7 @@ export type DaimoPayHydratedOrder = {
   paymentOptionsJson: string;
   redirectUri: string | null;
   orgId: string | null;
-  createdAt: Date;
+  createdAt: number | null;
 };
 
 export type DaimoPayHydratedOrderWithoutHandoffAddr = Omit<

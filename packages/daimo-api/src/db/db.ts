@@ -1,4 +1,9 @@
-import { ProfileLinkID, TagRedirectEvent, assertNotNull } from "@daimo/common";
+import {
+  ProfileLinkID,
+  TagRedirectEvent,
+  assertNotNull,
+  dateToUnix,
+} from "@daimo/common";
 import { Kysely, PostgresDialect } from "kysely";
 import { ClientConfig, Pool, PoolConfig } from "pg";
 import { Address, Hex, getAddress } from "viem";
@@ -555,10 +560,6 @@ export class DB {
       .executeTakeFirst();
     return Number(res.numInsertedOrUpdatedRows || 0);
   }
-}
-
-function dateToUnix(d: Date): number {
-  return Math.floor(d.getTime() / 1000);
 }
 
 interface PushTokenRow {

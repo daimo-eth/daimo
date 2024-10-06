@@ -160,3 +160,11 @@ export interface SuggestedAction {
   subtitle: string;
   url: string;
 }
+
+export function dateToUnix(d: Date): number {
+  return Math.floor(d.getTime() / 1000);
+}
+
+export function unixToDate(unix: number): Date {
+  return new Date(unix * 1000);
+}
