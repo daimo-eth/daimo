@@ -7,30 +7,11 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./TokenUtils.sol";
 import "../interfaces/IDaimoPayBridger.sol";
 
-/// @dev Asset amount, e.g. $100 USDC or 0.1 ETH
-struct TokenAmount {
-    /// @dev Zero address = native asset, e.g. ETH
-    IERC20 addr;
-    uint256 amount;
-}
-
-/// @dev Represents a destination address + optional arbitrary contract call
-struct Call {
-    /// @dev Destination receiving address or contract
-    address to;
-    /// @dev Native token amount for call, or 0
-    uint256 value;
-    /// @dev Calldata for call, or empty = no contract call
-    bytes data;
-}
-
 /// @dev Represents an intended call: "make X of token Y show up on chain Z, then
 ///      use it to do an arbitrary contract call".
 struct PayIntent {
     /// @dev Intent only executes on given target chain.
-    uint256 chainId;
-    /// @dev Expected token to send into the bridge on the source chain.
-    TokenAmount bridgeTokenIn;
+    uint256 toChainId;
     /// @dev Expected token after bridging to the destination chain.
     TokenAmount bridgeTokenOut;
     /// @dev Expected token amount after swapping on the destination chain.
@@ -38,7 +19,8 @@ struct PayIntent {
     /// @dev Destination on target chain. If dest.data != "" specifies a call,
     ///     (token, amount) is approved. Otherwise, it's transferred to dest.to
     Call finalCall;
-    /// @dev Escrow contract for fast-finish.
+    /// @dev Escrow contract for fast-finish. Will typically be the DaimoPay
+    ///      contract.
     address payable escrow;
     /// @dev Address to refund tokens if call fails, or zero.
     address refundAddress;
@@ -78,46 +60,43 @@ contract PayIntentContract is Initializable {
     function sendAndSelfDestruct(
         PayIntent calldata intent,
         IDaimoPayBridger bridger,
-        Call[] calldata swapCalls,
+        Call[] calldata calls,
         bytes calldata bridgeExtraData
     ) public {
         require(calcIntentHash(intent) == intentHash, "PI: intent");
         require(msg.sender == intent.escrow, "PI: only escrow");
+        require(intent.toChainId != block.chainid, "PI: same chain");
 
         // Run arbitrary calls provided by the LP. These will generally approve
         // the swap contract and swap if necessary, then approve tokens to the
         // bridger.
-        for (uint256 i = 0; i < swapCalls.length; ++i) {
-            Call calldata call = swapCalls[i];
+        for (uint256 i = 0; i < calls.length; ++i) {
+            Call calldata call = calls[i];
             (bool success, ) = call.to.call{value: call.value}(call.data);
             require(success, "PI: swap call failed");
         }
 
-        // Check that the post-swap token balance is sufficient
-        uint256 bridgeInBal = TokenUtils.getBalanceOf(
-            intent.bridgeTokenIn.addr,
-            address(this)
-        );
-        require(
-            bridgeInBal >= intent.bridgeTokenIn.amount,
-            "PI: insufficient bridge in token"
-        );
+        if (intent.toChainId != block.chainid) {
+            // Different chains. Approve bridger and initiate bridge
+            address inputToken = bridger.getInputToken(
+                intent.toChainId,
+                address(intent.bridgeTokenOut.addr)
+            );
+            uint256 inputAmount = bridger.getInputAmount(
+                intent.toChainId,
+                address(intent.bridgeTokenOut.addr),
+                intent.bridgeTokenOut.amount
+            );
 
-        // Approve bridger and initiate bridge
-        TokenUtils.approve(
-            intent.bridgeTokenIn.addr,
-            address(bridger),
-            intent.bridgeTokenIn.amount
-        );
-        bridger.sendToChain({
-            fromToken: address(intent.bridgeTokenIn.addr),
-            fromAmount: intent.bridgeTokenIn.amount,
-            toChainId: intent.chainId,
-            toAddress: address(this),
-            toToken: address(intent.bridgeTokenOut.addr),
-            toAmount: intent.bridgeTokenOut.amount,
-            extraData: bridgeExtraData
-        });
+            IERC20(inputToken).forceApprove(address(bridger), inputAmount);
+            bridger.sendToChain({
+                toChainId: intent.toChainId,
+                toAddress: address(this),
+                toToken: address(intent.bridgeTokenOut.addr),
+                toAmount: intent.bridgeTokenOut.amount,
+                extraData: bridgeExtraData
+            });
+        }
 
         // This use of SELFDESTRUCT is compatible with EIP-6780. Ephemeral
         // contracts are deployed, then destroyed in the same transaction.
@@ -129,7 +108,7 @@ contract PayIntentContract is Initializable {
     function receiveAndSelfDestruct(PayIntent calldata intent) public {
         require(keccak256(abi.encode(intent)) == intentHash, "PI: intent");
         require(msg.sender == intent.escrow, "PI: only creator");
-        require(block.chainid == intent.chainId, "PI: only dest chain");
+        require(block.chainid == intent.toChainId, "PI: only dest chain");
 
         IERC20 bridgeTok = intent.bridgeTokenOut.addr;
         uint256 amount = TokenUtils.getBalanceOf(bridgeTok, address(this));
@@ -139,7 +118,7 @@ contract PayIntentContract is Initializable {
         );
 
         // Send to escrow contract, which will forward to current recipient
-        TokenUtils.transfer(intent.bridgeTokenOut.addr, intent.escrow, amount);
+        TokenUtils.transfer(bridgeTok, intent.escrow, amount);
 
         // This use of SELFDESTRUCT is compatible with EIP-6780. Handoff
         // contracts are deployed, then destroyed in the same transaction.

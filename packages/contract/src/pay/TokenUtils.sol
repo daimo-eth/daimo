@@ -4,6 +4,23 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
+/// @dev Asset amount, e.g. $100 USDC or 0.1 ETH
+struct TokenAmount {
+    /// @dev Zero address = native asset, e.g. ETH
+    IERC20 addr;
+    uint256 amount;
+}
+
+/// @dev Represents a destination address + optional arbitrary contract call
+struct Call {
+    /// @dev Destination receiving address or contract
+    address to;
+    /// @dev Native token amount for call, or 0
+    uint256 value;
+    /// @dev Calldata for call, or empty = no contract call
+    bytes data;
+}
+
 /** Utility functions that work for both ERC20 and native tokens. */
 library TokenUtils {
     using SafeERC20 for IERC20;
@@ -23,7 +40,7 @@ library TokenUtils {
     /** Approves a token transfer. */
     function approve(IERC20 token, address spender, uint256 amount) internal {
         if (address(token) != address(0)) {
-            token.approve(spender, amount);
+            token.forceApprove({spender: spender, value: amount});
         } // Do nothing for native token.
     }
 

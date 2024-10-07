@@ -8,20 +8,28 @@ import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 interface IDaimoPayBridger {
     /// @notice Emitted when a bridge transaction is initiated
     event BridgeInitiated(
-        address indexed sender,
         uint256 indexed toChainId,
         address indexed toAddress,
+        address toToken,
+        uint256 toAmount,
         address fromToken,
-        uint256 fromAmount,
+        uint256 fromAmount
+    );
+
+    function getInputToken(
+        uint256 toChainId,
+        address toToken
+    ) external view returns (address);
+
+    function getInputAmount(
+        uint256 toChainId,
         address toToken,
         uint256 toAmount
-    );
+    ) external view returns (uint256);
 
     /// @dev Initiate a bridge. Guarantees that (toToken, toAmount) shows up
     ///      in (toAddress) on (toChainId). Otherwise, reverts.
     function sendToChain(
-        address fromToken,
-        uint256 fromAmount,
         uint256 toChainId,
         address toAddress,
         address toToken,
