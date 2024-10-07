@@ -99,7 +99,7 @@ contract DaimoPay {
 
     function startAction(
         PayIntent calldata intent,
-        Call[] calldata swapCalls,
+        Call[] calldata calls,
         bytes calldata bridgeExtraData
     ) public {
         PayIntentContract intentContract = intentFactory.createIntent(intent);
@@ -112,7 +112,7 @@ contract DaimoPay {
         intentContract.sendAndSelfDestruct(
             intent,
             bridger,
-            swapCalls,
+            calls,
             bridgeExtraData
         );
 
@@ -124,9 +124,9 @@ contract DaimoPay {
     // (toToken, fromAmount), keeping the spread (if any) between the amounts.
     function fastFinishAction(
         PayIntent calldata intent,
-        Call[] calldata swapCalls
+        Call[] calldata calls
     ) public {
-        require(intent.chainId == block.chainid, "DP: wrong chain");
+        require(intent.toChainId == block.chainid, "DP: wrong chain");
 
         // Calculate handoff address
         address intentAddr = intentFactory.getIntentAddress(intent);
@@ -141,13 +141,13 @@ contract DaimoPay {
         // Record LP as new recipient
         intentToRecipient[intentAddr] = msg.sender;
 
-        // LP fast-deposits  bridgeTokenOut
+        // LP fast-deposits bridgeTokenOut
         intent.bridgeTokenOut.addr.safeTransferFrom(
             msg.sender,
             address(this),
             intent.bridgeTokenOut.amount
         );
-        completeAction(intentAddr, intent, swapCalls);
+        completeAction(intentAddr, intent, calls);
 
         emit FastFinish({
             intentAddr: intentAddr,
@@ -162,9 +162,9 @@ contract DaimoPay {
     // must already have been completed; coins are already in intent contract.
     function claimAction(
         PayIntent calldata intent,
-        Call[] calldata swapCalls
+        Call[] calldata calls
     ) public {
-        require(intent.chainId == block.chainid, "DP: wrong chain");
+        require(intent.toChainId == block.chainid, "DP: wrong chain");
 
         PayIntentContract intentContract = intentFactory.createIntent(intent);
 
@@ -178,7 +178,7 @@ contract DaimoPay {
             recipient = intent.finalCall.to;
 
             intentToRecipient[address(intentContract)] = recipient;
-            completeAction(address(intentContract), intent, swapCalls);
+            completeAction(address(intentContract), intent, calls);
         } else {
             // Otherwise, the LP fastFinished the action, give them the recieved
             // amount.
@@ -195,18 +195,18 @@ contract DaimoPay {
         });
     }
 
-    // Swap  bridgeTokenOut to finalCallToken
-    // Then, if the action has calls, make the action calls.
+    // Swap bridgeTokenOut to finalCallToken
+    // Then, if the action has a finalCall, make the action calls.
     // Otherwise, transfer the token to the action address.
     function completeAction(
         address intentAddr,
         PayIntent calldata intent,
-        Call[] calldata swapCalls
+        Call[] calldata calls
     ) internal {
         // Run arbitrary calls provided by the LP. These will generally approve
         // the swap contract and swap if necessary
-        for (uint256 i = 0; i < swapCalls.length; ++i) {
-            Call calldata call = swapCalls[i];
+        for (uint256 i = 0; i < calls.length; ++i) {
+            Call calldata call = calls[i];
             (bool success, ) = call.to.call{value: call.value}(call.data);
             require(success, "DP: swap call failed");
         }
@@ -216,7 +216,6 @@ contract DaimoPay {
             intent.finalCallToken.addr,
             address(this)
         );
-
         require(
             finalCallTokenBalance >= intent.finalCallToken.amount,
             "DP: insufficient final call token received"

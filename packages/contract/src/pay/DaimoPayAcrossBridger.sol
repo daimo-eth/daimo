@@ -11,7 +11,9 @@ import "../../vendor/across/V3SpokePoolInterface.sol";
 /// @author The Daimo team
 /// @custom:security-contact security@daimo.com
 ///
-/// Bridges assets from to a destination chain using Across Protocol.
+/// Bridges assets from to a destination chain using Across Protocol. Makes the
+/// assumption that the local token is an ERC20 token and has a 1 to 1 price
+/// with the corresponding destination token.
 contract DaimoPayAcrossBridger is IDaimoPayBridger {
     using SafeERC20 for IERC20;
 
@@ -23,17 +25,101 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
         bytes message;
     }
 
+    address public immutable owner;
+
     // SpokePool contract address for this chain.
     V3SpokePoolInterface public immutable spokePool;
+    // Minimum percentage fee to pay the Across relayer. This contract checks
+    // that the input amount is at least this much larger than the output amount
+    // 1% is represented as 1e16, 100% is 1e18, 50% is 5e17. This is how Across
+    // represents percentage fees.
+    uint256 public minPercentageFee;
+    uint256 public immutable oneHundredPercent = 1e18;
 
-    constructor(V3SpokePoolInterface _spokePool) {
+    // Mapping from destination chain and token to the corresponding token on
+    // the current chain.
+    mapping(uint256 toChainId => mapping(address toToken => address localToken))
+        public localTokenMapping;
+
+    event TokenPairAdded(
+        uint256 indexed toChain,
+        address indexed toToken,
+        address indexed localToken
+    );
+    event TokenPairRemoved(
+        uint256 indexed toChain,
+        address indexed toToken,
+        address indexed localToken
+    );
+
+    /// Specify owner (not msg.sender) to allow CREATE3 deployment.
+    constructor(
+        address _initialOwner,
+        V3SpokePoolInterface _spokePool,
+        uint256 _minPercentageFee
+    ) {
+        owner = _initialOwner;
         spokePool = _spokePool;
+        minPercentageFee = _minPercentageFee;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "DPAB: caller is not the owner");
+        _;
+    }
+
+    // ----- ADMIN FUNCTIONS -----
+
+    /// Set the minimum percentage fee to pay the Across relayer.
+    function setMinPercentageFee(uint256 _minPercentageFee) public onlyOwner {
+        minPercentageFee = _minPercentageFee;
+    }
+
+    /// Map a token on a destination chain to a token on the current chain.
+    /// Assumes the local token has a 1 to 1 price with the corresponding
+    /// destination token.
+    function addTokenPair(
+        uint256 toChainId,
+        address toToken,
+        address localToken
+    ) public onlyOwner {
+        localTokenMapping[toChainId][toToken] = localToken;
+        emit TokenPairAdded(toChainId, toToken, localToken);
+    }
+
+    function removeTokenPair(
+        uint256 toChainId,
+        address toToken
+    ) public onlyOwner {
+        address localToken = localTokenMapping[toChainId][toToken];
+        delete localTokenMapping[toChainId][toToken];
+        emit TokenPairRemoved(toChainId, toToken, localToken);
+    }
+
+    // ----- BRIDGING FUNCTIONS -----
+
+    /// Get the local token that corresponds to the destination token.
+    function getInputToken(
+        uint256 toChainId,
+        address toToken
+    ) public view returns (address) {
+        return localTokenMapping[toChainId][toToken];
+    }
+
+    /// Get the minimum input amount for a given output amount accounting
+    /// for the percentage fee.
+    function getInputAmount(
+        uint256 /* toChainId */,
+        address /* toToken */,
+        uint256 toAmount
+    ) public view returns (uint256) {
+        return
+            (toAmount * (oneHundredPercent + minPercentageFee)) /
+            oneHundredPercent;
     }
 
     /// Initiate a bridge to a destination chain using Across Protocol.
     function sendToChain(
-        address fromToken,
-        uint256 fromAmount,
         uint256 toChainId,
         address toAddress,
         address toToken,
@@ -43,28 +129,37 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
         require(toChainId != block.chainid, "DPAB: same chain");
         require(toAmount > 0, "DPAB: zero amount");
 
+        // Get the local token that corresponds to the destination token.
+        address inputToken = getInputToken(toChainId, toToken);
+        require(
+            address(inputToken) != address(0),
+            "DPAB: input token not found"
+        );
+
+        uint256 inputAmount = getInputAmount(toChainId, toToken, toAmount);
+
         // Parse remaining arguments from extraData
         ExtraData memory extra;
         extra = abi.decode(extraData, (ExtraData));
 
         // Move input token from caller to this contract and approve the
         // SpokePool contract.
-        IERC20(fromToken).safeTransferFrom({
+        IERC20(inputToken).safeTransferFrom({
             from: msg.sender,
             to: address(this),
-            value: fromAmount
+            value: inputAmount
         });
-        IERC20(fromToken).forceApprove({
+        IERC20(inputToken).forceApprove({
             spender: address(spokePool),
-            value: fromAmount
+            value: inputAmount
         });
 
         spokePool.depositV3({
             depositor: address(this),
             recipient: toAddress,
-            inputToken: fromToken,
+            inputToken: inputToken,
             outputToken: toToken,
-            inputAmount: fromAmount,
+            inputAmount: inputAmount,
             outputAmount: toAmount,
             destinationChainId: toChainId,
             exclusiveRelayer: extra.exclusiveRelayer,
@@ -75,13 +170,12 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
         });
 
         emit BridgeInitiated(
-            msg.sender,
             toChainId,
             toAddress,
-            fromToken,
-            fromAmount,
             toToken,
-            toAmount
+            toAmount,
+            inputToken,
+            inputAmount
         );
     }
 }

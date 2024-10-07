@@ -88,24 +88,30 @@ contract DaimoPayCCTPBridger is IDaimoPayBridger {
         return bytes32(uint256(uint160(addr)));
     }
 
-    // ----- PUBLIC FUNCTIONS -----
+    // ----- BRIDGER FUNCTIONS -----
 
     /// Get the CCTP token for the current chain corresponding to the
     /// destination chain's CCTP token.
-    function getCurrentChainCCTPToken(
-        uint32 toDomain,
+    function getInputToken(
+        uint256 toChainId,
         address toToken
-    ) public view returns (IERC20) {
-        return
-            IERC20(
-                tokenMinter.getLocalToken(toDomain, addressToBytes32(toToken))
-            );
+    ) public view returns (address) {
+        uint32 toDomain = _getDomain(toChainId);
+        return tokenMinter.getLocalToken(toDomain, addressToBytes32(toToken));
+    }
+
+    // CCTP does 1 to 1 token bridging, so the amount of tokens to
+    // bridge is the same as toAmount.
+    function getInputAmount(
+        uint256 /* toChainId */,
+        address /* toToken */,
+        uint256 toAmount
+    ) public pure returns (uint256) {
+        return toAmount;
     }
 
     /// Initiate a bridge to a destination chain using CCTP.
     function sendToChain(
-        address fromToken,
-        uint256 fromAmount,
         uint256 toChainId,
         address toAddress,
         address toToken,
@@ -114,35 +120,34 @@ contract DaimoPayCCTPBridger is IDaimoPayBridger {
     ) public {
         require(toChainId != block.chainid, "DPCCTPB: same chain");
         require(toAmount > 0, "DPCCTPB: zero amount");
-        require(fromAmount >= toAmount, "DPCCTPB: insufficient fromAmount");
 
         uint32 toDomain = _getDomain(toChainId);
+        address inputToken = getInputToken(toChainId, toToken);
 
         // Move input token from caller to this contract and approve CCTP.
-        IERC20(fromToken).safeTransferFrom({
+        IERC20(inputToken).safeTransferFrom({
             from: msg.sender,
             to: address(this),
-            value: fromAmount
+            value: toAmount
         });
-        IERC20(fromToken).forceApprove({
+        IERC20(inputToken).forceApprove({
             spender: address(cctpMessenger),
-            value: fromAmount
+            value: toAmount
         });
 
         cctpMessenger.depositForBurn({
-            amount: fromAmount,
+            amount: toAmount,
             destinationDomain: toDomain,
             mintRecipient: addressToBytes32(toAddress),
-            burnToken: address(fromToken)
+            burnToken: address(inputToken)
         });
 
         emit BridgeInitiated(
-            msg.sender,
             toChainId,
             toAddress,
-            fromToken,
-            fromAmount,
             toToken,
+            toAmount,
+            inputToken,
             toAmount
         );
     }

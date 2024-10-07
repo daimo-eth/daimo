@@ -4,8 +4,8 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "../interfaces/IDaimoPayBridger.sol";
 import "./TokenUtils.sol";
+import "../interfaces/IDaimoPayBridger.sol";
 
 /// @title Bridger which multiplexes between different bridging protocols
 /// @author The Daimo team
@@ -23,6 +23,7 @@ contract DaimoPayBridger is IDaimoPayBridger {
         public chainIdToBridger;
 
     event BridgeAdded(uint256 indexed chainId, address bridger);
+    event BridgeRemoved(uint256 indexed chainId);
 
     /// Specify owner (not msg.sender) to allow CREATE3 deployment.
     constructor(address _initialOwner) {
@@ -63,12 +64,36 @@ contract DaimoPayBridger is IDaimoPayBridger {
         emit BridgeAdded(chainId, address(bridger));
     }
 
-    // ----- PUBLIC FUNCTIONS -----
+    function removeBridger(uint256 chainId) public onlyOwner {
+        delete chainIdToBridger[chainId];
+        emit BridgeRemoved(chainId);
+    }
+
+    // ----- BRIDGER FUNCTIONS -----
+
+    function getInputToken(
+        uint256 toChainId,
+        address toToken
+    ) public view returns (address) {
+        IDaimoPayBridger bridger = chainIdToBridger[toChainId];
+        require(address(bridger) != address(0), "DPB: missing bridger");
+
+        return bridger.getInputToken(toChainId, toToken);
+    }
+
+    function getInputAmount(
+        uint256 toChainId,
+        address toToken,
+        uint256 toAmount
+    ) public view returns (uint256) {
+        IDaimoPayBridger bridger = chainIdToBridger[toChainId];
+        require(address(bridger) != address(0), "DPB: missing bridger");
+
+        return bridger.getInputAmount(toChainId, toToken, toAmount);
+    }
 
     /// Initiate a bridge to a supported destination chain.
     function sendToChain(
-        address fromToken,
-        uint256 fromAmount,
         uint256 toChainId,
         address toAddress,
         address toToken,
@@ -77,29 +102,40 @@ contract DaimoPayBridger is IDaimoPayBridger {
     ) public {
         require(toAmount > 0, "DPB: zero amount");
 
-        // Move tokens from caller
-        IERC20(fromToken).safeTransferFrom({
-            from: msg.sender,
-            to: address(this),
-            value: fromAmount
-        });
-
         if (toChainId == block.chainid) {
-            // Same chain. Transfer token to toAddress.
-            require(fromToken == toToken, "DPB: transfer token mismatch");
-            require(fromAmount == toAmount, "DPB: transfer amount mismatch");
-            TokenUtils.transfer(IERC20(toToken), payable(toAddress), toAmount);
+            // Same chain. Move tokens from caller to toAddress.
+            IERC20(toToken).safeTransferFrom({
+                from: msg.sender,
+                to: payable(toAddress),
+                value: toAmount
+            });
         } else {
             // Different chains. Get the specific bridger implementation for
             // toChain (CCTP, etc)
             IDaimoPayBridger bridger = chainIdToBridger[toChainId];
             require(address(bridger) != address(0), "DPB: missing bridger");
 
-            // Approve tokens to the bridge contract and intiate bridging
-            TokenUtils.approve(IERC20(fromToken), address(bridger), fromAmount);
+            // Move input token from caller to this contract and initiate bridging.
+            address inputToken = bridger.getInputToken(toChainId, toToken);
+            require(inputToken != address(0), "DPB: missing input token");
+
+            uint256 inputAmount = bridger.getInputAmount(
+                toChainId,
+                toToken,
+                toAmount
+            );
+            IERC20(inputToken).safeTransferFrom({
+                from: msg.sender,
+                to: address(this),
+                value: inputAmount
+            });
+
+            // Approve tokens to the bridge contract and intiate bridging.
+            IERC20(inputToken).forceApprove({
+                spender: address(bridger),
+                value: inputAmount
+            });
             bridger.sendToChain(
-                fromToken,
-                fromAmount,
                 toChainId,
                 toAddress,
                 toToken,
