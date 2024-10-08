@@ -40,7 +40,7 @@ library TokenUtils {
     /** Approves a token transfer. */
     function approve(IERC20 token, address spender, uint256 amount) internal {
         if (address(token) != address(0)) {
-            token.forceApprove({spender: spender, value: amount});
+            token.approve({spender: spender, value: amount});
         } // Do nothing for native token.
     }
 
@@ -57,5 +57,18 @@ library TokenUtils {
             (bool success, ) = recipient.call{value: amount}("");
             require(success, "TokenUtils: ETH transfer failed");
         }
+    }
+
+    function transferFrom(
+        IERC20 token,
+        address from,
+        address to,
+        uint256 amount
+    ) internal {
+        require(
+            address(token) != address(0),
+            "CrepeTokenUtils: ETH transferFrom must be caller"
+        );
+        token.safeTransferFrom(from, to, amount);
     }
 }
