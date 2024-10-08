@@ -70,6 +70,21 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
 
     // ----- ADMIN FUNCTIONS -----
 
+    /// Initialize. Specify the localToken mapping to destination chains and tokens
+    function init(
+        uint256[] memory _toChainIds,
+        address[] memory _toTokens,
+        address[] memory _localTokens
+    ) public onlyOwner {
+        uint256 n = _toChainIds.length;
+        require(n == _toTokens.length, "DPAB: wrong toTokens length");
+        require(n == _localTokens.length, "DPAB: wrong localTokens length");
+
+        for (uint256 i = 0; i < n; ++i) {
+            _addTokenPair(_toChainIds[i], _toTokens[i], _localTokens[i]);
+        }
+    }
+
     /// Set the minimum percentage fee to pay the Across relayer.
     function setMinPercentageFee(uint256 _minPercentageFee) public onlyOwner {
         minPercentageFee = _minPercentageFee;
@@ -83,6 +98,14 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
         address toToken,
         address localToken
     ) public onlyOwner {
+        _addTokenPair(toChainId, toToken, localToken);
+    }
+
+    function _addTokenPair(
+        uint256 toChainId,
+        address toToken,
+        address localToken
+    ) private {
         localTokenMapping[toChainId][toToken] = localToken;
         emit TokenPairAdded(toChainId, toToken, localToken);
     }

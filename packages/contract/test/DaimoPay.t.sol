@@ -559,7 +559,7 @@ contract DummySpokePool is V3SpokePoolInterface, Test {
     }
 
     function depositV3(
-        address depositor,
+        address /* depositor */,
         address recipient,
         address inputToken,
         address outputToken,
@@ -572,6 +572,7 @@ contract DummySpokePool is V3SpokePoolInterface, Test {
         uint32 exclusivityDeadline,
         bytes calldata message
     ) external payable {
+        assertEq(recipient, LINEA_INTENT_ADDR, "incorrect recipient");
         assertEq(inputToken, expectedInputToken, "incorrect input token");
         assertEq(outputToken, expectedOutputToken, "incorrect output token");
         assertEq(inputAmount, 101, "incorrect input amount");
