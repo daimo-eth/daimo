@@ -7,7 +7,7 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 /// @dev Asset amount, e.g. $100 USDC or 0.1 ETH
 struct TokenAmount {
     /// @dev Zero address = native asset, e.g. ETH
-    IERC20 addr;
+    IERC20 token;
     uint256 amount;
 }
 
@@ -51,7 +51,7 @@ library TokenUtils {
         uint256 amount
     ) internal {
         if (address(token) != address(0)) {
-            token.safeTransfer(recipient, amount);
+            token.safeTransfer({to: recipient, value: amount});
         } else {
             // Native token transfer
             (bool success, ) = recipient.call{value: amount}("");
@@ -69,6 +69,6 @@ library TokenUtils {
             address(token) != address(0),
             "CrepeTokenUtils: ETH transferFrom must be caller"
         );
-        token.safeTransferFrom(from, to, amount);
+        token.safeTransferFrom({from: from, to: to, value: amount});
     }
 }

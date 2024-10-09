@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
+import {Ownable2StepUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -11,11 +12,23 @@ import "../../vendor/across/V3SpokePoolInterface.sol";
 /// @author The Daimo team
 /// @custom:security-contact security@daimo.com
 ///
-/// Bridges assets from to a destination chain using Across Protocol. Makes the
+/// @dev Bridges assets from to a destination chain using Across Protocol. Makes the
 /// assumption that the local token is an ERC20 token and has a 1 to 1 price
 /// with the corresponding destination token.
-contract DaimoPayAcrossBridger is IDaimoPayBridger {
+contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
     using SafeERC20 for IERC20;
+
+    struct AcrossBridgeRoute {
+        address localToken;
+        // Minimum percentage fee to pay the Across relayer. The input amount should
+        // be at least this much larger than the output amount
+        // 1% is represented as 1e16, 100% is 1e18, 50% is 5e17. This is how Across
+        // represents percentage fees.
+        uint256 pctFee;
+        // Minimum flat fee to pay the Across relayer. The input amount should be at
+        // least this much larger than the output amount
+        uint256 flatFee;
+    }
 
     struct ExtraData {
         address exclusiveRelayer;
@@ -25,120 +38,133 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
         bytes message;
     }
 
-    address public immutable owner;
+    uint256 public immutable ONE_HUNDRED_PERCENT = 1e18;
 
     // SpokePool contract address for this chain.
-    V3SpokePoolInterface public immutable spokePool;
-    // Minimum percentage fee to pay the Across relayer. This contract checks
-    // that the input amount is at least this much larger than the output amount
-    // 1% is represented as 1e16, 100% is 1e18, 50% is 5e17. This is how Across
-    // represents percentage fees.
-    uint256 public minPercentageFee;
-    uint256 public immutable oneHundredPercent = 1e18;
+    V3SpokePoolInterface public spokePool;
 
     // Mapping from destination chain and token to the corresponding token on
     // the current chain.
-    mapping(uint256 toChainId => mapping(address toToken => address localToken))
-        public localTokenMapping;
+    mapping(uint256 toChainId => mapping(address toToken => AcrossBridgeRoute bridgeRoute))
+        public bridgeRouteMapping;
 
-    event TokenPairAdded(
-        uint256 indexed toChain,
+    event BridgeRouteAdded(
+        uint256 indexed toChainId,
         address indexed toToken,
-        address indexed localToken
+        address indexed localToken,
+        uint256 pctFee
     );
-    event TokenPairRemoved(
-        uint256 indexed toChain,
+    event BridgeRouteRemoved(
+        uint256 indexed toChainId,
         address indexed toToken,
-        address indexed localToken
+        address indexed localToken,
+        uint256 pctFee
     );
 
-    /// Specify owner (not msg.sender) to allow CREATE3 deployment.
-    constructor(
-        address _initialOwner,
-        V3SpokePoolInterface _spokePool,
-        uint256 _minPercentageFee
-    ) {
-        owner = _initialOwner;
-        spokePool = _spokePool;
-        minPercentageFee = _minPercentageFee;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "DPAB: caller is not the owner");
-        _;
+    constructor() {
+        _disableInitializers();
     }
 
     // ----- ADMIN FUNCTIONS -----
 
-    /// Initialize. Specify the localToken mapping to destination chains and tokens
+    /// Initialize. Specify owner (not msg.sender) to allow CREATE3 deployment.
+    /// Specify the localToken mapping to destination chains and tokens
     function init(
-        uint256[] memory _toChainIds,
-        address[] memory _toTokens,
-        address[] memory _localTokens
-    ) public onlyOwner {
+        address _initialOwner,
+        V3SpokePoolInterface _spokePool,
+        uint256[] calldata _toChainIds,
+        address[] calldata _toTokens,
+        AcrossBridgeRoute[] calldata _bridgeRoutes
+    ) public initializer {
+        __Ownable_init(_initialOwner);
+
+        spokePool = _spokePool;
+
         uint256 n = _toChainIds.length;
-        require(n == _toTokens.length, "DPAB: wrong toTokens length");
-        require(n == _localTokens.length, "DPAB: wrong localTokens length");
+        require(n == _bridgeRoutes.length, "DPAB: wrong bridgeRoutes length");
 
         for (uint256 i = 0; i < n; ++i) {
-            _addTokenPair(_toChainIds[i], _toTokens[i], _localTokens[i]);
+            _addBridgeRoute({
+                toChainId: _toChainIds[i],
+                toToken: _toTokens[i],
+                bridgeRoute: _bridgeRoutes[i]
+            });
         }
-    }
-
-    /// Set the minimum percentage fee to pay the Across relayer.
-    function setMinPercentageFee(uint256 _minPercentageFee) public onlyOwner {
-        minPercentageFee = _minPercentageFee;
     }
 
     /// Map a token on a destination chain to a token on the current chain.
     /// Assumes the local token has a 1 to 1 price with the corresponding
     /// destination token.
-    function addTokenPair(
+    function addBridgeRoute(
         uint256 toChainId,
         address toToken,
-        address localToken
+        AcrossBridgeRoute calldata bridgeRoute
     ) public onlyOwner {
-        _addTokenPair(toChainId, toToken, localToken);
+        _addBridgeRoute({
+            toChainId: toChainId,
+            toToken: toToken,
+            bridgeRoute: bridgeRoute
+        });
     }
 
-    function _addTokenPair(
+    function _addBridgeRoute(
         uint256 toChainId,
         address toToken,
-        address localToken
+        AcrossBridgeRoute calldata bridgeRoute
     ) private {
-        localTokenMapping[toChainId][toToken] = localToken;
-        emit TokenPairAdded(toChainId, toToken, localToken);
+        bridgeRouteMapping[toChainId][toToken] = bridgeRoute;
+        emit BridgeRouteAdded({
+            toChainId: toChainId,
+            toToken: toToken,
+            localToken: bridgeRoute.localToken,
+            pctFee: bridgeRoute.pctFee
+        });
     }
 
-    function removeTokenPair(
+    function removeBridgeRoute(
         uint256 toChainId,
         address toToken
     ) public onlyOwner {
-        address localToken = localTokenMapping[toChainId][toToken];
-        delete localTokenMapping[toChainId][toToken];
-        emit TokenPairRemoved(toChainId, toToken, localToken);
+        AcrossBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
+            toToken
+        ];
+        delete bridgeRouteMapping[toChainId][toToken];
+        emit BridgeRouteRemoved({
+            toChainId: toChainId,
+            toToken: toToken,
+            localToken: bridgeRoute.localToken,
+            pctFee: bridgeRoute.pctFee
+        });
     }
 
     // ----- BRIDGING FUNCTIONS -----
 
-    /// Get the local token that corresponds to the destination token.
-    function getInputToken(
+    /// Get the local token that corresponds to the destination token. Get the
+    /// minimum input amount for a given output amount. The input amount must
+    /// cover the max of the percentage fee and the flat fee.
+    function getInputTokenAmount(
         uint256 toChainId,
-        address toToken
-    ) public view returns (address) {
-        return localTokenMapping[toChainId][toToken];
-    }
-
-    /// Get the minimum input amount for a given output amount accounting
-    /// for the percentage fee.
-    function getInputAmount(
-        uint256 /* toChainId */,
-        address /* toToken */,
+        address toToken,
         uint256 toAmount
-    ) public view returns (uint256) {
-        return
-            (toAmount * (oneHundredPercent + minPercentageFee)) /
-            oneHundredPercent;
+    ) public view returns (address inputToken, uint256 inputAmount) {
+        AcrossBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
+            toToken
+        ];
+        require(
+            bridgeRoute.localToken != address(0),
+            "DPAB: bridge route not found"
+        );
+
+        inputToken = bridgeRoute.localToken;
+
+        uint256 amtWithPctFee = (toAmount *
+            (ONE_HUNDRED_PERCENT + bridgeRoute.pctFee)) / ONE_HUNDRED_PERCENT;
+        uint256 amtWithFlatFee = toAmount + bridgeRoute.flatFee;
+
+        // Return the larger of the two amounts
+        inputAmount = amtWithPctFee > amtWithFlatFee
+            ? amtWithPctFee
+            : amtWithFlatFee;
     }
 
     /// Initiate a bridge to a destination chain using Across Protocol.
@@ -153,13 +179,11 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
         require(toAmount > 0, "DPAB: zero amount");
 
         // Get the local token that corresponds to the destination token.
-        address inputToken = getInputToken(toChainId, toToken);
-        require(
-            address(inputToken) != address(0),
-            "DPAB: input token not found"
-        );
-
-        uint256 inputAmount = getInputAmount(toChainId, toToken, toAmount);
+        (address inputToken, uint256 inputAmount) = getInputTokenAmount({
+            toChainId: toChainId,
+            toToken: toToken,
+            toAmount: toAmount
+        });
 
         // Parse remaining arguments from extraData
         ExtraData memory extra;
@@ -192,13 +216,14 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger {
             message: extra.message
         });
 
-        emit BridgeInitiated(
-            toChainId,
-            toAddress,
-            toToken,
-            toAmount,
-            inputToken,
-            inputAmount
-        );
+        emit BridgeInitiated({
+            fromAddress: msg.sender,
+            fromToken: inputToken,
+            fromAmount: inputAmount,
+            toChainId: toChainId,
+            toAddress: toAddress,
+            toToken: toToken,
+            toAmount: toAmount
+        });
     }
 }
