@@ -1,9 +1,16 @@
 import { ForeignToken } from "@daimo/contract";
 import { base58 } from "@scure/base";
-import { Address, bytesToBigInt, Hex, numberToBytes, zeroAddress } from "viem";
+import {
+  Address,
+  bytesToBigInt,
+  getAddress,
+  Hex,
+  numberToBytes,
+  zeroAddress,
+} from "viem";
 import z from "zod";
 
-import { BigIntStr } from "./model";
+import { BigIntStr, zAddress } from "./model";
 
 // lifecycle: waiting payment -> processed.
 export enum DaimoPayOrderStatusSource {
@@ -33,8 +40,37 @@ export type DaimoPayOrderUpdate =
 export interface DaimoPayOrderItem {
   name: string;
   description: string;
-  image: string;
+  image?: string;
 }
+
+// NOTE: be careful to modify this type only in backward-compatible ways.
+//       Add OPTIONAL fields, etc. Anything else requires a migration.
+export const zDaimoPayOrderMetadata = z.object({
+  intent: z.string(),
+  items: z.array(
+    z.object({
+      name: z.string(),
+      description: z.string(),
+      image: z.string().optional(),
+    }),
+  ),
+  paymentOptions: z.array(z.string()),
+  payer: z
+    .object({
+      preferredChains: z.array(z.number()).optional(),
+      preferredTokens: z
+        .array(
+          z.object({
+            chain: z.number(),
+            address: zAddress.transform((a) => getAddress(a)),
+          }),
+        )
+        .optional(),
+    })
+    .optional(),
+});
+
+export type DaimoPayOrderMetadata = z.infer<typeof zDaimoPayOrderMetadata>;
 
 export type DaimoPayDehydratedOrder = {
   mode: DaimoPayOrderMode.SALE | DaimoPayOrderMode.CHOOSE_AMOUNT;
@@ -42,12 +78,10 @@ export type DaimoPayDehydratedOrder = {
   destFinalCallTokenAmount: DaimoPayTokenAmount;
   destFinalCall: OnChainCall;
   destNonce: bigint;
-  intent: string;
-  itemsJson: string | null;
-  paymentOptionsJson: string;
   redirectUri: string | null;
   orgId: string | null;
   createdAt: number | null;
+  metadata: DaimoPayOrderMetadata;
 };
 
 export type DaimoPayHydratedOrder = {
@@ -67,12 +101,10 @@ export type DaimoPayHydratedOrder = {
   destStatus: DaimoPayOrderStatusDest;
   destFastFinishTxHash: Hex | null;
   destClaimTxHash: Hex | null;
-  intent: string;
-  itemsJson: string | null;
-  paymentOptionsJson: string;
   redirectUri: string | null;
   orgId: string | null;
   createdAt: number | null;
+  metadata: DaimoPayOrderMetadata;
 };
 
 export type DaimoPayHydratedOrderWithoutHandoffAddr = Omit<
