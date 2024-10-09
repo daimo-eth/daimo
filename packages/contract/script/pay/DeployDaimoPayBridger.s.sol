@@ -14,9 +14,7 @@ contract DeployDaimoPayBridger is Script {
         // initOwner = daimo.eth
         address initOwner = 0xEEee8B1371f1664b7C2A8c111D6062b6576fA6f0;
 
-        DaimoPayBridger implementation = new DaimoPayBridger{salt: 0}(
-            initOwner
-        );
+        DaimoPayBridger implementation = new DaimoPayBridger{salt: 0}();
 
         (
             uint256[] memory chainIds,
@@ -31,6 +29,7 @@ contract DeployDaimoPayBridger is Script {
                     address(implementation),
                     abi.encodeWithSelector(
                         DaimoPayBridger.init.selector,
+                        initOwner,
                         chainIds,
                         bridgers
                     )
@@ -49,6 +48,10 @@ contract DeployDaimoPayBridger is Script {
         returns (uint256[] memory chainIds, address[] memory bridgers)
     {
         bool testnet = _isTestnet(block.chainid);
+        if (testnet) {
+            // TODO
+            return (new uint256[](0), new address[](0));
+        }
 
         address cctpBridger = CREATE3.getDeployed(
             msg.sender,
@@ -59,34 +62,47 @@ contract DeployDaimoPayBridger is Script {
             keccak256("DaimoPayAcrossBridger-test1")
         );
 
-        if (testnet) {
-            // TODO
-            return (chainIds, bridgers);
-        } else {
-            chainIds = new uint256[](7);
-            bridgers = new address[](7);
+        // Bridge to other chains using CCTP. Only Linea uses Across.
+        uint256[] memory allChainIds = new uint256[](7);
+        address[] memory allBridgers = new address[](7);
 
-            // Linea is the only chain which uses Across
-            // All other chains use CCTP
+        allChainIds[0] = ARBITRUM_MAINNET;
+        allChainIds[1] = AVAX_MAINNET;
+        allChainIds[2] = BASE_MAINNET;
+        allChainIds[3] = ETH_MAINNET;
+        allChainIds[4] = OP_MAINNET;
+        allChainIds[5] = POLYGON_MAINNET;
+        allChainIds[6] = LINEA_MAINNET;
 
-            chainIds[0] = ARBITRUM_MAINNET;
-            chainIds[1] = AVAX_MAINNET;
-            chainIds[2] = BASE_MAINNET;
-            chainIds[3] = ETH_MAINNET;
-            chainIds[4] = OP_MAINNET;
-            chainIds[5] = POLYGON_MAINNET;
-            chainIds[6] = LINEA_MAINNET;
+        allBridgers[0] = cctpBridger;
+        allBridgers[1] = cctpBridger;
+        allBridgers[2] = cctpBridger;
+        allBridgers[3] = cctpBridger;
+        allBridgers[4] = cctpBridger;
+        allBridgers[5] = cctpBridger;
+        allBridgers[6] = acrossBridger;
 
-            bridgers[0] = cctpBridger;
-            bridgers[1] = cctpBridger;
-            bridgers[2] = cctpBridger;
-            bridgers[3] = cctpBridger;
-            bridgers[4] = cctpBridger;
-            bridgers[5] = cctpBridger;
-            bridgers[6] = acrossBridger;
+        chainIds = new uint256[](6);
+        bridgers = new address[](6);
 
-            return (chainIds, bridgers);
+        // Include all chainIds except the current chainId
+        uint256 count = 0;
+        for (uint256 i = 0; i < allChainIds.length; ++i) {
+            if (allChainIds[i] != block.chainid) {
+                chainIds[count] = allChainIds[i];
+                bridgers[count] = allBridgers[i];
+                ++count;
+            }
         }
+
+        // Linea bridges to other chains using Across. Override the CCTP bridgers.
+        if (block.chainid == LINEA_MAINNET) {
+            for (uint256 i = 0; i < bridgers.length; ++i) {
+                bridgers[i] = acrossBridger;
+            }
+        }
+
+        return (chainIds, bridgers);
     }
 
     // Exclude from forge coverage

@@ -14,8 +14,8 @@ contract DeployDaimoPayAcrossBridger is Script {
         (
             uint256[] memory chainIds,
             address[] memory toTokens,
-            address[] memory localTokens
-        ) = _getChains();
+            DaimoPayAcrossBridger.AcrossBridgeRoute[] memory bridgeRoutes
+        ) = _getBridgeRoutes();
 
         vm.startBroadcast();
 
@@ -24,11 +24,7 @@ contract DeployDaimoPayAcrossBridger is Script {
 
         DaimoPayAcrossBridger implementation = new DaimoPayAcrossBridger{
             salt: 0
-        }(
-            initOwner,
-            V3SpokePoolInterface(spokePool),
-            1e16 // 1% fee
-        );
+        }();
 
         address bridger = CREATE3.deploy(
             keccak256("DaimoPayAcrossBridger-test1"),
@@ -38,9 +34,11 @@ contract DeployDaimoPayAcrossBridger is Script {
                     address(implementation),
                     abi.encodeWithSelector(
                         DaimoPayAcrossBridger.init.selector,
+                        initOwner,
+                        V3SpokePoolInterface(spokePool),
                         chainIds,
                         toTokens,
-                        localTokens
+                        bridgeRoutes
                     )
                 )
             )
@@ -50,25 +48,29 @@ contract DeployDaimoPayAcrossBridger is Script {
         vm.stopBroadcast();
     }
 
-    function _getChains()
+    function _getBridgeRoutes()
         private
         view
         returns (
             uint256[] memory chainIds,
             address[] memory toTokens,
-            address[] memory localTokens
+            DaimoPayAcrossBridger.AcrossBridgeRoute[] memory bridgeRoutes
         )
     {
         bool testnet = _isTestnet(block.chainid);
         if (testnet) {
             // TODO: add testnet tokens
-            return (new uint256[](0), new address[](0), new address[](0));
+            return (
+                new uint256[](0),
+                new address[](0),
+                new DaimoPayAcrossBridger.AcrossBridgeRoute[](0)
+            );
         }
 
         if (block.chainid == ARBITRUM_MAINNET) {
             chainIds = new uint256[](1);
             toTokens = new address[](1);
-            localTokens = new address[](1);
+            bridgeRoutes = new DaimoPayAcrossBridger.AcrossBridgeRoute[](1);
 
             // chainIds[0] = BASE_MAINNET;
             // chainIds[1] = BLAST_MAINNET;
@@ -96,7 +98,12 @@ contract DeployDaimoPayAcrossBridger is Script {
             // toTokens[10] = ZKSYNC_MAINNET_BRIDGED_USDC;
             // toTokens[11] = ZORA_MAINNET_USDzC;
 
-            localTokens[0] = ARBITRUM_MAINNET_USDC;
+            bridgeRoutes[0] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: ARBITRUM_MAINNET_USDC,
+                pctFee: 720000000000000, // 0.072%
+                flatFee: 180000 // 0.18 USDC
+            });
+
             // localTokens[1] = ARBITRUM_MAINNET_DAI;
             // localTokens[2] = ARBITRUM_MAINNET_USDC;
             // localTokens[3] = ARBITRUM_MAINNET_USDC;
@@ -111,7 +118,7 @@ contract DeployDaimoPayAcrossBridger is Script {
         } else if (block.chainid == BASE_MAINNET) {
             chainIds = new uint256[](1);
             toTokens = new address[](1);
-            localTokens = new address[](1);
+            bridgeRoutes = new DaimoPayAcrossBridger.AcrossBridgeRoute[](1);
 
             // chainIds[0] = ARBITRUM_MAINNET;
             // chainIds[1] = BLAST_MAINNET;
@@ -139,7 +146,12 @@ contract DeployDaimoPayAcrossBridger is Script {
             // toTokens[10] = ZKSYNC_MAINNET_BRIDGED_USDC;
             // toTokens[11] = ZORA_MAINNET_USDzC;
 
-            localTokens[0] = BASE_MAINNET_USDC;
+            bridgeRoutes[0] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: BASE_MAINNET_USDC,
+                pctFee: 720000000000000, // 0.072%
+                flatFee: 180000 // 0.18 USDC
+            });
+
             // localTokens[1] = BASE_MAINNET_DAI;
             // localTokens[2] = BASE_MAINNET_USDC;
             // localTokens[3] = BASE_MAINNET_USDC;
@@ -156,7 +168,7 @@ contract DeployDaimoPayAcrossBridger is Script {
         } else if (block.chainid == ETH_MAINNET) {
             chainIds = new uint256[](1);
             toTokens = new address[](1);
-            localTokens = new address[](1);
+            bridgeRoutes = new DaimoPayAcrossBridger.AcrossBridgeRoute[](1);
 
             // chainIds[0] = ARBITRUM_MAINNET;
             // chainIds[1] = BASE_MAINNET;
@@ -184,7 +196,12 @@ contract DeployDaimoPayAcrossBridger is Script {
             // toTokens[10] = ZKSYNC_MAINNET_BRIDGED_USDC;
             // toTokens[11] = ZORA_MAINNET_USDzC;
 
-            localTokens[0] = ETH_MAINNET_USDC;
+            bridgeRoutes[0] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: ETH_MAINNET_USDC,
+                pctFee: 720000000000000, // 0.072%
+                flatFee: 180000 // 0.18 USDC
+            });
+
             // localTokens[1] = ETH_MAINNET_USDC;
             // localTokens[2] = ETH_MAINNET_DAI;
             // localTokens[3] = ETH_MAINNET_USDC;
@@ -199,7 +216,7 @@ contract DeployDaimoPayAcrossBridger is Script {
         } else if (block.chainid == LINEA_MAINNET) {
             chainIds = new uint256[](5);
             toTokens = new address[](5);
-            localTokens = new address[](5);
+            bridgeRoutes = new DaimoPayAcrossBridger.AcrossBridgeRoute[](5);
 
             chainIds[0] = ARBITRUM_MAINNET;
             chainIds[1] = BASE_MAINNET;
@@ -213,11 +230,31 @@ contract DeployDaimoPayAcrossBridger is Script {
             toTokens[3] = OP_MAINNET_USDC;
             toTokens[4] = POLYGON_MAINNET_USDC;
 
-            localTokens[0] = LINEA_MAINNET_BRIDGED_USDC;
-            localTokens[1] = LINEA_MAINNET_BRIDGED_USDC;
-            localTokens[2] = LINEA_MAINNET_BRIDGED_USDC;
-            localTokens[3] = LINEA_MAINNET_BRIDGED_USDC;
-            localTokens[4] = LINEA_MAINNET_BRIDGED_USDC;
+            bridgeRoutes[0] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: LINEA_MAINNET_BRIDGED_USDC,
+                pctFee: 420000000000000, // 0.042%
+                flatFee: 120000 // 0.12 USDC
+            });
+            bridgeRoutes[1] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: LINEA_MAINNET_BRIDGED_USDC,
+                pctFee: 190000000000000, // 0.019%
+                flatFee: 80000 // 0.08 USDC
+            });
+            bridgeRoutes[2] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: LINEA_MAINNET_BRIDGED_USDC,
+                pctFee: 48000000000000000, // 4.8%
+                flatFee: 9500000 // 9.5 USDC
+            });
+            bridgeRoutes[3] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: LINEA_MAINNET_BRIDGED_USDC,
+                pctFee: 770000000000000, // 0.077%
+                flatFee: 120000 // 0.12 USDC
+            });
+            bridgeRoutes[4] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: LINEA_MAINNET_BRIDGED_USDC,
+                pctFee: 240000000000000, // 0.024%
+                flatFee: 90000 // 0.09 USDC
+            });
         } else if (block.chainid == LISK_MAINNET) {
             // TODO
         } else if (block.chainid == MODE_MAINNET) {
@@ -225,23 +262,31 @@ contract DeployDaimoPayAcrossBridger is Script {
         } else if (block.chainid == OP_MAINNET) {
             chainIds = new uint256[](1);
             toTokens = new address[](1);
-            localTokens = new address[](1);
+            bridgeRoutes = new DaimoPayAcrossBridger.AcrossBridgeRoute[](1);
 
             chainIds[0] = LINEA_MAINNET;
 
             toTokens[0] = LINEA_MAINNET_BRIDGED_USDC;
 
-            localTokens[0] = OP_MAINNET_USDC;
+            bridgeRoutes[0] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: OP_MAINNET_USDC,
+                pctFee: 720000000000000, // 0.072%
+                flatFee: 180000 // 0.18 USDC
+            });
         } else if (block.chainid == POLYGON_MAINNET) {
             chainIds = new uint256[](1);
             toTokens = new address[](1);
-            localTokens = new address[](1);
+            bridgeRoutes = new DaimoPayAcrossBridger.AcrossBridgeRoute[](1);
 
             chainIds[0] = LINEA_MAINNET;
 
             toTokens[0] = LINEA_MAINNET_BRIDGED_USDC;
 
-            localTokens[0] = POLYGON_MAINNET_USDC;
+            bridgeRoutes[0] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+                localToken: POLYGON_MAINNET_USDC,
+                pctFee: 720000000000000, // 0.072%
+                flatFee: 180000 // 0.18 USDC
+            });
         } else if (block.chainid == REDSTONE_MAINNET) {
             // TODO
         } else if (block.chainid == SCROLL_MAINNET) {

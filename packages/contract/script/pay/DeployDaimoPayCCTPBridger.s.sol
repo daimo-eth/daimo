@@ -12,18 +12,14 @@ contract DeployDaimoPayCCTPBridger is Script {
         address tokenMinter = _getTokenMinterAddress(block.chainid);
         address tokenMessenger = _getTokenMessengerAddress(block.chainid);
 
-        (uint256[] memory chainIds, uint32[] memory domains) = _getChains();
+        (uint256[] memory chainIds, uint32[] memory domains) = _getCCTPChains();
 
         vm.startBroadcast();
 
         // initOwner = daimo.eth
         address initOwner = 0xEEee8B1371f1664b7C2A8c111D6062b6576fA6f0;
 
-        DaimoPayCCTPBridger implementation = new DaimoPayCCTPBridger{salt: 0}(
-            initOwner,
-            ITokenMinter(tokenMinter),
-            ICCTPTokenMessenger(tokenMessenger)
-        );
+        DaimoPayCCTPBridger implementation = new DaimoPayCCTPBridger{salt: 0}();
 
         address bridger = CREATE3.deploy(
             keccak256("DaimoPayCCTPBridger-test1"),
@@ -33,6 +29,9 @@ contract DeployDaimoPayCCTPBridger is Script {
                     address(implementation),
                     abi.encodeWithSelector(
                         DaimoPayCCTPBridger.init.selector,
+                        initOwner,
+                        ITokenMinter(tokenMinter),
+                        ICCTPTokenMessenger(tokenMessenger),
                         chainIds,
                         domains
                     )
@@ -44,7 +43,7 @@ contract DeployDaimoPayCCTPBridger is Script {
         vm.stopBroadcast();
     }
 
-    function _getChains()
+    function _getCCTPChains()
         private
         view
         returns (uint256[] memory chainIds, uint32[] memory domains)

@@ -9,9 +9,9 @@ import "./DaimoPay.sol";
 import "./TokenUtils.sol";
 
 /*
- * Liquidity provider contract that funds completes DaimoPay actions.
+ * Relayer contract that funds completes DaimoPay intents.
  */
-contract DaimoPayLP is Ownable2Step {
+contract DaimoPayRelayer is Ownable2Step {
     using SafeERC20 for IERC20;
 
     constructor(address _owner) Ownable(_owner) {}
@@ -27,18 +27,18 @@ contract DaimoPayLP is Ownable2Step {
         uint256 maxTip,
         Call calldata innerSwap
     ) external payable {
-        require(tx.origin == owner(), "DPLP: only usable by owner");
+        require(tx.origin == owner(), "DPR: only usable by owner");
 
         // Claim amountIn from msg.sender & approve swap
-        if (address(requiredTokenIn.addr) == address(0)) {
+        if (address(requiredTokenIn.token) == address(0)) {
             // Should never require extra input from owner
             require(
                 requiredTokenIn.amount == msg.value,
-                "DPLP: wrong msg.value"
+                "DPR: wrong msg.value"
             );
         } else {
             TokenUtils.transferFrom(
-                requiredTokenIn.addr,
+                requiredTokenIn.token,
                 msg.sender,
                 address(this),
                 suppliedTokenInAmount
@@ -48,9 +48,9 @@ contract DaimoPayLP is Ownable2Step {
                 // Input more USDC from owner.
                 uint256 inShortfall = requiredTokenIn.amount -
                     suppliedTokenInAmount;
-                require(inShortfall <= maxTip, "DPLP: excessive tip");
+                require(inShortfall <= maxTip, "DPR: excessive tip");
                 TokenUtils.transferFrom(
-                    requiredTokenIn.addr,
+                    requiredTokenIn.token,
                     owner(),
                     address(this),
                     inShortfall
@@ -61,21 +61,21 @@ contract DaimoPayLP is Ownable2Step {
             // expected slippage.
 
             // forceApprove() not necessary, we check correct tokenOut amount
-            requiredTokenIn.addr.approve(innerSwap.to, requiredTokenIn.amount);
+            requiredTokenIn.token.approve(innerSwap.to, requiredTokenIn.amount);
         }
 
         // Execute (inner) swap
         uint256 amountPre = TokenUtils.getBalanceOf(
-            requiredTokenOut.addr,
+            requiredTokenOut.token,
             address(this)
         );
         (bool success, ) = innerSwap.to.call{value: innerSwap.value}(
             innerSwap.data
         );
-        require(success, "DPLP: inner swap failed");
+        require(success, "DPR: inner swap failed");
 
         uint256 swapAmountOut = TokenUtils.getBalanceOf(
-            requiredTokenOut.addr,
+            requiredTokenOut.token,
             address(this)
         ) - amountPre;
 
@@ -83,9 +83,9 @@ contract DaimoPayLP is Ownable2Step {
         if (swapAmountOut < requiredTokenOut.amount) {
             // Output more USDC from owner.
             uint256 outShortfall = requiredTokenOut.amount - swapAmountOut;
-            require(outShortfall <= maxTip, "DPLP: excessive tip");
+            require(outShortfall <= maxTip, "DPR: excessive tip");
             TokenUtils.transferFrom(
-                requiredTokenOut.addr,
+                requiredTokenOut.token,
                 owner(),
                 address(this),
                 outShortfall
@@ -93,11 +93,11 @@ contract DaimoPayLP is Ownable2Step {
         } else {
             // Input excess tokens to owner.
             uint256 tip = swapAmountOut - requiredTokenOut.amount;
-            TokenUtils.transfer(requiredTokenOut.addr, payable(owner()), tip);
+            TokenUtils.transfer(requiredTokenOut.token, payable(owner()), tip);
         }
 
         TokenUtils.transfer(
-            requiredTokenOut.addr,
+            requiredTokenOut.token,
             payable(msg.sender),
             requiredTokenOut.amount
         );
@@ -108,19 +108,14 @@ contract DaimoPayLP is Ownable2Step {
         PayIntent calldata intent,
         Call[] calldata calls
     ) public onlyOwner {
-        TokenUtils.transferFrom(
-            intent.bridgeTokenOut.addr,
-            msg.sender,
-            address(this),
-            intent.bridgeTokenOut.amount
-        );
-        TokenUtils.approve(
-            intent.bridgeTokenOut.addr,
-            address(dp),
-            intent.bridgeTokenOut.amount
-        );
-        dp.fastFinishAction(intent, calls);
-        TokenUtils.approve(intent.bridgeTokenOut.addr, address(dp), 0);
+        TokenUtils.transferFrom({
+            token: intent.bridgeTokenOut.token,
+            from: msg.sender,
+            to: address(dp),
+            amount: intent.bridgeTokenOut.amount
+        });
+        dp.fastFinishIntent(intent, calls);
+        TokenUtils.approve(intent.bridgeTokenOut.token, address(dp), 0);
     }
 
     function claimAndKeep(
@@ -135,12 +130,12 @@ contract DaimoPayLP is Ownable2Step {
             );
         }
 
-        dp.claimAction(intent, calls);
-        TokenUtils.transfer(
-            intent.bridgeTokenOut.addr,
-            payable(msg.sender),
-            intent.bridgeTokenOut.amount
-        );
+        dp.claimIntent({intent: intent, calls: calls});
+        TokenUtils.transfer({
+            token: intent.bridgeTokenOut.token,
+            recipient: payable(msg.sender),
+            amount: intent.bridgeTokenOut.amount
+        });
     }
 
     receive() external payable {}
