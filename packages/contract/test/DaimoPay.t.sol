@@ -123,7 +123,7 @@ contract DaimoPayTest is Test {
         console.log("TestUSDC (toToken) address:", address(_toToken));
     }
 
-    function testGetHandoffAddr() public view {
+    function testGetIntentAddr() public view {
         PayIntent memory baseIntent = PayIntent({
             toChainId: _baseChainId,
             bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
@@ -446,7 +446,7 @@ contract DaimoPayTest is Test {
         // Wait for CCTP to relay the message
         vm.warp(block.timestamp + 20 minutes);
 
-        // CCTP receiveMessage() sends funds to the handoff address
+        // CCTP receiveMessage() sends funds to the intent address
         _toToken.transfer(BASE_INTENT_ADDR, _toAmount);
 
         // Then, LP claims the funds
@@ -470,7 +470,7 @@ contract DaimoPayTest is Test {
 
         dp.claimIntent({intent: intent, calls: new Call[](0)});
 
-        // LP received funds from handoff, and handoff is destroyed
+        // LP received funds from intent, and intent is destroyed
         assertEq(_toToken.balanceOf(BASE_INTENT_ADDR), 0);
         assertEq(_toToken.balanceOf(_lp), _lpToTokenInitBalance);
         assertEq(_toToken.balanceOf(_bob), _toAmount);
@@ -483,7 +483,7 @@ contract DaimoPayTest is Test {
         // Wait for CCTP to relay the message
         vm.warp(block.timestamp + 20 minutes);
 
-        // CCTP receiveMessage() sends funds to the handoff address
+        // CCTP receiveMessage() sends funds to the intent address
         _toToken.transfer(BASE_INTENT_ADDR, _toAmount);
 
         // Then, a third party calls claimIntent
@@ -514,7 +514,7 @@ contract DaimoPayTest is Test {
 
         dp.claimIntent({intent: intent, calls: new Call[](0)});
 
-        // LP doesn't receive funds, handoff is destroyed, and funds are sent
+        // LP doesn't receive funds, intent is destroyed, and funds are sent
         // to the final recipient
         assertEq(_toToken.balanceOf(BASE_INTENT_ADDR), 0);
         assertEq(_toToken.balanceOf(_lp), 0);

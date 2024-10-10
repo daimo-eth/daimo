@@ -136,7 +136,7 @@ contract PayIntentContract is Initializable {
             amount: amount
         });
 
-        // This use of SELFDESTRUCT is compatible with EIP-6780. Handoff
+        // This use of SELFDESTRUCT is compatible with EIP-6780. Intent
         // contracts are deployed, then destroyed in the same transaction.
         // solhint-disable-next-line
         selfdestruct(intent.escrow);
