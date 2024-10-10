@@ -15,7 +15,7 @@ export class PaymentMemoTracker {
 
     // Get memos sorted by creation time
     const rows = await retryBackoff(`loadPaymentMemos`, () =>
-      this.db.loadPaymentMemos()
+      this.db.loadPaymentMemos(),
     );
 
     this.cachePaymentMemos(rows);
@@ -34,7 +34,7 @@ export class PaymentMemoTracker {
 
   async addMemo(opHash: Hex, memo: string) {
     await retryBackoff(`insertPaymentMemo`, () =>
-      this.db.insertPaymentMemo({ opHash, memo })
+      this.db.insertPaymentMemo({ opHash, memo }),
     );
     this.cachePaymentMemos([{ opHash, memo }]);
   }

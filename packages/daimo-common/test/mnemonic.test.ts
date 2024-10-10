@@ -45,14 +45,14 @@ async function p256Verify(signature: Hex, message: Hex, pubkey: Hex) {
     },
     { name: "ECDSA", namedCurve: "P-256" },
     false,
-    ["verify"]
+    ["verify"],
   );
   const sig = new Uint8Array([...r, ...s]);
   return await crypto.subtle.verify(
     { name: "ECDSA", hash: "SHA-256" },
     key,
     sig,
-    Buffer.from(message.slice(2), "hex")
+    Buffer.from(message.slice(2), "hex"),
   );
 }
 
@@ -64,20 +64,20 @@ test("mnemonic roundtrips", async () => {
     const badMnemonic = // remove letters
       mnemonicKey.mnemonic.slice(
         0,
-        Math.random() * mnemonicKey.mnemonic.length - 1
+        Math.random() * mnemonicKey.mnemonic.length - 1,
       );
     assert(!validateMnemonic(badMnemonic));
 
     const randomMessage = toHex(p256.utils.randomPrivateKey());
     const signature = await signWithMnemonic(
       mnemonicKey.mnemonic,
-      randomMessage
+      randomMessage,
     );
 
     const correct = await p256Verify(
       signature,
       randomMessage,
-      mnemonicKey.publicKeyDER
+      mnemonicKey.publicKeyDER,
     );
 
     assert(correct);
@@ -85,7 +85,7 @@ test("mnemonic roundtrips", async () => {
     const wrong = await p256Verify(
       signature,
       "0xdeadbeef",
-      mnemonicKey.publicKeyDER
+      mnemonicKey.publicKeyDER,
     );
     assert(!wrong);
   }
@@ -128,8 +128,8 @@ test("invalid mnemonics fail", () => {
 
   const m3 = tryOrNull(() =>
     mnemonicToPublicKey(
-      "aplomb purchase judge huge fatigue burden nitrogen navy swear utmost rebuild fringe"
-    )
+      "aplomb purchase judge huge fatigue burden nitrogen navy swear utmost rebuild fringe",
+    ),
   );
   assert(m3 != null);
 });

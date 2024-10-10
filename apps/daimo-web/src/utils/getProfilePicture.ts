@@ -13,7 +13,7 @@ export async function loadPFPUrl(name: string): Promise<string | undefined> {
   }
 
   console.log(
-    `[PFP] ${name} (${addr}) fetched profile picture URL ${profilePicture}`
+    `[PFP] ${name} (${addr}) fetched profile picture URL ${profilePicture}`,
   );
   return profilePicture;
 }

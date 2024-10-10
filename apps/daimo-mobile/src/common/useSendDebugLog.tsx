@@ -25,7 +25,7 @@ export function SendDebugLogButton() {
  * Additionally returns the env summary for display.
  */
 export function useSendDebugLog(
-  account?: Account | null
+  account?: Account | null,
 ): [() => Promise<void>, Record<string, string>] {
   if (account === undefined) {
     account = getAccountManager().getAccount();
@@ -77,7 +77,7 @@ export function useSendDebugLog(
   return [sendDebugLog, envKV];
 }
 function getKeySecDescription(
-  hardwareSecurityLevel: ExpoEnclave.HardwareSecurityLevel
+  hardwareSecurityLevel: ExpoEnclave.HardwareSecurityLevel,
 ) {
   switch (hardwareSecurityLevel) {
     case "SOFTWARE":

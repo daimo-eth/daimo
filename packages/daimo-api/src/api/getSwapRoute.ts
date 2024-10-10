@@ -80,7 +80,7 @@ export async function getSwapQuote({
   // No output = no quote.
   if (amountOut === 0n) {
     console.log(
-      `[SWAP QUOTE] no output for ${amountIn} ${fromCoin.symbol} ${tokenIn}: ${swapPath}`
+      `[SWAP QUOTE] no output for ${amountIn} ${fromCoin.symbol} ${tokenIn}: ${swapPath}`,
     );
     return null;
   }

@@ -32,7 +32,7 @@ export async function deployWallet(
   inviteCodeTracker: InviteCodeTracker,
   telemetry: Telemetry,
   paymaster: Paymaster,
-  inviteGraph: InviteGraph
+  inviteGraph: InviteGraph,
 ): Promise<{ address: Address; faucetTransfer?: TransferSwapClog }> {
   // For now, invite is required
   const inviteStatus = getInviteStatus(inviteLinkStatus);
@@ -77,13 +77,13 @@ export async function deployWallet(
   console.log(`[API] Deploying account ${name} at ${address}. ${approvals}`);
   const deployReceipt = await retryBackoff(
     `deployWallet-${name}-${pubKeyHex}`,
-    () => accountFactory.deploy(pubKeyHex, initCalls)
+    () => accountFactory.deploy(pubKeyHex, initCalls),
   );
 
   const processed = await watcher.waitFor(Number(deployReceipt.blockNumber), 8);
   if (!processed) {
     console.log(
-      `[API] Deploy tx ${deployReceipt.transactionHash} not processed`
+      `[API] Deploy tx ${deployReceipt.transactionHash} not processed`,
     );
   }
 
@@ -107,7 +107,7 @@ export async function deployWallet(
       address,
       deviceAttestationString,
       inviteLinkStatus.link.code,
-      sendFaucet
+      sendFaucet,
     );
 
     if (inviteResult.faucetTransfer != null) {
@@ -120,7 +120,7 @@ export async function deployWallet(
   const url = `${explorer}/address/${address}`;
   telemetry.recordClippy(
     `New user ${name} with invite code ${inviteMeta} at ${url}`,
-    "celebrate"
+    "celebrate",
   );
 
   return { address, faucetTransfer };

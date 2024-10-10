@@ -19,7 +19,7 @@ export function hexToBuffer(hex: Hex): Buffer {
 // Returns eg "$0.42 fee" or null if no fee
 export function formatFeeAmountOrNull(
   locale: Locale,
-  dollars: number
+  dollars: number,
 ): string | null {
   const i18 = i18n(locale).format;
   if (dollars < 0) throw new Error("Negative fee");
@@ -31,7 +31,7 @@ export function formatFeeAmountOrNull(
 /** Formats an amount for a non-USD token, eg "123.000000" */
 export function getForeignCoinDisplayAmount(
   amount: `${bigint}` | bigint,
-  coin: ForeignToken
+  coin: ForeignToken,
 ) {
   const amountStr = formatUnits(BigInt(amount), coin.decimals);
   const maxDecimals = 6;
@@ -75,7 +75,7 @@ export function getTransferSummary(
   op: TransferClog,
   chainConfig: ChainConfig,
   locale?: Locale,
-  short?: boolean
+  short?: boolean,
 ) {
   const i18 = i18n(locale).op;
   // TODO: use home coin from account
@@ -101,7 +101,7 @@ export function getTransferSummary(
             readableAmount,
             coin.symbol,
             homeCoinSymbol,
-            crossChain
+            crossChain,
           );
     }
 

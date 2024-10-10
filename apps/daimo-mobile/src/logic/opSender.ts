@@ -22,7 +22,7 @@ export function useWarmDeviceKeySenderCache(account: Account) {
   const { enclaveKeyName, address } = account;
   const chainId = account.homeChainId;
   const keySlot = account.accountKeys.find(
-    (keyData) => keyData.pubKey === account.enclavePubKey
+    (keyData) => keyData.pubKey === account.enclavePubKey,
   )?.slot;
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export function loadOpSender({
 
   promise = (async () => {
     console.info(
-      `[SEND] loading DaimoOpSender ${chainId} ${address} ${signer.type}`
+      `[SEND] loading DaimoOpSender ${chainId} ${address} ${signer.type}`,
     );
 
     const chainConfig = env(daimoChain).chainConfig;

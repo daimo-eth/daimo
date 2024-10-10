@@ -103,7 +103,7 @@ export type EmailAddress = z.infer<typeof zEmailAddress>;
 
 // From https://stackoverflow.com/a/29767609
 const phoneNumberRegex = new RegExp(
-  /^\+?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4,6}$/im
+  /^\+?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4,6}$/im,
 );
 
 export const zPhoneNumber = z.string().regex(phoneNumberRegex);
@@ -159,4 +159,12 @@ export interface SuggestedAction {
   title: string;
   subtitle: string;
   url: string;
+}
+
+export function dateToUnix(d: Date): number {
+  return Math.floor(d.getTime() / 1000);
+}
+
+export function unixToDate(unix: number): Date {
+  return new Date(unix * 1000);
 }

@@ -12,7 +12,7 @@ session.connect();
 export async function healthCheck(
   db: DB,
   watcher: IndexWatcher,
-  startTimeS: number
+  startTimeS: number,
 ) {
   return healthCheckInner(db, watcher, startTimeS, []);
 }
@@ -21,7 +21,7 @@ export async function healthDebug(
   db: DB,
   watcher: IndexWatcher,
   startTimeS: number,
-  trpcReqsInFlight: string[]
+  trpcReqsInFlight: string[],
 ) {
   return healthCheckInner(db, watcher, startTimeS, trpcReqsInFlight, true);
 }
@@ -31,7 +31,7 @@ async function healthCheckInner(
   watcher: IndexWatcher,
   startTimeS: number,
   trpcReqsInFlight: string[],
-  showDetailedDebug?: boolean
+  showDetailedDebug?: boolean,
 ) {
   // Additional debug diagnostics
   const nowS = now();

@@ -23,7 +23,7 @@ export class Paymaster {
   constructor(
     private vc: ViemClient,
     private bundlerClient: BundlerClient,
-    private db: DB
+    private db: DB,
   ) {}
 
   async init() {
@@ -39,7 +39,7 @@ export class Paymaster {
   addToWhitelist(name: string) {
     // Run in background, don't await
     retryBackoff(`insertPaymasterWhiteslist`, () =>
-      this.db.insertPaymasterWhiteslist(name)
+      this.db.insertPaymasterWhiteslist(name),
     );
   }
 
@@ -89,12 +89,12 @@ export class Paymaster {
 
     const gasPriceParams = await retryBackoff(
       "get-user-operation-gas-price-params",
-      () => this.bundlerClient.getUserOperationGasPriceParams()
+      () => this.bundlerClient.getUserOperationGasPriceParams(),
     );
 
     const maxFeePerGas = hexToBigInt(gasPriceParams.maxFeePerGas);
     const maxPriorityFeePerGas = hexToBigInt(
-      gasPriceParams.maxPriorityFeePerGas
+      gasPriceParams.maxPriorityFeePerGas,
     );
     const preVerificationGas = calcPreVerificationGas();
 
@@ -105,7 +105,7 @@ export class Paymaster {
         maxFeePerGas: maxFeePerGas.toString(),
         maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
         preVerificationGas: preVerificationGas.toString(),
-      })}`
+      })}`,
     );
 
     return { maxFeePerGas, maxPriorityFeePerGas, preVerificationGas };
@@ -113,7 +113,7 @@ export class Paymaster {
 
   // Leftover gas payment is refunded by the paymaster so overpaying is fine.
   async calculateChainGasConstants(
-    sender: EAccount
+    sender: EAccount,
   ): Promise<ChainGasConstants> {
     // Sign paymaster for any valid Daimo account, excluding name blacklist.
     // Everyone else gets the Pimlico USDC paymaster.
@@ -142,7 +142,7 @@ export class Paymaster {
   async shouldSponsor(name?: string): Promise<boolean> {
     if (name == null) return false;
     return await retryBackoff(`checkPaymasterWhitelist`, () =>
-      this.db.checkPaymasterWhitelist(name!)
+      this.db.checkPaymasterWhitelist(name!),
     );
   }
 }

@@ -100,7 +100,7 @@ export interface FrameRequest {
  */
 export async function getFrameMessage(
   body: FrameRequest,
-  neynarClient: NeynarAPIClient
+  neynarClient: NeynarAPIClient,
 ) {
   const { messageBytes } = body.trustedData;
   const response = await neynarClient.validateFrameAction(messageBytes);

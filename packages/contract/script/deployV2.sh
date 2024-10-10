@@ -3,7 +3,7 @@ set -e
 
 
 # If necessary, run `npm run fetch` first in daimo-contract
-cp ../daimo-contract/script/chainlink/4-valid-feeds.jsonl chainlink-feeds.jsonl
+# cp ../daimo-contract/script/chainlink/4-valid-feeds.jsonl chainlink-feeds.jsonl
 
 # Requirements:
 # ALCHEMY_API_KEY
@@ -11,14 +11,16 @@ cp ../daimo-contract/script/chainlink/4-valid-feeds.jsonl chainlink-feeds.jsonl
 # ETHERSCAN_API_KEY_... for each target chain
 
 SCRIPTS=(
-    "script/DeployFastCCTP.s.sol"
-    "script/DeployFlexSwapper.s.sol"
-    "script/DeployCCTPBridger.s.sol"
-    "script/DeployAccountFactoryV2.s.sol"
-    "script/DeployTestAccountV2.s.sol"
+    # "script/DeployCrepeHandoffFactory.s.sol"
+    # "script/DeployCrepeFastCCTP.s.sol"
+    # "script/DeployFlexSwapper.s.sol"
+    # "script/DeployCCTPBridger.s.sol"
+    # "script/DeployAccountFactoryV2.s.sol"
+    # "script/DeployTestAccountV2.s.sol"
 
     # SWAPBOT (ensure private key is swapbot EOA)
     # "script/DeploySwapbotLP.s.sol" 
+    # "script/DeployCrepeBotLP.s.sol"
 )
 CHAINS=(
     # MAINNETS
@@ -33,7 +35,7 @@ CHAINS=(
     # "verifyContract,https://avalanche-c-chain-rpc.publicnode.com"  
 
     # TESTNETS
-    # "$ETHERSCAN_API_KEY_L1,wss://ethereum-sepolia-rpc.publicnode.com"
+    # "$ETHERSCAN_API_KEY_L1,https://eth-sepolia.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_BASE,https://sepolia.base.org"
  
 )
@@ -45,8 +47,8 @@ for SCRIPT in "${SCRIPTS[@]}"; do
         echo "======= RUNNING $SCRIPT ========" 
         echo "ETHERSCAN_API_KEY: $ETHERSCAN_API_KEY"
         echo "RPC_URL          : $RPC_URL"
-        echo forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY --broadcast
+        echo forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
         echo ""
-        forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY --broadcast  || exit 1
+        forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast || exit 1
     done
 done

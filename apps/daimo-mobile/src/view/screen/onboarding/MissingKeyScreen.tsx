@@ -28,7 +28,7 @@ export function MissingKeyScreen() {
   const [title, desc] = getKeyErrorDesc(account, keyInfo);
 
   console.log(
-    `[ONBOARDING] MISSING KEY ${account.name}, ${account.accountKeys.length} keys, ${account.pendingKeyRotation.length} pending rotations, pubKeyHex: ${keyInfo.pubKeyHex} title: ${title}, desc: ${desc}`
+    `[ONBOARDING] MISSING KEY ${account.name}, ${account.accountKeys.length} keys, ${account.pendingKeyRotation.length} pending rotations, pubKeyHex: ${keyInfo.pubKeyHex} title: ${title}, desc: ${desc}`,
   );
 
   return (
@@ -51,7 +51,7 @@ export function MissingKeyScreen() {
 
 function getKeyErrorDesc(account: Account, keyInfo: EnclaveKeyInfo) {
   console.log(
-    `[ONBOARDING] getKeyErrorDesc ${account.name} ${JSON.stringify(keyInfo)}`
+    `[ONBOARDING] getKeyErrorDesc ${account.name} ${JSON.stringify(keyInfo)}`,
   );
   if (keyInfo.pubKeyHex == null) {
     return [i18.keyErrorDesc.noKey.title(), i18.keyErrorDesc.noKey.desc()];

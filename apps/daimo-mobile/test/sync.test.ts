@@ -110,7 +110,7 @@ describe("addLandlineTransfers", () => {
 
     const result = addLandlineTransfers(
       [oldTransferClog, oldLandlineClog],
-      [newLandlineClog]
+      [newLandlineClog],
     );
 
     // The on-chain part of the old transfer should be combined with the

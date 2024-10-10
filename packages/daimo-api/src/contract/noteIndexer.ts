@@ -50,7 +50,7 @@ export class NoteIndexer extends Indexer {
   constructor(
     private nameReg: NameRegistry,
     private opIndexer: OpIndexer,
-    private paymentMemoTracker: PaymentMemoTracker
+    private paymentMemoTracker: PaymentMemoTracker,
   ) {
     super("NOTE");
   }
@@ -80,7 +80,7 @@ export class NoteIndexer extends Indexer {
   private async loadNoteLogs(
     kdb: Kysely<IndexDB>,
     from: number,
-    to: number
+    to: number,
   ): Promise<NoteLog[]> {
     const rows = await retryBackoff(
       `noteIndexer-logs-query-${from}-${to}`,
@@ -92,7 +92,7 @@ export class NoteIndexer extends Indexer {
           .where((eb) => eb.between("block_num", "" + from, "" + to))
           .orderBy("block_num")
           .orderBy("log_idx")
-          .execute()
+          .execute(),
     );
 
     return rows.map((r) => ({
@@ -159,7 +159,7 @@ export class NoteIndexer extends Indexer {
     this.senderIdToOwner.set(senderIdKey(log.from, id), log.ephemeralOwner);
     this.logCoordinateToNoteEvent.set(
       logCoordinateKey(log.transactionHash, log.logIndex),
-      [log.ephemeralOwner, "create"]
+      [log.ephemeralOwner, "create"],
     );
     return newNote;
   }
@@ -181,7 +181,7 @@ export class NoteIndexer extends Indexer {
     // Mark as redeemed
     this.logCoordinateToNoteEvent.set(
       logCoordinateKey(log.transactionHash, log.logIndex),
-      [log.ephemeralOwner, "claim"]
+      [log.ephemeralOwner, "claim"],
     );
     assertNotNull(log.redeemer, "redeemer is null");
     assertNotNull(log.from, "from is null");
@@ -220,7 +220,7 @@ export class NoteIndexer extends Indexer {
 
   getNoteStatusbyLogCoordinate(transactionHash: Hex, logIndex: number) {
     const eve = this.logCoordinateToNoteEvent.get(
-      logCoordinateKey(transactionHash, logIndex)
+      logCoordinateKey(transactionHash, logIndex),
     );
     return eve ? [this.getNoteStatusByOwner(eve[0]), eve[1]] : null;
   }

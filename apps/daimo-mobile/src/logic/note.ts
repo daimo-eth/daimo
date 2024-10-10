@@ -13,19 +13,19 @@ export function useEphemeralSignature(
   sender: Address,
   recipient: Address,
   ephemeralPrivateKey: `0x${string}` | undefined,
-  seed: string | undefined
+  seed: string | undefined,
 ) {
   const [ephemeralSignature, setEphemeralSignature] = useState<Hex>("0x");
 
   useEffect(() => {
     if (seed) {
       getNoteClaimSignatureFromSeed(sender, recipient, seed).then(
-        setEphemeralSignature
+        setEphemeralSignature,
       );
     } else {
       // Deprecated
       getNoteClaimSignature(sender, recipient, ephemeralPrivateKey).then(
-        setEphemeralSignature
+        setEphemeralSignature,
       );
     }
   }, [ephemeralPrivateKey, seed]);

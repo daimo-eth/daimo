@@ -41,7 +41,7 @@ export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
   // If it's a request, make it frame with button to check status.
   const frameMeta = getFrameForLinkStatus(desc, i18.checkStatus());
   console.log(
-    `[LINK] status ${JSON.stringify(desc)}, frame ${JSON.stringify(frameMeta)}`
+    `[LINK] status ${JSON.stringify(desc)}, frame ${JSON.stringify(frameMeta)}`,
   );
   if (frameMeta) meta.other = getFrameMetadata(frameMeta);
 
@@ -50,7 +50,7 @@ export function createMetadataForLinkStatus(desc: LinkStatusDesc): Metadata {
 
 export function getFrameForLinkStatus(
   desc: LinkStatusDesc,
-  recheckLabel: string
+  recheckLabel: string,
 ): FrameMetadataType | undefined {
   const i18n = getI18N(headers().get("accept-language"));
   const i18 = i18n.utils.metaTags;
@@ -108,7 +108,7 @@ function getPreviewURL(
   action: string | undefined,
   dollars: `${number}` | undefined,
   paidBy?: string,
-  cancelled?: boolean
+  cancelled?: boolean,
 ) {
   if (!name) {
     return getAbsoluteUrl(`/logo-link-preview.png`);
@@ -134,7 +134,7 @@ function getPreviewURL(
 export function createMetadata(
   title: string,
   description: string,
-  previewURL: string
+  previewURL: string,
 ): Metadata {
   return {
     title,

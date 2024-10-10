@@ -74,7 +74,7 @@ function RequestScreenInner({
   useEffect(() => {
     // Set focus on transitionEnd to avoid stack navigator iOS glitches.
     const unsubscribe = nav.addListener("transitionEnd", () =>
-      textInputRef.current?.focus()
+      textInputRef.current?.focus(),
     );
     return unsubscribe;
   }, []);
@@ -111,7 +111,7 @@ function RequestScreenInner({
       account,
       money,
       fulfiller,
-      fullMemo
+      fullMemo,
     );
     console.log(`[REQUEST] txHash ${txHash}`);
 
@@ -199,7 +199,7 @@ async function createRequestOnChain(
   account: Account,
   money: MoneyEntry,
   fulfiller?: DaimoContact,
-  memo?: string
+  memo?: string,
 ) {
   const id = generateRequestId();
   const idString = encodeRequestId(id);

@@ -9,7 +9,7 @@ export function getNoteId(ephemeralOwner: Address) {
 export async function getNoteClaimSignature(
   sender: Address,
   recipient: Address,
-  notePrivateKey: Hex | undefined
+  notePrivateKey: Hex | undefined,
 ) {
   if (recipient === sender) return dummySignature;
   if (!notePrivateKey) throw new Error("Cannot claim without secret");
@@ -25,7 +25,7 @@ export async function getNoteClaimSignature(
 export async function getNoteClaimSignatureFromSeed(
   sender: Address,
   recipient: Address,
-  seed: string | undefined
+  seed: string | undefined,
 ) {
   if (recipient === sender) return dummySignature;
   if (!seed) throw new Error("Cannot claim without seed");
@@ -39,14 +39,14 @@ export async function getNoteClaimSignatureFromSeed(
 export function generateNoteSeedAddress(): [string, Address] {
   const hexSeed = generatePrivateKey().slice(
     0,
-    2 + Number(128 / 4) // One hex is 4 bits
+    2 + Number(128 / 4), // One hex is 4 bits
   ) as Hex; // 128-bit cryptographic random seed.
 
   const seed = base58.encode(hexToBytes(hexSeed));
 
   const notePrivateKey = keccak256(hexSeed);
   const noteAddress = getAddress(
-    privateKeyToAccount(notePrivateKey).address
+    privateKeyToAccount(notePrivateKey).address,
   ) as Address;
 
   return [seed, noteAddress];

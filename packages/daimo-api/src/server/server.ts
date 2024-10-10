@@ -60,7 +60,7 @@ async function main() {
     vc,
     inviteGraph,
     profileCache,
-    await db.loadNameBlacklist()
+    await db.loadNameBlacklist(),
   );
   const inviteCodeTracker = new InviteCodeTracker(vc, nameReg, db);
   const paymentMemoTracker = new PaymentMemoTracker(db);
@@ -81,7 +81,7 @@ async function main() {
     requestIndexer,
     foreignCoinIndexer,
     paymentMemoTracker,
-    clogMatcher
+    clogMatcher,
   );
 
   const bundlerClient = getBundlerClientFromEnv(opIndexer);
@@ -95,7 +95,7 @@ async function main() {
     inviteCodeTracker,
     inviteGraph,
     nameReg,
-    monitor
+    monitor,
   );
 
   const notifier = new PushNotifier(
@@ -105,7 +105,7 @@ async function main() {
     noteIndexer,
     requestIndexer,
     keyReg,
-    db
+    db,
   );
 
   // Set up indexers
@@ -115,7 +115,7 @@ async function main() {
     // Dependency order. Within each list, indexers are indexed in parallel.
     [nameReg, keyReg, opIndexer],
     [noteIndexer, requestIndexer, foreignCoinIndexer],
-    [homeCoinIndexer]
+    [homeCoinIndexer],
   );
 
   // Initialize in background
@@ -165,7 +165,7 @@ async function main() {
     monitor,
     binanceClient,
     extApiCache,
-    tokenReg
+    tokenReg,
   );
   const handler = createHTTPHandler({
     middleware: cors(), // handle OPTIONS requests

@@ -22,7 +22,7 @@ export function ExistingChooseAccountScreen() {
 
   const setEAcc = useCallback(
     (targetEAcc: EAccount) => nav.navigate("ExistingUseBackup", { targetEAcc }),
-    [nav]
+    [nav],
   );
 
   return (

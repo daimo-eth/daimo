@@ -26,7 +26,7 @@ export function derKeytoContractFriendlyKey(pubKeyHex: Hex): [Hex, Hex] {
 }
 
 export function contractFriendlyKeyToDER(
-  accountPubkey: readonly [Hex, Hex]
+  accountPubkey: readonly [Hex, Hex],
 ): Hex {
   return (derPrefix +
     accountPubkey[0].substring(2) +
@@ -46,7 +46,7 @@ export function parseAndNormalizeSig(derSig: Hex): { r: bigint; s: bigint } {
   const r = bytesToBigInt(bR);
   let s = bytesToBigInt(bS);
   const n = BigInt(
-    "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
+    "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551",
   );
   if (s > n / 2n) {
     s = n - s;

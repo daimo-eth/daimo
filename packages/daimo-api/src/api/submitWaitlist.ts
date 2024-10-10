@@ -7,7 +7,7 @@ import { Telemetry } from "../server/telemetry";
 function generateMailtoURL(
   email: string,
   name: string,
-  inviteLink: string
+  inviteLink: string,
 ): string {
   const to = email;
   const bcc = "invite@daimo.com";
@@ -18,7 +18,7 @@ function generateMailtoURL(
       `Here's your Daimo invite: ${inviteLink}\n\n` +
       `It'll get you started with $10 USDC from us. Try it and let us know what you think.\n\n` +
       `Best,\n` +
-      `Team Daimo`
+      `Team Daimo`,
   );
 
   const mailtoURL = `mailto:${to}?bcc=${bcc}&subject=${subject}&body=${body}`;
@@ -31,7 +31,7 @@ export async function submitWaitlist(
   socials: string,
   db: DB,
   telemetry: Telemetry,
-  inviteCodeTracker: InviteCodeTracker
+  inviteCodeTracker: InviteCodeTracker,
 ) {
   await db.insertWaitlist(name, email, socials);
 

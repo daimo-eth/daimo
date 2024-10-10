@@ -186,7 +186,7 @@ async function updateProfileLinks(account: Account, action: OffchainAction) {
   const signature = await signAsync({ account, messageBytes });
 
   console.log(
-    `[PROFILE] sending offchain action: ${actionJSON} sig: ${signature}`
+    `[PROFILE] sending offchain action: ${actionJSON} sig: ${signature}`,
   );
   const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
   const addr = account.address;

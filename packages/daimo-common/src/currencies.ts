@@ -38,5 +38,5 @@ export const nonUsdCurrencies = data.map(
     symbol,
     currency,
     decimals,
-  })
+  }),
 );

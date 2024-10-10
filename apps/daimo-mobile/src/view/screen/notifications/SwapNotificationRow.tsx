@@ -46,7 +46,7 @@ export function SwapNotificationRow({ notif }: { notif: SwapNotification }) {
 
   const readableAmount = getForeignCoinDisplayAmount(
     notif.swap.fromAmount,
-    notif.swap.fromCoin
+    notif.swap.fromCoin,
   );
 
   const copy = (() => {

@@ -565,7 +565,7 @@ export const es: LanguageDefinition = {
     left: (usesLeft: number) =>
       `${usesLeft} ${pluralize(usesLeft, "invitación")} ${pluralize(
         usesLeft,
-        "restantes"
+        "restantes",
       )}`,
     locked: {
       header: () => `Invita tus amigos y gana USDC!`,

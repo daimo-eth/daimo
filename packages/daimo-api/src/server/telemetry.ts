@@ -113,14 +113,14 @@ export class Telemetry {
     const keysJson = JSON.stringify(action.keys);
     this.recordClippy(
       `${action.accountName} from ${ipCountry}: ${action.name} ${keysJson}`,
-      "info"
+      "info",
     );
   }
 
   /** Clippy is our Slack bot for API monitoring. */
   recordClippy(
     message: string,
-    level: "info" | "warn" | "error" | "celebrate" = "info"
+    level: "info" | "warn" | "error" | "celebrate" = "info",
   ) {
     const levelEmoji = {
       info: "",

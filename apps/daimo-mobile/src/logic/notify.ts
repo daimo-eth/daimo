@@ -110,7 +110,7 @@ class PushNotificationManager {
     console.log(`[NOTIFY] saving push token ${token.data} for account ${name}`);
     await Log.promise(
       "registerPushToken",
-      rpcFunc.registerPushToken.mutate({ address, token: token.data })
+      rpcFunc.registerPushToken.mutate({ address, token: token.data }),
     );
 
     this.accountManager.transform((acc) => ({ ...acc, pushToken: token.data }));

@@ -75,7 +75,7 @@ export function HistoryListSwipe({
   const styles = useMemo(() => getStyles(color), [color]);
   assert(
     !otherContact || otherContact.type === "eAcc",
-    "Unsupported DaimoContact in HistoryListSwipe"
+    "Unsupported DaimoContact in HistoryListSwipe",
   );
   const otherEAccContact = otherContact
     ? (otherContact as EAccountContact)
@@ -219,12 +219,12 @@ function TransferClogRow({
 
   assert(
     transferClog.amount > 0,
-    `TransferClogRow amount should be greater than 0. amount: ${transferClog.amount}`
+    `TransferClogRow amount should be greater than 0. amount: ${transferClog.amount}`,
   );
   const [from, to] = getDisplayFromTo(transferClog);
   assert(
     [from, to].includes(getAddress(address)),
-    `TransferClogRow from and to should include address. from: ${from}, to: ${to}`
+    `TransferClogRow from and to should include address. from: ${from}, to: ${to}`,
   );
   const setBottomSheetDetailHeight = useContext(SetBottomSheetDetailHeight);
 
@@ -271,7 +271,7 @@ function TransferClogRow({
     transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
     i18NLocale,
-    true
+    true,
   );
   const memoCol = isPending ? color.gray3 : color.grayDark;
 

@@ -24,7 +24,7 @@ export function decodeRequestIdString(idString: string) {
 export function generateRequestId() {
   const hexSeed = generatePrivateKey().slice(
     0,
-    2 + Number(64 / 4) // One hex is 4 bits
+    2 + Number(64 / 4), // One hex is 4 bits
   ) as Hex; // 64-bit cryptographic random seed.
 
   return hexToBigInt(hexSeed);
@@ -61,12 +61,12 @@ export function parseRequestMetadata(metadata: Hex): DaimoRichRequestV2 {
   res.v = Number(res.v);
   assert(
     typeof res.v === "number" && !Number.isNaN(res.v),
-    "Request version must be a number"
+    "Request version must be a number",
   );
 
   assert(
     zAddress.safeParse(res.fulfiller).success,
-    "Request fulfiller must be an Ethereum address"
+    "Request fulfiller must be an Ethereum address",
   );
 
   return res;

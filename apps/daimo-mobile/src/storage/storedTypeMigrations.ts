@@ -100,7 +100,7 @@ export function migrateV15ProposedSwaps(swaps: StoredV15ProposedSwap[]) {
 }
 
 function migrateV15ProposedSwap(
-  swap: StoredV15ProposedSwap
+  swap: StoredV15ProposedSwap,
 ): ProposedSwap | undefined {
   const { fromCoin } = swap;
   const tokenAddress = fromCoin.address || fromCoin.token;

@@ -25,7 +25,7 @@ export async function getExchangeRates(extApiCache: ExternalApiCache) {
 
 export async function getExchangeRatesInner(extApiCache: ExternalApiCache) {
   const json = await retryBackoff("fetchExchangeRates", () =>
-    extApiCache.get("exchange-rates", "rates", fetchExchangeRates, 3600)
+    extApiCache.get("exchange-rates", "rates", fetchExchangeRates, 3600),
   );
 
   assert(!!json, "No exchange rates found");

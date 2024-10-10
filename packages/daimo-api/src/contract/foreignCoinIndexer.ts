@@ -60,7 +60,7 @@ export class ForeignCoinIndexer extends Indexer {
   constructor(
     private nameReg: NameRegistry,
     private vc: ViemClient,
-    private tokenReg: TokenRegistry
+    private tokenReg: TokenRegistry,
   ) {
     super("FOREIGN-COIN");
   }
@@ -88,7 +88,7 @@ export class ForeignCoinIndexer extends Indexer {
           .where((eb) => eb.between("block_num", "" + from, "" + to))
           .orderBy("block_num")
           .orderBy("sort_idx")
-          .execute()
+          .execute(),
     );
 
     if (this.updateLastProcessedCheckStale(from, to)) return;
@@ -119,7 +119,7 @@ export class ForeignCoinIndexer extends Indexer {
 
     const elapsedMs = (performance.now() - startMs) | 0;
     console.log(
-      `[FOREIGN-COIN] loaded ${logs.length} transfers ${from} ${to} in ${elapsedMs}ms`
+      `[FOREIGN-COIN] loaded ${logs.length} transfers ${from} ${to} in ${elapsedMs}ms`,
     );
 
     if (logs.length === 0) return;
@@ -140,7 +140,7 @@ export class ForeignCoinIndexer extends Indexer {
   processForeignCoinDelta(
     addr: Address,
     delta: bigint,
-    log: ForeignTokenTransfer
+    log: ForeignTokenTransfer,
   ) {
     // Skip if addr is not a daimo account
     const addrName = this.nameReg.resolveDaimoNameForAddr(addr);
@@ -152,7 +152,7 @@ export class ForeignCoinIndexer extends Indexer {
     let newBal = balance + delta;
     if (newBal < 0) {
       console.warn(
-        `[FOREIGN-COIN] NEG BAL ${key} ${newBal} after ${debugJson(log)}`
+        `[FOREIGN-COIN] NEG BAL ${key} ${newBal} after ${debugJson(log)}`,
       );
       newBal = 0n;
     }
@@ -161,7 +161,7 @@ export class ForeignCoinIndexer extends Indexer {
     if (delta < 0n) {
       // outbound transfer
       console.log(
-        `[FOREIGN-COIN] outbound token transfer from ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`
+        `[FOREIGN-COIN] outbound token transfer from ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}`,
       );
       this.sendsByAddrTxHash.set(addrTxHashKey(addr, log.transactionHash), log);
 
@@ -169,7 +169,7 @@ export class ForeignCoinIndexer extends Indexer {
       const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
       const matchingPendingSwap = pendingSwaps.find(
         (t) =>
-          t.foreignToken.token === log.foreignToken.token && t.value === -delta
+          t.foreignToken.token === log.foreignToken.token && t.value === -delta,
       );
 
       // Special case: we previously swapped ETH in bulk
@@ -177,7 +177,7 @@ export class ForeignCoinIndexer extends Indexer {
       if (matchingPendingSwap == null) {
         const balance = this.inboxBalance.get(key) || 0n;
         console.log(
-          `[FOREIGN-COIN] UNMATCHED outbound token transfer from ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}, remaining balance ${balance}`
+          `[FOREIGN-COIN] UNMATCHED outbound token transfer from ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}, remaining balance ${balance}`,
         );
         const replacementSwap = [];
         if (balance > 0n) {
@@ -196,12 +196,12 @@ export class ForeignCoinIndexer extends Indexer {
       // Record matching inbound (receive) > outbound (swap to home coin)
       this.correspondingReceiveOfSend.set(
         addrTxHashKey(addr, log.transactionHash),
-        matchingPendingSwap
+        matchingPendingSwap,
       );
 
       // Clear specific pending swap
       const newPendingSwaps = pendingSwaps.filter(
-        (t) => t.transactionHash !== matchingPendingSwap.transactionHash
+        (t) => t.transactionHash !== matchingPendingSwap.transactionHash,
       );
       this.pendingSwapsByAddr.set(addr, newPendingSwaps);
     } else {
@@ -210,7 +210,7 @@ export class ForeignCoinIndexer extends Indexer {
       pending.push(log);
       this.pendingSwapsByAddr.set(addr, pending);
       console.log(
-        `[FOREIGN-COIN] inbound token transfer to ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}, new bal ${newBal}, # swaps pending: ${pending.length}`
+        `[FOREIGN-COIN] inbound token transfer to ${addrName} ${addr}, ${log.value} ${log.foreignToken.symbol} ${log.foreignToken.token}, new bal ${newBal}, # swaps pending: ${pending.length}`,
       );
     }
   }
@@ -232,7 +232,7 @@ export class ForeignCoinIndexer extends Indexer {
   }
 
   async getProposedSwapForLog(
-    log: ForeignTokenTransfer
+    log: ForeignTokenTransfer,
   ): Promise<ProposedSwap | null> {
     const swap = await retryBackoff(`getProposedSwapForLog`, async () => {
       const fromAcc = await this.nameReg.getEAccount(log.from);
@@ -241,7 +241,7 @@ export class ForeignCoinIndexer extends Indexer {
       const homeCoin = baseUSDC;
       const receivedAt = guessTimestampFromNum(
         log.blockNumber,
-        chainConfig.daimoChain
+        chainConfig.daimoChain,
       );
 
       return this.getProposedSwap(
@@ -250,12 +250,12 @@ export class ForeignCoinIndexer extends Indexer {
         log.value.toString() as `${bigint}`,
         fromAcc,
         homeCoin.token,
-        log.to
+        log.to,
       );
     });
 
     console.log(
-      `[FOREIGN-COIN] getProposedSwapForLog ${log.from}: ${debugJson(swap)}`
+      `[FOREIGN-COIN] getProposedSwapForLog ${log.from}: ${debugJson(swap)}`,
     );
 
     if (!swap) return null;
@@ -268,11 +268,11 @@ export class ForeignCoinIndexer extends Indexer {
     const pendingSwaps = this.pendingSwapsByAddr.get(addr) || [];
     const swaps = (
       await Promise.all(
-        pendingSwaps.map((swap) => this.getProposedSwapForLog(swap))
+        pendingSwaps.map((swap) => this.getProposedSwapForLog(swap)),
       )
     ).filter((s): s is ProposedSwap => s != null);
     console.log(
-      `[FOREIGN-COIN] getProposedSwaps ${addr}: ${pendingSwaps.length} pending, ${swaps.length} proposedSwaps`
+      `[FOREIGN-COIN] getProposedSwaps ${addr}: ${pendingSwaps.length} pending, ${swaps.length} proposedSwaps`,
     );
 
     return swaps;
@@ -284,20 +284,20 @@ export class ForeignCoinIndexer extends Indexer {
   // from the same user, or the user swaps multiple assets in a single tx.
   getForeignTokenReceiveForSwap(
     addr: Address,
-    txHash: Hex
+    txHash: Hex,
   ): ForeignTokenTransfer | null {
     const log = this.sendsByAddrTxHash.get(addrTxHashKey(addr, txHash));
     if (log == null) return null;
 
     const correspondingReceive = this.correspondingReceiveOfSend.get(
-      addrTxHashKey(addr, txHash)
+      addrTxHashKey(addr, txHash),
     );
     if (correspondingReceive == null) return null;
 
     return {
       ...correspondingReceive,
       foreignToken: assertNotNull(
-        this.tokenReg.getToken(log.foreignToken.token)
+        this.tokenReg.getToken(log.foreignToken.token),
       ),
     };
   }
@@ -309,7 +309,7 @@ export class ForeignCoinIndexer extends Indexer {
     fromAmount: BigIntStr,
     fromAcc: EAccount,
     toToken: Address,
-    toAddr: Address
+    toAddr: Address,
   ): Promise<SwapQueryResult | null> {
     if (fromToken === toToken) return null;
     const chainId = chainConfig.chainL2.id;

@@ -56,7 +56,7 @@ export function LongPressBigButton(props: LongPressButtonProps) {
   const touchUnderlay = useTouchUnderlay(props.type);
   const disabledStyle = useMemo(
     () => ({ ...style.button, opacity: 0.5 }),
-    [style.button]
+    [style.button],
   );
 
   const longPress = Gesture.LongPress()
@@ -285,13 +285,13 @@ function Button(
     style: ButtonStyle;
     touchUnderlay?: ReturnType<typeof useTouchUnderlay>;
     icon?: ImageSourcePropType;
-  }
+  },
 ) {
   const { color, touchHighlightUnderlay } = useTheme();
   const styles = useMemo(() => getStyles(color), [color]);
   const disabledStyle = useMemo(
     () => ({ ...props.style.button, opacity: 0.5 }),
-    [props.style.button]
+    [props.style.button],
   );
 
   const child = props.title ? (
