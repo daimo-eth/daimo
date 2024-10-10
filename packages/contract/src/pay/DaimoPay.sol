@@ -13,10 +13,10 @@ import "./PayIntentFactory.sol";
 import "./TokenUtils.sol";
 
 // A Daimo Pay transfer has 4 steps:
-// 1. Alice sends (tokenIn, amountIn) to handoff address on chain A -- simple erc20 transfer
+// 1. Alice sends (tokenIn, amountIn) to intent address on chain A -- simple erc20 transfer
 // 2. Relayer swaps tokenIn to bridgeTokenIn and burns on chain A -- relayer runs this in sendAndSelfDestruct
 //    - relayer doesnt need approve or anything else, just quote and swap.
-//    - quote comes from the handoff address which commits to the destination bridgeTokenOut amount, and therefore bridgeTokenIn amount.
+//    - quote comes from the intent address which commits to the destination bridgeTokenOut amount, and therefore bridgeTokenIn amount.
 //    - relayer has to fetch swap from Uniswap or similar
 
 // Fork: fastFinish, then claim
@@ -121,7 +121,7 @@ contract DaimoPay {
     ) public {
         require(intent.toChainId == block.chainid, "DP: wrong chain");
 
-        // Calculate handoff address
+        // Calculate intent address
         address intentAddr = intentFactory.getIntentAddress(intent);
 
         // Optimistic fast finish is only for transfers which haven't already
