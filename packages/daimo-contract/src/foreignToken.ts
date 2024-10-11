@@ -347,7 +347,12 @@ const polygonTokens = [polygonMATIC, polygonWMATIC, polygonWETH, polygonUSDC];
 // Polygon Amoy
 //
 
-export const polygonAmoyMATIC = nativeToken(80002, "MATIC", "MATIC", TokenLogo.MATIC);
+export const polygonAmoyMATIC = nativeToken(
+  80002,
+  "MATIC",
+  "MATIC",
+  TokenLogo.MATIC,
+);
 
 export const polygonAmoyWMATIC: ForeignToken = {
   chainId: 80002,
@@ -406,13 +411,23 @@ export const avalancheWAVAX: ForeignToken = {
   logoURI: TokenLogo.AVAX,
 };
 
-const avalancheTokens = [avalancheAVAX, avalancheUSDC, avalancheWETH, avalancheWAVAX];
+const avalancheTokens = [
+  avalancheAVAX,
+  avalancheUSDC,
+  avalancheWETH,
+  avalancheWAVAX,
+];
 
 //
 // Avalanche Fuji
 //
 
-export const avalancheFujiAVAX = nativeToken(43113, "AVAX", "AVAX", TokenLogo.AVAX);
+export const avalancheFujiAVAX = nativeToken(
+  43113,
+  "AVAX",
+  "AVAX",
+  TokenLogo.AVAX,
+);
 
 export const avalancheFujiUSDC: ForeignToken = {
   chainId: 43113,
@@ -432,13 +447,52 @@ export const avalancheFujiWAVAX: ForeignToken = {
   logoURI: TokenLogo.AVAX,
 };
 
-const avalancheFujiTokens = [avalancheFujiAVAX, avalancheFujiUSDC, avalancheFujiWAVAX];
+const avalancheFujiTokens = [
+  avalancheFujiAVAX,
+  avalancheFujiUSDC,
+  avalancheFujiWAVAX,
+];
+
+//
+// Linea Mainnet
+//
+
+export const lineaETH = nativeETH(59144);
+
+export const lineaWETH: ForeignToken = {
+  chainId: 59144,
+  token: getAddress("0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"),
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
+};
+
+export const lineaBridgedUSDC: ForeignToken = {
+  chainId: 59144,
+  token: getAddress("0x176211869cA2b568f2A7D4EE941E073a821EE1ff"),
+  decimals: 6,
+  name: "USD Coin",
+  symbol: "USDC.e",
+  logoURI: TokenLogo.USDC,
+};
+
+const lineaTokens = [lineaETH, lineaWETH, lineaBridgedUSDC];
+
+//
+// --------------------- Native Token Utils ---------------------
+//
 
 function nativeETH(chainId: number): ForeignToken {
   return nativeToken(chainId, "Ether", "ETH", TokenLogo.ETH);
 }
 
-function nativeToken(chainId: number, name: string, symbol: string, logoURI: string): ForeignToken {
+function nativeToken(
+  chainId: number,
+  name: string,
+  symbol: string,
+  logoURI: string,
+): ForeignToken {
   return {
     chainId,
     token: zeroAddress,
@@ -464,6 +518,7 @@ const allBasicTokens = [
   ...polygonAmoyTokens,
   ...avalancheTokens,
   ...avalancheFujiTokens,
+  ...lineaTokens,
 ];
 
 const toKey = (t: ForeignToken) => `${t.chainId}-${t.symbol.toLowerCase()}`;
