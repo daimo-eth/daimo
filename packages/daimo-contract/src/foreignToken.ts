@@ -24,7 +24,7 @@ export type ForeignToken = {
 };
 
 export enum TokenLogo {
-  ETH = "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+  ETH = "https://pay.daimo.com/chain-logos/ethereum.png",
   USDC = "https://assets.coingecko.com/coins/images/6319/large/usdc.png",
   EURC = "https://assets.coingecko.com/coins/images/26045/large/euro.png",
   USDT = "https://assets.coingecko.com/coins/images/325/large/tether.png",
@@ -347,7 +347,12 @@ const polygonTokens = [polygonMATIC, polygonWMATIC, polygonWETH, polygonUSDC];
 // Polygon Amoy
 //
 
-export const polygonAmoyMATIC = nativeToken(80002, "MATIC", "MATIC", TokenLogo.MATIC);
+export const polygonAmoyMATIC = nativeToken(
+  80002,
+  "MATIC",
+  "MATIC",
+  TokenLogo.MATIC,
+);
 
 export const polygonAmoyWMATIC: ForeignToken = {
   chainId: 80002,
@@ -406,13 +411,23 @@ export const avalancheWAVAX: ForeignToken = {
   logoURI: TokenLogo.AVAX,
 };
 
-const avalancheTokens = [avalancheAVAX, avalancheUSDC, avalancheWETH, avalancheWAVAX];
+const avalancheTokens = [
+  avalancheAVAX,
+  avalancheUSDC,
+  avalancheWETH,
+  avalancheWAVAX,
+];
 
 //
 // Avalanche Fuji
 //
 
-export const avalancheFujiAVAX = nativeToken(43113, "AVAX", "AVAX", TokenLogo.AVAX);
+export const avalancheFujiAVAX = nativeToken(
+  43113,
+  "AVAX",
+  "AVAX",
+  TokenLogo.AVAX,
+);
 
 export const avalancheFujiUSDC: ForeignToken = {
   chainId: 43113,
@@ -432,13 +447,22 @@ export const avalancheFujiWAVAX: ForeignToken = {
   logoURI: TokenLogo.AVAX,
 };
 
-const avalancheFujiTokens = [avalancheFujiAVAX, avalancheFujiUSDC, avalancheFujiWAVAX];
+const avalancheFujiTokens = [
+  avalancheFujiAVAX,
+  avalancheFujiUSDC,
+  avalancheFujiWAVAX,
+];
 
 function nativeETH(chainId: number): ForeignToken {
   return nativeToken(chainId, "Ether", "ETH", TokenLogo.ETH);
 }
 
-function nativeToken(chainId: number, name: string, symbol: string, logoURI: string): ForeignToken {
+function nativeToken(
+  chainId: number,
+  name: string,
+  symbol: string,
+  logoURI: string,
+): ForeignToken {
   return {
     chainId,
     token: zeroAddress,
