@@ -46,18 +46,26 @@ export interface DaimoPayOrderItem {
 // NOTE: be careful to modify this type only in backward-compatible ways.
 //       Add OPTIONAL fields, etc. Anything else requires a migration.
 export const zDaimoPayOrderMetadata = z.object({
-  intent: z.string(),
-  items: z.array(
-    z.object({
-      name: z.string(),
-      description: z.string(),
-      image: z.string().optional(),
-    }),
-  ),
-  paymentOptions: z.array(z.string()),
+  intent: z
+    .string()
+    .describe("Title verb, eg 'Preorder', 'Check out', 'Deposit'."),
+  items: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string(),
+        image: z.string().optional(),
+      }),
+    )
+    .describe("Details about what's being ordered, donated, deposited, etc."),
   payer: z
     .object({
-      preferredChains: z.array(z.number()).optional(),
+      preferredChains: z
+        .array(z.number())
+        .optional()
+        .describe(
+          "Preferred chain IDs, in descending order. Any assets the user owns on preferred chains will appear first. Defaults to destination chain.",
+        ),
       preferredTokens: z
         .array(
           z.object({
@@ -65,9 +73,19 @@ export const zDaimoPayOrderMetadata = z.object({
             address: zAddress.transform((a) => getAddress(a)),
           }),
         )
-        .optional(),
+        .optional()
+        .describe(
+          "Preferred tokens, in descending order. Any preferred assets the user owns will appear first. Defaults to destination token.",
+        ),
+      paymentOptions: z
+        .array(z.string())
+        .optional()
+        .describe(
+          "Payment options like Coinbase, Binance, etc. Defaults to all available options.",
+        ),
     })
-    .optional(),
+    .optional()
+    .describe(""),
 });
 
 export type DaimoPayOrderMetadata = z.infer<typeof zDaimoPayOrderMetadata>;
