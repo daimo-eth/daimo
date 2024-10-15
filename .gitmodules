@@ -20,3 +20,6 @@
 	path = packages/contract/lib/p256-verifier
 	url = https://github.com/daimo-eth/p256-verifier
 	branch = solc
+[submodule "packages/contract/lib/solmate"]
+	path = packages/contract/lib/solmate
+	url = https://github.com/transmissions11/solmate
