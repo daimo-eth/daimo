@@ -1,3 +1,5 @@
+.PHONY: build clean full test coverage codegen deploy
+
 build:
 	forge install
 	forge build
@@ -9,7 +11,6 @@ full:
 	make clean
 	make build
 
-.PHONY: test
 test:
 	$(eval BASE_MAINNET_RPC ?= $(or $(BASE_MAINNET_RPC),https://base-rpc.publicnode.com)) # Use environment variable if set, otherwise use default
 	@echo Running tests with RPC: $(BASE_MAINNET_RPC)
