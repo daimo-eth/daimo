@@ -11,8 +11,8 @@ import "../src/pay/DaimoPayCCTPBridger.sol";
 import "../src/pay/DaimoPayAcrossBridger.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
-address constant BASE_INTENT_ADDR = 0xc6D5137fB8B670Fa460EB4D1160fb0D46e6a1F04;
-address constant LINEA_INTENT_ADDR = 0x24A66b6ea9f3BADe72e129DB613c7066CB3c01dE;
+address constant BASE_INTENT_ADDR = 0x89BB900759103Dedca61c32B83317AFD68D9e7aa;
+address constant LINEA_INTENT_ADDR = 0xA20863C603354dAe157b703B544A25eC3267fBe9;
 
 contract DaimoPayTest is Test {
     // Daimo Pay contracts

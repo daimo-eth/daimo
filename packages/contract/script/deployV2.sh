@@ -11,6 +11,9 @@ set -e
 # ETHERSCAN_API_KEY_... for each target chain
 
 SCRIPTS=(
+    # CREATE3
+    # "script/DeployCreate3Factory.s.sol"
+
     # Daimo Pay.
     # "script/pay/DeployDaimoPayAcrossBridger.s.sol"
     # "script/pay/DeployDaimoPayCCTPBridger.s.sol"
@@ -34,6 +37,7 @@ CHAINS=(
     # "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_LINEA,https://linea-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
 
     # Not supporting Avalanche, skip.

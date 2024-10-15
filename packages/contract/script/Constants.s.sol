@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.13;
 
+import {CREATE3Factory} from "../vendor/create3/CREATE3Factory.sol";
+
 // Uniswap deployments
 // https://docs.uniswap.org/contracts/v3/reference/deployments/
 
@@ -424,32 +426,6 @@ function _getSpokePoolAddress(uint256 chainId) pure returns (address) {
 
 // ----------------- Deployment ----------------- //
 
-ICREATE3Factory constant CREATE3 = ICREATE3Factory(
-    0x9fBB3DF7C40Da2e5A0dE984fFE2CCB7C47cd0ABf
+CREATE3Factory constant CREATE3 = CREATE3Factory(
+    0x9C73c694aB05245168e7fBdBb7F94E17d71EDB81
 );
-
-/// @title Factory for deploying contracts to deterministic addresses via CREATE3
-/// @author zefram.eth
-/// @notice Enables deploying contracts using CREATE3. Each deployer (msg.sender) has
-/// its own namespace for deployed addresses.
-interface ICREATE3Factory {
-    /// @notice Deploys a contract using CREATE3
-    /// @dev The provided salt is hashed together with msg.sender to generate the final salt
-    /// @param salt The deployer-specific salt for determining the deployed contract's address
-    /// @param creationCode The creation code of the contract to deploy
-    /// @return deployed The address of the deployed contract
-    function deploy(
-        bytes32 salt,
-        bytes memory creationCode
-    ) external payable returns (address deployed);
-
-    /// @notice Predicts the address of a deployed contract
-    /// @dev The provided salt is hashed together with the deployer address to generate the final salt
-    /// @param deployer The deployer account that will call deploy()
-    /// @param salt The deployer-specific salt for determining the deployed contract's address
-    /// @return deployed The address of the contract that will be deployed
-    function getDeployed(
-        address deployer,
-        bytes32 salt
-    ) external view returns (address deployed);
-}
