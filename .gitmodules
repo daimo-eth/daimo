@@ -20,3 +20,6 @@
 [submodule "packages/contract/lib/solmate"]
 	path = packages/contract/lib/solmate
 	url = https://github.com/transmissions11/solmate
+[submodule "packages/contract/lib/openzeppelin-contracts-upgradeable"]
+	path = packages/contract/lib/openzeppelin-contracts-upgradeable
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
