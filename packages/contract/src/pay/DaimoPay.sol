@@ -13,17 +13,20 @@ import "./PayIntentFactory.sol";
 import "./TokenUtils.sol";
 
 // A Daimo Pay transfer has 4 steps:
-// 1. Alice sends (tokenIn, amountIn) to intent address on chain A -- simple erc20 transfer
+// 1. Alice sends (tokenIn, amountIn) to the intent address on chain A -- simple erc20 transfer
 // 2. Relayer swaps tokenIn to bridgeTokenIn and burns on chain A -- relayer runs this in sendAndSelfDestruct
-//    - relayer doesnt need approve or anything else, just quote and swap.
-//    - quote comes from the intent address which commits to the destination bridgeTokenOut amount, and therefore bridgeTokenIn amount.
-//    - relayer has to fetch swap from Uniswap or similar
+//    - the bridger contract makes the assumption that the price of bridgeTokenIn <> bridgeTokenOut is 1:1
+//    - the quote for the swap comes from the intent address which commits to the
+//      destination bridgeTokenOut amount, and therefore bridgeTokenIn amount.
+//    - relayer has to fetch the swap call from Uniswap or similar
 
 // Fork: fastFinish, then claim
 // Fork: claim directly
 
-// 3. Relayer swaps bridgeTokenOut to tokenOut on chain B -- relayer runs this in _finishIntent
-// Alice is responsible for putting a quote for the bridgeTokenOut <> tokenOut swap
+// 3. Relayer swaps bridgeTokenOut to the finalCallToken on chain B -- relayer runs this in _finishIntent
+// 4. The bridge transfer arrives on chain B later, and the relayer can call claimIntent
+
+// Alice is responsible for putting a quote for the bridgeTokenOut <> finalCallToken swap
 // This fixes bridgeTokenOut expected amount, which in turn fixes the bridgeTokenIn burn amount,
 // locking in the amounts expected for all intermediary swaps.
 
@@ -144,7 +147,7 @@ contract DaimoPay {
         emit FastFinish({intentAddr: intentAddr, newRecipient: msg.sender});
     }
 
-    // Claims a bridge transfer to its current recipient. If FastFinish happened
+    // Claim a bridge transfer to its current recipient. If FastFinish happened
     // for this transfer, then the recipient is the relayer who fronted the amount.
     // Otherwise, the recipient remains the original toAddr. The bridge transfer
     // must already have been completed; coins are already in intent contract.

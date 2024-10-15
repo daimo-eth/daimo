@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-import {Ownable2StepUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
+import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -15,7 +15,7 @@ import "../../vendor/across/V3SpokePoolInterface.sol";
 /// @dev Bridges assets from to a destination chain using Across Protocol. Makes the
 /// assumption that the local token is an ERC20 token and has a 1 to 1 price
 /// with the corresponding destination token.
-contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
+contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2Step {
     using SafeERC20 for IERC20;
 
     struct AcrossBridgeRoute {
@@ -41,7 +41,7 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
     uint256 public immutable ONE_HUNDRED_PERCENT = 1e18;
 
     // SpokePool contract address for this chain.
-    V3SpokePoolInterface public spokePool;
+    V3SpokePoolInterface public immutable spokePool;
 
     // Mapping from destination chain and token to the corresponding token on
     // the current chain.
@@ -61,23 +61,14 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
         uint256 pctFee
     );
 
-    constructor() {
-        _disableInitializers();
-    }
-
-    // ----- ADMIN FUNCTIONS -----
-
-    /// Initialize. Specify owner (not msg.sender) to allow CREATE3 deployment.
     /// Specify the localToken mapping to destination chains and tokens
-    function init(
-        address _initialOwner,
+    constructor(
+        address _owner,
         V3SpokePoolInterface _spokePool,
-        uint256[] calldata _toChainIds,
-        address[] calldata _toTokens,
-        AcrossBridgeRoute[] calldata _bridgeRoutes
-    ) public initializer {
-        __Ownable_init(_initialOwner);
-
+        uint256[] memory _toChainIds,
+        address[] memory _toTokens,
+        AcrossBridgeRoute[] memory _bridgeRoutes
+    ) Ownable(_owner) {
         spokePool = _spokePool;
 
         uint256 n = _toChainIds.length;
@@ -92,13 +83,15 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
         }
     }
 
+    // ----- ADMIN FUNCTIONS -----
+
     /// Map a token on a destination chain to a token on the current chain.
     /// Assumes the local token has a 1 to 1 price with the corresponding
     /// destination token.
     function addBridgeRoute(
         uint256 toChainId,
         address toToken,
-        AcrossBridgeRoute calldata bridgeRoute
+        AcrossBridgeRoute memory bridgeRoute
     ) public onlyOwner {
         _addBridgeRoute({
             toChainId: toChainId,
@@ -110,7 +103,7 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
     function _addBridgeRoute(
         uint256 toChainId,
         address toToken,
-        AcrossBridgeRoute calldata bridgeRoute
+        AcrossBridgeRoute memory bridgeRoute
     ) private {
         bridgeRouteMapping[toChainId][toToken] = bridgeRoute;
         emit BridgeRouteAdded({

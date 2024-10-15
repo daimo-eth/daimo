@@ -11,10 +11,7 @@ contract DeployDaimoPayBridger is Script {
     function run() public {
         vm.startBroadcast();
 
-        // initOwner = daimo.eth
-        address initOwner = 0xEEee8B1371f1664b7C2A8c111D6062b6576fA6f0;
-
-        DaimoPayBridger implementation = new DaimoPayBridger{salt: 0}();
+        address initOwner = msg.sender;
 
         (
             uint256[] memory chainIds,
@@ -22,18 +19,10 @@ contract DeployDaimoPayBridger is Script {
         ) = _getBridgersAndChainIds();
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayBridger-test1"),
+            keccak256("DaimoPayBridger-test2"),
             abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(
-                    address(implementation),
-                    abi.encodeWithSelector(
-                        DaimoPayBridger.init.selector,
-                        initOwner,
-                        chainIds,
-                        bridgers
-                    )
-                )
+                type(DaimoPayBridger).creationCode,
+                abi.encode(initOwner, chainIds, bridgers)
             )
         );
 
@@ -53,14 +42,16 @@ contract DeployDaimoPayBridger is Script {
             return (new uint256[](0), new address[](0));
         }
 
-        address cctpBridger = CREATE3.getDeployed(
-            msg.sender,
-            keccak256("DaimoPayCCTPBridger-test1")
-        );
         address acrossBridger = CREATE3.getDeployed(
             msg.sender,
-            keccak256("DaimoPayAcrossBridger-test1")
+            keccak256("DaimoPayAcrossBridger-test2")
         );
+        address cctpBridger = CREATE3.getDeployed(
+            msg.sender,
+            keccak256("DaimoPayCCTPBridger-test2")
+        );
+        console.log("acrossBridger address:", acrossBridger);
+        console.log("cctpBridger address:", cctpBridger);
 
         // Bridge to other chains using CCTP. Only Linea uses Across.
         uint256[] memory allChainIds = new uint256[](7);
@@ -100,6 +91,10 @@ contract DeployDaimoPayBridger is Script {
             for (uint256 i = 0; i < bridgers.length; ++i) {
                 bridgers[i] = acrossBridger;
             }
+        }
+
+        for (uint256 i = 0; i < chainIds.length; ++i) {
+            console.log("toChain:", chainIds[i], "bridger:", bridgers[i]);
         }
 
         return (chainIds, bridgers);

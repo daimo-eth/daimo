@@ -23,18 +23,19 @@ export {
   daimoEphemeralNotesAbi,
   daimoEphemeralNotesV2Abi,
   daimoFlexSwapperAbi,
+  daimoPayAbi,
+  daimoPayAcrossBridgerAbi,
+  daimoPayBridgerAbi,
+  daimoPayCctpBridgerAbi,
   daimoPaymasterV2Abi,
   daimoPaymasterV2Address,
+  daimoPayRelayerAbi,
   daimoRequestAbi,
   daimoRequestAddress,
   daimoRequestConfig,
   entryPointAbi,
   erc20Abi,
   swapbotLpAbi,
-  crepeBotLpAbi,
-  crepeFastCctpAbi,
-  crepeHandoffAbi,
-  crepeHandoffFactoryAbi,
 } from "./codegen/contracts";
 
 export const nameRegistryProxyConfig = {
@@ -60,22 +61,25 @@ export const daimoFastCctpAddrs: Address[] = [
   daimoFastCctpV1Address,
 ];
 
-/** Daimo Pay FastCCTP address */
-export const crepeFastCctpAddress =
-  "0x5575a46Ad9930e6E8C3327CEA8325878ba533d05";
-/** Daimo Pay factory address */
-export const crepeHandoffFactoryAddress =
-  "0x8B7bB875169B6fd583A7AD36f5025Af970818E02";
-export const crepeBotLpAddress = "0x499259F91D023aEF99A5E48930C99e6Df226769c";
-
-export const daimoFlexSwapperAddress =
-  "0x52A7Fb58f1F26fd57B4a3aAE55d6c51a38A73610";
-export const daimoCctpBridgerAddress =
-  "0x97DA4FaA21DA8bab9b0724B854Bd43250F25FF58";
+/** Daimo Pay main contract address */
+export const daimoPayAddress = "0xa69822d999eEe2B55E4c6C7916A5976CFF6df58D";
+/** Daimo Pay bridger address */
+export const daimoPayBridgerAddress =
+  "0x88a6DBe19f0Be172C58a0131c1f98a6a3544e20A";
+/** Daimo Pay intent factory address */
+export const payIntentFactoryAddress =
+  "0xF43E5c3714a44f99f5f365de1D464c24Cb10ec68";
+/** Daimo Pay relayer address */
+export const daimoPayRelayerAddress =
+  "0x0Da23CC64E7Ed26e00aEcb2481e61c3fB56003D8";
 
 // DAv2
 export const entryPointV07Address =
   "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
+export const daimoCctpBridgerAddress =
+  "0x97DA4FaA21DA8bab9b0724B854Bd43250F25FF58";
+export const daimoFlexSwapperAddress =
+  "0x52A7Fb58f1F26fd57B4a3aAE55d6c51a38A73610";
 
 // DAv1 backcompat
 export * from "./backcompat/daimoAccountV1";

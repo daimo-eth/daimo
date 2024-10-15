@@ -16,20 +16,23 @@ contract DaimoPayRelayer is Ownable2Step {
 
     constructor(address _owner) Ownable(_owner) {}
 
-    // Handles two cases:
-    // Exact output: input extra tokens from owner to make up for difference
-    // Exact input: output extra tokens from owner to make up for difference
+    // Makes a swap from requiredTokenIn to requiredTokenOut. The relayer "tips"
+    // the difference between the required input amount and the input amount
+    // supplied by the user to ensure the swap succeeds.
+    // The relayer also "tips" the difference between the required output amount
+    // and the output amount received from the swap.
     function swapAndTip(
         // supplied comes from the user, required is the gap we need to fill with tip.
         TokenAmount calldata requiredTokenIn,
-        uint256 suppliedTokenInAmount, // occasionally, user sends less USDC than required. The tipper / owner covers the difference.
+        uint256 suppliedTokenInAmount,
         TokenAmount calldata requiredTokenOut,
         uint256 maxTip,
         Call calldata innerSwap
     ) external payable {
         require(tx.origin == owner(), "DPR: only usable by owner");
 
-        // Claim amountIn from msg.sender & approve swap
+        // Check the amount supplied by the user. The contract owner tips the
+        // difference if needed
         if (address(requiredTokenIn.token) == address(0)) {
             // Should never require extra input from owner
             require(
@@ -45,7 +48,8 @@ contract DaimoPayRelayer is Ownable2Step {
             );
 
             if (suppliedTokenInAmount < requiredTokenIn.amount) {
-                // Input more USDC from owner.
+                // Input more tokens from the owner up to maxTip to make up for
+                // the shortfall so that the swap can go through.
                 uint256 inShortfall = requiredTokenIn.amount -
                     suppliedTokenInAmount;
                 require(inShortfall <= maxTip, "DPR: excessive tip");
@@ -56,7 +60,7 @@ contract DaimoPayRelayer is Ownable2Step {
                     inShortfall
                 );
             }
-            // if we're about to send more tokens than required, it's fine --
+            // If we're about to send more tokens than required, it's fine --
             // we'll just get more output back, allowing us to account for
             // expected slippage.
 
@@ -79,9 +83,11 @@ contract DaimoPayRelayer is Ownable2Step {
             address(this)
         ) - amountPre;
 
-        // Tip the difference; make sure it's not too much.
+        // Check the amount output from the swap. The contract owner tips the
+        // difference if needed. If there are excess tokens, transfer them to
+        // the owner.
         if (swapAmountOut < requiredTokenOut.amount) {
-            // Output more USDC from owner.
+            // Output more tokens from owner.
             uint256 outShortfall = requiredTokenOut.amount - swapAmountOut;
             require(outShortfall <= maxTip, "DPR: excessive tip");
             TokenUtils.transferFrom(
@@ -91,7 +97,7 @@ contract DaimoPayRelayer is Ownable2Step {
                 outShortfall
             );
         } else {
-            // Input excess tokens to owner.
+            // Give excess tokens to owner.
             uint256 tip = swapAmountOut - requiredTokenOut.amount;
             TokenUtils.transfer(requiredTokenOut.token, payable(owner()), tip);
         }
@@ -106,16 +112,16 @@ contract DaimoPayRelayer is Ownable2Step {
     function fastFinish(
         DaimoPay dp,
         PayIntent calldata intent,
+        TokenAmount calldata tokenIn,
         Call[] calldata calls
     ) public onlyOwner {
         TokenUtils.transferFrom({
-            token: intent.bridgeTokenOut.token,
+            token: tokenIn.token,
             from: msg.sender,
             to: address(dp),
-            amount: intent.bridgeTokenOut.amount
+            amount: tokenIn.amount
         });
         dp.fastFinishIntent(intent, calls);
-        TokenUtils.approve(intent.bridgeTokenOut.token, address(dp), 0);
     }
 
     function claimAndKeep(

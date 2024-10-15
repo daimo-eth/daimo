@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-import {Ownable2StepUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
+import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -15,7 +15,7 @@ import "../../vendor/cctp/ICCTPTokenMessenger.sol";
 ///
 /// @dev Bridges assets from to a destination chain using CCTP. The only supported
 /// bridge token is USDC.
-contract DaimoPayCCTPBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
+contract DaimoPayCCTPBridger is IDaimoPayBridger, Ownable2Step {
     using SafeERC20 for IERC20;
 
     // CCTP TokenMinter for this chain. Used to identify the CCTP token on the
@@ -31,23 +31,14 @@ contract DaimoPayCCTPBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
 
     event DomainAdded(uint256 indexed chainId, uint32 domain);
 
-    constructor() {
-        _disableInitializers();
-    }
-
-    // ----- ADMIN FUNCTIONS -----
-
-    /// Initialize. Specify owner (not msg.sender) to allow CREATE3 deployment.
     /// Specify the CCTP chain IDs and domains that this bridger will support.
-    function init(
-        address _initialOwner,
+    constructor(
+        address _owner,
         ITokenMinter _tokenMinter,
         ICCTPTokenMessenger _cctpMessenger,
         uint256[] memory _cctpChainIds,
         uint32[] memory _cctpDomains
-    ) public initializer {
-        __Ownable_init(_initialOwner);
-
+    ) Ownable(_owner) {
         tokenMinter = _tokenMinter;
         cctpMessenger = _cctpMessenger;
 
@@ -58,6 +49,8 @@ contract DaimoPayCCTPBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
             _addDomain({chainId: _cctpChainIds[i], domain: _cctpDomains[i]});
         }
     }
+
+    // ----- ADMIN FUNCTIONS -----
 
     /// Add a new supported CCTP recipient chain.
     function addCCTPDomain(uint256 chainId, uint32 domain) public onlyOwner {

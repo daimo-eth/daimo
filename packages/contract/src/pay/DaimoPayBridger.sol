@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
-import {Ownable2StepUpgradeable} from "openzeppelin-contracts-upgradeable/contracts/access/Ownable2StepUpgradeable.sol";
+import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -14,7 +14,7 @@ import "../interfaces/IDaimoPayBridger.sol";
 ///
 /// @dev Bridges assets from to a supported destination chain. Multiplexes between
 /// different bridging protocols by destination chain.
-contract DaimoPayBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
+contract DaimoPayBridger is IDaimoPayBridger, Ownable2Step {
     using SafeERC20 for IERC20;
 
     // Map chainId to the contract address of an IDaimoPayBridger implementation
@@ -24,21 +24,12 @@ contract DaimoPayBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
     event BridgeAdded(uint256 indexed chainId, address bridger);
     event BridgeRemoved(uint256 indexed chainId);
 
-    constructor() {
-        _disableInitializers();
-    }
-
-    // ----- ADMIN FUNCTIONS -----
-
-    /// Initialize. Specify owner (not msg.sender) to allow CREATE3 deployment.
     /// Specify the bridger implementation to use for each chain.
-    function init(
-        address _initialOwner,
+    constructor(
+        address _owner,
         uint256[] memory _chainIds,
         IDaimoPayBridger[] memory _bridgers
-    ) public initializer {
-        __Ownable_init(_initialOwner);
-
+    ) Ownable(_owner) {
         uint256 n = _chainIds.length;
         require(n == _bridgers.length, "DPB: wrong bridgers length");
 
@@ -46,6 +37,8 @@ contract DaimoPayBridger is IDaimoPayBridger, Ownable2StepUpgradeable {
             _addBridger({chainId: _chainIds[i], bridger: _bridgers[i]});
         }
     }
+
+    // ----- ADMIN FUNCTIONS -----
 
     /// Add a new bridger for a destination chain.
     function addBridger(

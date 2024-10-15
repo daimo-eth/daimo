@@ -67,7 +67,7 @@ library TokenUtils {
     ) internal {
         require(
             address(token) != address(0),
-            "CrepeTokenUtils: ETH transferFrom must be caller"
+            "TokenUtils: ETH transferFrom must be caller"
         );
         token.safeTransferFrom({from: from, to: to, value: amount});
     }

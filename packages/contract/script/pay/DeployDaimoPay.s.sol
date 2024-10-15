@@ -10,22 +10,22 @@ contract DeployDaimoPay is Script {
     function run() public {
         vm.startBroadcast();
 
-        address handoffFactory = CREATE3.getDeployed(
+        address intentFactory = CREATE3.getDeployed(
             msg.sender,
-            keccak256("PayIntentFactory-test1")
+            keccak256("PayIntentFactory-test2")
         );
         address bridger = CREATE3.getDeployed(
             msg.sender,
-            keccak256("DaimoPayBridger-test1")
+            keccak256("DaimoPayBridger-test2")
         );
-
-        console.log("using handoff factory at", handoffFactory);
+        console.log("using intent factory at", intentFactory);
+        console.log("using bridger at", bridger);
 
         address daimoPay = CREATE3.deploy(
-            keccak256("DaimoPay-test1"),
+            keccak256("DaimoPay-test2"),
             abi.encodePacked(
                 type(DaimoPay).creationCode,
-                abi.encode(handoffFactory, bridger)
+                abi.encode(intentFactory, bridger)
             )
         );
 

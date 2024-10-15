@@ -27,3 +27,6 @@ coverage:
 codegen:
 	make build
 	cd ../.. && npm ci && npm run codegen
+
+deploy:
+	./script/deployV2.sh

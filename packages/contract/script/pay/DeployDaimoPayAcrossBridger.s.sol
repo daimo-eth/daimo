@@ -19,31 +19,23 @@ contract DeployDaimoPayAcrossBridger is Script {
 
         vm.startBroadcast();
 
-        // initOwner = daimo.eth
-        address initOwner = 0xEEee8B1371f1664b7C2A8c111D6062b6576fA6f0;
-
-        DaimoPayAcrossBridger implementation = new DaimoPayAcrossBridger{
-            salt: 0
-        }();
+        address initOwner = msg.sender;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayAcrossBridger-test1"),
+            keccak256("DaimoPayAcrossBridger-test2"),
             abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
+                type(DaimoPayAcrossBridger).creationCode,
                 abi.encode(
-                    address(implementation),
-                    abi.encodeWithSelector(
-                        DaimoPayAcrossBridger.init.selector,
-                        initOwner,
-                        V3SpokePoolInterface(spokePool),
-                        chainIds,
-                        toTokens,
-                        bridgeRoutes
-                    )
+                    initOwner,
+                    V3SpokePoolInterface(spokePool),
+                    chainIds,
+                    toTokens,
+                    bridgeRoutes
                 )
             )
         );
-        console.log("bridger deployed at address:", address(bridger));
+
+        console.log("Across bridger deployed at address:", address(bridger));
 
         vm.stopBroadcast();
     }

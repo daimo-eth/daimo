@@ -11,8 +11,8 @@ import "../src/pay/DaimoPayCCTPBridger.sol";
 import "../src/pay/DaimoPayAcrossBridger.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
-address constant BASE_INTENT_ADDR = 0x65dDC7a8FD9F9bc2973fE20a2B8589d7E5D6b884;
-address constant LINEA_INTENT_ADDR = 0xecA320252e555bAA3135208b959F6C9C8a2258dE;
+address constant BASE_INTENT_ADDR = 0xc6D5137fB8B670Fa460EB4D1160fb0D46e6a1F04;
+address constant LINEA_INTENT_ADDR = 0x24A66b6ea9f3BADe72e129DB613c7066CB3c01dE;
 
 contract DaimoPayTest is Test {
     // Daimo Pay contracts
@@ -57,12 +57,8 @@ contract DaimoPayTest is Test {
         );
         messenger = new DummyCCTPMessenger(address(_fromToken));
 
-        address cctpBridgerImpl = address(new DaimoPayCCTPBridger());
-        cctpBridger = DaimoPayCCTPBridger(
-            address(new ERC1967Proxy(cctpBridgerImpl, ""))
-        );
-        cctpBridger.init({
-            _initialOwner: address(this),
+        cctpBridger = new DaimoPayCCTPBridger({
+            _owner: address(this),
             _tokenMinter: tokenMinter,
             _cctpMessenger: messenger,
             _cctpChainIds: new uint256[](0),
@@ -73,12 +69,8 @@ contract DaimoPayTest is Test {
         // Initialize Across bridger
         spokePool = new DummySpokePool(address(_fromToken), address(_toToken));
 
-        address acrossBridgerImpl = address(new DaimoPayAcrossBridger());
-        acrossBridger = DaimoPayAcrossBridger(
-            address(new ERC1967Proxy(acrossBridgerImpl, ""))
-        );
-        acrossBridger.init({
-            _initialOwner: address(this),
+        acrossBridger = new DaimoPayAcrossBridger({
+            _owner: address(this),
             _spokePool: spokePool,
             _toChainIds: new uint256[](0),
             _toTokens: new address[](0),
@@ -102,10 +94,8 @@ contract DaimoPayTest is Test {
         bridgers[0] = cctpBridger;
         bridgers[1] = acrossBridger;
 
-        address bridgerImpl = address(new DaimoPayBridger());
-        bridger = DaimoPayBridger(address(new ERC1967Proxy(bridgerImpl, "")));
-        bridger.init({
-            _initialOwner: address(this),
+        bridger = new DaimoPayBridger({
+            _owner: address(this),
             _chainIds: chainIds,
             _bridgers: bridgers
         });
@@ -124,6 +114,7 @@ contract DaimoPayTest is Test {
     }
 
     function testGetIntentAddr() public view {
+        // Get the intent address for the Base chain
         PayIntent memory baseIntent = PayIntent({
             toChainId: _baseChainId,
             bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
@@ -137,9 +128,9 @@ contract DaimoPayTest is Test {
         address actualBaseIntentAddr = intentFactory.getIntentAddress(
             baseIntent
         );
-        console.log("actual intent addr:", actualBaseIntentAddr);
-        assertEq(actualBaseIntentAddr, BASE_INTENT_ADDR);
+        console.log("actual base intent addr:", actualBaseIntentAddr);
 
+        // Get the intent address for the Linea chain
         PayIntent memory lineaIntent = PayIntent({
             toChainId: _lineaChainId,
             bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
@@ -152,7 +143,9 @@ contract DaimoPayTest is Test {
         address actualLineaIntentAddr = intentFactory.getIntentAddress(
             lineaIntent
         );
-        console.log("actual intent addr:", actualLineaIntentAddr);
+        console.log("actual linea intent addr:", actualLineaIntentAddr);
+
+        assertEq(actualBaseIntentAddr, BASE_INTENT_ADDR);
         assertEq(actualLineaIntentAddr, LINEA_INTENT_ADDR);
     }
 
