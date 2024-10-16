@@ -31,6 +31,11 @@ contract DaimoPayRelayer is Ownable2Step {
     ) external payable {
         require(tx.origin == owner(), "DPR: only usable by owner");
 
+        uint256 amountPreSwap = TokenUtils.getBalanceOf(
+            requiredTokenOut.token,
+            address(this)
+        );
+
         // Check the amount supplied by the user. The contract owner tips the
         // difference if needed
         if (address(requiredTokenIn.token) == address(0)) {
@@ -74,10 +79,6 @@ contract DaimoPayRelayer is Ownable2Step {
         }
 
         // Execute (inner) swap
-        uint256 amountPre = TokenUtils.getBalanceOf(
-            requiredTokenOut.token,
-            address(this)
-        );
         if (innerSwap.to != address(0)) {
             (bool success, ) = innerSwap.to.call{value: innerSwap.value}(
                 innerSwap.data
@@ -88,7 +89,7 @@ contract DaimoPayRelayer is Ownable2Step {
         uint256 swapAmountOut = TokenUtils.getBalanceOf(
             requiredTokenOut.token,
             address(this)
-        ) - amountPre;
+        ) - amountPreSwap;
 
         // Check the amount output from the swap. The contract owner tips the
         // difference if needed. If there are excess tokens, transfer them to

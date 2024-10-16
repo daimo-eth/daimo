@@ -52,13 +52,15 @@ contract DeployDaimoPayAcrossBridger is Script {
         bool testnet = _isTestnet(block.chainid);
         if (testnet) {
             // TODO: add testnet tokens
-            return (
-                new uint256[](0),
-                new address[](0),
-                new DaimoPayAcrossBridger.AcrossBridgeRoute[](0)
-            );
+            revert("Testnet not supported");
         }
 
+        // Each bridge route maps a destination chains token to a local token
+        // and specifies a percentage fee and a flat fee for the bridge. The flat
+        // fee is calculated as the absolute fee to send 400 USDC. The pct fee
+        // is calculated as the pct fee to send 200 USDC.
+        // Run the apps/pay-scratchpad/src/acrossFees.ts script to calculate the
+        // fees for each chain.
         if (block.chainid == ARBITRUM_MAINNET) {
             chainIds = new uint256[](1);
             toTokens = new address[](1);
@@ -157,6 +159,7 @@ contract DeployDaimoPayAcrossBridger is Script {
             // localTokens[11] = BASE_MAINNET_USDC;
         } else if (block.chainid == BLAST_MAINNET) {
             // TODO
+            revert("Unsupported chainID");
         } else if (block.chainid == ETH_MAINNET) {
             chainIds = new uint256[](1);
             toTokens = new address[](1);
@@ -249,8 +252,10 @@ contract DeployDaimoPayAcrossBridger is Script {
             });
         } else if (block.chainid == LISK_MAINNET) {
             // TODO
+            revert("Unsupported chainID");
         } else if (block.chainid == MODE_MAINNET) {
             // TODO
+            revert("Unsupported chainID");
         } else if (block.chainid == OP_MAINNET) {
             chainIds = new uint256[](1);
             toTokens = new address[](1);
@@ -281,12 +286,13 @@ contract DeployDaimoPayAcrossBridger is Script {
             });
         } else if (block.chainid == REDSTONE_MAINNET) {
             // TODO
+            revert("Unsupported chainID");
         } else if (block.chainid == SCROLL_MAINNET) {
             // TODO
-        } else if (block.chainid == ZKSYNC_MAINNET) {
-            // TODO
+            revert("Unsupported chainID");
         } else if (block.chainid == ZORA_MAINNET) {
             // TODO
+            revert("Unsupported chainID");
         }
     }
 

@@ -903,6 +903,17 @@ export const daimoAccountV2Abi = [
     ],
     name: 'UpdateHomeCoin',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   { type: 'error', inputs: [], name: 'ReentrancyGuardReentrantCall' },
@@ -1144,13 +1155,18 @@ export const daimoCctpBridgerAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  {
+    type: 'error',
     inputs: [
       { name: 'implementation', internalType: 'address', type: 'address' },
     ],
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   {
@@ -1268,6 +1284,16 @@ export const daimoEphemeralNotesAbi = [
     ],
     name: 'NoteRedeemed',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
   { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
   {
     type: 'error',
@@ -1279,6 +1305,7 @@ export const daimoEphemeralNotesAbi = [
     inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }],
     name: 'ECDSAInvalidSignatureS',
   },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
@@ -1396,6 +1423,16 @@ export const daimoEphemeralNotesV2Abi = [
     ],
     name: 'NoteRedeemed',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
   { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
   {
     type: 'error',
@@ -1407,6 +1444,7 @@ export const daimoEphemeralNotesV2Abi = [
     inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }],
     name: 'ECDSAInvalidSignatureS',
   },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
@@ -1707,6 +1745,17 @@ export const daimoFastCctpAbi = [
     ],
     name: 'Start',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
@@ -2181,13 +2230,18 @@ export const daimoFlexSwapperAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  {
+    type: 'error',
     inputs: [
       { name: 'implementation', internalType: 'address', type: 'address' },
     ],
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   {
@@ -2389,7 +2443,7 @@ export const daimoNameRegistryAbi = [
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   {
@@ -2458,7 +2512,7 @@ export const daimoNameRegistryProxyAbi = [
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
 ] as const
 
 export const daimoNameRegistryProxyAddress =
@@ -2913,6 +2967,17 @@ export const daimoPayAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
     name: 'SafeERC20FailedOperation',
   },
@@ -3224,6 +3289,17 @@ export const daimoPayAcrossBridgerAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
     inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
     name: 'OwnableInvalidOwner',
   },
@@ -3474,6 +3550,17 @@ export const daimoPayBridgerAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
     inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
     name: 'OwnableInvalidOwner',
   },
@@ -3720,6 +3807,17 @@ export const daimoPayCctpBridgerAbi = [
     ],
     name: 'OwnershipTransferred',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
@@ -4014,6 +4112,17 @@ export const daimoPayRelayerAbi = [
     ],
     name: 'OwnershipTransferred',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
@@ -4388,6 +4497,17 @@ export const daimoRequestAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
     name: 'SafeERC20FailedOperation',
   },
@@ -4568,7 +4688,7 @@ export const erc1967ProxyAbi = [
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4576,6 +4696,51 @@ export const erc1967ProxyAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const erc1967UtilsAbi = [
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
   {
     type: 'error',
     inputs: [{ name: 'admin', internalType: 'address', type: 'address' }],
@@ -5447,6 +5612,17 @@ export const ephemeralHandoffAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
     name: 'SafeERC20FailedOperation',
   },
@@ -5631,6 +5807,17 @@ export const payIntentContractAbi = [
     ],
     name: 'RefundedTokens',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   {
@@ -5968,6 +6155,17 @@ export const swapbotLpAbi = [
     ],
     name: 'SwapAndTip',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],

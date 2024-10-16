@@ -71,7 +71,7 @@ export const payIntentFactoryAddress =
   "0x39F91aE72c6cB0F6C8D951D3E120c8C4cE7E3761";
 /** Daimo Pay relayer address */
 export const daimoPayRelayerAddress =
-  "0x9d93F68081EDD794aC8785E2618d3fc7C8406967";
+  "0x872bcFC1b5f05fc1c676Ef1b8Ed6f3526C188caD";
 
 // DAv2
 export const entryPointV07Address =

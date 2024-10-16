@@ -40,19 +40,18 @@ import "./TokenUtils.sol";
 /// @notice Enables fast cross-chain transfers with optimistic intents
 /// @dev Allows optimistic fast intents. Alice initiates a transfer by calling
 /// `startIntent` on chain A. After the bridging delay (10+ min for CCTP),
-/// funds arrive at the intent address deployed on chain B. Bob can call
-/// `claimIntent` function to perform Bob's intent. Alternatively, immediately
-/// after the first call, an relayer can call `fastFinishIntent` to perform Bob's
+/// funds arrive at the intent address deployed on chain B. Alice can call
+/// `claimIntent` on chain B to finish her intent. Alternatively, immediately
+/// after the first call, a relayer can call `fastFinishIntent` to finish Alice's
 /// intent immediately. Later, when the funds arrive from the bridge, the relayer
-/// (rather than Bob) will claim.
+/// (rather than Alice) will claim.
 ///
 /// @notice WARNING: Never approve tokens directly to this contract. Never
 /// transfer tokens to this contract as a standalone transaction.
 /// Such tokens can be stolen by anyone. Instead:
 /// - Users should only interact by sending funds to an intent address.
-/// - Relayers should call this contract via their own contracts, using atomic
-///   transintents that provide funds and call functions like fastFinish without
-///   leaving dangling transfers or approvals.
+/// - Relayers should transfer funds and call this contract atomically via their
+///   own contracts.
 contract DaimoPay {
     using SafeERC20 for IERC20;
 
