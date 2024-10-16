@@ -28,7 +28,7 @@ export enum TokenLogo {
   USDC = "https://assets.coingecko.com/coins/images/6319/large/usdc.png",
   EURC = "https://assets.coingecko.com/coins/images/26045/large/euro.png",
   USDT = "https://assets.coingecko.com/coins/images/325/large/tether.png",
-  DAI = "https://assets.coingecko.com/coins/images/9956/large/dai-multi-collateral-mcd.png",
+  DAI = "https://pay.daimo.com/coin-logos/dai.png",
   MATIC = "https://assets.coingecko.com/coins/images/4713/large/polygon.png",
   AVAX = "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png",
 }

@@ -4,6 +4,7 @@ import {
   Address,
   bytesToBigInt,
   getAddress,
+  formatUnits,
   Hex,
   numberToBytes,
   zeroAddress,
@@ -136,6 +137,7 @@ export type ExternalPaymentOptionMetadata = {
   id: ExternalPaymentOptions;
   cta: string;
   logoURI: string;
+  logoShape: "circle" | "squircle";
   paymentToken: DaimoPayToken;
 };
 
@@ -252,4 +254,11 @@ export interface WebhookDelivery {
   httpStatus: number | null;
   body: string | null;
   createdAt: Date;
+}
+
+export function getDisplayPrice(tokenAmount: DaimoPayTokenAmount) {
+  const { token, amount } = tokenAmount;
+  const amountDec = formatUnits(BigInt(amount), token.decimals);
+  const displayPrice = Number(amountDec).toFixed(token.displayDecimals);
+  return (token.fiatSymbol ? `${token.fiatSymbol}` : "") + displayPrice;
 }
