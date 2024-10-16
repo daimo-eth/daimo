@@ -1,6 +1,6 @@
 {
   "name": "@daimo/contract",
-  "version": "0.2.11",
+  "version": "0.2.13",
   "description": "Daimo contracts, ABIs, and generated Typescript types",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
@@ -9,7 +9,8 @@
     "fetch:tokens": "tsx ./script/gen-tokens.ts",
     "fetch:feeds": "tsx ./script/gen-feeds.ts",
     "codegen": "wagmi -v && wagmi generate",
-    "build": "tsc"
+    "build": "tsc",
+    "publish": "npm run build && npm publish"
   },
   "author": "",
   "license": "GPL-3.0-or-later",
