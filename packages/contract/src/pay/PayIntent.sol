@@ -110,7 +110,8 @@ contract PayIntentContract is Initializable {
         // This use of SELFDESTRUCT is compatible with EIP-6780. Ephemeral
         // contracts are deployed, then destroyed in the same transaction.
         // solhint-disable-next-line
-        selfdestruct(intent.escrow);
+        // Certain chains (like Scroll) don't support SELFDESTRUCT
+        // selfdestruct(intent.escrow);
     }
 
     /// One step: receive  bridgeTokenOut and send to creator
@@ -139,7 +140,8 @@ contract PayIntentContract is Initializable {
         // This use of SELFDESTRUCT is compatible with EIP-6780. Intent
         // contracts are deployed, then destroyed in the same transaction.
         // solhint-disable-next-line
-        selfdestruct(intent.escrow);
+        // Certain chains (like Scroll) don't support SELFDESTRUCT
+        // selfdestruct(intent.escrow);
     }
 
     /// Accept native-token (eg ETH) inputs

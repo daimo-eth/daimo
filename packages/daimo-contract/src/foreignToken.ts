@@ -453,6 +453,41 @@ const avalancheFujiTokens = [
   avalancheFujiWAVAX,
 ];
 
+//
+// Linea Mainnet
+//
+
+export const lineaETH = nativeETH(59144);
+
+export const lineaWETH: ForeignToken = {
+  chainId: 59144,
+  token: getAddress("0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f"),
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
+};
+
+export const lineaBridgedUSDC: ForeignToken = {
+  chainId: 59144,
+  token: getAddress("0x176211869cA2b568f2A7D4EE941E073a821EE1ff"),
+  decimals: 6,
+  name: "USD Coin",
+  symbol: "USDC.e",
+  logoURI: TokenLogo.USDC,
+};
+
+// TODO: Include Linea ETH and WETH when swapping on Linea is supported.
+const lineaTokens = [
+  //lineaETH,
+  // lineaWETH,
+  lineaBridgedUSDC,
+];
+
+//
+// --------------------- Native Token Utils ---------------------
+//
+
 function nativeETH(chainId: number): ForeignToken {
   return nativeToken(chainId, "Ether", "ETH", TokenLogo.ETH);
 }
@@ -488,6 +523,7 @@ const allBasicTokens = [
   ...polygonAmoyTokens,
   ...avalancheTokens,
   ...avalancheFujiTokens,
+  ...lineaTokens,
 ];
 
 const toKey = (t: ForeignToken) => `${t.chainId}-${t.symbol.toLowerCase()}`;

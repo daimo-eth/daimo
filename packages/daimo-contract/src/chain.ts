@@ -32,6 +32,9 @@ import {
   ethereumSepoliaWETH,
   ethereumUSDC,
   ethereumWETH,
+  lineaBridgedUSDC,
+  lineaETH,
+  lineaWETH,
   optimismETH,
   optimismSepoliaETH,
   optimismSepoliaUSDC,
@@ -184,6 +187,16 @@ export const avalancheFuji: DAv2Chain = {
   isTestnet: true,
 };
 
+export const linea: DAv2Chain = {
+  chainId: 59144,
+  name: "linea",
+  shortName: "linea",
+  cctpDomain: -1,
+  bridgeCoin: lineaBridgedUSDC,
+  nativeToken: lineaETH,
+  wrappedNativeToken: lineaWETH,
+};
+
 const chains = [
   ethereum,
   ethereumSepolia,
@@ -197,6 +210,7 @@ const chains = [
   polygonAmoy,
   avalanche,
   avalancheFuji,
+  linea,
 ];
 
 /** Supported chains for send (+ soon receive). */

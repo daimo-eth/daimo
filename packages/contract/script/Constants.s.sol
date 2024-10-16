@@ -427,5 +427,5 @@ function _getSpokePoolAddress(uint256 chainId) pure returns (address) {
 // ----------------- Deployment ----------------- //
 
 CREATE3Factory constant CREATE3 = CREATE3Factory(
-    0x9C73c694aB05245168e7fBdBb7F94E17d71EDB81
+    0x4Ce25bE5611B6527eA48f7Abf513d48BAcb4Cc44
 );

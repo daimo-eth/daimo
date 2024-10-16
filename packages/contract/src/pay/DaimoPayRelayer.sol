@@ -65,7 +65,12 @@ contract DaimoPayRelayer is Ownable2Step {
             // expected slippage.
 
             // forceApprove() not necessary, we check correct tokenOut amount
-            requiredTokenIn.token.approve(innerSwap.to, requiredTokenIn.amount);
+            if (innerSwap.to != address(0)) {
+                requiredTokenIn.token.approve(
+                    innerSwap.to,
+                    requiredTokenIn.amount
+                );
+            }
         }
 
         // Execute (inner) swap
@@ -73,10 +78,12 @@ contract DaimoPayRelayer is Ownable2Step {
             requiredTokenOut.token,
             address(this)
         );
-        (bool success, ) = innerSwap.to.call{value: innerSwap.value}(
-            innerSwap.data
-        );
-        require(success, "DPR: inner swap failed");
+        if (innerSwap.to != address(0)) {
+            (bool success, ) = innerSwap.to.call{value: innerSwap.value}(
+                innerSwap.data
+            );
+            require(success, "DPR: inner swap failed");
+        }
 
         uint256 swapAmountOut = TokenUtils.getBalanceOf(
             requiredTokenOut.token,
