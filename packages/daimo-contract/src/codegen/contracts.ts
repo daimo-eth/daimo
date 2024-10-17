@@ -284,1140 +284,6 @@ export const aggregatorV3InterfaceAbi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CrepeBotLP
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const crepeBotLpAbi = [
-  {
-    type: 'constructor',
-    inputs: [
-      { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_usdc', internalType: 'contract IERC20', type: 'address' },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  { type: 'receive', stateMutability: 'payable' },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'acceptOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'mintCall',
-        internalType: 'struct Call',
-        type: 'tuple',
-        components: [
-          { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      { name: 'fc', internalType: 'contract CrepeFastCCTP', type: 'address' },
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'swapCall',
-        internalType: 'struct Call',
-        type: 'tuple',
-        components: [
-          { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'claimAndKeep',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'fc', internalType: 'contract CrepeFastCCTP', type: 'address' },
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'swapCall',
-        internalType: 'struct Call',
-        type: 'tuple',
-        components: [
-          { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'fastFinish',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'owner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'pendingOwner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'renounceOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'requiredTokenIn',
-        internalType: 'struct TokenAmount',
-        type: 'tuple',
-        components: [
-          { name: 'addr', internalType: 'contract IERC20', type: 'address' },
-          { name: 'amount', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'suppliedTokenInAmount',
-        internalType: 'uint256',
-        type: 'uint256',
-      },
-      {
-        name: 'requiredTokenOut',
-        internalType: 'struct TokenAmount',
-        type: 'tuple',
-        components: [
-          { name: 'addr', internalType: 'contract IERC20', type: 'address' },
-          { name: 'amount', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      { name: 'maxTip', internalType: 'uint256', type: 'uint256' },
-      {
-        name: 'innerSwap',
-        internalType: 'struct Call',
-        type: 'tuple',
-        components: [
-          { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'swapAndTip',
-    outputs: [],
-    stateMutability: 'payable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
-    name: 'transferOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'usdc',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'OwnershipTransferStarted',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'previousOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newOwner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'OwnershipTransferred',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
-    name: 'OwnableInvalidOwner',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
-    name: 'OwnableUnauthorizedAccount',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
-    name: 'SafeERC20FailedOperation',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CrepeFastCCTP
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const crepeFastCctpAbi = [
-  {
-    type: 'constructor',
-    inputs: [
-      {
-        name: '_tokenMinter',
-        internalType: 'contract ITokenMinter',
-        type: 'address',
-      },
-      {
-        name: '_cctpMessenger',
-        internalType: 'contract ICCTPTokenMessenger',
-        type: 'address',
-      },
-      {
-        name: '_handoffFactory',
-        internalType: 'contract CrepeHandoffFactory',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  { type: 'receive', stateMutability: 'payable' },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'cctpMessenger',
-    outputs: [
-      {
-        name: '',
-        internalType: 'contract ICCTPTokenMessenger',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'swapCall',
-        internalType: 'struct Call',
-        type: 'tuple',
-        components: [
-          { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'claimAction',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'swapCall',
-        internalType: 'struct Call',
-        type: 'tuple',
-        components: [
-          { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-    ],
-    name: 'fastFinishAction',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'getCurrentChainCCTPToken',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'handoffFactory',
-    outputs: [
-      {
-        name: '',
-        internalType: 'contract CrepeHandoffFactory',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'handoffAddr', internalType: 'address', type: 'address' }],
-    name: 'handoffSent',
-    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'handoffAddr', internalType: 'address', type: 'address' }],
-    name: 'handoffToRecipient',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'approvals',
-        internalType: 'struct TokenAmount[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'addr', internalType: 'contract IERC20', type: 'address' },
-          { name: 'amount', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'swapCall',
-        internalType: 'struct Call',
-        type: 'tuple',
-        components: [
-          { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'startAction',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'tokenMinter',
-    outputs: [
-      { name: '', internalType: 'contract ITokenMinter', type: 'address' },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'handoffAddr',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'refundAddress',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'ActionBounced',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'handoffAddr',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'destinationAddress',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'ActionCompleted',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'handoffAddr',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'finalRecipient',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-        indexed: false,
-      },
-    ],
-    name: 'Claim',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'handoffAddr',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'newRecipient',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-        indexed: false,
-      },
-    ],
-    name: 'FastFinish',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'handoffAddr',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-        indexed: false,
-      },
-    ],
-    name: 'Start',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
-    name: 'SafeERC20FailedOperation',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CrepeHandoff
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const crepeHandoffAbi = [
-  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
-  { type: 'receive', stateMutability: 'payable' },
-  {
-    type: 'function',
-    inputs: [
-      { name: '_creator', internalType: 'address payable', type: 'address' },
-      {
-        name: '_destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'initialize',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'receiveAndSelfDestruct',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      {
-        name: 'cctpMessenger',
-        internalType: 'contract ICCTPTokenMessenger',
-        type: 'address',
-      },
-      {
-        name: 'approvals',
-        internalType: 'struct TokenAmount[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'addr', internalType: 'contract IERC20', type: 'address' },
-          { name: 'amount', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-      {
-        name: 'swapCall',
-        internalType: 'struct Call',
-        type: 'tuple',
-        components: [
-          { name: 'to', internalType: 'address', type: 'address' },
-          { name: 'value', internalType: 'uint256', type: 'uint256' },
-          { name: 'data', internalType: 'bytes', type: 'bytes' },
-        ],
-      },
-      {
-        name: 'expectedBurnToken',
-        internalType: 'struct TokenAmount',
-        type: 'tuple',
-        components: [
-          { name: 'addr', internalType: 'contract IERC20', type: 'address' },
-          { name: 'amount', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'sendAndSelfDestruct',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'version',
-        internalType: 'uint64',
-        type: 'uint64',
-        indexed: false,
-      },
-    ],
-    name: 'Initialized',
-  },
-  { type: 'error', inputs: [], name: 'InvalidInitialization' },
-  { type: 'error', inputs: [], name: 'NotInitializing' },
-  {
-    type: 'error',
-    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
-    name: 'SafeERC20FailedOperation',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CrepeHandoffFactory
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const crepeHandoffFactoryAbi = [
-  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'creator', internalType: 'address payable', type: 'address' },
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'createHandoff',
-    outputs: [
-      { name: 'ret', internalType: 'contract CrepeHandoff', type: 'address' },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'creator', internalType: 'address payable', type: 'address' },
-      {
-        name: 'destination',
-        internalType: 'struct Destination',
-        type: 'tuple',
-        components: [
-          { name: 'chainId', internalType: 'uint256', type: 'uint256' },
-          { name: 'domain', internalType: 'uint32', type: 'uint32' },
-          {
-            name: 'mintToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCallToken',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
-            components: [
-              {
-                name: 'addr',
-                internalType: 'contract IERC20',
-                type: 'address',
-              },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-            ],
-          },
-          {
-            name: 'finalCall',
-            internalType: 'struct Call',
-            type: 'tuple',
-            components: [
-              { name: 'to', internalType: 'address', type: 'address' },
-              { name: 'value', internalType: 'uint256', type: 'uint256' },
-              { name: 'data', internalType: 'bytes', type: 'bytes' },
-            ],
-          },
-          { name: 'refundAddress', internalType: 'address', type: 'address' },
-          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'getHandoffAddress',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'handoffImplementation',
-    outputs: [
-      { name: '', internalType: 'contract CrepeHandoff', type: 'address' },
-    ],
-    stateMutability: 'view',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoAccountFactoryV2
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2037,6 +903,17 @@ export const daimoAccountV2Abi = [
     ],
     name: 'UpdateHomeCoin',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   { type: 'error', inputs: [], name: 'ReentrancyGuardReentrantCall' },
@@ -2278,13 +1155,18 @@ export const daimoCctpBridgerAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  {
+    type: 'error',
     inputs: [
       { name: 'implementation', internalType: 'address', type: 'address' },
     ],
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   {
@@ -2402,6 +1284,16 @@ export const daimoEphemeralNotesAbi = [
     ],
     name: 'NoteRedeemed',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
   { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
   {
     type: 'error',
@@ -2413,6 +1305,7 @@ export const daimoEphemeralNotesAbi = [
     inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }],
     name: 'ECDSAInvalidSignatureS',
   },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
@@ -2530,6 +1423,16 @@ export const daimoEphemeralNotesV2Abi = [
     ],
     name: 'NoteRedeemed',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
   { type: 'error', inputs: [], name: 'ECDSAInvalidSignature' },
   {
     type: 'error',
@@ -2541,6 +1444,7 @@ export const daimoEphemeralNotesV2Abi = [
     inputs: [{ name: 's', internalType: 'bytes32', type: 'bytes32' }],
     name: 'ECDSAInvalidSignatureS',
   },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
@@ -2841,6 +1745,17 @@ export const daimoFastCctpAbi = [
     ],
     name: 'Start',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
@@ -3315,13 +2230,18 @@ export const daimoFlexSwapperAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  {
+    type: 'error',
     inputs: [
       { name: 'implementation', internalType: 'address', type: 'address' },
     ],
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   {
@@ -3523,7 +2443,7 @@ export const daimoNameRegistryAbi = [
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   { type: 'error', inputs: [], name: 'InvalidInitialization' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
   {
@@ -3592,7 +2512,7 @@ export const daimoNameRegistryProxyAbi = [
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
 ] as const
 
 export const daimoNameRegistryProxyAddress =
@@ -3602,6 +2522,1623 @@ export const daimoNameRegistryProxyConfig = {
   address: daimoNameRegistryProxyAddress,
   abi: daimoNameRegistryProxyAbi,
 } as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoPay
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoPayAbi = [
+  {
+    type: 'constructor',
+    inputs: [
+      {
+        name: '_intentFactory',
+        internalType: 'contract PayIntentFactory',
+        type: 'address',
+      },
+      {
+        name: '_bridger',
+        internalType: 'contract DaimoPayBridger',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  { type: 'receive', stateMutability: 'payable' },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'bridger',
+    outputs: [
+      { name: '', internalType: 'contract DaimoPayBridger', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'calls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+    ],
+    name: 'claimIntent',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'calls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+    ],
+    name: 'fastFinishIntent',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'intentFactory',
+    outputs: [
+      { name: '', internalType: 'contract PayIntentFactory', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'intentAddr', internalType: 'address', type: 'address' }],
+    name: 'intentSent',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'intentAddr', internalType: 'address', type: 'address' }],
+    name: 'intentToRecipient',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'calls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'bridgeExtraData', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'startIntent',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'intentAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'finalRecipient',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Claim',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'intentAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newRecipient',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'FastFinish',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'intentAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'destinationAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      { name: 'success', internalType: 'bool', type: 'bool', indexed: true },
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+        indexed: false,
+      },
+    ],
+    name: 'IntentFinished',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'recipient',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'token',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'amount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+    ],
+    name: 'RefundedTokens',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'intentAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+        indexed: false,
+      },
+    ],
+    name: 'Start',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoPayAcrossBridger
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoPayAcrossBridgerAbi = [
+  {
+    type: 'constructor',
+    inputs: [
+      { name: '_owner', internalType: 'address', type: 'address' },
+      {
+        name: '_spokePool',
+        internalType: 'contract V3SpokePoolInterface',
+        type: 'address',
+      },
+      { name: '_toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
+      { name: '_toTokens', internalType: 'address[]', type: 'address[]' },
+      {
+        name: '_bridgeRoutes',
+        internalType: 'struct DaimoPayAcrossBridger.AcrossBridgeRoute[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'localToken', internalType: 'address', type: 'address' },
+          { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
+          { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'ONE_HUNDRED_PERCENT',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      {
+        name: 'bridgeRoute',
+        internalType: 'struct DaimoPayAcrossBridger.AcrossBridgeRoute',
+        type: 'tuple',
+        components: [
+          { name: 'localToken', internalType: 'address', type: 'address' },
+          { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
+          { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'addBridgeRoute',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+    ],
+    name: 'bridgeRouteMapping',
+    outputs: [
+      { name: 'localToken', internalType: 'address', type: 'address' },
+      { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
+      { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getInputTokenAmount',
+    outputs: [
+      { name: 'inputToken', internalType: 'address', type: 'address' },
+      { name: 'inputAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'pendingOwner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+    ],
+    name: 'removeBridgeRoute',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toAddress', internalType: 'address', type: 'address' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'sendToChain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'spokePool',
+    outputs: [
+      {
+        name: '',
+        internalType: 'contract V3SpokePoolInterface',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'fromAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'fromToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'fromAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'toAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'toToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'toAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'BridgeInitiated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'toToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'localToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'pctFee',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'BridgeRouteAdded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'toToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'localToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'pctFee',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'BridgeRouteRemoved',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferStarted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoPayBridger
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoPayBridgerAbi = [
+  {
+    type: 'constructor',
+    inputs: [
+      { name: '_owner', internalType: 'address', type: 'address' },
+      { name: '_chainIds', internalType: 'uint256[]', type: 'uint256[]' },
+      {
+        name: '_bridgers',
+        internalType: 'contract IDaimoPayBridger[]',
+        type: 'address[]',
+      },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'chainId', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridger',
+        internalType: 'contract IDaimoPayBridger',
+        type: 'address',
+      },
+    ],
+    name: 'addBridger',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'chainId', internalType: 'uint256', type: 'uint256' }],
+    name: 'chainIdToBridger',
+    outputs: [
+      {
+        name: 'bridger',
+        internalType: 'contract IDaimoPayBridger',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getInputTokenAmount',
+    outputs: [
+      { name: 'inputToken', internalType: 'address', type: 'address' },
+      { name: 'inputAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'pendingOwner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'chainId', internalType: 'uint256', type: 'uint256' }],
+    name: 'removeBridger',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toAddress', internalType: 'address', type: 'address' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'sendToChain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'chainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'bridger',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'BridgeAdded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'fromAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'fromToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'fromAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'toAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'toToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'toAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'BridgeInitiated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'chainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+    ],
+    name: 'BridgeRemoved',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferStarted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoPayCCTPBridger
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoPayCctpBridgerAbi = [
+  {
+    type: 'constructor',
+    inputs: [
+      { name: '_owner', internalType: 'address', type: 'address' },
+      {
+        name: '_tokenMinter',
+        internalType: 'contract ITokenMinter',
+        type: 'address',
+      },
+      {
+        name: '_cctpMessenger',
+        internalType: 'contract ICCTPTokenMessenger',
+        type: 'address',
+      },
+      { name: '_cctpChainIds', internalType: 'uint256[]', type: 'uint256[]' },
+      { name: '_cctpDomains', internalType: 'uint32[]', type: 'uint32[]' },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'chainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'domain', internalType: 'uint32', type: 'uint32' },
+    ],
+    name: 'addCCTPDomain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'chainId', internalType: 'uint256', type: 'uint256' }],
+    name: 'cctpDomainMapping',
+    outputs: [{ name: 'domain', internalType: 'uint32', type: 'uint32' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'cctpMessenger',
+    outputs: [
+      {
+        name: '',
+        internalType: 'contract ICCTPTokenMessenger',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getInputTokenAmount',
+    outputs: [
+      { name: 'inputToken', internalType: 'address', type: 'address' },
+      { name: 'inputAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'pendingOwner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toAddress', internalType: 'address', type: 'address' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      { name: '', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'sendToChain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'tokenMinter',
+    outputs: [
+      { name: '', internalType: 'contract ITokenMinter', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'fromAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'fromToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'fromAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'toAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'toToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'toAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'BridgeInitiated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'chainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'domain',
+        internalType: 'uint32',
+        type: 'uint32',
+        indexed: false,
+      },
+    ],
+    name: 'DomainAdded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferStarted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoPayRelayer
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoPayRelayerAbi = [
+  {
+    type: 'constructor',
+    inputs: [{ name: '_owner', internalType: 'address', type: 'address' }],
+    stateMutability: 'nonpayable',
+  },
+  { type: 'receive', stateMutability: 'payable' },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'mintCall',
+        internalType: 'struct Call',
+        type: 'tuple',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'dp', internalType: 'contract DaimoPay', type: 'address' },
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'calls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+    ],
+    name: 'claimAndKeep',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'dp', internalType: 'contract DaimoPay', type: 'address' },
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'tokenIn',
+        internalType: 'struct TokenAmount',
+        type: 'tuple',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'calls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+    ],
+    name: 'fastFinish',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'pendingOwner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'requiredTokenIn',
+        internalType: 'struct TokenAmount',
+        type: 'tuple',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'suppliedTokenInAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+      },
+      {
+        name: 'requiredTokenOut',
+        internalType: 'struct TokenAmount',
+        type: 'tuple',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      { name: 'maxTip', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'innerSwap',
+        internalType: 'struct Call',
+        type: 'tuple',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+    ],
+    name: 'swapAndTip',
+    outputs: [],
+    stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferStarted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
+] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoPaymasterV2
@@ -3960,6 +4497,17 @@ export const daimoRequestAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
     name: 'SafeERC20FailedOperation',
   },
@@ -4140,7 +4688,7 @@ export const erc1967ProxyAbi = [
     name: 'ERC1967InvalidImplementation',
   },
   { type: 'error', inputs: [], name: 'ERC1967NonPayable' },
-  { type: 'error', inputs: [], name: 'FailedCall' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4148,6 +4696,51 @@ export const erc1967ProxyAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export const erc1967UtilsAbi = [
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newAdmin',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'AdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'beacon',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'BeaconUpgraded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'implementation',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'Upgraded',
+  },
   {
     type: 'error',
     inputs: [{ name: 'admin', internalType: 'address', type: 'address' }],
@@ -5019,8 +5612,351 @@ export const ephemeralHandoffAbi = [
   },
   {
     type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  {
+    type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
     name: 'SafeERC20FailedOperation',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PayIntentContract
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const payIntentContractAbi = [
+  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
+  { type: 'receive', stateMutability: 'payable' },
+  {
+    type: 'function',
+    inputs: [{ name: '_intentHash', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'initialize',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'receiveAndSelfDestruct',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'bridger',
+        internalType: 'contract IDaimoPayBridger',
+        type: 'address',
+      },
+      { name: 'caller', internalType: 'address payable', type: 'address' },
+      {
+        name: 'calls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'bridgeExtraData', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'sendAndSelfDestruct',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'version',
+        internalType: 'uint64',
+        type: 'uint64',
+        indexed: false,
+      },
+    ],
+    name: 'Initialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'recipient',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'token',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'amount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+    ],
+    name: 'RefundedTokens',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  { type: 'error', inputs: [], name: 'InvalidInitialization' },
+  { type: 'error', inputs: [], name: 'NotInitializing' },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PayIntentFactory
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const payIntentFactoryAbi = [
+  { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'createIntent',
+    outputs: [
+      {
+        name: 'ret',
+        internalType: 'contract PayIntentContract',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'getIntentAddress',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'intentImpl',
+    outputs: [
+      { name: '', internalType: 'contract PayIntentContract', type: 'address' },
+    ],
+    stateMutability: 'view',
   },
 ] as const
 
@@ -5219,6 +6155,17 @@ export const swapbotLpAbi = [
     ],
     name: 'SwapAndTip',
   },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
   {
     type: 'error',
     inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],

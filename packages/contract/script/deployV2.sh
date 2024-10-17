@@ -11,8 +11,18 @@ set -e
 # ETHERSCAN_API_KEY_... for each target chain
 
 SCRIPTS=(
-    # "script/DeployCrepeHandoffFactory.s.sol"
-    # "script/DeployCrepeFastCCTP.s.sol"
+    # CREATE3
+    # "script/DeployCreate3Factory.s.sol"
+
+    # Daimo Pay.
+    # "script/pay/DeployDaimoPayAcrossBridger.s.sol"
+    # "script/pay/DeployDaimoPayCCTPBridger.s.sol"
+    # "script/pay/DeployDaimoPayBridger.s.sol"
+    # "script/pay/DeployPayIntentFactory.s.sol"
+    # "script/pay/DeployDaimoPay.s.sol"
+    # "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
+
+    # DAv2
     # "script/DeployFlexSwapper.s.sol"
     # "script/DeployCCTPBridger.s.sol"
     # "script/DeployAccountFactoryV2.s.sol"
@@ -20,7 +30,6 @@ SCRIPTS=(
 
     # SWAPBOT (ensure private key is swapbot EOA)
     # "script/DeploySwapbotLP.s.sol" 
-    # "script/DeployCrepeBotLP.s.sol"
 )
 CHAINS=(
     # MAINNETS
@@ -28,6 +37,7 @@ CHAINS=(
     # "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_LINEA,https://linea-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
 
     # Not supporting Avalanche, skip.
@@ -47,8 +57,11 @@ for SCRIPT in "${SCRIPTS[@]}"; do
         echo "======= RUNNING $SCRIPT ========" 
         echo "ETHERSCAN_API_KEY: $ETHERSCAN_API_KEY"
         echo "RPC_URL          : $RPC_URL"
-        echo forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+
+        FORGE_CMD="forge script $SCRIPT --sig run --fork-url $RPC_URL --private-key $PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY --broadcast"
+
+        echo $FORGE_CMD
         echo ""
-        forge script $SCRIPT --sig "run" --fork-url $RPC_URL --private-key $PRIVATE_KEY --broadcast || exit 1
+        $FORGE_CMD || exit 1
     done
 done
