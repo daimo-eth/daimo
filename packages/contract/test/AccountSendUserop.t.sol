@@ -31,7 +31,7 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 0;
-        bytes32 expectedUserOpHash = hex"f8a76c8c428c21d5b3940a34861079ded59efd427edee75d7983875996bbc51c";
+        bytes32 expectedUserOpHash = hex"b9acfdda0302c78eac1f3c8ffe91759e0f29a3426b6e414d41cf4a123eb1e611";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
@@ -46,8 +46,8 @@ contract AccountSendUseropTest is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x5bf1e1209bd79ce5a6ab4a01396000c78d64aea18474c29a18f7cffbfcb0cc13,
-                    s: 0x4f07814526fcd656b6c505bd9df4df7789830db58184307abed1eb4979991aef
+                    r: 0xea1c9254ff047a575376c4502f4908be19a2e7cb679d73673ab676432ea1ef5e,
+                    s: 0x4eefff3de51995a06910a4d53059e587bd52b61c0870f4814d07ab7e72a98f3e
                 })
             )
         );
@@ -117,7 +117,7 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
-        bytes32 expectedUserOpHash = hex"f8a76c8c428c21d5b3940a34861079ded59efd427edee75d7983875996bbc51c";
+        bytes32 expectedUserOpHash = hex"b9acfdda0302c78eac1f3c8ffe91759e0f29a3426b6e414d41cf4a123eb1e611";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash

@@ -67,7 +67,6 @@ contract PayIntentContract is Initializable {
     ) public {
         require(calcIntentHash(intent) == intentHash, "PI: intent");
         require(msg.sender == intent.escrow, "PI: only escrow");
-        require(intent.toChainId != block.chainid, "PI: same chain");
 
         // Run arbitrary calls provided by the relayer. These will generally approve
         // the swap contract and swap if necessary, then approve tokens to the
@@ -78,7 +77,16 @@ contract PayIntentContract is Initializable {
             require(success, "PI: swap call failed");
         }
 
-        if (intent.toChainId != block.chainid) {
+        if (intent.toChainId == block.chainid) {
+            // Same chain. Check that sufficient token is present.
+            uint256 balance = intent.bridgeTokenOut.token.balanceOf(
+                address(this)
+            );
+            require(
+                balance >= intent.bridgeTokenOut.amount,
+                "PI: insufficient token"
+            );
+        } else {
             // Different chains. Get the input token and amount for the bridge
             (address inputToken, uint256 inputAmount) = bridger
                 .getInputTokenAmount({
@@ -86,6 +94,9 @@ contract PayIntentContract is Initializable {
                     toToken: address(intent.bridgeTokenOut.token),
                     toAmount: intent.bridgeTokenOut.amount
                 });
+
+            uint256 balance = IERC20(inputToken).balanceOf(address(this));
+            require(balance >= inputAmount, "PI: insufficient bridge token");
 
             // Approve bridger and initiate bridge
             IERC20(inputToken).forceApprove({
