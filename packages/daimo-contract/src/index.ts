@@ -62,13 +62,13 @@ export const daimoFastCctpAddrs: Address[] = [
 ];
 
 /** Daimo Pay main contract address */
-export const daimoPayAddress = "0x430EF444ff206C0bD7faE7c1d61A1BF3E0d3ac08";
+export const daimoPayAddress = "0x598774159308780E7b7E819c84c1122b7e81b3EB";
 /** Daimo Pay bridger address */
 export const daimoPayBridgerAddress =
-  "0x5D3142b72B5A3C1C6ffc0c2687A6FD637F90a4BA";
+  "0x6Bb2e775C3b587Bf19C1498b050b1AeBa4E504C2";
 /** Daimo Pay intent factory address */
 export const payIntentFactoryAddress =
-  "0x39F91aE72c6cB0F6C8D951D3E120c8C4cE7E3761";
+  "0x9Df33Ac04643aB896Aacbe54557EEb5F78dAf6B6";
 /** Daimo Pay relayer address */
 export const daimoPayRelayerAddress =
   "0x872bcFC1b5f05fc1c676Ef1b8Ed6f3526C188caD";
