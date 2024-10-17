@@ -19,7 +19,7 @@ contract DeployDaimoPayCCTPBridger is Script {
         address initOwner = msg.sender;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayCCTPBridger-test4"),
+            keccak256("DaimoPayCCTPBridger-test5"),
             abi.encodePacked(
                 type(DaimoPayCCTPBridger).creationCode,
                 abi.encode(

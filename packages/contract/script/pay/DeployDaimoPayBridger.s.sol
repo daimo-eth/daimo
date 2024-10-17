@@ -19,7 +19,7 @@ contract DeployDaimoPayBridger is Script {
         ) = _getBridgersAndChainIds();
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayBridger-test4"),
+            keccak256("DaimoPayBridger-test5"),
             abi.encodePacked(
                 type(DaimoPayBridger).creationCode,
                 abi.encode(initOwner, chainIds, bridgers)
@@ -44,11 +44,11 @@ contract DeployDaimoPayBridger is Script {
 
         address acrossBridger = CREATE3.getDeployed(
             msg.sender,
-            keccak256("DaimoPayAcrossBridger-test4")
+            keccak256("DaimoPayAcrossBridger-test5")
         );
         address cctpBridger = CREATE3.getDeployed(
             msg.sender,
-            keccak256("DaimoPayCCTPBridger-test4")
+            keccak256("DaimoPayCCTPBridger-test5")
         );
         console.log("acrossBridger address:", acrossBridger);
         console.log("cctpBridger address:", cctpBridger);

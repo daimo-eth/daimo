@@ -11,8 +11,8 @@ import "../src/pay/DaimoPayCCTPBridger.sol";
 import "../src/pay/DaimoPayAcrossBridger.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
-address constant BASE_INTENT_ADDR = 0x390BBE1FF47153C0540f78D766fb0B8027522E9b;
-address constant LINEA_INTENT_ADDR = 0xd02f87925794dd48eeE762a5Ee6aE81a54623735;
+address constant BASE_INTENT_ADDR = 0x5c77AC24daF6067E54955581C3Fd370dA6eB7C04;
+address constant LINEA_INTENT_ADDR = 0xfa5A49Ce976b2a7842deC5E6B3Fb8613a677E4D6;
 
 contract DaimoPayTest is Test {
     // Daimo Pay contracts
@@ -31,19 +31,30 @@ contract DaimoPayTest is Test {
     // Across dummy contracts
     DummySpokePool public spokePool;
 
-    uint256 immutable _fromChainId = 10; // Optimism
+    // Account addresses
     address immutable _alice = 0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa;
+    address immutable _bob = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
+    address immutable _lp = 0x2222222222222222222222222222222222222222;
+
+    uint256 immutable _lpToTokenInitBalance = 1000;
+
+    // Tokens
     IERC20 immutable _fromToken = new TestUSDC{salt: bytes32(uint256(1))}();
+    IERC20 immutable _toToken = new TestUSDC{salt: bytes32(uint256(2))}();
+    // Token that's not registered in the token minter and Across
+    IERC20 immutable _unregisteredToken =
+        new TestUSDC{salt: bytes32(uint256(420))}();
+
+    // Chains
+    uint256 immutable _fromChainId = 10; // Optimism
     uint256 immutable _baseChainId = 8453; // Base
     uint32 immutable _baseDomain = 6; // Base
     uint256 immutable _lineaChainId = 59144; // Linea
-    address immutable _bob = 0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB;
-    IERC20 immutable _toToken = new TestUSDC{salt: bytes32(uint256(2))}();
-    uint256 immutable _toAmount = 100;
-    uint256 immutable _nonce = 1;
 
-    address immutable _lp = 0x2222222222222222222222222222222222222222;
-    uint256 immutable _lpToTokenInitBalance = 1000;
+    // Intent data
+    uint256 immutable _toAmount = 100;
+
+    uint256 immutable _nonce = 1;
 
     function setUp() public {
         intentFactory = new PayIntentFactory();
@@ -519,11 +530,8 @@ contract DaimoPayTest is Test {
     function testCCTPFromAndToTokenMismatch() public {
         vm.chainId(_fromChainId);
 
-        // Deploy a new token that's not registered by the token minter
-        IERC20 newToken = new TestUSDC{salt: bytes32(uint256(420))}();
-
         // Give Alice some coins
-        newToken.transfer(_alice, 555);
+        _unregisteredToken.transfer(_alice, 555);
 
         // Alice initiates a transfer
         vm.startPrank(_alice);
@@ -540,7 +548,7 @@ contract DaimoPayTest is Test {
 
         // Alice sends some coins to the intent address
         address intentAddr = intentFactory.getIntentAddress(intent);
-        newToken.transfer(intentAddr, _toAmount);
+        _unregisteredToken.transfer(intentAddr, _toAmount);
 
         // Expect revert due to token mismatch
         vm.expectRevert();
@@ -557,11 +565,8 @@ contract DaimoPayTest is Test {
     function testAcrossFromAndToTokenMismatch() public {
         vm.chainId(_fromChainId);
 
-        // Deploy a new token that's not registered by the DaimoPayAcrossBridger
-        IERC20 newToken = new TestUSDC{salt: bytes32(uint256(420))}();
-
         // Give Alice some coins
-        newToken.transfer(_alice, 555);
+        _unregisteredToken.transfer(_alice, 555);
 
         // Alice initiates a transfer
         vm.startPrank(_alice);
@@ -578,7 +583,7 @@ contract DaimoPayTest is Test {
 
         // Alice sends some coins to the intent address
         address intentAddr = intentFactory.getIntentAddress(intent);
-        newToken.transfer(intentAddr, _toAmount);
+        _unregisteredToken.transfer(intentAddr, _toAmount);
 
         // Expect revert due to token mismatch
         vm.expectRevert();

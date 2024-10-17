@@ -122,7 +122,7 @@ contract PayIntentContract is Initializable {
         // contracts are deployed, then destroyed in the same transaction.
         // solhint-disable-next-line
         // Certain chains (like Scroll) don't support SELFDESTRUCT
-        // selfdestruct(intent.escrow);
+        selfdestruct(intent.escrow);
     }
 
     /// One step: receive  bridgeTokenOut and send to creator
@@ -152,7 +152,7 @@ contract PayIntentContract is Initializable {
         // contracts are deployed, then destroyed in the same transaction.
         // solhint-disable-next-line
         // Certain chains (like Scroll) don't support SELFDESTRUCT
-        // selfdestruct(intent.escrow);
+        selfdestruct(intent.escrow);
     }
 
     /// Accept native-token (eg ETH) inputs
