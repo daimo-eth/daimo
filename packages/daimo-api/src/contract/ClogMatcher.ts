@@ -1,19 +1,12 @@
-import {
-  assertNotNull,
-  debugJson,
-  retryBackoff,
-} from "@daimo/common";
-import {
-  bytesToAddr,
-  daimoFastCctpAddrs
-} from "@daimo/contract";
+import { assertNotNull, debugJson, retryBackoff } from "@daimo/common";
+import { bytesToAddr, daimoFastCctpAddrs } from "@daimo/contract";
 import { Kysely } from "kysely";
 import { Address, Hex, bytesToHex, hexToBytes, zeroAddress } from "viem";
 
+import { ForeignTokenTransfer } from "./foreignCoinIndexer";
 import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { TokenRegistry } from "../server/tokenRegistry";
-import { ForeignTokenTransfer } from "./foreignCoinIndexer";
 
 /**
  * Finds corresponding information for a given transfer over logs in a tx.

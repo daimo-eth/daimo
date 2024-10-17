@@ -87,7 +87,7 @@ contract DeployDaimoPayBridger is Script {
         }
 
         // Linea bridges to other chains using Across. Override the CCTP bridgers.
-        if (block.chainid == LINEA_MAINNET) {
+        if (!_isCCTP(block.chainid)) {
             for (uint256 i = 0; i < bridgers.length; ++i) {
                 bridgers[i] = acrossBridger;
             }

@@ -9,23 +9,21 @@ import {
   hexToBuffer,
   retryBackoff,
 } from "@daimo/common";
-import {
-  bytesToAddr
-} from '@daimo/contract';
+import { bytesToAddr } from "@daimo/contract";
 import { DaimoNonce } from "@daimo/userop";
 import { Kysely } from "kysely";
 import { Address, Hex, bytesToHex, getAddress, numberToHex } from "viem";
 
-import { DB as IndexDB } from "../codegen/dbIndex";
-import { chainConfig } from "../env";
-import { ViemClient } from "../network/viemClient";
-import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { ClogMatcher } from "./ClogMatcher";
 import { ForeignCoinIndexer } from "./foreignCoinIndexer";
 import { Indexer } from "./indexer";
 import { NoteIndexer } from "./noteIndexer";
 import { OpIndexer } from "./opIndexer";
 import { RequestIndexer } from "./requestIndexer";
+import { DB as IndexDB } from "../codegen/dbIndex";
+import { chainConfig } from "../env";
+import { ViemClient } from "../network/viemClient";
+import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 
 /** ERC-20 or native token transfer. See daimo_transfers table. */
 export interface Transfer {

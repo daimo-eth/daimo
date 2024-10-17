@@ -20,15 +20,15 @@ import {
 import { Kysely } from "kysely";
 import { Address, bytesToHex, getAddress, Hex, zeroAddress } from "viem";
 
+import { Transfer } from "./homeCoinIndexer";
+import { Indexer } from "./indexer";
+import { NameRegistry } from "./nameRegistry";
 import { getSwapQuote } from "../api/getSwapRoute";
 import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { TokenRegistry } from "../server/tokenRegistry";
 import { addrTxHashKey } from "../utils/indexing";
-import { Transfer } from "./homeCoinIndexer";
-import { Indexer } from "./indexer";
-import { NameRegistry } from "./nameRegistry";
 
 // An in/outbound swap coin transfer with swap coin metadata.
 export type ForeignTokenTransfer = Transfer & {

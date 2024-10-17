@@ -23,7 +23,7 @@ SCRIPTS=(
     # "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
 
     # DAv2
-    "script/DeployFlexSwapper.s.sol"
+    # "script/DeployFlexSwapper.s.sol"
     # "script/DeployCCTPBridger.s.sol"
     # "script/DeployAccountFactoryV2.s.sol"
     # "script/DeployTestAccountV2.s.sol"
@@ -37,7 +37,7 @@ CHAINS=(
     # "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_LINEA,https://linea-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_LINEA,https://linea-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
 
     # Not supporting Avalanche, skip.

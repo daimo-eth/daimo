@@ -82,6 +82,7 @@ address constant BASE_MAINNET_DAI = 0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb;
 address constant ETH_MAINNET_DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 address constant OP_MAINNET_DAI = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
 address constant POLYGON_MAINNET_DAI = 0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063;
+address constant LINEA_MAINNET_DAI = 0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5;
 
 // USDT addresses
 address constant ARBITRUM_MAINNET_USDT = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
@@ -91,6 +92,7 @@ address constant ETH_MAINNET_USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
 address constant LISK_MAINNET_USDT = 0x05D032ac25d322df992303dCa074EE7392C117b9;
 address constant OP_MAINNET_USDT = 0x94b008aA00579c1307B0EF2c499aD98a8ce58e58;
 address constant POLYGON_MAINNET_USDT = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
+address constant LINEA_MAINNET_USDT = 0xA219439258ca9da29E9Cc4cE5596924745e12B93;
 
 // USDC.e or USDbC (bridged USDC) addresses
 address constant ARBITRUM_MAINNET_BRIDGED_USDC = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
@@ -115,6 +117,7 @@ address constant ETH_MAINNET_WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 address constant ETH_TESTNET_WETH = 0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9;
 address constant OP_STACK_WETH = 0x4200000000000000000000000000000000000006;
 address constant POLYGON_WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
+address constant LINEA_WETH = 0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f;
 
 address constant POLYGON_WMATIC = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
 address constant AVAX_WAVAX = 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7;
@@ -169,6 +172,9 @@ address constant AVAX_MAINNET_UNISWAP_FACTORY = 0x740b1c1de25031C31FF4fC9A62f554
 address constant AVAX_TESTNET_UNISWAP_ROUTER = address(0); // Not deployed
 address constant AVAX_TESTNET_UNISWAP_FACTORY = address(0); // Not deployed
 
+address constant LINEA_MAINNET_UNISWAP_ROUTER = 0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a;
+address constant LINEA_MAINNET_UNISWAP_FACTORY = 0x31FAfd4889FA1269F7a13A66eE0fB458f27D72A9;
+
 function _getUSDCAddress(uint256 chainId) pure returns (address) {
     // Mainnets
     if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_USDC;
@@ -198,6 +204,7 @@ function _getUniswapFactoryAddress(uint256 chainId) pure returns (address) {
     if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_UNISWAP_FACTORY;
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_UNISWAP_FACTORY;
     if (chainId == AVAX_MAINNET) return AVAX_MAINNET_UNISWAP_FACTORY;
+    if (chainId == LINEA_MAINNET) return LINEA_MAINNET_UNISWAP_FACTORY;
 
     // Testnets
     if (chainId == ETH_TESTNET) return ETH_TESTNET_UNISWAP_FACTORY;
@@ -218,6 +225,7 @@ function _getWETH(uint256 chainId) pure returns (address) {
     if (chainId == ETH_MAINNET) return ETH_MAINNET_WETH;
     if (chainId == OP_MAINNET) return OP_STACK_WETH;
     if (chainId == POLYGON_MAINNET) return POLYGON_WETH;
+    if (chainId == LINEA_MAINNET) return LINEA_WETH;
 
     // Testnets
     if (chainId == ARBITRUM_TESTNET) return ARBITRUM_TESTNET_WETH;
@@ -249,6 +257,7 @@ function _getDAIAddress(uint256 chainId) pure returns (address) {
     if (chainId == ETH_MAINNET) return ETH_MAINNET_DAI;
     if (chainId == OP_MAINNET) return OP_MAINNET_DAI;
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_DAI;
+    if (chainId == LINEA_MAINNET) return LINEA_MAINNET_DAI;
 
     if (_isTestnet(chainId)) return address(0);
 
@@ -263,6 +272,7 @@ function _getUSDTAddress(uint256 chainId) pure returns (address) {
     if (chainId == LISK_MAINNET) return LISK_MAINNET_USDT;
     if (chainId == OP_MAINNET) return OP_MAINNET_USDT;
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_USDT;
+    if (chainId == LINEA_MAINNET) return LINEA_MAINNET_USDT;
 
     if (_isTestnet(chainId)) return address(0);
 
@@ -344,6 +354,17 @@ function _isTestnet(uint256 chainId) pure returns (bool) {
         chainId == ARBITRUM_TESTNET ||
         chainId == BASE_TESTNET ||
         chainId == POLYGON_TESTNET;
+}
+
+// Check whether the chain is a CCTP chain
+function _isCCTP(uint256 chainId) pure returns (bool) {
+    return
+        chainId == ETH_MAINNET ||
+        chainId == AVAX_MAINNET ||
+        chainId == OP_MAINNET ||
+        chainId == ARBITRUM_MAINNET ||
+        chainId == BASE_MAINNET ||
+        chainId == POLYGON_MAINNET;
 }
 
 // Check whether the chain is L1.

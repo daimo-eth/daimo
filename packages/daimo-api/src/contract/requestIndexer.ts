@@ -13,19 +13,17 @@ import {
   parseRequestMetadata,
   retryBackoff,
 } from "@daimo/common";
-import {
-  bytesToAddr
-} from '@daimo/contract';
+import { bytesToAddr } from "@daimo/contract";
 import { Kysely } from "kysely";
 import { Address, Hex, bytesToHex } from "viem";
 
+import { Indexer } from "./indexer";
+import { NameRegistry } from "./nameRegistry";
 import { DB as IndexDB } from "../codegen/dbIndex";
 import { DB } from "../db/db";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { logCoordinateKey } from "../utils/indexing";
-import { Indexer } from "./indexer";
-import { NameRegistry } from "./nameRegistry";
 
 interface RequestCreatedLog {
   transactionHash: Hex;

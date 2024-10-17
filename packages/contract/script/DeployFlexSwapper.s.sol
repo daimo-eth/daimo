@@ -34,7 +34,10 @@ contract DeployFlexSwapperScript is Script {
     }
 
     function _loadKnownTokens() private {
-        IERC20 usdc = IERC20(_getUSDCAddress(block.chainid));
+        IERC20 usdc = IERC20(address(0));
+        if (_isCCTP(block.chainid)) {
+            usdc = IERC20(_getUSDCAddress(block.chainid));
+        }
         IERC20 dai = IERC20(_getDAIAddress(block.chainid));
         IERC20 usdt = IERC20(_getUSDTAddress(block.chainid));
         IERC20 bridgedUsdc = IERC20(address(0));
@@ -81,8 +84,9 @@ contract DeployFlexSwapperScript is Script {
         uint256 numChainlinkTokens = _knownTokens.length;
 
         // Add known good stablecoins
-        assert(usdc != IERC20(address(0)));
-        _knownTokenAddrs.push(usdc);
+        if (usdc != IERC20(address(0))) {
+            _knownTokenAddrs.push(usdc);
+        }
         if (dai != IERC20(address(0))) {
             _knownTokenAddrs.push(dai);
         }
@@ -92,6 +96,7 @@ contract DeployFlexSwapperScript is Script {
         if (bridgedUsdc != IERC20(address(0))) {
             _knownTokenAddrs.push(bridgedUsdc);
         }
+        require(_knownTokenAddrs.length > 0, "No known tokens");
         for (uint256 i = numChainlinkTokens; i < _knownTokenAddrs.length; i++) {
             DaimoFlexSwapper.KnownToken memory knownToken = DaimoFlexSwapper
                 .KnownToken({
@@ -165,30 +170,29 @@ contract DeployFlexSwapperScript is Script {
         }
 
         // Stablecoins
-        IERC20 usdc = IERC20(_getUSDCAddress(chainId));
-        IERC20 dai = IERC20(_getDAIAddress(chainId));
-        IERC20 usdt = IERC20(_getUSDTAddress(chainId));
-
         IERC20[] memory stablecoins;
         if (_isTestnet(chainId)) {
             // There is no swapping liquidity on testnets so no need for
             // stablecoin options.
             stablecoins = new IERC20[](1);
-            stablecoins[0] = usdc;
+            stablecoins[0] = IERC20(_getUSDCAddress(chainId));
         } else if (_isL1(chainId)) {
             // No bridged USDC on L1
             stablecoins = new IERC20[](3);
-            stablecoins[0] = usdc;
-            stablecoins[1] = usdt;
-            stablecoins[2] = dai;
-        } else {
-            IERC20 bridgedUsdc = IERC20(_getBridgedUSDCAddress(chainId));
-
+            stablecoins[0] = IERC20(_getUSDCAddress(chainId));
+            stablecoins[1] = IERC20(_getUSDTAddress(chainId));
+            stablecoins[2] = IERC20(_getDAIAddress(chainId));
+        } else if (_isCCTP(chainId)) {
             stablecoins = new IERC20[](4);
-            stablecoins[0] = usdc;
-            stablecoins[1] = usdt;
-            stablecoins[2] = dai;
-            stablecoins[3] = bridgedUsdc;
+            stablecoins[0] = IERC20(_getUSDCAddress(chainId));
+            stablecoins[1] = IERC20(_getUSDTAddress(chainId));
+            stablecoins[2] = IERC20(_getDAIAddress(chainId));
+            stablecoins[3] = IERC20(_getBridgedUSDCAddress(chainId));
+        } else {
+            stablecoins = new IERC20[](3);
+            stablecoins[0] = IERC20(_getBridgedUSDCAddress(chainId));
+            stablecoins[1] = IERC20(_getUSDTAddress(chainId));
+            stablecoins[2] = IERC20(_getDAIAddress(chainId));
         }
 
         // Supported output tokens (stablecoins + hopTokens)
