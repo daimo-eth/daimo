@@ -29,6 +29,8 @@ export function getChainExplorerByChainId(chainId: number): string | undefined {
       return "https://amoy.polygonscan.com";
     case 43113:
       return "https://testnet.snowtrace.io";
+    case 59144:
+      return "https://lineascan.build";
     default:
       return undefined;
   }

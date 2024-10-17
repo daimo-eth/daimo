@@ -477,12 +477,7 @@ export const lineaBridgedUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-// TODO: Include Linea ETH and WETH when swapping on Linea is supported.
-const lineaTokens = [
-  //lineaETH,
-  // lineaWETH,
-  lineaBridgedUSDC,
-];
+const lineaTokens = [lineaETH, lineaWETH, lineaBridgedUSDC];
 
 //
 // --------------------- Native Token Utils ---------------------
