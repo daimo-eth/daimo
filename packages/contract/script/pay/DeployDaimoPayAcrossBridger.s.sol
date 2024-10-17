@@ -51,8 +51,12 @@ contract DeployDaimoPayAcrossBridger is Script {
     {
         bool testnet = _isTestnet(block.chainid);
         if (testnet) {
-            // TODO: add testnet tokens
-            revert("Testnet not supported");
+            // Bridging not supported on testnet.
+            return (
+                new uint256[](0),
+                new address[](0),
+                new DaimoPayAcrossBridger.AcrossBridgeRoute[](0)
+            );
         }
 
         // Each bridge route maps a destination chains token to a local token

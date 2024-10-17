@@ -42,6 +42,10 @@ contract DeployDaimoPayCCTPBridger is Script {
         returns (uint256[] memory chainIds, uint32[] memory domains)
     {
         bool testnet = _isTestnet(block.chainid);
+        if (testnet) {
+            // Bridging not supported on testnet.
+            return (new uint256[](0), new uint32[](0));
+        }
 
         chainIds = new uint256[](6);
         chainIds[0] = testnet ? ETH_TESTNET : ETH_MAINNET;
