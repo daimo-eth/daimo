@@ -5,13 +5,13 @@ import {
   EAccount,
   assertEqual,
   assertNotNull,
-  bytesToAddr,
   isValidName,
   now,
   retryBackoff,
   validateName,
 } from "@daimo/common";
 import {
+  bytesToAddr,
   daimoFastCctpAddrs,
   nameRegistryProxyConfig,
   teamDaimoFaucetAddr,
@@ -26,12 +26,12 @@ import {
 } from "viem";
 import { normalize } from "viem/ens";
 
-import { Indexer } from "./indexer";
 import { ProfileCache } from "../api/profile";
 import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { ViemClient } from "../network/viemClient";
 import { InviteGraph } from "../offchain/inviteGraph";
+import { Indexer } from "./indexer";
 
 // Special labels are append-only. Historical addresses remain labelled.
 export const specialAddrLabels: { [_: Address]: AddrLabel } = {

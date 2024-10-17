@@ -1,23 +1,24 @@
 import {
-  extractChain,
-  Chain,
-  getAddress,
-  bytesToHex,
-  ByteArray,
   Address,
+  ByteArray,
+  bytesToHex,
+  Chain,
+  extractChain,
+  getAddress,
 } from "viem";
 import {
-  mainnet,
-  sepolia,
-  base,
-  optimism,
-  polygon,
-  baseSepolia,
   arbitrum,
   arbitrumSepolia,
-  optimismSepolia,
   avalanche,
   avalancheFuji,
+  base,
+  baseSepolia,
+  linea,
+  mainnet,
+  optimism,
+  optimismSepolia,
+  polygon,
+  sepolia,
 } from "viem/chains";
 
 /** Retrieve the Viem chain config for a given chainId. */
@@ -38,6 +39,7 @@ export function getViemChainById(chainId: number): Chain {
       optimismSepolia,
       avalanche,
       avalancheFuji,
+      linea,
     ],
     id: chainId as any,
   });
@@ -67,6 +69,7 @@ const alchemyChainNames: Record<number, string> = {
   [baseSepolia.id]: "base-sepolia",
   [optimism.id]: "opt-mainnet",
   [optimismSepolia.id]: "opt-sepolia",
+  [linea.id]: "linea-mainnet",
 };
 const supportedChainIds = Object.keys(alchemyChainNames).map(Number);
 

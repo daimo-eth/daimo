@@ -27,9 +27,9 @@ export {
   daimoPayAcrossBridgerAbi,
   daimoPayBridgerAbi,
   daimoPayCctpBridgerAbi,
+  daimoPayRelayerAbi,
   daimoPaymasterV2Abi,
   daimoPaymasterV2Address,
-  daimoPayRelayerAbi,
   daimoRequestAbi,
   daimoRequestAddress,
   daimoRequestConfig,
@@ -91,3 +91,7 @@ export * from "./external";
 // Supported chains and coins
 export * from "./chain";
 export * from "./chainConfig";
+export * from "./chainExplorer";
+
+export * from "./cctp";
+export * from "./viemClient";

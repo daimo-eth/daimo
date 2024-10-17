@@ -1,3 +1,4 @@
+import { Address, getAddress } from "viem";
 import {
   arbitrum,
   avalanche,
@@ -7,8 +8,7 @@ import {
   ethereumSepolia,
   optimism,
   polygon,
-} from "@daimo/contract";
-import { Address, getAddress } from "viem";
+} from "./chain";
 
 const chainToCctpMessengerAddr: Record<number, Address> = {
   // https://developers.circle.com/stablecoins/docs/evm-smart-contracts#mainnet-contract-addresses

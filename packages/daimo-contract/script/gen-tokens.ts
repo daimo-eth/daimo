@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import { getAddress, Hex, isAddress } from "viem";
 
-import { assert } from "./util";
 import { DAv2Chain, getDAv2Chain } from "../src";
 import { baseUSDbC, baseUSDC, ForeignToken } from "../src/foreignToken";
+import { assert } from "./util";
 
 const tokenListURLs = [
   "https://tokens.coingecko.com/ethereum/all.json",
@@ -12,6 +12,7 @@ const tokenListURLs = [
   "https://tokens.coingecko.com/base/all.json",
   "https://tokens.coingecko.com/polygon-pos/all.json",
   // "https://tokens.coingecko.com/avalanche/all.json",
+  "https://tokens.coingecko.com/linea/all.json",
 ];
 
 interface TokenListResponse {
@@ -43,7 +44,7 @@ async function main() {
 
     const tokens = tokenList.tokens
       .map((token) => getForeignToken(chain, token))
-      .filter((token) => token != null);
+      .filter((token) => token != null) as ForeignToken[];
     console.log(`Loaded ${tokens.length} tokens for ${chain.name} from ${url}`);
 
     foreignTokens.push(...tokens);
@@ -52,7 +53,7 @@ async function main() {
   console.log(`Writing ${foreignTokens.length} tokens to tokens.json`);
   await fs.writeFile(
     "./src/codegen/tokens.json",
-    JSON.stringify(foreignTokens, null, 2)
+    JSON.stringify(foreignTokens, null, 2),
   );
 }
 
@@ -66,11 +67,11 @@ const customOverrides = [baseUSDC, baseUSDbC] as ForeignToken[];
 
 function getForeignToken(
   chain: DAv2Chain,
-  token: TokenListToken
+  token: TokenListToken,
 ): ForeignToken | null {
   assert(
     token.chainId === chain.chainId,
-    `Unsupported: ${JSON.stringify({ token, chain })}`
+    `Unsupported: ${JSON.stringify({ token, chain })}`,
   );
   const largeLogo = token.logoURI?.split("?")[0].replace("thumb", "large");
 
@@ -79,7 +80,7 @@ function getForeignToken(
   const addr = getAddress(token.address);
 
   const override = customOverrides.find(
-    (o) => o.token === addr && o.chainId === chain.chainId
+    (o) => o.token === addr && o.chainId === chain.chainId,
   );
   if (override != null) {
     return override;

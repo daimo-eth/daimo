@@ -8,10 +8,8 @@ import {
   maxUint128,
   PublicClient,
 } from "viem";
-import { arbitrum, base, mainnet, optimism, polygon } from "viem/chains";
+import { arbitrum, base, linea, mainnet, optimism, polygon } from "viem/chains";
 
-import { ChainlinkFeed, PricedToken } from "./scriptModels";
-import { assert, assertNotNull } from "./util";
 import {
   aggregatorV2V3InterfaceAbi,
   arbitrumWETH,
@@ -20,16 +18,19 @@ import {
   erc20Abi,
   ethereumWETH,
   ForeignToken,
+  getAlchemyTransportUrl,
   getDAv2Chain,
   optimismWETH,
   polygonWETH,
   polygonWMATIC,
 } from "../src";
+import { ChainlinkFeed, PricedToken } from "./scriptModels";
+import { assert, assertNotNull, chunkArray } from "./util";
 
 const alchemyKey = process.env.ALCHEMY_API_KEY;
 if (alchemyKey == null) throw new Error("Missing ALCHEMY_API_KEY");
 
-const chains = [mainnet, arbitrum, optimism, base, polygon];
+const chains = [mainnet, arbitrum, optimism, base, polygon, linea];
 
 const chainlinkJsonUrls = [
   "https://reference-data-directory.vercel.app/feeds-mainnet.json",
@@ -37,6 +38,7 @@ const chainlinkJsonUrls = [
   "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-optimism-1.json",
   "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-base-1.json",
   "https://reference-data-directory.vercel.app/feeds-matic-mainnet.json",
+  "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-linea-1.json",
 ];
 
 /**
@@ -66,7 +68,7 @@ async function main() {
     rawNames.map(async (file) => {
       const raw = await fs.readFile(`${rawDir}/${file}`);
       return JSON.parse(raw.toString());
-    })
+    }),
   );
   const nTotalFeeds = rawJsons.reduce((sum, r) => sum + r.length, 0);
   console.log(`1-raw-feed-info/: ${nTotalFeeds} total feeds`);
@@ -103,7 +105,7 @@ async function main() {
       .map(({ tokenAddress, chainlinkFeedAddress }) => [
         tokenAddress,
         chainlinkFeedAddress,
-      ])
+      ]),
   );
 
   // - manual validation for rebasing tokens, etc.
@@ -120,7 +122,7 @@ async function main() {
       tokenAddress,
       chainlinkFeedAddress: tokenToFeed.get(tokenAddress),
       skipUniswap: true,
-    }))
+    })),
   );
 
   // write 4-valid-feeds.json
@@ -134,7 +136,7 @@ function downloadFiles(dir: string, urls: string[]) {
       const raw = await fetch(url).then((r) => r.text());
       console.log(`Writing ${raw.length}ch to ${dir}/${filename}`);
       await fs.writeFile(`${dir}/${filename}`, raw);
-    })
+    }),
   );
 }
 
@@ -200,6 +202,8 @@ function parseChainlinkFeeds(rawJsons: any[]): ChainlinkFeed[] {
           return 137;
         case "Avalanche":
           return 43114;
+        case "Linea":
+          return 59144;
         default:
           throw new Error("Unknown chain name: " + chainName);
       }
@@ -224,7 +228,7 @@ function parseChainlinkFeeds(rawJsons: any[]): ChainlinkFeed[] {
       }
       assert(
         rFeed.docs.blockchainName === chainName,
-        rFeed.docs.blockchainName
+        rFeed.docs.blockchainName,
       );
       const feedAddress = getAddress(rFeed.proxyAddress);
       const tokenSymbol = rFeed.docs.baseAsset as string;
@@ -247,14 +251,14 @@ function parseChainlinkFeeds(rawJsons: any[]): ChainlinkFeed[] {
 
 function mergeTokensWithFeeds(
   tokens: ForeignToken[],
-  feeds: ChainlinkFeed[]
+  feeds: ChainlinkFeed[],
 ): { token: ForeignToken; feed: ChainlinkFeed }[] {
   const ret = [] as { token: ForeignToken; feed: ChainlinkFeed }[];
   for (const token of tokens) {
     const possibleFeeds = feeds.filter(
       (f) =>
         f.chainId === token.chainId &&
-        f.tokenSymbol.toUpperCase() === token.symbol.toUpperCase()
+        f.tokenSymbol.toUpperCase() === token.symbol.toUpperCase(),
     );
     if (possibleFeeds.length > 1) {
       throw new Error(`Duplicate feeds: ${JSON.stringify(possibleFeeds)}`);
@@ -273,7 +277,7 @@ function mergeTokensWithFeeds(
 }
 
 async function priceTokens(
-  tfs: { token: ForeignToken; feed: ChainlinkFeed }[]
+  tfs: { token: ForeignToken; feed: ChainlinkFeed }[],
 ): Promise<PricedToken[]> {
   const ret: PricedToken[] = [];
   const clients = new Map<number, PublicClient>();
@@ -282,35 +286,44 @@ async function priceTokens(
   let blockNumber = 0;
   let blockTimestamp = 0;
 
-  for (const { token, feed } of tfs) {
-    const client = getCachedClient(clients, token.chainId);
-    if (token.chainId !== chainId) {
-      const block = await client.getBlock({ blockTag: "latest" });
-      blockNumber = Number(block.number);
-      blockTimestamp = Number(block.timestamp);
-    }
+  const concurrency = 20;
+  const chunks = chunkArray(tfs, concurrency);
 
-    const accChain = getDAv2Chain(token.chainId);
-    const usdcAddr = accChain.bridgeCoin.token;
+  for (const chunk of chunks) {
+    const promises = chunk.map(async ({ token, feed }) => {
+      const client = getCachedClient(clients, token.chainId);
+      if (token.chainId !== chainId) {
+        const block = await client.getBlock({ blockTag: "latest" });
+        blockNumber = Number(block.number);
+        blockTimestamp = Number(block.timestamp);
+      }
 
-    // Get Chainlink price feed for this token, if available
-    try {
-      const tokenWithPrice = await quoteToken({
-        blockNumber,
-        blockTimestamp,
-        client,
-        token,
-        feed,
-        usdcAddr,
-      });
-      const { status, uniswapPrice, chainlinkPrice } = tokenWithPrice;
-      console.log(
-        `${accChain.name} ${token.symbol}: ${status} uniswap ${uniswapPrice} chainlink ${chainlinkPrice}`
-      );
-      ret.push(tokenWithPrice);
-    } catch (e) {
-      console.error(`ERROR ${accChain.name} ${token.symbol}: ${e.message}`);
-    }
+      const accChain = getDAv2Chain(token.chainId);
+      const usdcAddr = accChain.bridgeCoin.token;
+
+      // Get Chainlink price feed for this token, if available
+      try {
+        const tokenWithPrice = await quoteToken({
+          blockNumber,
+          blockTimestamp,
+          client,
+          token,
+          feed,
+          usdcAddr,
+        });
+        const { status, uniswapPrice, chainlinkPrice } = tokenWithPrice;
+        console.log(
+          `${accChain.name} ${token.symbol}: ${status} uniswap ${uniswapPrice} chainlink ${chainlinkPrice}`,
+        );
+        return tokenWithPrice;
+      } catch (e) {
+        console.error(`ERROR ${accChain.name} ${token.symbol}: ${e.message}`);
+        return null;
+      }
+    });
+
+    const results = await Promise.all(promises);
+    ret.push(...(results.filter((f) => f != null) as PricedToken[]));
   }
 
   return ret;
@@ -442,10 +455,11 @@ function getCachedClient(clients: Map<number, PublicClient>, chainId: number) {
 function getPublicClient(chainId: number): PublicClient {
   const chain = Object.values(chains).find((c) => c.id === chainId) as Chain;
   if (chain == null) throw new Error("Unsupported chain: " + chainId);
-  return createPublicClient({
-    chain,
-    transport: http(chain.rpcUrls.alchemy.http[0] + "/" + alchemyKey),
-  });
+  if (alchemyKey == null) throw new Error("Missing Alchemy key");
+
+  const rpcUrl = getAlchemyTransportUrl(chain.id, alchemyKey);
+  const transport = http(rpcUrl);
+  return createPublicClient({ chain, transport });
 }
 
 function toJSON(obj: any): string {

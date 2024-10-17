@@ -5,7 +5,6 @@ import {
   UserOpHex,
   assert,
   derKeytoContractFriendlyKey,
-  getCctpMessengerAddr,
   now,
   zUserOpHex,
 } from "@daimo/common";
@@ -16,6 +15,7 @@ import {
   daimoFastCctpV1Address,
   erc20Abi,
   getBridgeCoin,
+  getCctpMessengerAddr,
 } from "@daimo/contract";
 import { Utils } from "userop";
 import {

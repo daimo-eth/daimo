@@ -457,6 +457,12 @@
   },
   {
     "chainId": 42161,
+    "tokenSymbol": "USDM",
+    "feedAddress": "0x24EA2671671c33D66e9854eC06e42E5D3ac1f764",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
     "tokenSymbol": "SUSHI",
     "feedAddress": "0xb2A8BA74cbca38508BA1632761b56C897060147C",
     "feedDecimals": 8
@@ -465,6 +471,12 @@
     "chainId": 42161,
     "tokenSymbol": "DPI",
     "feedAddress": "0x1e431E56118bE414bD91f6392414ad3833d21B0D",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "gmWBTC",
+    "feedAddress": "0x19eCDd6DDc12597ec4A522fB1E25b1A580B605B7",
     "feedDecimals": 8
   },
   {
@@ -483,6 +495,12 @@
     "chainId": 42161,
     "tokenSymbol": "UNI",
     "feedAddress": "0x9C917083fDb403ab5ADbEC26Ee294f6EcAda2720",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 42161,
+    "tokenSymbol": "gmWETH",
+    "feedAddress": "0xEAeFFF521cb36dFb414E8580f8635BFB44d96255",
     "feedDecimals": 8
   },
   {
@@ -559,9 +577,21 @@
   },
   {
     "chainId": 8453,
+    "tokenSymbol": "USDM",
+    "feedAddress": "0xF7742A6f36e9936CeA0E976bF6CD3930C1178775",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 8453,
     "tokenSymbol": "weETH",
     "feedAddress": "0xFC1415403EbB0c693f9a7844b92aD2Ff24775C65",
     "feedDecimals": 18
+  },
+  {
+    "chainId": 8453,
+    "tokenSymbol": "CBBTC",
+    "feedAddress": "0x07DA0E54543a844a80ABE69c8A12F22B3aA59f9D",
+    "feedDecimals": 8
   },
   {
     "chainId": 8453,
@@ -738,6 +768,72 @@
     "feedDecimals": 8
   },
   {
+    "chainId": 59144,
+    "tokenSymbol": "ETH",
+    "feedAddress": "0x3c6Cd9Cc7c7a4c2Cf5a82734CD249D7D593354dA",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "LINK",
+    "feedAddress": "0x8dF01C2eFed1404872b54a69f40a57FeC1545998",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "WSTETH",
+    "feedAddress": "0x8eCE1AbA32716FdDe8D6482bfd88E9a0ee01f565",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "FOXY",
+    "feedAddress": "0xdE14081b6bd39230EcA7Be1137413b7b87B07C07",
+    "feedDecimals": 18
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "AAVE",
+    "feedAddress": "0x09B0a8AFD9185500d7C64FC68338b4C50db6df1d",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "ARB",
+    "feedAddress": "0x28606F10277Cc2e99e57ae2C55D26860E13A1BBD",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "USDC",
+    "feedAddress": "0xAADAa473C1bDF7317ec07c915680Af29DeBfdCb5",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "BTC",
+    "feedAddress": "0x7A99092816C8BD5ec8ba229e3a6E6Da1E628E1F9",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "DAI",
+    "feedAddress": "0x5133D67c38AFbdd02997c14Abd8d83676B4e309A",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "USDT",
+    "feedAddress": "0xefCA2bbe0EdD0E22b2e0d2F8248E99F4bEf4A7dB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 59144,
+    "tokenSymbol": "MATIC",
+    "feedAddress": "0x9ce4473B42a639d010eD741df3CA829E6e480803",
+    "feedDecimals": 8
+  },
+  {
     "chainId": 10,
     "tokenSymbol": "ETH",
     "feedAddress": "0x13e3Ee699D1909E989722E753853AE30b17e08c5",
@@ -849,6 +945,12 @@
     "chainId": 10,
     "tokenSymbol": "TRX",
     "feedAddress": "0x0E09921cf7801A5aD47B892C8727593275625a9f",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 10,
+    "tokenSymbol": "USDM",
+    "feedAddress": "0xA45881b63ff9BE3F9a3439CA0c002686e65a8ED5",
     "feedDecimals": 8
   },
   {
@@ -1369,8 +1471,14 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "LINK",
-    "feedAddress": "0x2c1d072e956AFFC0D435Cb7AC38EF18d24d9127c",
+    "tokenSymbol": "BAT",
+    "feedAddress": "0x9441D7556e7820B5ca42082cfa99487D56AcA958",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "COMP",
+    "feedAddress": "0xdbd020CAeF83eFd542f4De03e3cF0C28A4428bd5",
     "feedDecimals": 8
   },
   {
@@ -1411,12 +1519,6 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "UNI",
-    "feedAddress": "0x553303d460EE0afB37EdFf9bE42922D8FF63220e",
-    "feedDecimals": 8
-  },
-  {
-    "chainId": 1,
     "tokenSymbol": "TAO",
     "feedAddress": "0x1c88503c9A52aE6aaE1f9bb99b3b7e9b8Ab35459",
     "feedDecimals": 8
@@ -1425,12 +1527,6 @@
     "chainId": 1,
     "tokenSymbol": "PYUSD",
     "feedAddress": "0x8f1dF6D7F2db73eECE86a18b4381F4707b918FB1",
-    "feedDecimals": 8
-  },
-  {
-    "chainId": 1,
-    "tokenSymbol": "SUSHI",
-    "feedAddress": "0xCc70F09A6CC17553b2E31954cD36E4A2d89501f7",
     "feedDecimals": 8
   },
   {
@@ -1447,14 +1543,14 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "DAI",
-    "feedAddress": "0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9",
+    "tokenSymbol": "BTC",
+    "feedAddress": "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c",
     "feedDecimals": 8
   },
   {
     "chainId": 1,
-    "tokenSymbol": "ZRX",
-    "feedAddress": "0x2885d15b8Af22648b98B122b22FDF4D2a56c6023",
+    "tokenSymbol": "YFI",
+    "feedAddress": "0xA027702dbb89fbd58938e4324ac03B58d812b0E1",
     "feedDecimals": 8
   },
   {
@@ -1465,8 +1561,14 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "COMP",
-    "feedAddress": "0xdbd020CAeF83eFd542f4De03e3cF0C28A4428bd5",
+    "tokenSymbol": "CBBTC",
+    "feedAddress": "0x2665701293fCbEB223D11A08D826563EDcCE423A",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "SUSHI",
+    "feedAddress": "0xCc70F09A6CC17553b2E31954cD36E4A2d89501f7",
     "feedDecimals": 8
   },
   {
@@ -1489,8 +1591,8 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "MKR",
-    "feedAddress": "0xec1D1B3b0443256cc3860e24a46F108e699484Aa",
+    "tokenSymbol": "DAI",
+    "feedAddress": "0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9",
     "feedDecimals": 8
   },
   {
@@ -1507,8 +1609,14 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "AAVE",
-    "feedAddress": "0x547a514d5e3769680Ce22B2361c10Ea13619e8a9",
+    "tokenSymbol": "ETH",
+    "feedAddress": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "USDM",
+    "feedAddress": "0x079674468Fee6ab45aBfE986737A440701c49BdB",
     "feedDecimals": 8
   },
   {
@@ -1537,6 +1645,12 @@
   },
   {
     "chainId": 1,
+    "tokenSymbol": "USD0",
+    "feedAddress": "0x7e891DEbD8FA0A4Cf6BE58Ddff5a8ca174FebDCB",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
     "tokenSymbol": "RPL",
     "feedAddress": "0x4E155eD98aFE9034b7A5962f6C84c86d869daA9d",
     "feedDecimals": 8
@@ -1549,8 +1663,8 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "BAT",
-    "feedAddress": "0x9441D7556e7820B5ca42082cfa99487D56AcA958",
+    "tokenSymbol": "LINK",
+    "feedAddress": "0x2c1d072e956AFFC0D435Cb7AC38EF18d24d9127c",
     "feedDecimals": 8
   },
   {
@@ -1585,12 +1699,6 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "ETH",
-    "feedAddress": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
-    "feedDecimals": 8
-  },
-  {
-    "chainId": 1,
     "tokenSymbol": "STG",
     "feedAddress": "0x7A9f34a0Aa917D438e9b6E630067062B7F8f6f3d",
     "feedDecimals": 8
@@ -1605,12 +1713,6 @@
     "chainId": 1,
     "tokenSymbol": "USDP",
     "feedAddress": "0x09023c0DA49Aaf8fc3fA3ADF34C6A7016D38D5e3",
-    "feedDecimals": 8
-  },
-  {
-    "chainId": 1,
-    "tokenSymbol": "SXP",
-    "feedAddress": "0xFb0CfD6c19e25DB4a08D8a204a387cEa48Cc138f",
     "feedDecimals": 8
   },
   {
@@ -1645,15 +1747,15 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "YFI",
-    "feedAddress": "0xA027702dbb89fbd58938e4324ac03B58d812b0E1",
-    "feedDecimals": 8
-  },
-  {
-    "chainId": 1,
     "tokenSymbol": "AMPL",
     "feedAddress": "0xe20CA8D7546932360e37E9D72c1a47334af57706",
     "feedDecimals": 18
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "AAVE",
+    "feedAddress": "0x547a514d5e3769680Ce22B2361c10Ea13619e8a9",
+    "feedDecimals": 8
   },
   {
     "chainId": 1,
@@ -1663,14 +1765,26 @@
   },
   {
     "chainId": 1,
-    "tokenSymbol": "BTC",
-    "feedAddress": "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c",
+    "tokenSymbol": "UNI",
+    "feedAddress": "0x553303d460EE0afB37EdFf9bE42922D8FF63220e",
     "feedDecimals": 8
   },
   {
     "chainId": 1,
     "tokenSymbol": "SUSDE",
     "feedAddress": "0xFF3BC18cCBd5999CE63E788A1c250a88626aD099",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "ZRX",
+    "feedAddress": "0x2885d15b8Af22648b98B122b22FDF4D2a56c6023",
+    "feedDecimals": 8
+  },
+  {
+    "chainId": 1,
+    "tokenSymbol": "MKR",
+    "feedAddress": "0xec1D1B3b0443256cc3860e24a46F108e699484Aa",
     "feedDecimals": 8
   },
   {
@@ -1723,7 +1837,7 @@
   },
   {
     "chainId": 137,
-    "tokenSymbol": "MATIC",
+    "tokenSymbol": "POL",
     "feedAddress": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
     "feedDecimals": 8
   },

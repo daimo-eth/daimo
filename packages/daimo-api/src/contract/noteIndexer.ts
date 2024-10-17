@@ -3,22 +3,24 @@ import {
   DaimoNoteStatus,
   amountToDollars,
   assertNotNull,
-  bytesToAddr,
   debugJson,
   getEAccountStr,
   getNoteId,
   retryBackoff,
 } from "@daimo/common";
+import {
+  bytesToAddr
+} from '@daimo/contract';
 import { Kysely } from "kysely";
 import { Address, Hex, bytesToHex } from "viem";
 
-import { Indexer } from "./indexer";
-import { NameRegistry } from "./nameRegistry";
-import { OpIndexer } from "./opIndexer";
 import { DB as IndexDB } from "../codegen/dbIndex";
 import { chainConfig } from "../env";
 import { PaymentMemoTracker } from "../offchain/paymentMemoTracker";
 import { logCoordinateKey, senderIdKey } from "../utils/indexing";
+import { Indexer } from "./indexer";
+import { NameRegistry } from "./nameRegistry";
+import { OpIndexer } from "./opIndexer";
 
 interface NoteLog {
   blockNum: number;
