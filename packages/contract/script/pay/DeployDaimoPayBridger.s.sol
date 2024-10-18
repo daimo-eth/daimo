@@ -38,7 +38,7 @@ contract DeployDaimoPayBridger is Script {
     {
         bool testnet = _isTestnet(block.chainid);
         if (testnet) {
-            // TODO
+            // Bridging not supported on testnet.
             return (new uint256[](0), new address[](0));
         }
 
