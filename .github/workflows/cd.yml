@@ -54,6 +54,17 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - if: env.IMAGE_MANIFEST == 'null'
+        uses: actions/setup-node@v3
+        with:
+          node-version: "22.x"
+
+      - if: env.IMAGE_MANIFEST == 'null'
+        run: |
+          git submodule update --init daimo
+          npm ci
+          npx turbo build --filter='@daimo/api'
+
+      - if: env.IMAGE_MANIFEST == 'null'
         name: Build, tag, and push docker image to Amazon ECR
         uses: docker/build-push-action@v5
         with:
