@@ -5,7 +5,7 @@ FROM node:20
 WORKDIR /usr/src/app
 
 # Copy app code
-COPY daimo/packages/daimo-api/dist ./dist
+COPY packages/daimo-api/dist ./dist
 COPY node_modules/geoip-lite/data ./data
 
 # Expose the port the app runs on
