@@ -60,7 +60,6 @@ jobs:
 
       - if: env.IMAGE_MANIFEST == 'null'
         run: |
-          git submodule update --init daimo
           npm ci
           npx turbo build --filter='@daimo/api'
 
