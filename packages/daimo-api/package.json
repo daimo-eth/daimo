@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "OTEL_SERVICE_NAME=daimo-api ts-node-dev --inspect=4321 -r ./src/server/tracing.ts src/server/server.ts",
     "start": "OTEL_SERVICE_NAME=daimo-api node --max-old-space-size=7168 -- ../../node_modules/.bin/ts-node -r ./src/server/tracing.ts src/server/server.ts",
+    "build": "esbuild --bundle src/server/server.ts --platform=node --outdir=dist",
     "test": "tsc --noEmit && tape -r ts-node/register/transpile-only test/**/*.test.ts",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape,ts-node",
@@ -53,6 +54,7 @@
     "@types/semver": "^7.5.8",
     "@types/tape": "^5.6.0",
     "depcheck": "^1.4.3",
+    "esbuild": "^0.24.0",
     "eslint": "^8.56.0",
     "tape": "^5.6.3",
     "ts-node": "^10.9.2",
