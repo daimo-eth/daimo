@@ -42,9 +42,7 @@ import { chainConfig, getEnvApi } from "../env";
 import { i18n } from "../i18n";
 import {
   getLandlineAccounts,
-  getLandlineSession,
   getLandlineTransfers,
-  getLandlineURL,
 } from "../landline/connector";
 import { addLandlineTransfers } from "../landline/landlineClogMatcher";
 import { ViemClient } from "../network/viemClient";
