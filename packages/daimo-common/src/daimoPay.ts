@@ -104,6 +104,7 @@ export type DaimoPayDehydratedOrder = {
   redirectUri: string | null;
   orgId: string | null;
   createdAt: number | null;
+  lastUpdatedAt: number | null;
   metadata: DaimoPayOrderMetadata;
 };
 
@@ -127,6 +128,7 @@ export type DaimoPayHydratedOrder = {
   redirectUri: string | null;
   orgId: string | null;
   createdAt: number | null;
+  lastUpdatedAt: number | null;
   metadata: DaimoPayOrderMetadata;
 };
 
@@ -204,7 +206,7 @@ export type PaymentStartedEvent = {
   type: "payment_started";
   paymentId: DaimoPayOrderID;
   chainId: number;
-  txHash: Hex;
+  txHash: Hex | null;
 };
 
 export type PaymentCompletedEvent = {
