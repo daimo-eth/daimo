@@ -18,7 +18,7 @@
     "@tsconfig/node20": "^20.1.4",
     "@wagmi/cli": "^2.1.15",
     "tsx": "^4.19.1",
-    "typescript": "5.3.3",
+    "typescript": "5.5.2",
     "userop": "^0.3.2",
     "viem": "^2.21.10"
   },
