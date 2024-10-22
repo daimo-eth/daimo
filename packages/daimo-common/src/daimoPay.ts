@@ -37,6 +37,12 @@ export enum DaimoPayOrderMode {
   HYDRATED = "hydrated", // once hydrated, the order is final and all parameters are known and immutable
 }
 
+export enum DaimoPayIntentStatus {
+  PENDING = "pending",
+  SUCCESSFUL = "successful",
+  REFUNDED = "refunded",
+}
+
 export type DaimoPayOrderUpdate =
   | DaimoPayOrderMode
   | DaimoPayOrderStatusSource
@@ -129,6 +135,7 @@ export type DaimoPayHydratedOrder = {
   orgId: string | null;
   createdAt: number | null;
   lastUpdatedAt: number | null;
+  intentStatus: DaimoPayIntentStatus;
   metadata: DaimoPayOrderMetadata;
 };
 
@@ -223,7 +230,7 @@ export type PaymentBouncedEvent = {
   txHash: Hex;
 };
 
-export type WebhookEventBody =
+export type DaimoPayEvent =
   | PaymentStartedEvent
   | PaymentCompletedEvent
   | PaymentBouncedEvent;
@@ -248,7 +255,7 @@ export enum WebhookEventStatus {
 export interface WebhookEvent {
   id: UUID;
   endpoint: WebhookEndpoint;
-  body: WebhookEventBody;
+  body: DaimoPayEvent;
   status: WebhookEventStatus;
   deliveries: WebhookDelivery[];
   createdAt: Date;
