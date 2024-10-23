@@ -14,20 +14,20 @@ import z from "zod";
 import { BigIntStr, zAddress } from "./model";
 
 // lifecycle: waiting payment -> pending processing -> start submitted -> processed (onchain tx was successful)
-// strings are not consistent for legacy reasons
 export enum DaimoPayOrderStatusSource {
   WAITING_PAYMENT = "waiting_payment",
   PENDING_PROCESSING = "pending_processing",
   START_SUBMITTED = "start_submitted",
-  START_SUCCESSFUL = "processed",
+  /* Start transaction receipt confirmed. */
+  PROCESSED = "processed",
 }
 
 // lifecycle: pending -> fast-finish-submitted (onchain tx submitted) -> fast-finished (onchain tx was successful) -> claimed (onchain tx was successful)
-// strings are not consistent for legacy reasons
 export enum DaimoPayOrderStatusDest {
   PENDING = "pending",
   FAST_FINISH_SUBMITTED = "fast_finish_submitted",
-  FAST_FINISH_SUCCESSFUL = "fast_finished",
+  /* Fast finish transaction receipt confirmed. */
+  FAST_FINISHED = "fast_finished",
   CLAIM_SUCCESSFUL = "claimed",
 }
 
