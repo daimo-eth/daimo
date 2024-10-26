@@ -521,6 +521,10 @@ const allBasicTokens = [
   ...lineaTokens,
 ];
 
+const blacklistedTokens: Record<number, Set<Address>> = {
+  137: new Set([getAddress("0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc")]), // GAX Liquidity Token Reward (GLTR)
+};
+
 const toKey = (t: ForeignToken) => `${t.chainId}-${t.symbol.toLowerCase()}`;
 
 // Export tokens for each supported chain
@@ -544,6 +548,9 @@ for (const token of codegenTokens as ForeignToken[]) {
     // if (jsonB !== jsonT) throw new Error(`Mismatch: ${jsonB} ${jsonT}`);
     //
     // Skip token-list aliases of known, basic tokens.
+    continue;
+  } else if (blacklistedTokens[token.chainId]?.has(token.token)) {
+    // Skip manually-blacklisted tokens
     continue;
   }
   const toks = tokensByChainId.get(token.chainId) || [];
