@@ -209,6 +209,14 @@ export const zUUID = z.string().uuid();
 
 export type UUID = z.infer<typeof zUUID>;
 
+/** The possible states of a Daimo Pay payment. */
+export enum PaymentStatus {
+  Pending = "payment_pending",
+  Started = "payment_started",
+  Completed = "payment_completed",
+  Bounced = "payment_bounced",
+}
+
 export type PaymentStartedEvent = {
   type: "payment_started";
   paymentId: DaimoPayOrderID;
