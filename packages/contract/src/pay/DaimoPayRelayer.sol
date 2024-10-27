@@ -145,10 +145,16 @@ contract DaimoPayRelayer is Ownable2Step {
         }
 
         dp.claimIntent({intent: intent, calls: calls});
+
+        // Transfer any bridgeTokenOut balance back to the owner
+        uint256 balance = TokenUtils.getBalanceOf(
+            intent.bridgeTokenOut.token,
+            address(this)
+        );
         TokenUtils.transfer({
             token: intent.bridgeTokenOut.token,
             recipient: payable(msg.sender),
-            amount: intent.bridgeTokenOut.amount
+            amount: balance
         });
     }
 

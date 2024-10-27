@@ -27,9 +27,9 @@ export {
   daimoPayAcrossBridgerAbi,
   daimoPayBridgerAbi,
   daimoPayCctpBridgerAbi,
-  daimoPayRelayerAbi,
   daimoPaymasterV2Abi,
   daimoPaymasterV2Address,
+  daimoPayRelayerAbi,
   daimoRequestAbi,
   daimoRequestAddress,
   daimoRequestConfig,
@@ -71,7 +71,7 @@ export const payIntentFactoryAddress =
   "0xa4ce06F41FfC631f004e4c451D70C6E5A0f7f175";
 /** Daimo Pay relayer address */
 export const daimoPayRelayerAddress =
-  "0xea5426c21c893fcaD30742ce6e95f8db15A23616";
+  "0x547F08b3Cd77b94cfd2C90127B829bbDa9b2f9d9";
 
 // DAv2
 export const entryPointV07Address =
