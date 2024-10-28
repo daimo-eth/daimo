@@ -42,9 +42,7 @@ import { chainConfig, getEnvApi } from "../env";
 import { i18n } from "../i18n";
 import {
   getLandlineAccounts,
-  getLandlineSession,
   getLandlineTransfers,
-  getLandlineURL,
 } from "../landline/connector";
 import { addLandlineTransfers } from "../landline/landlineClogMatcher";
 import { ViemClient } from "../network/viemClient";
@@ -200,20 +198,20 @@ export async function getAccountHistory(
   const exchangeRates = await getExchangeRates(extApiCache);
 
   // Get landline session key and accounts
-  let landlineSessionURL = "";
+  let landlineSessionKey: string | undefined;
+  const landlineSessionURL = "";
   let landlineAccounts: LandlineAccount[] = [];
 
   // Landline supported starting in 1.9.11
-  let landlineSessionKey: string | undefined;
   if (
     getEnvApi().LANDLINE_API_URL &&
     appVersion &&
     semver.gte(appVersion, "1.9.11")
   ) {
     const daimoAddress = address;
-    const llSession = await getLandlineSession({ daimoAddress }, ctx);
-    landlineSessionKey = llSession.key;
-    landlineSessionURL = getLandlineURL(address, landlineSessionKey);
+    // const llSession = await getLandlineSession({ daimoAddress }, ctx);
+    // landlineSessionKey = llSession.key;
+    // landlineSessionURL = getLandlineURL(address, landlineSessionKey);
     landlineAccounts = await getLandlineAccounts({ daimoAddress }, ctx);
 
     const landlineTransfers = await getLandlineTransfers({ daimoAddress }, ctx);
