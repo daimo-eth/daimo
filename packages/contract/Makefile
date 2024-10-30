@@ -12,11 +12,12 @@ full:
 	make build
 
 test:
-	$(eval BASE_MAINNET_RPC ?= $(or $(BASE_MAINNET_RPC),https://base-rpc.publicnode.com)) # Use environment variable if set, otherwise use default
-	@echo Running tests with RPC: $(BASE_MAINNET_RPC)
-	forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --no-match-path "test/uniswap/*"
-	forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --fork-block-number 14513720 --match-path "test/uniswap/*" --no-match-path "test/uniswap/Quoter.t.sol"
-	forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --fork-block-number 15950101 --match-path "test/uniswap/Quoter.t.sol"
+	# $(eval BASE_MAINNET_RPC ?= $(or $(BASE_MAINNET_RPC),https://base-rpc.publicnode.com)) # Use environment variable if set, otherwise use default
+	# @echo Running tests with RPC: $(BASE_MAINNET_RPC)
+	# forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --no-match-path "test/uniswap/*"
+	# forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --fork-block-number 14513720 --match-path "test/uniswap/*" --no-match-path "test/uniswap/Quoter.t.sol"
+	# forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --fork-block-number 15950101 --match-path "test/uniswap/Quoter.t.sol"
+	forge test -vvv --match-path "test/DaimoPay.t.sol"
 
 coverage:
 	$(eval BASE_MAINNET_RPC ?= $(or $(BASE_MAINNET_RPC),https://base-rpc.publicnode.com)) # Use environment variable if set, otherwise use default

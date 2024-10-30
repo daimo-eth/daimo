@@ -1,42 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.0;
 
+/**
+ * @title IAxelarGateway
+ * @dev Interface for the Axelar Gateway that supports general message passing and contract call execution.
+ */
 interface IAxelarGateway {
-    /**********\
-    |* Errors *|
-    \**********/
-
-    error NotSelf();
-    error NotProxy();
-    error InvalidCodeHash();
-    error SetupFailed();
-    error InvalidAuthModule();
-    error InvalidTokenDeployer();
-    error InvalidAmount();
-    error InvalidChainId();
-    error InvalidCommands();
-    error TokenDoesNotExist(string symbol);
-    error TokenAlreadyExists(string symbol);
-    error TokenDeployFailed(string symbol);
-    error TokenContractDoesNotExist(address token);
-    error BurnFailed(string symbol);
-    error MintFailed(string symbol);
-    error InvalidSetMintLimitsParams();
-    error ExceedMintLimit(string symbol);
-
-    /**********\
-    |* Events *|
-    \**********/
-
-    event TokenSent(
-        address indexed sender,
-        string destinationChain,
-        string destinationAddress,
-        string symbol,
-        uint256 amount
-    );
-
+    /**
+     * @notice Emitted when a contract call is made through the gateway.
+     * @dev Logs the attempt to call a contract on another chain.
+     * @param sender The address of the sender who initiated the contract call.
+     * @param destinationChain The name of the destination chain.
+     * @param destinationContractAddress The address of the contract on the destination chain.
+     * @param payloadHash The keccak256 hash of the sent payload data.
+     * @param payload The payload data used for the contract call.
+     */
     event ContractCall(
         address indexed sender,
         string destinationChain,
@@ -45,73 +24,29 @@ interface IAxelarGateway {
         bytes payload
     );
 
-    event ContractCallWithToken(
-        address indexed sender,
-        string destinationChain,
-        string destinationContractAddress,
-        bytes32 indexed payloadHash,
-        bytes payload,
-        string symbol,
-        uint256 amount
-    );
-
-    event Executed(bytes32 indexed commandId);
-
-    event TokenDeployed(string symbol, address tokenAddresses);
-
-    event ContractCallApproved(
-        bytes32 indexed commandId,
-        string sourceChain,
-        string sourceAddress,
-        address indexed contractAddress,
-        bytes32 indexed payloadHash,
-        bytes32 sourceTxHash,
-        uint256 sourceEventIndex
-    );
-
-    event ContractCallApprovedWithMint(
-        bytes32 indexed commandId,
-        string sourceChain,
-        string sourceAddress,
-        address indexed contractAddress,
-        bytes32 indexed payloadHash,
-        string symbol,
-        uint256 amount,
-        bytes32 sourceTxHash,
-        uint256 sourceEventIndex
-    );
-
-    event TokenMintLimitUpdated(string symbol, uint256 limit);
-
-    event OperatorshipTransferred(bytes newOperatorsData);
-
-    event Upgraded(address indexed implementation);
-
-    /********************\
-    |* Public Functions *|
-    \********************/
-
-    function sendToken(
-        string calldata destinationChain,
-        string calldata destinationAddress,
-        string calldata symbol,
-        uint256 amount
-) external;
-
+    /**
+     * @notice Sends a contract call to another chain.
+     * @dev Initiates a cross-chain contract call through the gateway to the specified destination chain and contract.
+     * @param destinationChain The name of the destination chain.
+     * @param contractAddress The address of the contract on the destination chain.
+     * @param payload The payload data to be used in the contract call.
+     */
     function callContract(
         string calldata destinationChain,
         string calldata contractAddress,
         bytes calldata payload
     ) external;
 
-    function callContractWithToken(
-        string calldata destinationChain,
-        string calldata contractAddress,
-        bytes calldata payload,
-        string calldata symbol,
-        uint256 amount
-    ) external;
-
+    /**
+     * @notice Checks if a contract call is approved.
+     * @dev Determines whether a given contract call, identified by the commandId and payloadHash, is approved.
+     * @param commandId The identifier of the command to check.
+     * @param sourceChain The name of the source chain.
+     * @param sourceAddress The address of the sender on the source chain.
+     * @param contractAddress The address of the contract where the call will be executed.
+     * @param payloadHash The keccak256 hash of the payload data.
+     * @return True if the contract call is approved, false otherwise.
+     */
     function isContractCallApproved(
         bytes32 commandId,
         string calldata sourceChain,
@@ -120,16 +55,15 @@ interface IAxelarGateway {
         bytes32 payloadHash
     ) external view returns (bool);
 
-    function isContractCallAndMintApproved(
-        bytes32 commandId,
-        string calldata sourceChain,
-        string calldata sourceAddress,
-        address contractAddress,
-        bytes32 payloadHash,
-        string calldata symbol,
-        uint256 amount
-    ) external view returns (bool);
-
+    /**
+     * @notice Validates and approves a contract call.
+     * @dev Validates the given contract call information and marks it as approved if valid.
+     * @param commandId The identifier of the command to validate.
+     * @param sourceChain The name of the source chain.
+     * @param sourceAddress The address of the sender on the source chain.
+     * @param payloadHash The keccak256 hash of the payload data.
+     * @return True if the contract call is validated and approved, false otherwise.
+     */
     function validateContractCall(
         bytes32 commandId,
         string calldata sourceChain,
@@ -137,69 +71,11 @@ interface IAxelarGateway {
         bytes32 payloadHash
     ) external returns (bool);
 
-    function validateContractCallAndMint(
-        bytes32 commandId,
-        string calldata sourceChain,
-        string calldata sourceAddress,
-        bytes32 payloadHash,
-        string calldata symbol,
-        uint256 amount
-    ) external returns (bool);
-
-    /***********\
-    |* Getters *|
-    \***********/
-
-    function authModule() external view returns (address);
-
-    function tokenDeployer() external view returns (address);
-
-    function tokenMintLimit(
-        string memory symbol
-    ) external view returns (uint256);
-
-    function tokenMintAmount(
-        string memory symbol
-    ) external view returns (uint256);
-
-    function allTokensFrozen() external view returns (bool);
-
-    function implementation() external view returns (address);
-
-    function tokenAddresses(
-        string memory symbol
-    ) external view returns (address);
-
-    function tokenFrozen(string memory symbol) external view returns (bool);
-
+    /**
+     * @notice Checks if a command has been executed.
+     * @dev Determines whether a command, identified by the commandId, has been executed.
+     * @param commandId The identifier of the command to check.
+     * @return True if the command has been executed, false otherwise.
+     */
     function isCommandExecuted(bytes32 commandId) external view returns (bool);
-
-    function adminEpoch() external view returns (uint256);
-
-    function adminThreshold(uint256 epoch) external view returns (uint256);
-
-    function admins(uint256 epoch) external view returns (address[] memory);
-
-    /*******************\
-    |* Admin Functions *|
-    \*******************/
-
-    function setTokenMintLimits(
-        string[] calldata symbols,
-        uint256[] calldata limits
-    ) external;
-
-    function upgrade(
-        address newImplementation,
-        bytes32 newImplementationCodeHash,
-        bytes calldata setupParams
-    ) external;
-
-    /**********************\
-    |* External Functions *|
-    \**********************/
-
-    function setup(bytes calldata params) external;
-
-    function execute(bytes calldata input) external;
 }

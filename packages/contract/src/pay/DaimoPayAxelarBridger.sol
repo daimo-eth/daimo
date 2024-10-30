@@ -7,7 +7,7 @@ import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "../interfaces/IDaimoPayBridger.sol";
-import "../../vendor/axelar/IAxelarGateway.sol";
+import "../../vendor/axelar/IAxelarGatewayWithToken.sol";
 
 /// @title Bridger implementation for Axelar Protocol
 /// @author The Daimo team
@@ -24,40 +24,38 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
         string destChainName;
         string tokenSymbol;
         address localTokenAddr;
-        // Axelar charges a flat fee based on the source chain, destination
-        // chain, and token.
-        uint256 fee;
+        address receiverContract;
     }
 
     // AxelarGateway contract for this chain.
-    IAxelarGateway public immutable axelarGateway;
+    IAxelarGatewayWithToken public immutable axelarGateway;
 
     // Mapping from destination chain and token to the corresponding token on
     // the current chain.
     mapping(uint256 toChainId => mapping(address toToken => AxelarBridgeRoute bridgeRoute))
         public bridgeRouteMapping;
 
-    event BridgeRouteAdded(
-        uint256 indexed toChainId,
-        address indexed toToken,
-        string destChainName,
-        string tokenSymbol,
-        address localTokenAddr,
-        uint256 fee
-    );
-    event BridgeRouteRemoved(
-        uint256 indexed toChainId,
-        address indexed toToken,
-        string destChainName,
-        string tokenSymbol,
-        address localTokenAddr,
-        uint256 fee
-    );
+    // event BridgeRouteAdded(
+    //     uint256 indexed toChainId,
+    //     address indexed toToken,
+    //     string destChainName,
+    //     string tokenSymbol,
+    //     address localTokenAddr,
+    //     uint256 fee
+    // );
+    // event BridgeRouteRemoved(
+    //     uint256 indexed toChainId,
+    //     address indexed toToken,
+    //     string destChainName,
+    //     string tokenSymbol,
+    //     address localTokenAddr,
+    //     uint256 fee
+    // );
 
     /// Specify the localToken mapping to destination chains and tokens
     constructor(
         address _owner,
-        IAxelarGateway _axelarGateway,
+        IAxelarGatewayWithToken _axelarGateway,
         uint256[] memory _toChainIds,
         address[] memory _toTokens,
         AxelarBridgeRoute[] memory _bridgeRoutes
@@ -99,14 +97,14 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
         AxelarBridgeRoute memory bridgeRoute
     ) private {
         bridgeRouteMapping[toChainId][toToken] = bridgeRoute;
-        emit BridgeRouteAdded({
-            toChainId: toChainId,
-            toToken: toToken,
-            destChainName: bridgeRoute.destChainName,
-            tokenSymbol: bridgeRoute.tokenSymbol,
-            localTokenAddr: bridgeRoute.localTokenAddr,
-            fee: bridgeRoute.fee
-        });
+        // emit BridgeRouteAdded({
+        //     toChainId: toChainId,
+        //     toToken: toToken,
+        //     destChainName: bridgeRoute.destChainName,
+        //     tokenSymbol: bridgeRoute.tokenSymbol,
+        //     localTokenAddr: bridgeRoute.localTokenAddr,
+        //     fee: bridgeRoute.fee
+        // });
     }
 
     function removeBridgeRoute(
@@ -117,14 +115,14 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
             toToken
         ];
         delete bridgeRouteMapping[toChainId][toToken];
-        emit BridgeRouteRemoved({
-            toChainId: toChainId,
-            toToken: toToken,
-            destChainName: bridgeRoute.destChainName,
-            tokenSymbol: bridgeRoute.tokenSymbol,
-            localTokenAddr: bridgeRoute.localTokenAddr,
-            fee: bridgeRoute.fee
-        });
+        // emit BridgeRouteRemoved({
+        //     toChainId: toChainId,
+        //     toToken: toToken,
+        //     destChainName: bridgeRoute.destChainName,
+        //     tokenSymbol: bridgeRoute.tokenSymbol,
+        //     localTokenAddr: bridgeRoute.localTokenAddr,
+        //     fee: bridgeRoute.fee
+        // });
     }
 
     // ----- BRIDGING FUNCTIONS -----
@@ -140,8 +138,7 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
         AxelarBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
             toToken
         ];
-        // Axelar charges a flat fee independent of the amount being bridged.
-        return (bridgeRoute.localTokenAddr, toAmount + bridgeRoute.fee);
+        return (bridgeRoute.localTokenAddr, toAmount);
     }
 
     /// Initiate a bridge to a destination chain using Across Protocol.
@@ -178,9 +175,10 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
             value: inputAmount
         });
 
-        axelarGateway.sendToken(
+        axelarGateway.callContractWithToken(
             bridgeRoute.destChainName,
-            toAddress.toHexString(),
+            bridgeRoute.receiverContract.toHexString(),
+            abi.encode(toAddress),
             bridgeRoute.tokenSymbol,
             inputAmount
         );
