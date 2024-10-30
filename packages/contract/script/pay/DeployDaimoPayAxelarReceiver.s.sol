@@ -14,7 +14,7 @@ contract DeployDaimoPayAxelarReceiver is Script {
         vm.startBroadcast();
 
         address receiver = CREATE3.deploy(
-            keccak256("DaimoPayAxelarReceiver-test1"),
+            keccak256("DaimoPayAxelarReceiver-test3"),
             abi.encodePacked(
                 type(DaimoPayAxelarReceiver).creationCode,
                 abi.encode(axelarGateway)

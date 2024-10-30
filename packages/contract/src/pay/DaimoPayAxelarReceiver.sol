@@ -1,20 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
+import {AxelarExpressExecutableWithToken} from "@axelar-network/contracts/express/AxelarExpressExecutableWithToken.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
-
-import "../../vendor/axelar/AxelarExecutableWithToken.sol";
 
 /// @title Receiver contract for Axelar Protocol
 /// @author The Daimo team
 /// @custom:security-contact security@daimo.com
 ///
 /// @dev Receives assets on the destination chain and transfers them to the
-/// intended recipient. Axelar's 
-contract DaimoPayAxelarReceiver is AxelarExecutableWithToken {
+/// intended recipient. Axelar's
+contract DaimoPayAxelarReceiver is AxelarExpressExecutableWithToken {
     using SafeERC20 for IERC20;
 
-    constructor(address _gateway) AxelarExecutableWithToken(_gateway) {}
+    constructor(address _gateway) AxelarExpressExecutableWithToken(_gateway) {}
 
     function _execute(
         bytes32 /* commandId */,
