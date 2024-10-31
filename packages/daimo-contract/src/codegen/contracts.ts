@@ -3324,6 +3324,663 @@ export const daimoPayAcrossBridgerAbi = [
 ] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DaimoPayAxelarBridger
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const daimoPayAxelarBridgerAbi = [
+  {
+    type: 'constructor',
+    inputs: [
+      { name: '_owner', internalType: 'address', type: 'address' },
+      {
+        name: '_axelarGateway',
+        internalType: 'contract IAxelarGatewayWithToken',
+        type: 'address',
+      },
+      {
+        name: '_axelarGasService',
+        internalType: 'contract IAxelarGasService',
+        type: 'address',
+      },
+      { name: '_toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
+      { name: '_toTokens', internalType: 'address[]', type: 'address[]' },
+      {
+        name: '_bridgeRoutes',
+        internalType: 'struct DaimoPayAxelarBridger.AxelarBridgeRoute[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'destChainName', internalType: 'string', type: 'string' },
+          { name: 'tokenSymbol', internalType: 'string', type: 'string' },
+          { name: 'localTokenAddr', internalType: 'address', type: 'address' },
+          {
+            name: 'receiverContract',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'fee', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    stateMutability: 'nonpayable',
+  },
+  { type: 'receive', stateMutability: 'payable' },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      {
+        name: 'bridgeRoute',
+        internalType: 'struct DaimoPayAxelarBridger.AxelarBridgeRoute',
+        type: 'tuple',
+        components: [
+          { name: 'destChainName', internalType: 'string', type: 'string' },
+          { name: 'tokenSymbol', internalType: 'string', type: 'string' },
+          { name: 'localTokenAddr', internalType: 'address', type: 'address' },
+          {
+            name: 'receiverContract',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'fee', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'addBridgeRoute',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'axelarGasService',
+    outputs: [
+      { name: '', internalType: 'contract IAxelarGasService', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'axelarGateway',
+    outputs: [
+      {
+        name: '',
+        internalType: 'contract IAxelarGatewayWithToken',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+    ],
+    name: 'bridgeRouteMapping',
+    outputs: [
+      { name: 'destChainName', internalType: 'string', type: 'string' },
+      { name: 'tokenSymbol', internalType: 'string', type: 'string' },
+      { name: 'localTokenAddr', internalType: 'address', type: 'address' },
+      { name: 'receiverContract', internalType: 'address', type: 'address' },
+      { name: 'fee', internalType: 'uint256', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'commandId', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'sourceChain', internalType: 'string', type: 'string' },
+      { name: 'sourceAddress', internalType: 'string', type: 'string' },
+      { name: 'payload', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'execute',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'commandId', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'sourceChain', internalType: 'string', type: 'string' },
+      { name: 'sourceAddress', internalType: 'string', type: 'string' },
+      { name: 'payload', internalType: 'bytes', type: 'bytes' },
+      { name: 'tokenSymbol', internalType: 'string', type: 'string' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'executeWithToken',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'commandId', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'sourceChain', internalType: 'string', type: 'string' },
+      { name: 'sourceAddress', internalType: 'string', type: 'string' },
+      { name: 'payload', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'expressExecute',
+    outputs: [],
+    stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'commandId', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'sourceChain', internalType: 'string', type: 'string' },
+      { name: 'sourceAddress', internalType: 'string', type: 'string' },
+      { name: 'payload', internalType: 'bytes', type: 'bytes' },
+      { name: 'symbol', internalType: 'string', type: 'string' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'expressExecuteWithToken',
+    outputs: [],
+    stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'gateway',
+    outputs: [
+      { name: '', internalType: 'contract IAxelarGateway', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'commandId', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'sourceChain', internalType: 'string', type: 'string' },
+      { name: 'sourceAddress', internalType: 'string', type: 'string' },
+      { name: 'payloadHash', internalType: 'bytes32', type: 'bytes32' },
+    ],
+    name: 'getExpressExecutor',
+    outputs: [
+      { name: 'expressExecutor', internalType: 'address', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'commandId', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'sourceChain', internalType: 'string', type: 'string' },
+      { name: 'sourceAddress', internalType: 'string', type: 'string' },
+      { name: 'payloadHash', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'symbol', internalType: 'string', type: 'string' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getExpressExecutorWithToken',
+    outputs: [
+      { name: 'expressExecutor', internalType: 'address', type: 'address' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getInputTokenAmount',
+    outputs: [
+      { name: 'inputToken', internalType: 'address', type: 'address' },
+      { name: 'inputAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'pendingOwner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+    ],
+    name: 'removeBridgeRoute',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'toAddress', internalType: 'address', type: 'address' },
+      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'sendToChain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'fromAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'fromToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'fromAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'toAddress',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'toToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'toAmount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'BridgeInitiated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'toToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'destChainName',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'tokenSymbol',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'localTokenAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'receiverContract',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      { name: 'fee', internalType: 'uint256', type: 'uint256', indexed: false },
+    ],
+    name: 'BridgeRouteAdded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'toToken',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'destChainName',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'tokenSymbol',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'localTokenAddr',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'receiverContract',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      { name: 'fee', internalType: 'uint256', type: 'uint256', indexed: false },
+    ],
+    name: 'BridgeRouteRemoved',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'commandId',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sourceChain',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'sourceAddress',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'payloadHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: false,
+      },
+      {
+        name: 'expressExecutor',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'ExpressExecuted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'commandId',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sourceChain',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'sourceAddress',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'payloadHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: false,
+      },
+      {
+        name: 'symbol',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'amount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'expressExecutor',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'ExpressExecutedWithToken',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'commandId',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sourceChain',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'sourceAddress',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'payloadHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: false,
+      },
+      {
+        name: 'expressExecutor',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'ExpressExecutionFulfilled',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'commandId',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'sourceChain',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'sourceAddress',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'payloadHash',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: false,
+      },
+      {
+        name: 'symbol',
+        internalType: 'string',
+        type: 'string',
+        indexed: false,
+      },
+      {
+        name: 'amount',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'expressExecutor',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'ExpressExecutionWithTokenFulfilled',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferStarted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'previousOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'newOwner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'AddressEmptyCode',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'AddressInsufficientBalance',
+  },
+  { type: 'error', inputs: [], name: 'AlreadyExecuted' },
+  { type: 'error', inputs: [], name: 'ExpressExecutorAlreadySet' },
+  { type: 'error', inputs: [], name: 'FailedInnerCall' },
+  { type: 'error', inputs: [], name: 'InsufficientValue' },
+  { type: 'error', inputs: [], name: 'InvalidAddress' },
+  { type: 'error', inputs: [], name: 'NotApprovedByGateway' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
+    name: 'SafeERC20FailedOperation',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'value', internalType: 'uint256', type: 'uint256' },
+      { name: 'length', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'StringsInsufficientHexLength',
+  },
+  { type: 'error', inputs: [], name: 'TokenTransferFailed' },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoPayBridger
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -3853,7 +4510,6 @@ export const daimoPayRelayerAbi = [
     inputs: [{ name: '_owner', internalType: 'address', type: 'address' }],
     stateMutability: 'nonpayable',
   },
-  { type: 'receive', stateMutability: 'payable' },
   {
     type: 'function',
     inputs: [],
@@ -4032,6 +4688,74 @@ export const daimoPayRelayerAbi = [
     name: 'renounceOwnership',
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'dp', internalType: 'contract DaimoPay', type: 'address' },
+      {
+        name: 'intent',
+        internalType: 'struct PayIntent',
+        type: 'tuple',
+        components: [
+          { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+          {
+            name: 'bridgeTokenOut',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCallToken',
+            internalType: 'struct TokenAmount',
+            type: 'tuple',
+            components: [
+              {
+                name: 'token',
+                internalType: 'contract IERC20',
+                type: 'address',
+              },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+            ],
+          },
+          {
+            name: 'finalCall',
+            internalType: 'struct Call',
+            type: 'tuple',
+            components: [
+              { name: 'to', internalType: 'address', type: 'address' },
+              { name: 'value', internalType: 'uint256', type: 'uint256' },
+              { name: 'data', internalType: 'bytes', type: 'bytes' },
+            ],
+          },
+          { name: 'escrow', internalType: 'address payable', type: 'address' },
+          { name: 'refundAddress', internalType: 'address', type: 'address' },
+          { name: 'nonce', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+      {
+        name: 'calls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      { name: 'bridgeExtraData', internalType: 'bytes', type: 'bytes' },
+      { name: 'bridgeGasFee', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'startIntent',
+    outputs: [],
+    stateMutability: 'payable',
   },
   {
     type: 'function',

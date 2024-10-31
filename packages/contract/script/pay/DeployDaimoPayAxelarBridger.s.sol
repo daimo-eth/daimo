@@ -79,19 +79,23 @@ contract DeployDaimoPayAxelarBridger is Script {
             toTokens = new address[](1);
             bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](1);
 
-            chainIds[0] = BNB_MAINNET;
+            chainIds[0] = BSC_MAINNET;
 
             for (uint32 i = 0; i < chainIds.length; ++i) {
+                uint256 fee = block.chainid == POLYGON_MAINNET
+                    ? 3000000000000000000 // 3.0 POLYGON
+                    : 300000000000000; // 0.0003 ETH
+
                 toTokens[i] = _getAxlUSDCAddress(chainIds[i]);
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
                     destChainName: _getAxelarChainName(chainIds[i]),
                     tokenSymbol: "axlUSDC",
                     localTokenAddr: _getAxlUSDCAddress(block.chainid),
                     receiverContract: axelarReceiver,
-                    fee: 300000000000000 // 0.0003 ETH
+                    fee: fee
                 });
             }
-        } else if (block.chainid == BNB_MAINNET) {
+        } else if (block.chainid == BSC_MAINNET) {
             chainIds = new uint256[](6);
             toTokens = new address[](6);
             bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](6);
@@ -110,11 +114,21 @@ contract DeployDaimoPayAxelarBridger is Script {
                     tokenSymbol: "axlUSDC",
                     localTokenAddr: _getAxlUSDCAddress(block.chainid),
                     receiverContract: axelarReceiver,
-                    fee: 300000000000000 // 0.0003 ETH
+                    fee: 2000000000000000 // 0.002 BNB
                 });
             }
         } else {
             revert("Unsupported chainID");
+        }
+
+        for (uint32 i = 0; i < chainIds.length; ++i) {
+            console.log("toChain:", chainIds[i], "toToken:", toTokens[i]);
+            console.log("destChainName:", bridgeRoutes[i].destChainName);
+            console.log("tokenSymbol:", bridgeRoutes[i].tokenSymbol);
+            console.log("localTokenAddr:", bridgeRoutes[i].localTokenAddr);
+            console.log("receiverContract:", bridgeRoutes[i].receiverContract);
+            console.log("fee:", bridgeRoutes[i].fee);
+            console.log("--------------------------------");
         }
     }
 

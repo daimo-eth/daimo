@@ -186,6 +186,10 @@ contract DaimoPayAxelarBridger is
         AxelarBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
             toToken
         ];
+        require(
+            bridgeRoute.localTokenAddr != address(0),
+            "DPAxB: no bridge route"
+        );
         return (bridgeRoute.localTokenAddr, toAmount);
     }
 

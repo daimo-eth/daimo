@@ -123,7 +123,7 @@ contract DaimoPayRelayer is Ownable2Step {
         Call[] calldata calls,
         bytes calldata bridgeExtraData,
         uint256 bridgeGasFee
-    ) public onlyOwner {
+    ) public payable onlyOwner {
         // We use Axelar when bridging to/from BSC. Axelar requries a native token
         // payment for the gas fee.
         if (block.chainid == 56 || intent.toChainId == 56) {
@@ -177,6 +177,4 @@ contract DaimoPayRelayer is Ownable2Step {
             amount: balance
         });
     }
-
-    receive() external payable {}
 }
