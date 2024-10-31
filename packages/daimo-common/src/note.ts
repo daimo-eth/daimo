@@ -1,9 +1,9 @@
-import { base58 } from "@scure/base";
+import { base58, base32crockford } from "@scure/base";
 import { Address, Hex, getAddress, hexToBytes, keccak256 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 
 export function getNoteId(ephemeralOwner: Address) {
-  return base58.encode(hexToBytes(ephemeralOwner)).slice(0, 5);
+  return base32crockford.encode(hexToBytes(ephemeralOwner)).toLowerCase().slice(0, 5);
 }
 
 export async function getNoteClaimSignature(
@@ -30,7 +30,14 @@ export async function getNoteClaimSignatureFromSeed(
   if (recipient === sender) return dummySignature;
   if (!seed) throw new Error("Cannot claim without seed");
 
-  const hexSeed = base58.decode(seed);
+  let hexSeed;
+  try {
+    // Try base32 first (new format)
+    hexSeed = base32crockford.decode(seed.toUpperCase());
+  } catch {
+    // Fall back to base58 for backward compatibility
+    hexSeed = base58.decode(seed);
+  }
   const notePrivateKey = keccak256(hexSeed);
 
   return getNoteClaimSignature(sender, recipient, notePrivateKey);
@@ -42,7 +49,7 @@ export function generateNoteSeedAddress(): [string, Address] {
     2 + Number(128 / 4) // One hex is 4 bits
   ) as Hex; // 128-bit cryptographic random seed.
 
-  const seed = base58.encode(hexToBytes(hexSeed));
+  const seed = base32crockford.encode(hexToBytes(hexSeed)).toLowerCase();
 
   const notePrivateKey = keccak256(hexSeed);
   const noteAddress = getAddress(

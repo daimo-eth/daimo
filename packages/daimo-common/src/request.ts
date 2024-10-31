@@ -1,4 +1,4 @@
-import { base58 } from "@scure/base";
+import { base58, base32crockford } from "@scure/base";
 import {
   Address,
   Hex,
@@ -14,11 +14,17 @@ import { assert } from "./assert";
 import { zAddress } from "./model";
 
 export function encodeRequestId(id: bigint) {
-  return base58.encode(numberToBytes(id));
+  return base32crockford.encode(numberToBytes(id)).toLowerCase();
 }
 
 export function decodeRequestIdString(idString: string) {
-  return bytesToBigInt(base58.decode(idString));
+  try {
+    // Try base32 first (new format)
+    return bytesToBigInt(base32crockford.decode(idString.toUpperCase()));
+  } catch {
+    // Fall back to base58 for backward compatibility
+    return bytesToBigInt(base58.decode(idString));
+  }
 }
 
 export function generateRequestId() {
