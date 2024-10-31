@@ -9,10 +9,12 @@ import "../src/pay/DaimoPay.sol";
 import "../src/pay/DaimoPayBridger.sol";
 import "../src/pay/DaimoPayCCTPBridger.sol";
 import "../src/pay/DaimoPayAcrossBridger.sol";
+import "../src/pay/DaimoPayAxelarBridger.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
-address constant BASE_INTENT_ADDR = 0x5c77AC24daF6067E54955581C3Fd370dA6eB7C04;
-address constant LINEA_INTENT_ADDR = 0xfa5A49Ce976b2a7842deC5E6B3Fb8613a677E4D6;
+address constant BASE_INTENT_ADDR = 0xd880D93c97dBc39424c8199F85C63EFCBcc2727D;
+address constant LINEA_INTENT_ADDR = 0xD7d57FF9931D6AB74A4b05a1ed2A2368D485860b;
+address constant BNB_INTENT_ADDR = 0xAB83a49FE9F96C45E6F5EB1fAa2755987522ac38;
 
 contract DaimoPayTest is Test {
     // Daimo Pay contracts
@@ -23,6 +25,7 @@ contract DaimoPayTest is Test {
     DaimoPayBridger public bridger;
     DaimoPayCCTPBridger public cctpBridger;
     DaimoPayAcrossBridger public acrossBridger;
+    DaimoPayAxelarBridger public axelarBridger;
 
     // CCTP dummy contracts
     DummyTokenMinter public tokenMinter;
@@ -30,6 +33,9 @@ contract DaimoPayTest is Test {
 
     // Across dummy contracts
     DummySpokePool public spokePool;
+
+    // Axelar dummy contracts
+    DummyAxelarGateway public axelarGateway;
 
     // Account addresses
     address immutable _alice = 0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa;
@@ -50,6 +56,7 @@ contract DaimoPayTest is Test {
     uint256 immutable _baseChainId = 8453; // Base
     uint32 immutable _baseDomain = 6; // Base
     uint256 immutable _lineaChainId = 59144; // Linea
+    uint256 immutable _bnbChainId = 56; // BNB Chain
 
     // Intent data
     uint256 immutable _toAmount = 100;
@@ -97,13 +104,36 @@ contract DaimoPayTest is Test {
             })
         });
 
-        // Map _baseChainId to cctpBridger and _lineaChainId to acrossBridger
-        uint256[] memory chainIds = new uint256[](2);
+        // Initialize Axelar bridger
+        axelarGateway = new DummyAxelarGateway();
+        axelarBridger = new DaimoPayAxelarBridger({
+            _owner: address(this),
+            _axelarGateway: axelarGateway,
+            _toChainIds: new uint256[](0),
+            _toTokens: new address[](0),
+            _bridgeRoutes: new DaimoPayAxelarBridger.AxelarBridgeRoute[](0)
+        });
+        axelarBridger.addBridgeRoute({
+            toChainId: _bnbChainId,
+            toToken: address(_toToken),
+            bridgeRoute: DaimoPayAxelarBridger.AxelarBridgeRoute({
+                destChainName: "binance",
+                tokenSymbol: "axlUSDC",
+                localTokenAddr: address(_fromToken),
+                fee: 10 // (= $0.00001)
+            })
+        });
+
+        // Map _baseChainId to cctpBridger, _lineaChainId to acrossBridger,
+        // and _bnbChainId to axelarBridger
+        uint256[] memory chainIds = new uint256[](3);
         chainIds[0] = _baseChainId;
         chainIds[1] = _lineaChainId;
-        IDaimoPayBridger[] memory bridgers = new IDaimoPayBridger[](2);
+        chainIds[2] = _bnbChainId;
+        IDaimoPayBridger[] memory bridgers = new IDaimoPayBridger[](3);
         bridgers[0] = cctpBridger;
         bridgers[1] = acrossBridger;
+        bridgers[2] = axelarBridger;
 
         bridger = new DaimoPayBridger({
             _owner: address(this),
@@ -118,6 +148,8 @@ contract DaimoPayTest is Test {
         console.log("DummyTokenMinter address:", address(tokenMinter));
         console.log("DummyCCTPMessenger address:", address(messenger));
         console.log("DaimoPayCCTPBridger address:", address(cctpBridger));
+        console.log("DaimoPayAcrossBridger address:", address(acrossBridger));
+        console.log("DaimoPayAxelarBridger address:", address(axelarBridger));
         console.log("DaimoPayBridger address:", address(bridger));
         console.log("DaimoPay address:", address(dp));
         console.log("TestUSDC (fromToken) address:", address(_fromToken));
@@ -156,8 +188,22 @@ contract DaimoPayTest is Test {
         );
         console.log("actual linea intent addr:", actualLineaIntentAddr);
 
+        // Get the intent address for the BNB chain
+        PayIntent memory bnbIntent = PayIntent({
+            toChainId: _bnbChainId,
+            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
+            finalCall: Call({to: _bob, value: 0, data: ""}),
+            escrow: payable(address(dp)),
+            refundAddress: _alice,
+            nonce: _nonce
+        });
+        address actualBnbIntentAddr = intentFactory.getIntentAddress(bnbIntent);
+        console.log("actual bnb intent addr:", actualBnbIntentAddr);
+
         assertEq(actualBaseIntentAddr, BASE_INTENT_ADDR);
         assertEq(actualLineaIntentAddr, LINEA_INTENT_ADDR);
+        assertEq(actualBnbIntentAddr, BNB_INTENT_ADDR);
     }
 
     // Test that startIntent reverts when the intent is on the same chain.
@@ -267,6 +313,12 @@ contract DaimoPayTest is Test {
             0,
             "incorrect Across amount received"
         );
+        // Check that the Axelar bridger didn't receive tokens
+        assertEq(
+            axelarGateway.totalInputAmount(),
+            0,
+            "incorrect Axelar amount received"
+        );
     }
 
     // Test a simple startIntent call that bridges using Across.
@@ -353,9 +405,85 @@ contract DaimoPayTest is Test {
         );
         // Check that the CCTP messenger didn't burned tokens
         assertEq(messenger.amountBurned(), 0, "incorrect CCTP amount burned");
+        // Check that the Axelar bridger didn't receive tokens
+        assertEq(
+            axelarGateway.totalInputAmount(),
+            0,
+            "incorrect Axelar amount received"
+        );
 
         // Check that the extra tokens were refunded to the caller
         assertEq(_fromToken.balanceOf(_alice), 555 - 120 + 10);
+    }
+
+    // Test a simple startIntent call that bridges using Axelar.
+    // Simple = no pre-swap, no post-call.
+    function testSimpleAxelarStart() public {
+        vm.chainId(_fromChainId);
+
+        // Give Alice some coins
+        _fromToken.transfer(_alice, 555);
+
+        // Alice initiates a transfer
+        vm.startPrank(_alice);
+
+        PayIntent memory intent = PayIntent({
+            toChainId: _bnbChainId,
+            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
+            finalCall: Call({to: _bob, value: 0, data: ""}),
+            escrow: payable(address(dp)),
+            refundAddress: _alice,
+            nonce: _nonce
+        });
+
+        // Alice sends some coins to the intent address, enough to cover the
+        // 10 USDC flat fee.
+        uint256 inputAmount = _toAmount + 10;
+        address intentAddr = intentFactory.getIntentAddress(intent);
+        _fromToken.transfer(intentAddr, inputAmount);
+
+        vm.expectEmit(address(axelarBridger));
+        emit IDaimoPayBridger.BridgeInitiated({
+            fromAddress: address(bridger),
+            fromToken: address(_fromToken),
+            fromAmount: inputAmount,
+            toChainId: _bnbChainId,
+            toAddress: intentAddr,
+            toToken: address(_toToken),
+            toAmount: _toAmount
+        });
+
+        vm.expectEmit(address(dp));
+        emit DaimoPay.Start(intentAddr, intent);
+
+        uint256 gasBefore = gasleft();
+        dp.startIntent({
+            intent: intent,
+            calls: new Call[](0),
+            bridgeExtraData: ""
+        });
+        uint256 gasAfter = gasleft();
+
+        console.log("gas used", gasBefore - gasAfter);
+
+        vm.stopPrank();
+
+        assertEq(dp.intentSent(intentAddr), true, "intent not sent");
+        // Check that the Axelar bridger received tokens
+        assertEq(
+            axelarGateway.totalInputAmount(),
+            inputAmount,
+            "incorrect Axelar amount received"
+        );
+        // Check that the CCTP messenger didn't burned tokens
+        assertEq(messenger.amountBurned(), 0, "incorrect CCTP amount burned");
+        // Check that the Across bridger didn't receive tokens
+        assertEq(
+            spokePool.totalInputAmount(),
+            0,
+            "incorrect Across amount received"
+        );
     }
 
     // Test that a simple fastFinishIntent completes successfully.
@@ -636,6 +764,7 @@ contract DummyCCTPMessenger is ICCTPTokenMessenger, Test {
 
     constructor(address burnToken) {
         expectedBurnToken = burnToken;
+        amountBurned = 0;
     }
 
     function depositForBurn(
@@ -704,6 +833,8 @@ contract DummySpokePool is V3SpokePoolInterface, Test {
     constructor(address inputToken, address outputToken) {
         expectedInputToken = inputToken;
         expectedOutputToken = outputToken;
+        totalInputAmount = 0;
+        totalOutputAmount = 0;
     }
 
     function depositV3(
@@ -789,4 +920,185 @@ contract DummySpokePool is V3SpokePoolInterface, Test {
         uint32 rootBundleId,
         bytes32[] calldata proof
     ) external {}
+}
+
+contract DummyAxelarGateway is IAxelarGateway, Test {
+    uint256 public totalInputAmount;
+
+    /********************\
+    |* Public Functions *|
+    \********************/
+
+    function sendToken(
+        string calldata destinationChain,
+        string calldata destinationAddress,
+        string calldata symbol,
+        uint256 amount
+    ) external {
+        assertEq(destinationChain, "binance", "incorrect destination chain");
+        assertEq(
+            destinationAddress,
+            Strings.toHexString(BNB_INTENT_ADDR),
+            "incorrect destination address"
+        );
+        assertEq(symbol, "axlUSDC", "incorrect symbol");
+        totalInputAmount += amount;
+    }
+
+    function callContract(
+        string calldata /* destinationChain */,
+        string calldata /* contractAddress */,
+        bytes calldata /* payload */
+    ) external pure {
+        revert("not implemented");
+    }
+
+    function callContractWithToken(
+        string calldata /* destinationChain */,
+        string calldata /* contractAddress */,
+        bytes calldata /* payload */,
+        string calldata /* symbol */,
+        uint256 /* amount */
+    ) external pure {
+        revert("not implemented");
+    }
+
+    function isContractCallApproved(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        address /* contractAddress */,
+        bytes32 /* payloadHash */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
+
+    function isContractCallAndMintApproved(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        address /* contractAddress */,
+        bytes32 /* payloadHash */,
+        string calldata /* symbol */,
+        uint256 /* amount */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
+
+    function validateContractCall(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        bytes32 /* payloadHash */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
+
+    function validateContractCallAndMint(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        bytes32 /* payloadHash */,
+        string calldata /* symbol */,
+        uint256 /* amount */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
+
+    /***********\
+    |* Getters *|
+    \***********/
+
+    function authModule() external pure returns (address) {
+        revert("not implemented");
+    }
+
+    function tokenDeployer() external pure returns (address) {
+        revert("not implemented");
+    }
+
+    function tokenMintLimit(
+        string memory /* symbol */
+    ) external pure returns (uint256) {
+        revert("not implemented");
+    }
+
+    function tokenMintAmount(
+        string memory /* symbol */
+    ) external pure returns (uint256) {
+        revert("not implemented");
+    }
+
+    function allTokensFrozen() external pure returns (bool) {
+        revert("not implemented");
+    }
+
+    function implementation() external pure returns (address) {
+        revert("not implemented");
+    }
+
+    function tokenAddresses(
+        string memory /* symbol */
+    ) external pure returns (address) {
+        revert("not implemented");
+    }
+
+    function tokenFrozen(
+        string memory /* symbol */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
+
+    function isCommandExecuted(
+        bytes32 /* commandId */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
+
+    function adminEpoch() external pure returns (uint256) {
+        revert("not implemented");
+    }
+
+    function adminThreshold(
+        uint256 /* epoch */
+    ) external pure returns (uint256) {
+        revert("not implemented");
+    }
+
+    function admins(
+        uint256 /* epoch */
+    ) external pure returns (address[] memory) {
+        revert("not implemented");
+    }
+
+    /*******************\
+    |* Admin Functions *|
+    \*******************/
+
+    function setTokenMintLimits(
+        string[] calldata /* symbols */,
+        uint256[] calldata /* limits */
+    ) external pure {
+        revert("not implemented");
+    }
+
+    function upgrade(
+        address /* newImplementation */,
+        bytes32 /* newImplementationCodeHash */,
+        bytes calldata /* setupParams */
+    ) external pure {
+        revert("not implemented");
+    }
+
+    /**********************\
+    |* External Functions *|
+    \**********************/
+
+    function setup(bytes calldata /* params */) external pure {
+        revert("not implemented");
+    }
+
+    function execute(bytes calldata /* input */) external pure {
+        revert("not implemented");
+    }
 }

@@ -17,6 +17,7 @@ SCRIPTS=(
     # Daimo Pay.
     # "script/pay/DeployDaimoPayAcrossBridger.s.sol"
     # "script/pay/DeployDaimoPayCCTPBridger.s.sol"
+    # "script/pay/DeployDaimoPayAxelarBridger.s.sol"
     # "script/pay/DeployDaimoPayBridger.s.sol"
     # "script/pay/DeployPayIntentFactory.s.sol"
     # "script/pay/DeployDaimoPay.s.sol"

@@ -29,9 +29,9 @@ uint256 constant ARBITRUM_MAINNET = 42161;
 uint256 constant AVAX_MAINNET = 43114; // C-chain
 uint256 constant BASE_MAINNET = 8453;
 uint256 constant BLAST_MAINNET = 81457;
+uint256 constant BSC_MAINNET = 56;
 uint256 constant ETH_MAINNET = 1;
 uint256 constant LINEA_MAINNET = 59144;
-uint256 constant BSC_MAINNET = 56;
 uint256 constant LISK_MAINNET = 1135;
 uint256 constant MODE_MAINNET = 34443;
 uint256 constant OP_MAINNET = 10;
@@ -325,6 +325,19 @@ function _getAxlUsdcAddress(uint256 chainId) pure returns (address) {
     return address(0);
 }
 
+function _getAxlUSDCAddress(uint256 chainId) pure returns (address) {
+    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_AXLUSDC;
+    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_AXLUSDC;
+    if (chainId == BASE_MAINNET) return BASE_MAINNET_AXLUSDC;
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_AXLUSDC;
+    if (chainId == ETH_MAINNET) return ETH_MAINNET_AXLUSDC;
+    if (chainId == LINEA_MAINNET) return LINEA_MAINNET_AXLUSDC;
+    if (chainId == OP_MAINNET) return OP_MAINNET_AXLUSDC;
+    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_AXLUSDC;
+
+    revert("Unsupported chainID");
+}
+
 // Chainlink DataFeed aggregator addresses (tokenIn --> USD)
 address constant ETH_MAINNET_AAVE_USD_AGGREGATOR = 0x547a514d5e3769680Ce22B2361c10Ea13619e8a9;
 
@@ -472,6 +485,52 @@ function _getSpokePoolAddress(uint256 chainId) pure returns (address) {
     if (chainId == REDSTONE_MAINNET) return REDSTONE_MAINNET_SPOKE_POOL;
 
     return address(0);
+}
+
+// ----------------- Axelar ----------------- //
+
+address constant ARBITRUM_MAINNET_AXELAR_GATEWAY = 0xe432150cce91c13a887f7D836923d5597adD8E31;
+address constant AVAX_MAINNET_AXELAR_GATEWAY = 0x5029C0EFf6C34351a0CEc334542cDb22c7928f78;
+address constant BASE_MAINNET_AXELAR_GATEWAY = 0xe432150cce91c13a887f7D836923d5597adD8E31;
+address constant BSC_MAINNET_AXELAR_GATEWAY = 0x304acf330bbE08d1e512eefaa92F6a57871fD895;
+address constant ETH_MAINNET_AXELAR_GATEWAY = 0x4F4495243837681061C4743b74B3eEdf548D56A5;
+address constant LINEA_MAINNET_AXELAR_GATEWAY = 0xe432150cce91c13a887f7D836923d5597adD8E31;
+address constant OP_MAINNET_AXELAR_GATEWAY = 0xe432150cce91c13a887f7D836923d5597adD8E31;
+address constant POLYGON_MAINNET_AXELAR_GATEWAY = 0x6f015F16De9fC8791b234eF68D486d2bF203FBA8;
+
+function _getAxelarGatewayAddress(uint256 chainId) pure returns (address) {
+    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_AXELAR_GATEWAY;
+    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_AXELAR_GATEWAY;
+    if (chainId == BASE_MAINNET) return BASE_MAINNET_AXELAR_GATEWAY;
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_AXELAR_GATEWAY;
+    if (chainId == ETH_MAINNET) return ETH_MAINNET_AXELAR_GATEWAY;
+    if (chainId == LINEA_MAINNET) return LINEA_MAINNET_AXELAR_GATEWAY;
+    if (chainId == OP_MAINNET) return OP_MAINNET_AXELAR_GATEWAY;
+    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_AXELAR_GATEWAY;
+
+    revert("Unsupported chainID");
+}
+
+string constant ARBITRUM_MAINNET_AXELAR_CHAIN_NAME = "arbitrum";
+string constant AVAX_MAINNET_AXELAR_CHAIN_NAME = "avalanche";
+string constant BASE_MAINNET_AXELAR_CHAIN_NAME = "base";
+string constant BSC_MAINNET_AXELAR_CHAIN_NAME = "binance";
+string constant ETH_MAINNET_AXELAR_CHAIN_NAME = "ethereum";
+string constant LINEA_MAINNET_AXELAR_CHAIN_NAME = "linea";
+string constant OP_MAINNET_AXELAR_CHAIN_NAME = "optimism";
+string constant POLYGON_MAINNET_AXELAR_CHAIN_NAME = "polygon";
+
+function _getAxelarChainName(uint256 chainId) pure returns (string memory) {
+    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_AXELAR_CHAIN_NAME;
+    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_AXELAR_CHAIN_NAME;
+    if (chainId == BASE_MAINNET) return BASE_MAINNET_AXELAR_CHAIN_NAME;
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_AXELAR_CHAIN_NAME;
+    if (chainId == ETH_MAINNET) return ETH_MAINNET_AXELAR_CHAIN_NAME;
+    if (chainId == LINEA_MAINNET) return LINEA_MAINNET_AXELAR_CHAIN_NAME;
+    if (chainId == OP_MAINNET) return OP_MAINNET_AXELAR_CHAIN_NAME;
+    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_AXELAR_CHAIN_NAME;
+
+    revert("Unsupported chainID");
 }
 
 // ----------------- Deployment ----------------- //
