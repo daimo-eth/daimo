@@ -1,4 +1,5 @@
 import { Address } from "viem";
+import { mainnet } from "viem/chains";
 
 import {
   daimoFastCctpAbi,
@@ -78,8 +79,20 @@ export const entryPointV07Address =
   "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
 export const daimoCctpBridgerAddress =
   "0x97DA4FaA21DA8bab9b0724B854Bd43250F25FF58";
-export const daimoFlexSwapperAddress =
-  "0x52A7Fb58f1F26fd57B4a3aAE55d6c51a38A73610";
+
+// Mainnet has a different address for flex swapper, one that was deployed long
+// ago once without chainlink feeds. Redeploy with chainlink is too expensive
+// and we don't need it for now.
+export const daimoFlexSwapperUniOnlyAddress = (chainId: number) => {
+  if (chainId === mainnet.id)
+    return "0x207e87f84cff325715f324d09e63b21a03e53b61";
+  else return "0xE7c58dcEe819ca56f5b41E1B627c84420d5cf0cA";
+};
+export const daimoFlexSwapperAddress = (chainId: number) => {
+  if (chainId === mainnet.id)
+    return "0x207e87f84cff325715f324d09e63b21a03e53b61";
+  else return "0xA9F5d58edb8dF8af90f875eac89AA49C57b87Db8";
+};
 
 // DAv1 backcompat
 export * from "./backcompat/daimoAccountV1";

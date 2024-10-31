@@ -31,6 +31,7 @@ uint256 constant BASE_MAINNET = 8453;
 uint256 constant BLAST_MAINNET = 81457;
 uint256 constant ETH_MAINNET = 1;
 uint256 constant LINEA_MAINNET = 59144;
+uint256 constant BSC_MAINNET = 56;
 uint256 constant LISK_MAINNET = 1135;
 uint256 constant MODE_MAINNET = 34443;
 uint256 constant OP_MAINNET = 10;
@@ -83,6 +84,7 @@ address constant ETH_MAINNET_DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 address constant OP_MAINNET_DAI = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
 address constant POLYGON_MAINNET_DAI = 0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063;
 address constant LINEA_MAINNET_DAI = 0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5;
+address constant BSC_MAINNET_DAI = 0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3;
 
 // USDT addresses
 address constant ARBITRUM_MAINNET_USDT = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
@@ -93,15 +95,27 @@ address constant LISK_MAINNET_USDT = 0x05D032ac25d322df992303dCa074EE7392C117b9;
 address constant OP_MAINNET_USDT = 0x94b008aA00579c1307B0EF2c499aD98a8ce58e58;
 address constant POLYGON_MAINNET_USDT = 0xc2132D05D31c914a87C6611C10748AEb04B58e8F;
 address constant LINEA_MAINNET_USDT = 0xA219439258ca9da29E9Cc4cE5596924745e12B93;
+address constant BSC_MAINNET_USDT = 0x55d398326f99059fF775485246999027B3197955;
 
 // USDC.e or USDbC (bridged USDC) addresses
 address constant ARBITRUM_MAINNET_BRIDGED_USDC = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
 address constant AVAX_MAINNET_BRIDGED_USDC = 0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664;
 address constant BASE_MAINNET_BRIDGED_USDC = 0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA;
 address constant LINEA_MAINNET_BRIDGED_USDC = 0x176211869cA2b568f2A7D4EE941E073a821EE1ff;
+address constant BSC_MAINNET_BRIDGED_USDC = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d; // NOTE: Binance pegged USDC has 18 decimals on BSC.
 address constant MODE_MAINNET_BRIDGED_USDC = 0xd988097fb8612cc24eeC14542bC03424c656005f;
 address constant OP_MAINNET_BRIDGED_USDC = 0x7F5c764cBc14f9669B88837ca1490cCa17c31607;
 address constant POLYGON_MAINNET_BRIDGED_USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+
+// axlUSDC (Axelar wrapped USDC) addresses
+address constant ARBITRUM_MAINNET_AXLUSDC = 0xEB466342C4d449BC9f53A865D5Cb90586f405215;
+address constant AVAX_MAINNET_AXLUSDC = 0xfaB550568C688d5D8A52C7d794cb93Edc26eC0eC;
+address constant BASE_MAINNET_AXLUSDC = 0xEB466342C4d449BC9f53A865D5Cb90586f405215;
+address constant BSC_MAINNET_AXLUSDC = 0x4268B8F0B87b6Eae5d897996E6b845ddbD99Adf3;
+address constant ETH_MAINNET_AXLUSDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+address constant LINEA_MAINNET_AXLUSDC = 0xEB466342C4d449BC9f53A865D5Cb90586f405215;
+address constant OP_MAINNET_AXLUSDC = 0xEB466342C4d449BC9f53A865D5Cb90586f405215;
+address constant POLYGON_MAINNET_AXLUSDC = 0x750e4C4984a9e0f12978eA6742Bc1c5D248f40ed;
 
 // USDB
 address constant BLAST_MAINNET_USDB = 0x4300000000000000000000000000000000000003;
@@ -120,6 +134,7 @@ address constant POLYGON_WETH = 0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619;
 address constant LINEA_WETH = 0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f;
 
 address constant POLYGON_WMATIC = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
+address constant BSC_MAINNET_WBNB = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
 address constant AVAX_WAVAX = 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7;
 
 // ----------------- Flex Swapper ----------------- //
@@ -175,6 +190,9 @@ address constant AVAX_TESTNET_UNISWAP_FACTORY = address(0); // Not deployed
 address constant LINEA_MAINNET_UNISWAP_ROUTER = 0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a;
 address constant LINEA_MAINNET_UNISWAP_FACTORY = 0x31FAfd4889FA1269F7a13A66eE0fB458f27D72A9;
 
+address constant BSC_MAINNET_UNISWAP_ROUTER = 0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2;
+address constant BSC_MAINNET_UNISWAP_FACTORY = 0xdB1d10011AD0Ff90774D0C6Bb92e5C5c8b4461F7;
+
 function _getUSDCAddress(uint256 chainId) pure returns (address) {
     // Mainnets
     if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_USDC;
@@ -193,7 +211,7 @@ function _getUSDCAddress(uint256 chainId) pure returns (address) {
     if (chainId == OP_TESTNET) return OP_TESTNET_USDC;
     if (chainId == POLYGON_TESTNET) return POLYGON_TESTNET_USDC;
 
-    revert("Unsupported chainID");
+    return address(0);
 }
 
 function _getUniswapFactoryAddress(uint256 chainId) pure returns (address) {
@@ -205,7 +223,7 @@ function _getUniswapFactoryAddress(uint256 chainId) pure returns (address) {
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_UNISWAP_FACTORY;
     if (chainId == AVAX_MAINNET) return AVAX_MAINNET_UNISWAP_FACTORY;
     if (chainId == LINEA_MAINNET) return LINEA_MAINNET_UNISWAP_FACTORY;
-
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_UNISWAP_FACTORY;
     // Testnets
     if (chainId == ETH_TESTNET) return ETH_TESTNET_UNISWAP_FACTORY;
     if (chainId == BASE_TESTNET) return BASE_TESTNET_UNISWAP_FACTORY;
@@ -214,7 +232,7 @@ function _getUniswapFactoryAddress(uint256 chainId) pure returns (address) {
     if (chainId == POLYGON_TESTNET) return POLYGON_TESTNET_UNISWAP_FACTORY;
     if (chainId == AVAX_TESTNET) return AVAX_TESTNET_UNISWAP_FACTORY;
 
-    revert("Unsupported chainID");
+    return address(0);
 }
 
 function _getWETH(uint256 chainId) pure returns (address) {
@@ -235,12 +253,13 @@ function _getWETH(uint256 chainId) pure returns (address) {
     if (chainId == OP_TESTNET) return OP_STACK_WETH;
     if (chainId == POLYGON_TESTNET) return POLYGON_WETH;
 
-    revert("Unsupported chainID");
+    return address(0);
 }
 
 function _getWrappedNativeToken(uint256 chainId) pure returns (address) {
     if (chainId == AVAX_MAINNET) return AVAX_WAVAX;
     if (chainId == POLYGON_MAINNET) return POLYGON_WMATIC;
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_WBNB;
 
     if (chainId == AVAX_TESTNET) return AVAX_WAVAX;
     if (chainId == POLYGON_TESTNET) return POLYGON_WMATIC;
@@ -258,10 +277,11 @@ function _getDAIAddress(uint256 chainId) pure returns (address) {
     if (chainId == OP_MAINNET) return OP_MAINNET_DAI;
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_DAI;
     if (chainId == LINEA_MAINNET) return LINEA_MAINNET_DAI;
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_DAI;
 
     if (_isTestnet(chainId)) return address(0);
 
-    revert("Unsupported chainID");
+    return address(0);
 }
 
 function _getUSDTAddress(uint256 chainId) pure returns (address) {
@@ -273,10 +293,11 @@ function _getUSDTAddress(uint256 chainId) pure returns (address) {
     if (chainId == OP_MAINNET) return OP_MAINNET_USDT;
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_USDT;
     if (chainId == LINEA_MAINNET) return LINEA_MAINNET_USDT;
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_USDT;
 
     if (_isTestnet(chainId)) return address(0);
 
-    revert("Unsupported chainID");
+    return address(0);
 }
 
 function _getBridgedUSDCAddress(uint256 chainId) pure returns (address) {
@@ -284,11 +305,24 @@ function _getBridgedUSDCAddress(uint256 chainId) pure returns (address) {
     if (chainId == AVAX_MAINNET) return AVAX_MAINNET_BRIDGED_USDC;
     if (chainId == BASE_MAINNET) return BASE_MAINNET_BRIDGED_USDC;
     if (chainId == LINEA_MAINNET) return LINEA_MAINNET_BRIDGED_USDC;
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_BRIDGED_USDC;
     if (chainId == MODE_MAINNET) return MODE_MAINNET_BRIDGED_USDC;
     if (chainId == OP_MAINNET) return OP_MAINNET_BRIDGED_USDC;
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_BRIDGED_USDC;
 
-    revert("Unsupported chainID");
+    return address(0);
+}
+
+function _getAxlUsdcAddress(uint256 chainId) pure returns (address) {
+    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_AXLUSDC;
+    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_AXLUSDC;
+    if (chainId == BASE_MAINNET) return BASE_MAINNET_AXLUSDC;
+    if (chainId == BSC_MAINNET) return BSC_MAINNET_AXLUSDC;
+    if (chainId == LINEA_MAINNET) return LINEA_MAINNET_AXLUSDC;
+    if (chainId == OP_MAINNET) return OP_MAINNET_AXLUSDC;
+    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_AXLUSDC;
+
+    return address(0);
 }
 
 // Chainlink DataFeed aggregator addresses (tokenIn --> USD)
@@ -342,7 +376,7 @@ function _getTokenMessengerAddress(uint256 chainId) pure returns (address) {
         chainId == POLYGON_TESTNET
     ) return TESTNET_TOKEN_MESSENGER;
 
-    revert("Unsupported chainID");
+    return address(0);
 }
 
 // Check whether the chain is a testnet.
@@ -404,7 +438,7 @@ function _getTokenMinterAddress(uint256 chainId) pure returns (address) {
         chainId == POLYGON_TESTNET
     ) return TESTNET_TOKEN_MINTER;
 
-    revert("Unsupported chainID");
+    return address(0);
 }
 
 // ----------------- Across ----------------- //
@@ -437,7 +471,7 @@ function _getSpokePoolAddress(uint256 chainId) pure returns (address) {
     if (chainId == LISK_MAINNET) return LISK_MAINNET_SPOKE_POOL;
     if (chainId == REDSTONE_MAINNET) return REDSTONE_MAINNET_SPOKE_POOL;
 
-    revert("Unsupported chainID");
+    return address(0);
 }
 
 // ----------------- Deployment ----------------- //

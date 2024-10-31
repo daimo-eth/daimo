@@ -13,6 +13,7 @@ import {
   avalancheFuji,
   base,
   baseSepolia,
+  bsc,
   linea,
   mainnet,
   optimism,
@@ -70,6 +71,7 @@ const alchemyChainNames: Record<number, string> = {
   [optimism.id]: "opt-mainnet",
   [optimismSepolia.id]: "opt-sepolia",
   [linea.id]: "linea-mainnet",
+  [bsc.id]: "bnb-mainnet",
 };
 const supportedChainIds = Object.keys(alchemyChainNames).map(Number);
 

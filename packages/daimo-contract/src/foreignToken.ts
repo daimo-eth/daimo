@@ -31,6 +31,7 @@ export enum TokenLogo {
   DAI = "https://pay.daimo.com/coin-logos/dai.png",
   MATIC = "https://assets.coingecko.com/coins/images/4713/large/polygon.png",
   AVAX = "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png",
+  BNB = "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png",
 }
 
 /* --------------------- Tokens Constants --------------------- */
@@ -480,6 +481,40 @@ export const lineaBridgedUSDC: ForeignToken = {
 const lineaTokens = [lineaETH, lineaWETH, lineaBridgedUSDC];
 
 //
+// BSC Mainnet
+//
+
+export const bscBNB = nativeToken(56, "BNB", "BNB", TokenLogo.BNB);
+
+export const bscWBNB: ForeignToken = {
+  chainId: 56,
+  token: getAddress("0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"),
+  decimals: 18,
+  name: "Wrapped BNB",
+  symbol: "WBNB",
+  logoURI: TokenLogo.BNB,
+};
+
+export const bscAxlUSDC: ForeignToken = {
+  chainId: 56,
+  token: getAddress("0x4268B8F0B87b6Eae5d897996E6b845ddbD99Adf3"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
+export const bscUSDC: ForeignToken = {
+  chainId: 56,
+  token: getAddress("0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"),
+  decimals: 18,
+  name: "Binance-Peg USD Coin",
+  symbol: "USDC",
+  logoURI: TokenLogo.USDC,
+};
+
+const bscTokens = [bscBNB, bscWBNB, bscAxlUSDC, bscUSDC];
+
 // --------------------- Native Token Utils ---------------------
 //
 
@@ -519,6 +554,7 @@ const allBasicTokens = [
   ...avalancheTokens,
   ...avalancheFujiTokens,
   ...lineaTokens,
+  ...bscTokens,
 ];
 
 const blacklistedTokens: Record<number, Set<Address>> = {

@@ -2268,6 +2268,14 @@ export const daimoFlexSwapperAbi = [
   },
 ] as const
 
+export const daimoFlexSwapperAddress =
+  '0xe2064998A16D2bb2D8B3890C1aA31eAfF8917755' as const
+
+export const daimoFlexSwapperConfig = {
+  address: daimoFlexSwapperAddress,
+  abi: daimoFlexSwapperAbi,
+} as const
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DaimoNameRegistry
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -4520,119 +4528,6 @@ export const daimoRequestConfig = {
   address: daimoRequestAddress,
   abi: daimoRequestAbi,
 } as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DummyBridger
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const dummyBridgerAbi = [
-  {
-    type: 'constructor',
-    inputs: [
-      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '', internalType: 'address', type: 'address' }],
-    name: 'bridges',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'expectedExtraData',
-    outputs: [{ name: '', internalType: 'bytes', type: 'bytes' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'expectedToChainId',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'expectedTokenIn',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
-      { name: 'amountIn', internalType: 'uint256', type: 'uint256' },
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'sendToChain',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DummySwapper
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const dummySwapperAbi = [
-  {
-    type: 'constructor',
-    inputs: [
-      { name: 'tokenInA', internalType: 'contract IERC20', type: 'address' },
-      { name: 'tokenOutA', internalType: 'contract IERC20', type: 'address' },
-      { name: 'tokenInB', internalType: 'contract IERC20', type: 'address' },
-      { name: 'tokenOutB', internalType: 'contract IERC20', type: 'address' },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'expectedTokenInA',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'expectedTokenInB',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'expectedTokenOutA',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'expectedTokenOutB',
-    outputs: [{ name: '', internalType: 'contract IERC20', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'tokenIn', internalType: 'contract IERC20', type: 'address' },
-      { name: 'amountIn', internalType: 'uint256', type: 'uint256' },
-      { name: 'tokenOut', internalType: 'contract IERC20', type: 'address' },
-      { name: 'extraData', internalType: 'bytes', type: 'bytes' },
-    ],
-    name: 'swapToCoin',
-    outputs: [{ name: 'amountOut', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'payable',
-  },
-] as const
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ERC165

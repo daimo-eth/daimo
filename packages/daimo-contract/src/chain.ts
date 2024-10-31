@@ -5,6 +5,8 @@
  * https://developers.circle.com/stablecoins/docs/supported-domains
  */
 
+import { bsc as bscViem } from "viem/chains";
+
 import { DaimoChain } from "./chainConfig";
 import {
   ForeignToken,
@@ -26,6 +28,10 @@ import {
   baseSepoliaWETH,
   baseUSDC,
   baseWETH,
+  bscAxlUSDC,
+  bscBNB,
+  bscUSDC,
+  bscWBNB,
   ethereumETH,
   ethereumSepoliaETH,
   ethereumSepoliaUSDC,
@@ -56,6 +62,8 @@ export type DAv2Chain = {
   shortName: string;
   cctpDomain: number;
   bridgeCoin: ForeignToken;
+  /** The USDC token to use for quoting / pricing other tokens on this chain. */
+  localUSDC: ForeignToken;
   nativeToken: ForeignToken;
   wrappedNativeToken: ForeignToken;
   isTestnet?: boolean;
@@ -67,6 +75,7 @@ export const ethereum: DAv2Chain = {
   shortName: "eth",
   cctpDomain: 0,
   bridgeCoin: ethereumUSDC,
+  localUSDC: ethereumUSDC,
   nativeToken: ethereumETH,
   wrappedNativeToken: ethereumWETH,
 };
@@ -77,6 +86,7 @@ export const ethereumSepolia: DAv2Chain = {
   shortName: "eth",
   cctpDomain: 0,
   bridgeCoin: ethereumSepoliaUSDC,
+  localUSDC: ethereumSepoliaUSDC,
   nativeToken: ethereumSepoliaETH,
   wrappedNativeToken: ethereumSepoliaWETH,
   isTestnet: true,
@@ -88,6 +98,7 @@ export const base: DAv2Chain = {
   shortName: "base",
   cctpDomain: 6,
   bridgeCoin: baseUSDC,
+  localUSDC: baseUSDC,
   nativeToken: baseETH,
   wrappedNativeToken: baseWETH,
 };
@@ -98,6 +109,7 @@ export const baseSepolia: DAv2Chain = {
   shortName: "base",
   cctpDomain: 6,
   bridgeCoin: baseSepoliaUSDC,
+  localUSDC: baseSepoliaUSDC,
   nativeToken: baseSepoliaETH,
   wrappedNativeToken: baseSepoliaWETH,
   isTestnet: true,
@@ -109,6 +121,7 @@ export const arbitrum: DAv2Chain = {
   shortName: "arb",
   cctpDomain: 3,
   bridgeCoin: arbitrumUSDC,
+  localUSDC: arbitrumUSDC,
   nativeToken: arbitrumETH,
   wrappedNativeToken: arbitrumWETH,
 };
@@ -119,6 +132,7 @@ export const arbitrumSepolia: DAv2Chain = {
   shortName: "arb",
   cctpDomain: 3,
   bridgeCoin: arbitrumSepoliaUSDC,
+  localUSDC: arbitrumSepoliaUSDC,
   nativeToken: arbitrumSepoliaETH,
   wrappedNativeToken: arbitrumSepoliaWETH,
   isTestnet: true,
@@ -130,6 +144,7 @@ export const optimism: DAv2Chain = {
   shortName: "op",
   cctpDomain: 2,
   bridgeCoin: optimismUSDC,
+  localUSDC: optimismUSDC,
   nativeToken: optimismETH,
   wrappedNativeToken: optimismWETH,
 };
@@ -140,6 +155,7 @@ export const optimismSepolia: DAv2Chain = {
   shortName: "op",
   cctpDomain: 2,
   bridgeCoin: optimismSepoliaUSDC,
+  localUSDC: optimismSepoliaUSDC,
   nativeToken: optimismSepoliaETH,
   wrappedNativeToken: optimismSepoliaWETH,
   isTestnet: true,
@@ -151,6 +167,7 @@ export const polygon: DAv2Chain = {
   shortName: "poly",
   cctpDomain: 7,
   bridgeCoin: polygonUSDC,
+  localUSDC: polygonUSDC,
   nativeToken: polygonMATIC,
   wrappedNativeToken: polygonWMATIC,
 };
@@ -161,6 +178,7 @@ export const polygonAmoy: DAv2Chain = {
   shortName: "poly",
   cctpDomain: 7,
   bridgeCoin: polygonAmoyUSDC,
+  localUSDC: polygonAmoyUSDC,
   nativeToken: polygonAmoyMATIC,
   wrappedNativeToken: polygonAmoyWMATIC,
   isTestnet: true,
@@ -172,6 +190,7 @@ export const avalanche: DAv2Chain = {
   shortName: "avax",
   cctpDomain: 1,
   bridgeCoin: avalancheUSDC,
+  localUSDC: avalancheUSDC,
   nativeToken: avalancheAVAX,
   wrappedNativeToken: avalancheWAVAX,
 };
@@ -182,6 +201,7 @@ export const avalancheFuji: DAv2Chain = {
   shortName: "avax",
   cctpDomain: 1,
   bridgeCoin: avalancheFujiUSDC,
+  localUSDC: avalancheFujiUSDC,
   nativeToken: avalancheFujiAVAX,
   wrappedNativeToken: avalancheFujiWAVAX,
   isTestnet: true,
@@ -193,8 +213,20 @@ export const linea: DAv2Chain = {
   shortName: "linea",
   cctpDomain: -1,
   bridgeCoin: lineaBridgedUSDC,
+  localUSDC: lineaBridgedUSDC,
   nativeToken: lineaETH,
   wrappedNativeToken: lineaWETH,
+};
+
+export const bsc: DAv2Chain = {
+  chainId: bscViem.id,
+  name: bscViem.name,
+  shortName: "bsc",
+  cctpDomain: -1,
+  bridgeCoin: bscAxlUSDC,
+  localUSDC: bscUSDC,
+  nativeToken: bscBNB,
+  wrappedNativeToken: bscWBNB,
 };
 
 const chains = [
@@ -211,6 +243,7 @@ const chains = [
   avalanche,
   avalancheFuji,
   linea,
+  bsc,
 ];
 
 /** Supported chains for send (+ soon receive). */
@@ -233,11 +266,6 @@ export function getChainName(chainId: number): string {
 /** Returns the CCTP domain for the given chainId. */
 export function getCctpDomain(chainId: number): number {
   return getDAv2Chain(chainId).cctpDomain;
-}
-
-/** Returns the bridge coin address for the given chainId. */
-export function getBridgeCoin(chainId: number): ForeignToken {
-  return getDAv2Chain(chainId).bridgeCoin;
 }
 
 /** Returns whether the chainId is a testnet. */

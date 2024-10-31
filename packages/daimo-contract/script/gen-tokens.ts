@@ -3,6 +3,7 @@ import { getAddress, Hex, isAddress } from "viem";
 
 import { DAv2Chain, getDAv2Chain } from "../src";
 import { baseUSDbC, baseUSDC, ForeignToken } from "../src/foreignToken";
+// eslint-disable-next-line import/order
 import { assert } from "./util";
 
 const tokenListURLs = [
@@ -13,6 +14,7 @@ const tokenListURLs = [
   "https://tokens.coingecko.com/polygon-pos/all.json",
   // "https://tokens.coingecko.com/avalanche/all.json",
   "https://tokens.coingecko.com/linea/all.json",
+  "https://tokens.coingecko.com/binance-smart-chain/all.json",
 ];
 
 interface TokenListResponse {

@@ -835,6 +835,33 @@
   },
   {
     "compareOffchain": "",
+    "contractAddress": "0xE7C99f804709C8b80c7fA12f7eCA12FB7306c6b3",
+    "contractType": "",
+    "contractVersion": 4,
+    "decimalPlaces": null,
+    "ens": "yneth-eth-exchange-rate",
+    "formatDecimalPlaces": null,
+    "healthPrice": "",
+    "heartbeat": 86400,
+    "history": null,
+    "multiply": "1000000000000000000",
+    "name": "ynETH / ETH Exchange Rate",
+    "pair": [
+      "",
+      ""
+    ],
+    "path": "yneth-eth-exchange-rate",
+    "proxyAddress": "0x57011f81c93Da4dFb244c80667aAECf8cA9D53Bb",
+    "threshold": 1e-7,
+    "valuePrefix": "",
+    "assetName": "",
+    "feedCategory": "",
+    "feedType": "",
+    "docs": {},
+    "decimals": 18
+  },
+  {
+    "compareOffchain": "",
     "contractAddress": "0xa901c5741FAd401DfF8a750218aEB72527F86eD3",
     "contractType": "",
     "contractVersion": 4,

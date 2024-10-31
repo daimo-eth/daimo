@@ -14,7 +14,6 @@ import {
   daimoFastCctpV1Abi,
   daimoFastCctpV1Address,
   erc20Abi,
-  getBridgeCoin,
   getCctpMessengerAddr,
 } from "@daimo/contract";
 import { Utils } from "userop";
@@ -414,7 +413,7 @@ export class DaimoOpSender {
     const toChainId = BigInt(toChain.chainId);
     const toDomain = toChain.cctpDomain;
     const toAddr = to;
-    const toToken = getBridgeCoin(toChain.chainId).token;
+    const toToken = toChain.bridgeCoin.token;
     const toAmount = parsedAmount;
     const nonce = generateRandom256BitInteger();
 

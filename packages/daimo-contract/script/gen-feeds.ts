@@ -1,25 +1,36 @@
 import fs from "node:fs/promises";
 import {
-  Address,
   Chain,
   createPublicClient,
   getAddress,
   http,
   maxUint128,
+  parseUnits,
   PublicClient,
 } from "viem";
-import { arbitrum, base, linea, mainnet, optimism, polygon } from "viem/chains";
+import {
+  arbitrum,
+  base,
+  bsc,
+  linea,
+  mainnet,
+  optimism,
+  polygon,
+} from "viem/chains";
 
 import {
   aggregatorV2V3InterfaceAbi,
   arbitrumWETH,
   baseWETH,
+  bscWBNB,
   daimoFlexSwapperAbi,
+  daimoFlexSwapperUniOnlyAddress,
   erc20Abi,
   ethereumWETH,
   ForeignToken,
   getAlchemyTransportUrl,
   getDAv2Chain,
+  lineaWETH,
   optimismWETH,
   polygonWETH,
   polygonWMATIC,
@@ -30,7 +41,7 @@ import { assert, assertNotNull, chunkArray } from "./util";
 const alchemyKey = process.env.ALCHEMY_API_KEY;
 if (alchemyKey == null) throw new Error("Missing ALCHEMY_API_KEY");
 
-const chains = [mainnet, arbitrum, optimism, base, polygon, linea];
+const chains = [mainnet, arbitrum, optimism, base, polygon, linea, bsc];
 
 const chainlinkJsonUrls = [
   "https://reference-data-directory.vercel.app/feeds-mainnet.json",
@@ -39,6 +50,7 @@ const chainlinkJsonUrls = [
   "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-base-1.json",
   "https://reference-data-directory.vercel.app/feeds-matic-mainnet.json",
   "https://reference-data-directory.vercel.app/feeds-ethereum-mainnet-linea-1.json",
+  "https://reference-data-directory.vercel.app/feeds-bsc-mainnet.json",
 ];
 
 /**
@@ -97,36 +109,11 @@ async function main() {
       tokenSymbol,
       tokenAddress,
       chainlinkFeedAddress,
-      skipUniswap: false,
+      skipUniswap: !!chainlinkFeedAddress,
     }));
-  const tokenToFeed = new Map(
-    pricedTokens
-      .filter((pt) => pt.chainlinkFeedAddress != null)
-      .map(({ tokenAddress, chainlinkFeedAddress }) => [
-        tokenAddress,
-        chainlinkFeedAddress,
-      ]),
-  );
-
-  // - manual validation for rebasing tokens, etc.
-  const chainlinkOnlyTokens = [
-    [1, "USDV", "0x0E573Ce2736Dd9637A0b21058352e1667925C7a8"],
-    [1, "FRAX", "0x853d955aCEf822Db058eb8505911ED77F175b99e"],
-    [1, "FDUSD", "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409"],
-    [1, "PYUSD", "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8"],
-  ] as [number, string, Address][];
-  validFeeds.push(
-    ...chainlinkOnlyTokens.map(([chainId, tokenSymbol, tokenAddress]) => ({
-      chainId,
-      tokenSymbol,
-      tokenAddress,
-      chainlinkFeedAddress: tokenToFeed.get(tokenAddress),
-      skipUniswap: true,
-    })),
-  );
 
   // write 4-valid-feeds.json
-  await fs.writeFile(`${clDir}/4-valid-feeds.json`, toJSONL(validFeeds));
+  await fs.writeFile(`${clDir}/4-valid-feeds.jsonl`, toJSONL(validFeeds));
 }
 
 function downloadFiles(dir: string, urls: string[]) {
@@ -148,6 +135,8 @@ function getWETHAndWMATIC(): ForeignToken[] {
     { ...baseWETH, symbol: "ETH" },
     { ...polygonWETH, symbol: "ETH" },
     { ...polygonWMATIC, symbol: "MATIC" },
+    { ...lineaWETH, symbol: "ETH" },
+    { ...bscWBNB, symbol: "BNB" },
   ];
 }
 
@@ -187,7 +176,14 @@ function getWETHAndWMATIC(): ForeignToken[] {
 function parseChainlinkFeeds(rawJsons: any[]): ChainlinkFeed[] {
   const ret: ChainlinkFeed[] = [];
   for (const rJson of rawJsons) {
-    const chainName = rJson[0].docs.blockchainName;
+    const chainName = rJson.find((r) => r.docs.blockchainName != null)?.docs
+      .blockchainName;
+    if (chainName == null) {
+      console.log(`Skipping feed, no chain name: ${JSON.stringify(rJson)}`);
+      continue;
+    } else {
+      console.log(`Processing ${chainName}`);
+    }
     const chainId = (function () {
       switch (chainName) {
         case "Ethereum":
@@ -204,6 +200,8 @@ function parseChainlinkFeeds(rawJsons: any[]): ChainlinkFeed[] {
           return 43114;
         case "Linea":
           return 59144;
+        case "Binance":
+          return 56;
         default:
           throw new Error("Unknown chain name: " + chainName);
       }
@@ -299,7 +297,7 @@ async function priceTokens(
       }
 
       const accChain = getDAv2Chain(token.chainId);
-      const usdcAddr = accChain.bridgeCoin.token;
+      const usdc = accChain.localUSDC;
 
       // Get Chainlink price feed for this token, if available
       try {
@@ -309,7 +307,7 @@ async function priceTokens(
           client,
           token,
           feed,
-          usdcAddr,
+          usdc,
         });
         const { status, uniswapPrice, chainlinkPrice } = tokenWithPrice;
         console.log(
@@ -335,31 +333,27 @@ async function quoteToken({
   client,
   token,
   feed,
-  usdcAddr,
+  usdc,
 }: {
   blockNumber: number;
   blockTimestamp: number;
   client: PublicClient;
   token: ForeignToken;
   feed?: ChainlinkFeed;
-  usdcAddr: Address;
+  usdc: ForeignToken;
 }): Promise<PricedToken> {
   const tokenAddress = token.token;
 
   // First, quote Uniswap
-  const swapperAddr =
-    token.chainId === 1
-      ? "0x207e87f84cff325715f324d09e63b21a03e53b61"
-      : "0xd4f52859A6Fa075A6253C46A4D6367f2F8247165";
   const [uniQuote, tokenDec] = await client.multicall({
     contracts: [
       {
         abi: daimoFlexSwapperAbi,
-        address: swapperAddr,
+        address: daimoFlexSwapperUniOnlyAddress(token.chainId),
         functionName: "quote",
         args: [
-          usdcAddr,
-          1_000_000n, // $1 of USDC
+          usdc.token,
+          parseUnits("1", usdc.decimals), // $1 of USDC
           tokenAddress,
         ],
       },
