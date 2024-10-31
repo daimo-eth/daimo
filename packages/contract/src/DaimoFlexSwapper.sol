@@ -182,7 +182,7 @@ contract DaimoFlexSwapper is
         extra = abi.decode(extraData, (DaimoFlexSwapperExtraData));
 
         // Get quote = best-effort price and path from tokenIn to tokenOut.
-        (uint256 minAmountOut, uint256 swapEstAmountOut) = _getMinAmountOut({
+        (uint256 minAmountOut, uint256 swapEstAmountOut) = getMinAmountOut({
             tokenIn: tokenIn,
             amountIn: amountIn,
             tokenOut: tokenOut
@@ -227,11 +227,11 @@ contract DaimoFlexSwapper is
     /// when called via an adversarial party. We use Uniswap TWAP/TWAL, with a
     /// Chainlink sanity check where available. For both input  and output,
     /// token = 0x0 refers to ETH or the native asset (eg MATIC on Polygon).
-    function _getMinAmountOut(
+    function getMinAmountOut(
         IERC20 tokenIn,
         uint256 amountIn,
         IERC20 tokenOut
-    ) private view returns (uint256 minAmountOut, uint256 swapEstAmountOut) {
+    ) public view returns (uint256 minAmountOut, uint256 swapEstAmountOut) {
         require(amountIn > 0, "DFS: amountIn = 0");
         if (address(tokenIn) == address(0)) tokenIn = wrappedNativeToken;
         if (address(tokenOut) == address(0)) tokenOut = wrappedNativeToken;
@@ -276,8 +276,14 @@ contract DaimoFlexSwapper is
         uint256 refAmountOut = 0;
         if (stableToStable) {
             // Require USD stablecoins to be exchanged 1-to-1.
-            refAmountOut = amountIn;
-            minAmountOut = amountIn;
+            uint8 decIn = IERC20Metadata(address(tokenIn)).decimals();
+            uint8 decOut = IERC20Metadata(address(tokenOut)).decimals();
+            if (decIn > decOut) {
+                refAmountOut = amountIn / 10 ** (decIn - decOut);
+            } else {
+                refAmountOut = amountIn * 10 ** (decOut - decIn);
+            }
+            minAmountOut = refAmountOut;
         } else {
             // Get Chainlink quote, if available (if not, refAmountOut = 0).
             refAmountOut = getChainlinkQuote(tokenIn, amountIn, tokenOut);

@@ -10,6 +10,7 @@ import "../dummy/DaimoDummyUSDC.sol";
 
 contract SwapperTest is Test {
     IERC20 public usdc = IERC20(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913);
+    IERC20 public dai = IERC20(0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb);
     IERC20 public weth = IERC20(0x4200000000000000000000000000000000000006);
     IERC20 public degen = IERC20(0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed);
     address payable public alice = payable(address(0x123));
@@ -25,9 +26,10 @@ contract SwapperTest is Test {
         IERC20[] memory hopTokens = new IERC20[](1);
         hopTokens[0] = weth;
 
-        IERC20[] memory outputTokens = new IERC20[](2);
+        IERC20[] memory outputTokens = new IERC20[](3);
         outputTokens[0] = usdc;
         outputTokens[1] = weth;
+        outputTokens[2] = dai;
 
         uint24[] memory oracleFeeTiers = new uint24[](4);
         oracleFeeTiers[0] = 100;
@@ -37,6 +39,22 @@ contract SwapperTest is Test {
 
         address swapperImpl = address(new DaimoFlexSwapper());
         swapper = DaimoFlexSwapper(address(new ERC1967Proxy(swapperImpl, "")));
+
+        IERC20[] memory knownTokenAddrs = new IERC20[](2);
+        knownTokenAddrs[0] = usdc;
+        knownTokenAddrs[1] = dai;
+        DaimoFlexSwapper.KnownToken[]
+            memory knownTokens = new DaimoFlexSwapper.KnownToken[](2);
+        knownTokens[0] = DaimoFlexSwapper.KnownToken({
+            chainlinkFeedAddr: AggregatorV2V3Interface(address(0)),
+            isStablecoin: true,
+            skipUniswap: false
+        });
+        knownTokens[1] = DaimoFlexSwapper.KnownToken({
+            chainlinkFeedAddr: AggregatorV2V3Interface(address(0)),
+            isStablecoin: true,
+            skipUniswap: false
+        });
 
         swapper.init({
             _initialOwner: address(this),
@@ -48,8 +66,8 @@ contract SwapperTest is Test {
             _oraclePoolFactory: IUniswapV3Factory(
                 0x33128a8fC17869897dcE68Ed026d694621f6FDfD
             ),
-            _knownTokenAddrs: new IERC20[](0),
-            _knownTokens: new DaimoFlexSwapper.KnownToken[](0)
+            _knownTokenAddrs: knownTokenAddrs,
+            _knownTokens: knownTokens
         });
     }
 
@@ -62,6 +80,54 @@ contract SwapperTest is Test {
         // If tokenIn == tokenOut, there should be no swap path.
         assertEq(swapPath, new bytes(0));
         assertEq(quotedAmountOut, 100);
+    }
+
+    function testStableToStable() public {
+        // Test getMinAmountOut directly
+        // 1 DAI (1e18 units) = 1 USDC (1e6 units)
+        uint256 minOut;
+        uint256 swapEstOut;
+        (minOut, swapEstOut) = swapper.getMinAmountOut(dai, 1e18, usdc);
+        assertEq(minOut, 1e6);
+        assertApproxEqAbs(swapEstOut, 1e6, 1e4); // should be within 1%
+
+        // Test swap
+        // 1 DAI (1e18 units) = 1 USDC (1e6 units)
+        bytes memory swapTooLittleOutput = _fakeSwapper(usdc, 1e6 - 1);
+        bytes memory swapOK = _fakeSwapper(usdc, 1e6);
+        deal(address(dai), address(this), 2e18);
+        dai.approve(address(swapper), 2e18);
+        swapper.swapToCoin(dai, 1e18, usdc, swapOK);
+        vm.expectRevert("DFS: insufficient output");
+        swapper.swapToCoin(dai, 1e18, usdc, swapTooLittleOutput);
+
+        // Same in reverse
+        swapTooLittleOutput = _fakeSwapper(dai, 1e18 - 1);
+        swapOK = _fakeSwapper(dai, 1e18);
+        deal(address(usdc), address(this), 2e6);
+        usdc.approve(address(swapper), 2e6);
+        swapper.swapToCoin(usdc, 1e6, dai, swapOK);
+        vm.expectRevert("DFS: insufficient output");
+        swapper.swapToCoin(usdc, 1e6, dai, swapTooLittleOutput);
+    }
+
+    function _fakeSwapper(
+        IERC20 outToken,
+        uint256 outAmount
+    ) private returns (bytes memory) {
+        address dest = address(new FakeSwapper());
+        deal(address(outToken), dest, outAmount);
+        return
+            abi.encode(
+                DaimoFlexSwapper.DaimoFlexSwapperExtraData({
+                    callDest: dest,
+                    callData: abi.encodeWithSignature(
+                        "swap(address,uint256)",
+                        outToken,
+                        outAmount
+                    )
+                })
+            );
     }
 
     function testSwapERC20ToUSDC() public {
@@ -238,6 +304,12 @@ contract SwapperTest is Test {
         address recipient;
         uint256 amountIn;
         uint256 amountOutMinimum;
+    }
+}
+
+contract FakeSwapper {
+    function swap(IERC20 outToken, uint256 outAmount) public {
+        outToken.transfer(msg.sender, outAmount);
     }
 }
 
