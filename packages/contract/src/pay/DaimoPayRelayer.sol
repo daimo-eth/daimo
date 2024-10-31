@@ -117,6 +117,26 @@ contract DaimoPayRelayer is Ownable2Step {
         );
     }
 
+    function startIntent(
+        DaimoPay dp,
+        PayIntent calldata intent,
+        Call[] calldata calls,
+        bytes calldata bridgeExtraData,
+        uint256 bridgeGasFee
+    ) public onlyOwner {
+        // We use Axelar when bridging to/from BSC. Axelar requries a native token
+        // payment for the gas fee.
+        if (block.chainid == 56 || intent.toChainId == 56) {
+            DaimoPayBridger bridger = dp.bridger();
+            IDaimoPayBridger axelarBridger = bridger.chainIdToBridger(56);
+            (bool success, ) = address(axelarBridger).call{value: bridgeGasFee}(
+                ""
+            );
+            require(success, "DPR: axelar fee transfer failed");
+        }
+        dp.startIntent(intent, calls, bridgeExtraData);
+    }
+
     function fastFinish(
         DaimoPay dp,
         PayIntent calldata intent,

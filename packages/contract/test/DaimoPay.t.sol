@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
+import {GasInfo} from "@axelar-network/contracts/interfaces/IAxelarGasService.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
 import "account-abstraction/core/EntryPoint.sol";
 
@@ -10,12 +11,11 @@ import "../src/pay/DaimoPayBridger.sol";
 import "../src/pay/DaimoPayCCTPBridger.sol";
 import "../src/pay/DaimoPayAcrossBridger.sol";
 import "../src/pay/DaimoPayAxelarBridger.sol";
-import "../src/pay/DaimoPayAxelarReceiver.sol";
 import "./dummy/DaimoDummyUSDC.sol";
 
-address constant BASE_INTENT_ADDR = 0xd880D93c97dBc39424c8199F85C63EFCBcc2727D;
-address constant LINEA_INTENT_ADDR = 0xD7d57FF9931D6AB74A4b05a1ed2A2368D485860b;
-address constant BNB_INTENT_ADDR = 0xAB83a49FE9F96C45E6F5EB1fAa2755987522ac38;
+address constant BASE_INTENT_ADDR = 0xB87c250C2A5697A29BF705c2B785D57E5316F569;
+address constant LINEA_INTENT_ADDR = 0x018D75D202dF6aD5783C6fcef15AbCC93113530b;
+address constant BSC_INTENT_ADDR = 0xdc20CA67e52107Bb77631A6e5F1A7c9b9B20bB81;
 
 contract DaimoPayTest is Test {
     // Daimo Pay contracts
@@ -27,7 +27,6 @@ contract DaimoPayTest is Test {
     DaimoPayCCTPBridger public cctpBridger;
     DaimoPayAcrossBridger public acrossBridger;
     DaimoPayAxelarBridger public axelarBridger;
-    DaimoPayAxelarReceiver public axelarReceiver;
 
     // CCTP dummy contracts
     DummyTokenMinter public tokenMinter;
@@ -37,7 +36,8 @@ contract DaimoPayTest is Test {
     DummySpokePool public spokePool;
 
     // Axelar dummy contracts
-    // DummyAxelarGateway public axelarGateway;
+    DummyAxelarGatewayWithToken public axelarGateway;
+    DummyAxelarGasService public axelarGasService;
 
     // Account addresses
     address immutable _alice = 0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa;
@@ -58,7 +58,7 @@ contract DaimoPayTest is Test {
     uint256 immutable _baseChainId = 8453; // Base
     uint32 immutable _baseDomain = 6; // Base
     uint256 immutable _lineaChainId = 59144; // Linea
-    uint256 immutable _bnbChainId = 56; // BNB Chain
+    uint256 immutable _bscChainId = 56; // BNB Chain
 
     // Intent data
     uint256 immutable _toAmount = 100;
@@ -107,32 +107,37 @@ contract DaimoPayTest is Test {
         });
 
         // Initialize Axelar bridger
-        // axelarGateway = new DummyAxelarGateway();
-        // axelarReceiver = new DaimoPayAxelarReceiver(address(axelarGateway));
-        // axelarBridger = new DaimoPayAxelarBridger({
-        //     _owner: address(this),
-        //     _axelarGateway: axelarGateway,
-        //     _toChainIds: new uint256[](0),
-        //     _toTokens: new address[](0),
-        //     _bridgeRoutes: new DaimoPayAxelarBridger.AxelarBridgeRoute[](0)
-        // });
-        // axelarBridger.addBridgeRoute({
-        //     toChainId: _bnbChainId,
-        //     toToken: address(_toToken),
-        //     bridgeRoute: DaimoPayAxelarBridger.AxelarBridgeRoute({
-        //         destChainName: "binance",
-        //         tokenSymbol: "axlUSDC",
-        //         localTokenAddr: address(_fromToken),
-        //         fee: 10 // (= $0.00001)
-        //     })
-        // });
+        axelarGateway = new DummyAxelarGatewayWithToken();
+        axelarGasService = new DummyAxelarGasService(
+            _toAmount,
+            address(_alice)
+        );
+        axelarBridger = new DaimoPayAxelarBridger({
+            _owner: address(this),
+            _axelarGateway: axelarGateway,
+            _axelarGasService: axelarGasService,
+            _toChainIds: new uint256[](0),
+            _toTokens: new address[](0),
+            _bridgeRoutes: new DaimoPayAxelarBridger.AxelarBridgeRoute[](0)
+        });
+        axelarBridger.addBridgeRoute({
+            toChainId: _bscChainId,
+            toToken: address(_toToken),
+            bridgeRoute: DaimoPayAxelarBridger.AxelarBridgeRoute({
+                destChainName: "binance",
+                tokenSymbol: "axlUSDC",
+                localTokenAddr: address(_fromToken),
+                receiverContract: address(0xdead),
+                fee: 10
+            })
+        });
 
         // Map _baseChainId to cctpBridger, _lineaChainId to acrossBridger,
-        // and _bnbChainId to axelarBridger
+        // and _bscChainId to axelarBridger
         uint256[] memory chainIds = new uint256[](3);
         chainIds[0] = _baseChainId;
         chainIds[1] = _lineaChainId;
-        chainIds[2] = _bnbChainId;
+        chainIds[2] = _bscChainId;
         IDaimoPayBridger[] memory bridgers = new IDaimoPayBridger[](3);
         bridgers[0] = cctpBridger;
         bridgers[1] = acrossBridger;
@@ -193,7 +198,7 @@ contract DaimoPayTest is Test {
 
         // Get the intent address for the BNB chain
         PayIntent memory bnbIntent = PayIntent({
-            toChainId: _bnbChainId,
+            toChainId: _bscChainId,
             bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
@@ -206,7 +211,7 @@ contract DaimoPayTest is Test {
 
         assertEq(actualBaseIntentAddr, BASE_INTENT_ADDR);
         assertEq(actualLineaIntentAddr, LINEA_INTENT_ADDR);
-        assertEq(actualBnbIntentAddr, BNB_INTENT_ADDR);
+        assertEq(actualBnbIntentAddr, BSC_INTENT_ADDR);
     }
 
     // Test that startIntent reverts when the intent is on the same chain.
@@ -317,11 +322,11 @@ contract DaimoPayTest is Test {
             "incorrect Across amount received"
         );
         // Check that the Axelar bridger didn't receive tokens
-        // assertEq(
-        //     axelarGateway.totalInputAmount(),
-        //     0,
-        //     "incorrect Axelar amount received"
-        // );
+        assertEq(
+            axelarGateway.totalAmount(),
+            0,
+            "incorrect Axelar amount received"
+        );
     }
 
     // Test a simple startIntent call that bridges using Across.
@@ -406,14 +411,14 @@ contract DaimoPayTest is Test {
             expectedInputAmount,
             "incorrect Across amount received"
         );
-        // Check that the CCTP messenger didn't burned tokens
+        // Check that the CCTP messenger didn't burn tokens
         assertEq(messenger.amountBurned(), 0, "incorrect CCTP amount burned");
         // Check that the Axelar bridger didn't receive tokens
-        // assertEq(
-        //     axelarGateway.totalInputAmount(),
-        //     0,
-        //     "incorrect Axelar amount received"
-        // );
+        assertEq(
+            axelarGateway.totalAmount(),
+            0,
+            "incorrect Axelar amount received"
+        );
 
         // Check that the extra tokens were refunded to the caller
         assertEq(_fromToken.balanceOf(_alice), 555 - 120 + 10);
@@ -431,7 +436,7 @@ contract DaimoPayTest is Test {
         vm.startPrank(_alice);
 
         PayIntent memory intent = PayIntent({
-            toChainId: _bnbChainId,
+            toChainId: _bscChainId,
             bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
@@ -440,18 +445,19 @@ contract DaimoPayTest is Test {
             nonce: _nonce
         });
 
-        // Alice sends some coins to the intent address, enough to cover the
-        // 10 USDC flat fee.
-        uint256 inputAmount = _toAmount + 10;
+        // Alice sends some coins to the intent address
         address intentAddr = intentFactory.getIntentAddress(intent);
-        _fromToken.transfer(intentAddr, inputAmount);
+        _fromToken.transfer(intentAddr, _toAmount);
+
+        // Give the DaimoPayAxelarBridger some native token to pay for gas
+        vm.deal(address(axelarBridger), 10);
 
         vm.expectEmit(address(axelarBridger));
         emit IDaimoPayBridger.BridgeInitiated({
             fromAddress: address(bridger),
             fromToken: address(_fromToken),
-            fromAmount: inputAmount,
-            toChainId: _bnbChainId,
+            fromAmount: _toAmount,
+            toChainId: _bscChainId,
             toAddress: intentAddr,
             toToken: address(_toToken),
             toAmount: _toAmount
@@ -460,11 +466,14 @@ contract DaimoPayTest is Test {
         vm.expectEmit(address(dp));
         emit DaimoPay.Start(intentAddr, intent);
 
+        // Encode the refund address in the bridgeExtraData
+        bytes memory bridgeExtraData = abi.encode(address(_alice));
+
         uint256 gasBefore = gasleft();
         dp.startIntent({
             intent: intent,
             calls: new Call[](0),
-            bridgeExtraData: ""
+            bridgeExtraData: bridgeExtraData
         });
         uint256 gasAfter = gasleft();
 
@@ -473,13 +482,19 @@ contract DaimoPayTest is Test {
         vm.stopPrank();
 
         assertEq(dp.intentSent(intentAddr), true, "intent not sent");
+        // Check that the gas service received the correct amount
+        assertEq(
+            address(axelarGasService).balance,
+            10,
+            "incorrect gas service balance"
+        );
         // Check that the Axelar bridger received tokens
-        // assertEq(
-        //     axelarGateway.totalInputAmount(),
-        //     inputAmount,
-        //     "incorrect Axelar amount received"
-        // );
-        // Check that the CCTP messenger didn't burned tokens
+        assertEq(
+            axelarGateway.totalAmount(),
+            _toAmount,
+            "incorrect Axelar amount received"
+        );
+        // Check that the CCTP messenger didn't burn tokens
         assertEq(messenger.amountBurned(), 0, "incorrect CCTP amount burned");
         // Check that the Across bridger didn't receive tokens
         assertEq(
@@ -925,183 +940,353 @@ contract DummySpokePool is V3SpokePoolInterface, Test {
     ) external {}
 }
 
-// contract DummyAxelarGateway is IAxelarGateway, Test {
-//     uint256 public totalInputAmount;
+contract DummyAxelarGatewayWithToken is IAxelarGatewayWithToken, Test {
+    uint256 public totalAmount;
 
-//     /********************\
-//     |* Public Functions *|
-//     \********************/
+    constructor() {
+        totalAmount = 0;
+    }
 
-//     function sendToken(
-//         string calldata destinationChain,
-//         string calldata destinationAddress,
-//         string calldata symbol,
-//         uint256 amount
-//     ) external {
-//         assertEq(destinationChain, "binance", "incorrect destination chain");
-//         assertEq(
-//             destinationAddress,
-//             Strings.toHexString(BNB_INTENT_ADDR),
-//             "incorrect destination address"
-//         );
-//         assertEq(symbol, "axlUSDC", "incorrect symbol");
-//         totalInputAmount += amount;
-//     }
+    function callContractWithToken(
+        string calldata destinationChain,
+        string calldata contractAddress,
+        bytes calldata payload,
+        string calldata symbol,
+        uint256 amount
+    ) external {
+        assertEq(destinationChain, "binance", "incorrect destination chain");
+        assertEq(
+            contractAddress,
+            Strings.toHexString(address(0xdead)),
+            "incorrect contract address"
+        );
+        assertEq(payload, abi.encode(BSC_INTENT_ADDR), "incorrect payload");
+        assertEq(symbol, "axlUSDC", "incorrect symbol");
 
-//     function callContract(
-//         string calldata /* destinationChain */,
-//         string calldata /* contractAddress */,
-//         bytes calldata /* payload */
-//     ) external pure {
-//         revert("not implemented");
-//     }
+        totalAmount += amount;
+    }
 
-//     function callContractWithToken(
-//         string calldata /* destinationChain */,
-//         string calldata /* contractAddress */,
-//         bytes calldata /* payload */,
-//         string calldata /* symbol */,
-//         uint256 /* amount */
-//     ) external pure {
-//         revert("not implemented");
-//     }
+    function callContract(
+        string calldata /* destinationChain */,
+        string calldata /* destinationContractAddress */,
+        bytes calldata /* payload */
+    ) external pure {
+        revert("not implemented");
+    }
 
-//     function isContractCallApproved(
-//         bytes32 /* commandId */,
-//         string calldata /* sourceChain */,
-//         string calldata /* sourceAddress */,
-//         address /* contractAddress */,
-//         bytes32 /* payloadHash */
-//     ) external pure returns (bool) {
-//         revert("not implemented");
-//     }
+    function isContractCallApproved(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        address /* contractAddress */,
+        bytes32 /* payloadHash */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
 
-//     function isContractCallAndMintApproved(
-//         bytes32 /* commandId */,
-//         string calldata /* sourceChain */,
-//         string calldata /* sourceAddress */,
-//         address /* contractAddress */,
-//         bytes32 /* payloadHash */,
-//         string calldata /* symbol */,
-//         uint256 /* amount */
-//     ) external pure returns (bool) {
-//         revert("not implemented");
-//     }
+    function validateContractCall(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        bytes32 /* payloadHash */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
 
-//     function validateContractCall(
-//         bytes32 /* commandId */,
-//         string calldata /* sourceChain */,
-//         string calldata /* sourceAddress */,
-//         bytes32 /* payloadHash */
-//     ) external pure returns (bool) {
-//         revert("not implemented");
-//     }
+    function isCommandExecuted(
+        bytes32 /* commandId */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
 
-//     function validateContractCallAndMint(
-//         bytes32 /* commandId */,
-//         string calldata /* sourceChain */,
-//         string calldata /* sourceAddress */,
-//         bytes32 /* payloadHash */,
-//         string calldata /* symbol */,
-//         uint256 /* amount */
-//     ) external pure returns (bool) {
-//         revert("not implemented");
-//     }
+    function sendToken(
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        string calldata /* symbol */,
+        uint256 /* amount */
+    ) external pure {
+        revert("not implemented");
+    }
 
-//     /***********\
-//     |* Getters *|
-//     \***********/
+    function isContractCallAndMintApproved(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        address /* contractAddress */,
+        bytes32 /* payloadHash */,
+        string calldata /* symbol */,
+        uint256 /* amount */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
 
-//     function authModule() external pure returns (address) {
-//         revert("not implemented");
-//     }
+    function validateContractCallAndMint(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        bytes32 /* payloadHash */,
+        string calldata /* symbol */,
+        uint256 /* amount */
+    ) external pure returns (bool) {
+        revert("not implemented");
+    }
 
-//     function tokenDeployer() external pure returns (address) {
-//         revert("not implemented");
-//     }
+    function tokenAddresses(
+        string memory /* symbol */
+    ) external pure returns (address) {
+        revert("not implemented");
+    }
+}
 
-//     function tokenMintLimit(
-//         string memory /* symbol */
-//     ) external pure returns (uint256) {
-//         revert("not implemented");
-//     }
+contract DummyAxelarGasService is IAxelarGasService, Test {
+    uint256 public immutable expectedAmount;
+    address public immutable expectedRefundAddress;
 
-//     function tokenMintAmount(
-//         string memory /* symbol */
-//     ) external pure returns (uint256) {
-//         revert("not implemented");
-//     }
+    constructor(uint256 amount, address refundAddress) {
+        expectedAmount = amount;
+        expectedRefundAddress = refundAddress;
+    }
 
-//     function allTokensFrozen() external pure returns (bool) {
-//         revert("not implemented");
-//     }
+    function payNativeGasForContractCallWithToken(
+        address /* sender */,
+        string calldata destinationChain,
+        string calldata destinationAddress,
+        bytes calldata payload,
+        string calldata symbol,
+        uint256 amount,
+        address refundAddress
+    ) external payable {
+        assertEq(destinationChain, "binance", "incorrect destination chain");
+        assertEq(
+            destinationAddress,
+            Strings.toHexString(address(0xdead)),
+            "incorrect destination address"
+        );
+        assertEq(payload, abi.encode(BSC_INTENT_ADDR), "incorrect payload");
+        assertEq(symbol, "axlUSDC", "incorrect symbol");
+        assertEq(amount, expectedAmount, "incorrect amount");
+        assertEq(
+            refundAddress,
+            expectedRefundAddress,
+            "incorrect refund address"
+        );
+    }
 
-//     function implementation() external pure returns (address) {
-//         revert("not implemented");
-//     }
+    function payNativeGasForExpressCallWithToken(
+        address /* sender */,
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        string calldata /* symbol */,
+        uint256 /* amount */,
+        address /* refundAddress */
+    ) external payable {
+        revert("not implemented");
+    }
 
-//     function tokenAddresses(
-//         string memory /* symbol */
-//     ) external pure returns (address) {
-//         revert("not implemented");
-//     }
+    function getGasInfo(
+        string calldata /* chain */
+    ) external pure returns (GasInfo memory) {
+        revert("not implemented");
+    }
 
-//     function tokenFrozen(
-//         string memory /* symbol */
-//     ) external pure returns (bool) {
-//         revert("not implemented");
-//     }
+    function estimateGasFee(
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        uint256 /* executionGasLimit */,
+        bytes calldata /* params */
+    ) external pure returns (uint256 /* gasEstimate */) {
+        revert("not implemented");
+    }
 
-//     function isCommandExecuted(
-//         bytes32 /* commandId */
-//     ) external pure returns (bool) {
-//         revert("not implemented");
-//     }
+    function payGas(
+        address /* sender */,
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        uint256 /* executionGasLimit */,
+        bool /* estimateOnChain */,
+        address /* refundAddress */,
+        bytes calldata /* params */
+    ) external payable {
+        revert("not implemented");
+    }
 
-//     function adminEpoch() external pure returns (uint256) {
-//         revert("not implemented");
-//     }
+    function payGasForContractCall(
+        address /* sender */,
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        address /* gasToken */,
+        uint256 /* gasFeeAmount */,
+        address /* refundAddress */
+    ) external pure {
+        revert("not implemented");
+    }
 
-//     function adminThreshold(
-//         uint256 /* epoch */
-//     ) external pure returns (uint256) {
-//         revert("not implemented");
-//     }
+    function payGasForContractCallWithToken(
+        address /* sender */,
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        string calldata /* symbol */,
+        uint256 /* amount */,
+        address /* gasToken */,
+        uint256 /* gasFeeAmount */,
+        address /* refundAddress */
+    ) external pure {
+        revert("not implemented");
+    }
 
-//     function admins(
-//         uint256 /* epoch */
-//     ) external pure returns (address[] memory) {
-//         revert("not implemented");
-//     }
+    function payNativeGasForContractCall(
+        address /* sender */,
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        address /* refundAddress */
+    ) external payable {
+        revert("not implemented");
+    }
 
-//     /*******************\
-//     |* Admin Functions *|
-//     \*******************/
+    function payGasForExpressCall(
+        address /* sender */,
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        address /* gasToken */,
+        uint256 /* gasFeeAmount */,
+        address /* refundAddress */
+    ) external pure {
+        revert("not implemented");
+    }
 
-//     function setTokenMintLimits(
-//         string[] calldata /* symbols */,
-//         uint256[] calldata /* limits */
-//     ) external pure {
-//         revert("not implemented");
-//     }
+    function payGasForExpressCallWithToken(
+        address /* sender */,
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        string calldata /* symbol */,
+        uint256 /* amount */,
+        address /* gasToken */,
+        uint256 /* gasFeeAmount */,
+        address /* refundAddress */
+    ) external pure {
+        revert("not implemented");
+    }
 
-//     function upgrade(
-//         address /* newImplementation */,
-//         bytes32 /* newImplementationCodeHash */,
-//         bytes calldata /* setupParams */
-//     ) external pure {
-//         revert("not implemented");
-//     }
+    function payNativeGasForExpressCall(
+        address /* sender */,
+        string calldata /* destinationChain */,
+        string calldata /* destinationAddress */,
+        bytes calldata /* payload */,
+        address /* refundAddress */
+    ) external payable {
+        revert("not implemented");
+    }
 
-//     /**********************\
-//     |* External Functions *|
-//     \**********************/
+    function addGas(
+        bytes32 /* txHash */,
+        uint256 /* logIndex */,
+        address /* gasToken */,
+        uint256 /* gasFeeAmount */,
+        address /* refundAddress */
+    ) external pure {
+        revert("not implemented");
+    }
 
-//     function setup(bytes calldata /* params */) external pure {
-//         revert("not implemented");
-//     }
+    function addNativeGas(
+        bytes32 /* txHash */,
+        uint256 /* logIndex */,
+        address /* refundAddress */
+    ) external payable {
+        revert("not implemented");
+    }
 
-//     function execute(bytes calldata /* input */) external pure {
-//         revert("not implemented");
-//     }
-// }
+    function addExpressGas(
+        bytes32 /* txHash */,
+        uint256 /* logIndex */,
+        address /* gasToken */,
+        uint256 /* gasFeeAmount */,
+        address /* refundAddress */
+    ) external pure {
+        revert("not implemented");
+    }
+
+    function addNativeExpressGas(
+        bytes32 /* txHash */,
+        uint256 /* logIndex */,
+        address /* refundAddress */
+    ) external payable {
+        revert("not implemented");
+    }
+
+    function updateGasInfo(
+        string[] calldata /* chains */,
+        GasInfo[] calldata /* gasUpdates */
+    ) external pure {
+        revert("not implemented");
+    }
+
+    function collectFees(
+        address payable /* receiver */,
+        address[] calldata /* tokens */,
+        uint256[] calldata /* amounts */
+    ) external pure {
+        revert("not implemented");
+    }
+
+    function refund(
+        bytes32 /* txHash */,
+        uint256 /* logIndex */,
+        address payable /* receiver */,
+        address /* token */,
+        uint256 /* amount */
+    ) external pure {
+        revert("not implemented");
+    }
+
+    function gasCollector() external pure returns (address) {
+        revert("not implemented");
+    }
+
+    function acceptOwnership() external pure {
+        revert("not implemented");
+    }
+
+    function contractId() external pure returns (bytes32) {
+        revert("not implemented");
+    }
+
+    function implementation() external pure returns (address) {
+        revert("not implemented");
+    }
+
+    function owner() external pure returns (address) {
+        revert("not implemented");
+    }
+
+    function pendingOwner() external pure returns (address) {
+        revert("not implemented");
+    }
+
+    function proposeOwnership(address /* newOwner */) external pure {
+        revert("not implemented");
+    }
+
+    function setup(bytes calldata /* data */) external pure {
+        revert("not implemented");
+    }
+
+    function transferOwnership(address /* newOwner */) external pure {
+        revert("not implemented");
+    }
+
+    function upgrade(
+        address /* newImplementation */,
+        bytes32 /* newImplementationCodeHash */,
+        bytes calldata /* params */
+    ) external pure {
+        revert("not implemented");
+    }
+}

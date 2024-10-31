@@ -5,7 +5,6 @@ import "forge-std/Script.sol";
 import "openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import "../../src/pay/DaimoPayAxelarBridger.sol";
-import "../../src/pay/DaimoPayAxelarReceiver.sol";
 import "../Constants.s.sol";
 
 contract DeployDaimoPayAxelarBridger is Script {
@@ -24,7 +23,7 @@ contract DeployDaimoPayAxelarBridger is Script {
         address initOwner = msg.sender;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayAxelarBridger-test3"),
+            keccak256("DaimoPayAxelarBridger-new2"),
             abi.encodePacked(
                 type(DaimoPayAxelarBridger).creationCode,
                 abi.encode(
@@ -54,7 +53,7 @@ contract DeployDaimoPayAxelarBridger is Script {
     {
         address axelarReceiver = CREATE3.getDeployed(
             msg.sender,
-            keccak256("DaimoPayAxelarReceiver-test3")
+            keccak256("DaimoPayAxelarBridger-new2")
         );
 
         bool testnet = _isTestnet(block.chainid);
@@ -76,12 +75,11 @@ contract DeployDaimoPayAxelarBridger is Script {
             block.chainid == OP_MAINNET ||
             block.chainid == POLYGON_MAINNET
         ) {
-            chainIds = new uint256[](2);
-            toTokens = new address[](2);
-            bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](2);
+            chainIds = new uint256[](1);
+            toTokens = new address[](1);
+            bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](1);
 
             chainIds[0] = BNB_MAINNET;
-            chainIds[1] = OP_MAINNET;
 
             for (uint32 i = 0; i < chainIds.length; ++i) {
                 toTokens[i] = _getAxlUSDCAddress(chainIds[i]);
@@ -90,7 +88,7 @@ contract DeployDaimoPayAxelarBridger is Script {
                     tokenSymbol: "axlUSDC",
                     localTokenAddr: _getAxlUSDCAddress(block.chainid),
                     receiverContract: axelarReceiver,
-                    fee: 1_000_000 // 1 USDC
+                    fee: 300000000000000 // 0.0003 ETH
                 });
             }
         } else if (block.chainid == BNB_MAINNET) {
@@ -112,7 +110,7 @@ contract DeployDaimoPayAxelarBridger is Script {
                     tokenSymbol: "axlUSDC",
                     localTokenAddr: _getAxlUSDCAddress(block.chainid),
                     receiverContract: axelarReceiver,
-                    fee: 1_000_000 // 1 USDC
+                    fee: 300000000000000 // 0.0003 ETH
                 });
             }
         } else {

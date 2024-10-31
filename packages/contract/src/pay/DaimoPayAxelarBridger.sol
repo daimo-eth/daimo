@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.12;
 
+import {AxelarExpressExecutableWithToken} from "@axelar-network/contracts/express/AxelarExpressExecutableWithToken.sol";
 import {IAxelarGatewayWithToken} from "@axelar-network/contracts/interfaces/IAxelarGatewayWithToken.sol";
 import {IAxelarGasService} from "@axelar-network/contracts/interfaces/IAxelarGasService.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -17,7 +18,11 @@ import "../interfaces/IDaimoPayBridger.sol";
 /// @dev Bridges assets from to a destination chain using Axelar Protocol. Makes
 /// the assumption that the local token is an ERC20 token and has a 1 to 1 price
 /// with the corresponding destination token.
-contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
+contract DaimoPayAxelarBridger is
+    IDaimoPayBridger,
+    AxelarExpressExecutableWithToken,
+    Ownable2Step
+{
     using SafeERC20 for IERC20;
     using Strings for address;
 
@@ -26,6 +31,7 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
         string tokenSymbol;
         address localTokenAddr;
         address receiverContract;
+        // Fee to be paid in native token for Axelar's bridging gas fee
         uint256 fee;
     }
 
@@ -66,7 +72,10 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
         uint256[] memory _toChainIds,
         address[] memory _toTokens,
         AxelarBridgeRoute[] memory _bridgeRoutes
-    ) Ownable(_owner) {
+    )
+        Ownable(_owner)
+        AxelarExpressExecutableWithToken(address(_axelarGateway))
+    {
         axelarGateway = _axelarGateway;
         axelarGasService = _axelarGasService;
 
@@ -135,11 +144,40 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
         });
     }
 
+    // ----- AXELAR EXECUTABLE FUNCTIONS -----
+
+    /// Part of the AxelarExpressExecutableWithToken interface. Used to make
+    /// a contract call on the destination chain without tokens. Not supported
+    /// by this implementation because we will always be bridging tokens.
+    function _execute(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        bytes calldata /* payload */
+    ) internal pure override {
+        revert("DPAxB: _execute not supported");
+    }
+
+    /// Part of the AxelarExpressExecutableWithToken interface. Used to make
+    /// a contract call on the destination chain with tokens. Will always be
+    /// used to transfer tokens to the intent address on the destination chain.
+    function _executeWithToken(
+        bytes32 /* commandId */,
+        string calldata /* sourceChain */,
+        string calldata /* sourceAddress */,
+        bytes calldata payload,
+        string calldata tokenSymbol,
+        uint256 amount
+    ) internal override {
+        address recipient = abi.decode(payload, (address));
+        address tokenAddress = axelarGateway.tokenAddresses(tokenSymbol);
+
+        IERC20(tokenAddress).safeTransfer(recipient, amount);
+    }
+
     // ----- BRIDGING FUNCTIONS -----
 
-    /// Get the local token that corresponds to the destination token. Get the
-    /// minimum input amount for a given output amount. The input amount must
-    /// cover the max of the percentage fee and the flat fee.
+    /// Get the local token that corresponds to the destination token.
     function getInputTokenAmount(
         uint256 toChainId,
         address toToken,
@@ -148,19 +186,21 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
         AxelarBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
             toToken
         ];
-        return (bridgeRoute.localTokenAddr, toAmount + bridgeRoute.fee);
+        return (bridgeRoute.localTokenAddr, toAmount);
     }
 
-    /// Initiate a bridge to a destination chain using Across Protocol.
+    /// Initiate a bridge to a destination chain using Axelar Protocol.
     function sendToChain(
         uint256 toChainId,
         address toAddress,
         address toToken,
         uint256 toAmount,
-        bytes calldata /* extraData */
+        bytes calldata extraData
     ) public {
         require(toChainId != block.chainid, "DPAxB: same chain");
         require(toAmount > 0, "DPAxB: zero amount");
+
+        address refundAddress = abi.decode(extraData, (address));
 
         // Get the local token that corresponds to the destination token.
         (address inputToken, uint256 inputAmount) = getInputTokenAmount({
@@ -173,36 +213,40 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
             toToken
         ];
 
-        // Move input token from caller to this contract and approve the
-        // AxelarGateway contract.
+        // Move input token from caller to this contract
         IERC20(inputToken).safeTransferFrom({
             from: msg.sender,
             to: address(this),
             value: inputAmount
         });
-        IERC20(inputToken).forceApprove({
-            spender: address(axelarGateway),
-            value: inputAmount
-        });
 
-        axelarGasService.payGasForExpressCallWithToken(
-            msg.sender,
+        // Pay for Axelar's bridging gas fee.
+        axelarGasService.payNativeGasForContractCallWithToken{
+            value: bridgeRoute.fee
+        }(
+            address(this),
             bridgeRoute.destChainName,
             bridgeRoute.receiverContract.toHexString(),
             abi.encode(toAddress),
             bridgeRoute.tokenSymbol,
-            inputAmount,
-            inputToken,
-            bridgeRoute.fee,
-            msg.sender
+            toAmount,
+            refundAddress
         );
 
+        // Approve the AxelarGateway contract and initiate the bridge. Send the
+        // tokens to the DaimoPayAxelarBridger on the destination chain. The
+        // _executeWithToken function will be called on the destination chain
+        // to transfer the tokens to the toAddress.
+        IERC20(inputToken).forceApprove({
+            spender: address(axelarGateway),
+            value: toAmount
+        });
         axelarGateway.callContractWithToken(
             bridgeRoute.destChainName,
             bridgeRoute.receiverContract.toHexString(),
             abi.encode(toAddress),
             bridgeRoute.tokenSymbol,
-            inputAmount
+            toAmount
         );
 
         emit BridgeInitiated({
@@ -215,4 +259,6 @@ contract DaimoPayAxelarBridger is IDaimoPayBridger, Ownable2Step {
             toAmount: toAmount
         });
     }
+
+    receive() external payable {}
 }
