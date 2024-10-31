@@ -57,6 +57,13 @@ export interface DaimoPayOrderItem {
 // NOTE: be careful to modify this type only in backward-compatible ways.
 //       Add OPTIONAL fields, etc. Anything else requires a migration.
 export const zDaimoPayOrderMetadata = z.object({
+  style: z
+    .object({
+      background: z.string().optional().describe("Background color."),
+    })
+    .optional()
+    .describe("Style of the checkout page."),
+  orgLogo: z.string().optional().describe("Logo of the organization."),
   intent: z
     .string()
     .describe("Title verb, eg 'Preorder', 'Check out', 'Deposit'."),
