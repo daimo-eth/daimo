@@ -21,7 +21,7 @@ contract DeployDaimoPayAcrossBridger is Script {
         address initOwner = msg.sender;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayAcrossBridger-test5"),
+            keccak256("DaimoPayAcrossBridger-options1"),
             abi.encodePacked(
                 type(DaimoPayAcrossBridger).creationCode,
                 abi.encode(
@@ -163,6 +163,15 @@ contract DeployDaimoPayAcrossBridger is Script {
             });
         } else {
             revert("Unsupported chainID");
+        }
+
+        for (uint256 i = 0; i < chainIds.length; ++i) {
+            console.log("toChain:", chainIds[i]);
+            console.log("bridgeTokenIn:", bridgeRoutes[i].bridgeTokenIn);
+            console.log("bridgeTokenOut:", bridgeRoutes[i].bridgeTokenOut);
+            console.log("pctFee:", bridgeRoutes[i].pctFee);
+            console.log("flatFee:", bridgeRoutes[i].flatFee);
+            console.log("--------------------------------");
         }
     }
 

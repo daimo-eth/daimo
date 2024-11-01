@@ -6,16 +6,16 @@ import {GasInfo} from "@axelar-network/contracts/interfaces/IAxelarGasService.so
 import "account-abstraction/interfaces/IEntryPoint.sol";
 import "account-abstraction/core/EntryPoint.sol";
 
-import "../src/pay/DaimoPay.sol";
-import "../src/pay/DaimoPayBridger.sol";
-import "../src/pay/DaimoPayCCTPBridger.sol";
-import "../src/pay/DaimoPayAcrossBridger.sol";
-import "../src/pay/DaimoPayAxelarBridger.sol";
-import "./dummy/DaimoDummyUSDC.sol";
+import "../../src/pay/DaimoPay.sol";
+import "../../src/pay/DaimoPayBridger.sol";
+import "../../src/pay/DaimoPayCCTPBridger.sol";
+import "../../src/pay/DaimoPayAcrossBridger.sol";
+import "../../src/pay/DaimoPayAxelarBridger.sol";
+import "../dummy/DaimoDummyUSDC.sol";
 
-address constant BASE_INTENT_ADDR = 0xB87c250C2A5697A29BF705c2B785D57E5316F569;
-address constant LINEA_INTENT_ADDR = 0x018D75D202dF6aD5783C6fcef15AbCC93113530b;
-address constant BSC_INTENT_ADDR = 0xdc20CA67e52107Bb77631A6e5F1A7c9b9B20bB81;
+address constant BASE_INTENT_ADDR = 0x62bd346d7D099Ff5b363B3032F58F8F7B6e2B5a2;
+address constant LINEA_INTENT_ADDR = 0x92E52dA739b7e465036e5919e7f0170b39A8D02F;
+address constant BSC_INTENT_ADDR = 0x4343063B8dAD76dA045E0Ec1d963C932B39e2576;
 
 contract DaimoPayTest is Test {
     // Daimo Pay contracts
@@ -49,6 +49,8 @@ contract DaimoPayTest is Test {
     // Tokens
     IERC20 immutable _fromToken = new TestUSDC{salt: bytes32(uint256(1))}();
     IERC20 immutable _toToken = new TestUSDC{salt: bytes32(uint256(2))}();
+    IERC20 immutable _bridgeTokenOption =
+        new TestUSDC{salt: bytes32(uint256(3))}();
     // Token that's not registered in the token minter and Across
     IERC20 immutable _unregisteredToken =
         new TestUSDC{salt: bytes32(uint256(420))}();
@@ -62,6 +64,7 @@ contract DaimoPayTest is Test {
 
     // Intent data
     uint256 immutable _toAmount = 100;
+    uint256 immutable _bridgeTokenOptionToAmount = 10;
 
     uint256 immutable _nonce = 1;
 
@@ -77,33 +80,45 @@ contract DaimoPayTest is Test {
         );
         messenger = new DummyCCTPMessenger(address(_fromToken));
 
+        uint256[] memory cctpChainIds = new uint256[](1);
+        DaimoPayCCTPBridger.CCTPBridgeRoute[]
+            memory cctpBridgeRoutes = new DaimoPayCCTPBridger.CCTPBridgeRoute[](
+                1
+            );
+        cctpChainIds[0] = _baseChainId;
+        cctpBridgeRoutes[0] = DaimoPayCCTPBridger.CCTPBridgeRoute({
+            domain: _baseDomain,
+            bridgeTokenOut: address(_toToken)
+        });
         cctpBridger = new DaimoPayCCTPBridger({
             _owner: address(this),
             _tokenMinter: tokenMinter,
             _cctpMessenger: messenger,
-            _cctpChainIds: new uint256[](0),
-            _cctpDomains: new uint32[](0)
+            _toChainIds: cctpChainIds,
+            _bridgeRoutes: cctpBridgeRoutes
         });
-        cctpBridger.addCCTPDomain({chainId: _baseChainId, domain: _baseDomain});
 
         // Initialize Across bridger
         spokePool = new DummySpokePool(address(_fromToken), address(_toToken));
 
+        uint256[] memory acrossChainIds = new uint256[](1);
+        DaimoPayAcrossBridger.AcrossBridgeRoute[]
+            memory acrossBridgeRoutes = new DaimoPayAcrossBridger.AcrossBridgeRoute[](
+                1
+            );
+        acrossChainIds[0] = _lineaChainId;
+        acrossBridgeRoutes[0] = DaimoPayAcrossBridger.AcrossBridgeRoute({
+            bridgeTokenIn: address(_fromToken),
+            bridgeTokenOut: address(_toToken),
+            pctFee: 1e16, // 1% fee
+            flatFee: 10 // (=$0.00001)
+        });
+
         acrossBridger = new DaimoPayAcrossBridger({
             _owner: address(this),
             _spokePool: spokePool,
-            _toChainIds: new uint256[](0),
-            _toTokens: new address[](0),
-            _bridgeRoutes: new DaimoPayAcrossBridger.AcrossBridgeRoute[](0)
-        });
-        acrossBridger.addBridgeRoute({
-            toChainId: _lineaChainId,
-            toToken: address(_toToken),
-            bridgeRoute: DaimoPayAcrossBridger.AcrossBridgeRoute({
-                localToken: address(_fromToken),
-                pctFee: 1e16, // 1% fee
-                flatFee: 10 // (=$0.00001)
-            })
+            _toChainIds: acrossChainIds,
+            _bridgeRoutes: acrossBridgeRoutes
         });
 
         // Initialize Axelar bridger
@@ -112,24 +127,28 @@ contract DaimoPayTest is Test {
             _toAmount,
             address(_alice)
         );
+
+        uint256[] memory axelarChainIds = new uint256[](1);
+        DaimoPayAxelarBridger.AxelarBridgeRoute[]
+            memory axelarBridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](
+                1
+            );
+        axelarChainIds[0] = _bscChainId;
+        axelarBridgeRoutes[0] = DaimoPayAxelarBridger.AxelarBridgeRoute({
+            destChainName: "binance",
+            bridgeTokenIn: address(_fromToken),
+            bridgeTokenOut: address(_toToken),
+            bridgeTokenOutSymbol: "axlUSDC",
+            receiverContract: address(0xdead),
+            fee: 10 // 10 wei
+        });
+
         axelarBridger = new DaimoPayAxelarBridger({
             _owner: address(this),
             _axelarGateway: axelarGateway,
             _axelarGasService: axelarGasService,
-            _toChainIds: new uint256[](0),
-            _toTokens: new address[](0),
-            _bridgeRoutes: new DaimoPayAxelarBridger.AxelarBridgeRoute[](0)
-        });
-        axelarBridger.addBridgeRoute({
-            toChainId: _bscChainId,
-            toToken: address(_toToken),
-            bridgeRoute: DaimoPayAxelarBridger.AxelarBridgeRoute({
-                destChainName: "binance",
-                tokenSymbol: "axlUSDC",
-                localTokenAddr: address(_fromToken),
-                receiverContract: address(0xdead),
-                fee: 10
-            })
+            _toChainIds: axelarChainIds,
+            _bridgeRoutes: axelarBridgeRoutes
         });
 
         // Map _baseChainId to cctpBridger, _lineaChainId to acrossBridger,
@@ -162,13 +181,30 @@ contract DaimoPayTest is Test {
         console.log("DaimoPay address:", address(dp));
         console.log("TestUSDC (fromToken) address:", address(_fromToken));
         console.log("TestUSDC (toToken) address:", address(_toToken));
+        console.log("TestUSDC (bridgeTokenOption) address:", address(_bridgeTokenOption));
+    }
+
+    function getBridgeTokenOutOptions()
+        public
+        view
+        returns (TokenAmount[] memory)
+    {
+        TokenAmount[] memory bridgeTokenOutOptions = new TokenAmount[](2);
+        bridgeTokenOutOptions[0] = TokenAmount({
+            token: _toToken,
+            amount: _toAmount
+        });
+        bridgeTokenOutOptions[1] = TokenAmount({
+            token: _bridgeTokenOption,
+            amount: _bridgeTokenOptionToAmount
+        });
+        return bridgeTokenOutOptions;
     }
 
     function testGetIntentAddr() public view {
-        // Get the intent address for the Base chain
         PayIntent memory baseIntent = PayIntent({
             toChainId: _baseChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -184,7 +220,7 @@ contract DaimoPayTest is Test {
         // Get the intent address for the Linea chain
         PayIntent memory lineaIntent = PayIntent({
             toChainId: _lineaChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -199,7 +235,7 @@ contract DaimoPayTest is Test {
         // Get the intent address for the BNB chain
         PayIntent memory bnbIntent = PayIntent({
             toChainId: _bscChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -227,12 +263,14 @@ contract DaimoPayTest is Test {
 
         // Create a payment intent which specifies the native token
         // The 0 address is used to specify native token
+        TokenAmount[] memory bridgeTokenOutOptions = new TokenAmount[](1);
+        bridgeTokenOutOptions[0] = TokenAmount({
+            token: IERC20(address(0)),
+            amount: _toAmount
+        });
         PayIntent memory intent = PayIntent({
             toChainId: _fromChainId,
-            bridgeTokenOut: TokenAmount({
-                token: IERC20(address(0)),
-                amount: _toAmount
-            }),
+            bridgeTokenOutOptions: bridgeTokenOutOptions,
             finalCallToken: TokenAmount({
                 token: IERC20(address(0)),
                 amount: _toAmount
@@ -271,7 +309,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _baseChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -342,7 +380,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _lineaChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -383,7 +421,7 @@ contract DaimoPayTest is Test {
 
         // Extra tokens should be refunded to the caller
         vm.expectEmit(LINEA_INTENT_ADDR);
-        emit TokenRefund.RefundedTokens({
+        emit TransferTokenBalance.RefundedTokens({
             recipient: _alice,
             token: address(_fromToken),
             amount: 10
@@ -437,7 +475,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _bscChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -467,7 +505,12 @@ contract DaimoPayTest is Test {
         emit DaimoPay.Start(intentAddr, intent);
 
         // Encode the refund address in the bridgeExtraData
-        bytes memory bridgeExtraData = abi.encode(address(_alice));
+        bytes memory bridgeExtraData = abi.encode(
+            DaimoPayAxelarBridger.ExtraData({
+                gasRefundAddress: _alice,
+                useExpress: false
+            })
+        );
 
         uint256 gasBefore = gasleft();
         dp.startIntent({
@@ -517,7 +560,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _baseChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -550,6 +593,8 @@ contract DaimoPayTest is Test {
         assertEq(_toToken.balanceOf(_bob), _toAmount);
     }
 
+    // Test that the LP gets refunded any surplus tokens after fast finishing
+    // the intent.
     function testSimpleFastFinishWithLeftover() public {
         vm.chainId(_baseChainId);
 
@@ -561,7 +606,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _baseChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: 1}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: 1}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -569,12 +614,13 @@ contract DaimoPayTest is Test {
             nonce: _nonce
         });
 
-        // LP transfers too much of finalCallToken to the intent address
+        // LP transfers too much of finalCallToken to finish the intent.
+        // Only 1 is needed, but 10 is sent.
         _toToken.transfer({to: address(dp), value: 10});
 
         // An extra 9 of finalCallToken should be sent back to the LP
         vm.expectEmit(address(dp));
-        emit TokenRefund.RefundedTokens({
+        emit TransferTokenBalance.RefundedTokens({
             recipient: _lp,
             token: address(_toToken),
             amount: 9
@@ -604,7 +650,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _baseChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -620,7 +666,8 @@ contract DaimoPayTest is Test {
 
         dp.claimIntent({intent: intent, calls: new Call[](0)});
 
-        // LP received funds from intent, and intent is destroyed
+        // LP received funds from intent, and intent is destroyed. Bob has
+        // _toAmount tokens from the fast finish.
         assertEq(_toToken.balanceOf(BASE_INTENT_ADDR), 0);
         assertEq(_toToken.balanceOf(_lp), _lpToTokenInitBalance);
         assertEq(_toToken.balanceOf(_bob), _toAmount);
@@ -641,7 +688,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _baseChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -665,16 +712,56 @@ contract DaimoPayTest is Test {
         dp.claimIntent({intent: intent, calls: new Call[](0)});
 
         // LP doesn't receive funds, intent is destroyed, and funds are sent
-        // to the final recipient
+        // to Bob
         assertEq(_toToken.balanceOf(BASE_INTENT_ADDR), 0);
         assertEq(_toToken.balanceOf(_lp), 0);
         assertEq(_toToken.balanceOf(_bob), _toAmount);
     }
 
+    // Test that the contract reverts when the intent address doesn't have
+    // sufficient balance of any bridge token option.
+    function testClaimWithInsufficientBalance() public {
+        vm.chainId(_baseChainId);
+
+        // Send insufficient funds to the intent address
+        _toToken.transfer(BASE_INTENT_ADDR, _toAmount - 1);
+        _bridgeTokenOption.transfer(
+            BASE_INTENT_ADDR,
+            _bridgeTokenOptionToAmount - 1
+        );
+
+        // Then, LP claims the funds
+        vm.prank(_lp);
+
+        PayIntent memory intent = PayIntent({
+            toChainId: _baseChainId,
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
+            finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
+            finalCall: Call({to: _bob, value: 0, data: ""}),
+            escrow: payable(address(dp)),
+            refundAddress: _alice,
+            nonce: _nonce
+        });
+
+        vm.expectRevert("PI: insufficient token received");
+
+        dp.claimIntent({intent: intent, calls: new Call[](0)});
+
+        // LP didn't receive funds from intent and the tokens are still in the
+        // intent address
+        assertEq(_toToken.balanceOf(BASE_INTENT_ADDR), _toAmount - 1);
+        assertEq(
+            _bridgeTokenOption.balanceOf(BASE_INTENT_ADDR),
+            _bridgeTokenOptionToAmount - 1
+        );
+        assertEq(_toToken.balanceOf(_lp), 0);
+        assertEq(_bridgeTokenOption.balanceOf(_lp), 0);
+    }
+
     // Test that the contract reverts when the fromToken doesn't match the
     // localToken returned by the CCTP TokenMinter.
     function testCCTPFromAndToTokenMismatch() public {
-        vm.chainId(_fromChainId);
+        vm.chainId(_baseChainId);
 
         // Give Alice some coins
         _unregisteredToken.transfer(_alice, 555);
@@ -684,7 +771,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _baseChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -719,7 +806,7 @@ contract DaimoPayTest is Test {
 
         PayIntent memory intent = PayIntent({
             toChainId: _lineaChainId,
-            bridgeTokenOut: TokenAmount({token: _toToken, amount: _toAmount}),
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
             finalCall: Call({to: _bob, value: 0, data: ""}),
             escrow: payable(address(dp)),
@@ -748,31 +835,52 @@ contract DaimoPayTest is Test {
         // the input amount should use the 1% fee.
         uint256 largeOutputAmount = 1000000;
         uint256 expectedLargeInputAmount = 1010000;
-        (, uint256 actualLargeInputAmount) = acrossBridger.getInputTokenAmount({
-            toChainId: _lineaChainId,
-            toToken: address(_toToken),
-            toAmount: largeOutputAmount
+        TokenAmount[] memory bridgeTokenOutOptions = new TokenAmount[](2);
+        bridgeTokenOutOptions[0] = TokenAmount({
+            token: _toToken,
+            amount: largeOutputAmount
         });
+        bridgeTokenOutOptions[1] = TokenAmount({
+            token: _bridgeTokenOption,
+            amount: 1
+        });
+        (
+            address actualLargeInputToken,
+            uint256 actualLargeInputAmount
+        ) = acrossBridger.getBridgeTokenIn({
+                toChainId: _lineaChainId,
+                bridgeTokenOutOptions: bridgeTokenOutOptions
+            });
         assertEq(
             actualLargeInputAmount,
             expectedLargeInputAmount,
             "incorrect large input amount"
         );
+        // The Linea bridge route uses (_fromToken, _toToken) as the bridge token
+        assertEq(actualLargeInputToken, address(_fromToken), "incorrect token");
 
         // 10 USDC flat fee is higher than the 1% fee for 1 USDC, so the input
         // amount should use the flat fee.
         uint256 smallOutputAmount = 1;
         uint256 expectedSmallInputAmount = 11;
-        (, uint256 actualSmallInputAmount) = acrossBridger.getInputTokenAmount({
-            toChainId: _lineaChainId,
-            toToken: address(_toToken),
-            toAmount: smallOutputAmount
+        bridgeTokenOutOptions[0] = TokenAmount({
+            token: _toToken,
+            amount: smallOutputAmount
         });
+        (
+            address actualSmallInputToken,
+            uint256 actualSmallInputAmount
+        ) = acrossBridger.getBridgeTokenIn({
+                toChainId: _lineaChainId,
+                bridgeTokenOutOptions: bridgeTokenOutOptions
+            });
         assertEq(
             actualSmallInputAmount,
             expectedSmallInputAmount,
             "incorrect small input amount"
         );
+        // The Linea bridge route uses (_fromToken, _toToken) as the bridge token
+        assertEq(actualSmallInputToken, address(_fromToken), "incorrect token");
     }
 }
 

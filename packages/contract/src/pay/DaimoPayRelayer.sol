@@ -118,20 +118,16 @@ contract DaimoPayRelayer is Ownable2Step {
     }
 
     function startIntent(
+        Call[] calldata preCalls,
         DaimoPay dp,
         PayIntent calldata intent,
         Call[] calldata calls,
-        bytes calldata bridgeExtraData,
-        uint256 bridgeGasFee
+        bytes calldata bridgeExtraData
     ) public payable onlyOwner {
-        // Axelar requires a native token payment for the gas fee. Transfer
-        // the fee to directly to the bridger contract.
-        if (bridgeGasFee > 0) {
-            IDaimoPayBridger bridger = dp.bridger().chainIdToBridger(
-                intent.toChainId
-            );
-            (bool success, ) = address(bridger).call{value: bridgeGasFee}("");
-            require(success, "DPR: axelar fee transfer failed");
+        for (uint256 i = 0; i < preCalls.length; ++i) {
+            Call calldata call = preCalls[i];
+            (bool success, ) = call.to.call{value: call.value}(call.data);
+            require(success, "DPR: preCall failed");
         }
         dp.startIntent(intent, calls, bridgeExtraData);
     }

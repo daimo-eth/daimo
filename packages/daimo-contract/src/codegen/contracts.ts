@@ -2572,9 +2572,9 @@ export const daimoPayAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -2637,9 +2637,9 @@ export const daimoPayAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -2725,9 +2725,9 @@ export const daimoPayAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -2843,9 +2843,9 @@ export const daimoPayAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -2929,9 +2929,9 @@ export const daimoPayAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -3006,13 +3006,13 @@ export const daimoPayAcrossBridgerAbi = [
         type: 'address',
       },
       { name: '_toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
-      { name: '_toTokens', internalType: 'address[]', type: 'address[]' },
       {
         name: '_bridgeRoutes',
         internalType: 'struct DaimoPayAcrossBridger.AcrossBridgeRoute[]',
         type: 'tuple[]',
         components: [
-          { name: 'localToken', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
           { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
           { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
         ],
@@ -3036,33 +3036,11 @@ export const daimoPayAcrossBridgerAbi = [
   },
   {
     type: 'function',
-    inputs: [
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      {
-        name: 'bridgeRoute',
-        internalType: 'struct DaimoPayAcrossBridger.AcrossBridgeRoute',
-        type: 'tuple',
-        components: [
-          { name: 'localToken', internalType: 'address', type: 'address' },
-          { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
-          { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'addBridgeRoute',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-    ],
+    inputs: [{ name: 'toChainId', internalType: 'uint256', type: 'uint256' }],
     name: 'bridgeRouteMapping',
     outputs: [
-      { name: 'localToken', internalType: 'address', type: 'address' },
+      { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+      { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
       { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
       { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
     ],
@@ -3072,13 +3050,20 @@ export const daimoPayAcrossBridgerAbi = [
     type: 'function',
     inputs: [
       { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
     ],
-    name: 'getInputTokenAmount',
+    name: 'getBridgeTokenIn',
     outputs: [
-      { name: 'inputToken', internalType: 'address', type: 'address' },
-      { name: 'inputAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+      { name: 'inAmount', internalType: 'uint256', type: 'uint256' },
     ],
     stateMutability: 'view',
   },
@@ -3099,10 +3084,9 @@ export const daimoPayAcrossBridgerAbi = [
   {
     type: 'function',
     inputs: [
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
     ],
-    name: 'removeBridgeRoute',
+    name: 'removeBridgeRoutes',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -3118,11 +3102,38 @@ export const daimoPayAcrossBridgerAbi = [
     inputs: [
       { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
       { name: 'toAddress', internalType: 'address', type: 'address' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
       { name: 'extraData', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'sendToChain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
+      {
+        name: 'bridgeRoutes',
+        internalType: 'struct DaimoPayAcrossBridger.AcrossBridgeRoute[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+          { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
+          { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'setBridgeRoutes',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -3206,21 +3217,15 @@ export const daimoPayAcrossBridgerAbi = [
         indexed: true,
       },
       {
-        name: 'toToken',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'localToken',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'pctFee',
-        internalType: 'uint256',
-        type: 'uint256',
+        name: 'bridgeRoute',
+        internalType: 'struct DaimoPayAcrossBridger.AcrossBridgeRoute',
+        type: 'tuple',
+        components: [
+          { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+          { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
+          { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
+        ],
         indexed: false,
       },
     ],
@@ -3237,21 +3242,15 @@ export const daimoPayAcrossBridgerAbi = [
         indexed: true,
       },
       {
-        name: 'toToken',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'localToken',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'pctFee',
-        internalType: 'uint256',
-        type: 'uint256',
+        name: 'bridgeRoute',
+        internalType: 'struct DaimoPayAcrossBridger.AcrossBridgeRoute',
+        type: 'tuple',
+        components: [
+          { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+          { name: 'pctFee', internalType: 'uint256', type: 'uint256' },
+          { name: 'flatFee', internalType: 'uint256', type: 'uint256' },
+        ],
         indexed: false,
       },
     ],
@@ -3343,15 +3342,19 @@ export const daimoPayAxelarBridgerAbi = [
         type: 'address',
       },
       { name: '_toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
-      { name: '_toTokens', internalType: 'address[]', type: 'address[]' },
       {
         name: '_bridgeRoutes',
         internalType: 'struct DaimoPayAxelarBridger.AxelarBridgeRoute[]',
         type: 'tuple[]',
         components: [
           { name: 'destChainName', internalType: 'string', type: 'string' },
-          { name: 'tokenSymbol', internalType: 'string', type: 'string' },
-          { name: 'localTokenAddr', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+          {
+            name: 'bridgeTokenOutSymbol',
+            internalType: 'string',
+            type: 'string',
+          },
           {
             name: 'receiverContract',
             internalType: 'address',
@@ -3368,32 +3371,6 @@ export const daimoPayAxelarBridgerAbi = [
     type: 'function',
     inputs: [],
     name: 'acceptOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      {
-        name: 'bridgeRoute',
-        internalType: 'struct DaimoPayAxelarBridger.AxelarBridgeRoute',
-        type: 'tuple',
-        components: [
-          { name: 'destChainName', internalType: 'string', type: 'string' },
-          { name: 'tokenSymbol', internalType: 'string', type: 'string' },
-          { name: 'localTokenAddr', internalType: 'address', type: 'address' },
-          {
-            name: 'receiverContract',
-            internalType: 'address',
-            type: 'address',
-          },
-          { name: 'fee', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    name: 'addBridgeRoute',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -3421,15 +3398,13 @@ export const daimoPayAxelarBridgerAbi = [
   },
   {
     type: 'function',
-    inputs: [
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-    ],
+    inputs: [{ name: 'toChainId', internalType: 'uint256', type: 'uint256' }],
     name: 'bridgeRouteMapping',
     outputs: [
       { name: 'destChainName', internalType: 'string', type: 'string' },
-      { name: 'tokenSymbol', internalType: 'string', type: 'string' },
-      { name: 'localTokenAddr', internalType: 'address', type: 'address' },
+      { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+      { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+      { name: 'bridgeTokenOutSymbol', internalType: 'string', type: 'string' },
       { name: 'receiverContract', internalType: 'address', type: 'address' },
       { name: 'fee', internalType: 'uint256', type: 'uint256' },
     ],
@@ -3499,6 +3474,27 @@ export const daimoPayAxelarBridgerAbi = [
   {
     type: 'function',
     inputs: [
+      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'getBridgeTokenIn',
+    outputs: [
+      { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+      { name: 'inAmount', internalType: 'uint256', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
       { name: 'commandId', internalType: 'bytes32', type: 'bytes32' },
       { name: 'sourceChain', internalType: 'string', type: 'string' },
       { name: 'sourceAddress', internalType: 'string', type: 'string' },
@@ -3528,20 +3524,6 @@ export const daimoPayAxelarBridgerAbi = [
   },
   {
     type: 'function',
-    inputs: [
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'getInputTokenAmount',
-    outputs: [
-      { name: 'inputToken', internalType: 'address', type: 'address' },
-      { name: 'inputAmount', internalType: 'uint256', type: 'uint256' },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
@@ -3557,10 +3539,9 @@ export const daimoPayAxelarBridgerAbi = [
   {
     type: 'function',
     inputs: [
-      { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
+      { name: 'toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
     ],
-    name: 'removeBridgeRoute',
+    name: 'removeBridgeRoutes',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -3576,11 +3557,48 @@ export const daimoPayAxelarBridgerAbi = [
     inputs: [
       { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
       { name: 'toAddress', internalType: 'address', type: 'address' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
       { name: 'extraData', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'sendToChain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
+      {
+        name: 'bridgeRoutes',
+        internalType: 'struct DaimoPayAxelarBridger.AxelarBridgeRoute[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'destChainName', internalType: 'string', type: 'string' },
+          { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+          {
+            name: 'bridgeTokenOutSymbol',
+            internalType: 'string',
+            type: 'string',
+          },
+          {
+            name: 'receiverContract',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'fee', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'setBridgeRoutes',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -3651,36 +3669,27 @@ export const daimoPayAxelarBridgerAbi = [
         indexed: true,
       },
       {
-        name: 'toToken',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'destChainName',
-        internalType: 'string',
-        type: 'string',
+        name: 'bridgeRoute',
+        internalType: 'struct DaimoPayAxelarBridger.AxelarBridgeRoute',
+        type: 'tuple',
+        components: [
+          { name: 'destChainName', internalType: 'string', type: 'string' },
+          { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+          {
+            name: 'bridgeTokenOutSymbol',
+            internalType: 'string',
+            type: 'string',
+          },
+          {
+            name: 'receiverContract',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'fee', internalType: 'uint256', type: 'uint256' },
+        ],
         indexed: false,
       },
-      {
-        name: 'tokenSymbol',
-        internalType: 'string',
-        type: 'string',
-        indexed: false,
-      },
-      {
-        name: 'localTokenAddr',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'receiverContract',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      { name: 'fee', internalType: 'uint256', type: 'uint256', indexed: false },
     ],
     name: 'BridgeRouteAdded',
   },
@@ -3695,36 +3704,27 @@ export const daimoPayAxelarBridgerAbi = [
         indexed: true,
       },
       {
-        name: 'toToken',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'destChainName',
-        internalType: 'string',
-        type: 'string',
+        name: 'bridgeRoute',
+        internalType: 'struct DaimoPayAxelarBridger.AxelarBridgeRoute',
+        type: 'tuple',
+        components: [
+          { name: 'destChainName', internalType: 'string', type: 'string' },
+          { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+          {
+            name: 'bridgeTokenOutSymbol',
+            internalType: 'string',
+            type: 'string',
+          },
+          {
+            name: 'receiverContract',
+            internalType: 'address',
+            type: 'address',
+          },
+          { name: 'fee', internalType: 'uint256', type: 'uint256' },
+        ],
         indexed: false,
       },
-      {
-        name: 'tokenSymbol',
-        internalType: 'string',
-        type: 'string',
-        indexed: false,
-      },
-      {
-        name: 'localTokenAddr',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      {
-        name: 'receiverContract',
-        internalType: 'address',
-        type: 'address',
-        indexed: false,
-      },
-      { name: 'fee', internalType: 'uint256', type: 'uint256', indexed: false },
     ],
     name: 'BridgeRouteRemoved',
   },
@@ -4036,13 +4036,20 @@ export const daimoPayBridgerAbi = [
     type: 'function',
     inputs: [
       { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
     ],
-    name: 'getInputTokenAmount',
+    name: 'getBridgeTokenIn',
     outputs: [
-      { name: 'inputToken', internalType: 'address', type: 'address' },
-      { name: 'inputAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+      { name: 'inAmount', internalType: 'uint256', type: 'uint256' },
     ],
     stateMutability: 'view',
   },
@@ -4079,8 +4086,15 @@ export const daimoPayBridgerAbi = [
     inputs: [
       { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
       { name: 'toAddress', internalType: 'address', type: 'address' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
       { name: 'extraData', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'sendToChain',
@@ -4260,8 +4274,16 @@ export const daimoPayCctpBridgerAbi = [
         internalType: 'contract ICCTPTokenMessenger',
         type: 'address',
       },
-      { name: '_cctpChainIds', internalType: 'uint256[]', type: 'uint256[]' },
-      { name: '_cctpDomains', internalType: 'uint32[]', type: 'uint32[]' },
+      { name: '_toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
+      {
+        name: '_bridgeRoutes',
+        internalType: 'struct DaimoPayCCTPBridger.CCTPBridgeRoute[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'domain', internalType: 'uint32', type: 'uint32' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+        ],
+      },
     ],
     stateMutability: 'nonpayable',
   },
@@ -4274,19 +4296,12 @@ export const daimoPayCctpBridgerAbi = [
   },
   {
     type: 'function',
-    inputs: [
-      { name: 'chainId', internalType: 'uint256', type: 'uint256' },
+    inputs: [{ name: 'toChainId', internalType: 'uint256', type: 'uint256' }],
+    name: 'bridgeRouteMapping',
+    outputs: [
       { name: 'domain', internalType: 'uint32', type: 'uint32' },
+      { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
     ],
-    name: 'addCCTPDomain',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'chainId', internalType: 'uint256', type: 'uint256' }],
-    name: 'cctpDomainMapping',
-    outputs: [{ name: 'domain', internalType: 'uint32', type: 'uint32' }],
     stateMutability: 'view',
   },
   {
@@ -4306,13 +4321,20 @@ export const daimoPayCctpBridgerAbi = [
     type: 'function',
     inputs: [
       { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
     ],
-    name: 'getInputTokenAmount',
+    name: 'getBridgeTokenIn',
     outputs: [
-      { name: 'inputToken', internalType: 'address', type: 'address' },
-      { name: 'inputAmount', internalType: 'uint256', type: 'uint256' },
+      { name: 'bridgeTokenIn', internalType: 'address', type: 'address' },
+      { name: 'inAmount', internalType: 'uint256', type: 'uint256' },
     ],
     stateMutability: 'view',
   },
@@ -4332,6 +4354,15 @@ export const daimoPayCctpBridgerAbi = [
   },
   {
     type: 'function',
+    inputs: [
+      { name: 'toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
+    ],
+    name: 'removeBridgeRoutes',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     inputs: [],
     name: 'renounceOwnership',
     outputs: [],
@@ -4342,11 +4373,36 @@ export const daimoPayCctpBridgerAbi = [
     inputs: [
       { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
       { name: 'toAddress', internalType: 'address', type: 'address' },
-      { name: 'toToken', internalType: 'address', type: 'address' },
-      { name: 'toAmount', internalType: 'uint256', type: 'uint256' },
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
       { name: '', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'sendToChain',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'toChainIds', internalType: 'uint256[]', type: 'uint256[]' },
+      {
+        name: 'bridgeRoutes',
+        internalType: 'struct DaimoPayCCTPBridger.CCTPBridgeRoute[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'domain', internalType: 'uint32', type: 'uint32' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+        ],
+      },
+    ],
+    name: 'setBridgeRoutes',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -4420,19 +4476,46 @@ export const daimoPayCctpBridgerAbi = [
     anonymous: false,
     inputs: [
       {
-        name: 'chainId',
+        name: 'toChainId',
         internalType: 'uint256',
         type: 'uint256',
         indexed: true,
       },
       {
-        name: 'domain',
-        internalType: 'uint32',
-        type: 'uint32',
+        name: 'bridgeRoute',
+        internalType: 'struct DaimoPayCCTPBridger.CCTPBridgeRoute',
+        type: 'tuple',
+        components: [
+          { name: 'domain', internalType: 'uint32', type: 'uint32' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+        ],
         indexed: false,
       },
     ],
-    name: 'DomainAdded',
+    name: 'BridgeRouteAdded',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'toChainId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+      {
+        name: 'bridgeRoute',
+        internalType: 'struct DaimoPayCCTPBridger.CCTPBridgeRoute',
+        type: 'tuple',
+        components: [
+          { name: 'domain', internalType: 'uint32', type: 'uint32' },
+          { name: 'bridgeTokenOut', internalType: 'address', type: 'address' },
+        ],
+        indexed: false,
+      },
+    ],
+    name: 'BridgeRouteRemoved',
   },
   {
     type: 'event',
@@ -4538,9 +4621,9 @@ export const daimoPayRelayerAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -4604,9 +4687,9 @@ export const daimoPayRelayerAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -4692,6 +4775,16 @@ export const daimoPayRelayerAbi = [
   {
     type: 'function',
     inputs: [
+      {
+        name: 'preCalls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
       { name: 'dp', internalType: 'contract DaimoPay', type: 'address' },
       {
         name: 'intent',
@@ -4700,9 +4793,9 @@ export const daimoPayRelayerAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -4751,7 +4844,6 @@ export const daimoPayRelayerAbi = [
         ],
       },
       { name: 'bridgeExtraData', internalType: 'bytes', type: 'bytes' },
-      { name: 'bridgeGasFee', internalType: 'uint256', type: 'uint256' },
     ],
     name: 'startIntent',
     outputs: [],
@@ -6256,6 +6348,23 @@ export const payIntentContractAbi = [
   { type: 'receive', stateMutability: 'payable' },
   {
     type: 'function',
+    inputs: [
+      {
+        name: 'bridgeTokenOutOptions',
+        internalType: 'struct TokenAmount[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'token', internalType: 'contract IERC20', type: 'address' },
+          { name: 'amount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    name: 'checkBridgeTokenOutBalance',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     inputs: [{ name: '_intentHash', internalType: 'bytes32', type: 'bytes32' }],
     name: 'initialize',
     outputs: [],
@@ -6271,9 +6380,9 @@ export const payIntentContractAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -6326,9 +6435,9 @@ export const payIntentContractAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -6462,9 +6571,9 @@ export const payIntentFactoryAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',
@@ -6523,9 +6632,9 @@ export const payIntentFactoryAbi = [
         components: [
           { name: 'toChainId', internalType: 'uint256', type: 'uint256' },
           {
-            name: 'bridgeTokenOut',
-            internalType: 'struct TokenAmount',
-            type: 'tuple',
+            name: 'bridgeTokenOutOptions',
+            internalType: 'struct TokenAmount[]',
+            type: 'tuple[]',
             components: [
               {
                 name: 'token',

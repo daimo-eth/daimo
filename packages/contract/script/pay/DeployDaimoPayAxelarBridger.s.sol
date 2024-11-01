@@ -14,7 +14,6 @@ contract DeployDaimoPayAxelarBridger is Script {
 
         (
             uint256[] memory chainIds,
-            address[] memory toTokens,
             DaimoPayAxelarBridger.AxelarBridgeRoute[] memory bridgeRoutes
         ) = _getBridgeRoutes();
 
@@ -23,7 +22,7 @@ contract DeployDaimoPayAxelarBridger is Script {
         address initOwner = msg.sender;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayAxelarBridger-new2"),
+            keccak256("DaimoPayAxelarBridger-options1"),
             abi.encodePacked(
                 type(DaimoPayAxelarBridger).creationCode,
                 abi.encode(
@@ -31,7 +30,6 @@ contract DeployDaimoPayAxelarBridger is Script {
                     IAxelarGatewayWithToken(axelarGateway),
                     IAxelarGasService(axelarGasService),
                     chainIds,
-                    toTokens,
                     bridgeRoutes
                 )
             )
@@ -47,13 +45,14 @@ contract DeployDaimoPayAxelarBridger is Script {
         view
         returns (
             uint256[] memory chainIds,
-            address[] memory toTokens,
             DaimoPayAxelarBridger.AxelarBridgeRoute[] memory bridgeRoutes
         )
     {
+        // The bridge always gets sent to the DaimoPayAxelarBridger on the
+        // destination chain.
         address axelarReceiver = CREATE3.getDeployed(
             msg.sender,
-            keccak256("DaimoPayAxelarBridger-new2")
+            keccak256("DaimoPayAxelarBridger-options1")
         );
 
         bool testnet = _isTestnet(block.chainid);
@@ -61,7 +60,6 @@ contract DeployDaimoPayAxelarBridger is Script {
             // Bridging not supported on testnet.
             return (
                 new uint256[](0),
-                new address[](0),
                 new DaimoPayAxelarBridger.AxelarBridgeRoute[](0)
             );
         }
@@ -83,7 +81,6 @@ contract DeployDaimoPayAxelarBridger is Script {
                     ? 3000000000000000000 // 3.0 POLYGON
                     : 300000000000000; // 0.0003 ETH
 
-                toTokens[i] = _getAxlUSDCAddress(chainIds[i]);
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
                     destChainName: _getAxelarChainName(chainIds[i]),
                     bridgeTokenIn: _getAxlUSDCAddress(block.chainid),
@@ -95,7 +92,6 @@ contract DeployDaimoPayAxelarBridger is Script {
             }
         } else if (block.chainid == BSC_MAINNET) {
             chainIds = new uint256[](6);
-            toTokens = new address[](6);
             bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](6);
 
             chainIds[0] = ARBITRUM_MAINNET;
@@ -120,11 +116,14 @@ contract DeployDaimoPayAxelarBridger is Script {
         }
 
         for (uint32 i = 0; i < chainIds.length; ++i) {
-            console.log("toChain:", chainIds[i], "toToken:", toTokens[i]);
+            console.log("toChain:", chainIds[i]);
             console.log("destChainName:", bridgeRoutes[i].destChainName);
             console.log("bridgeTokenIn:", bridgeRoutes[i].bridgeTokenIn);
             console.log("bridgeTokenOut:", bridgeRoutes[i].bridgeTokenOut);
-            console.log("bridgeTokenOutSymbol:", bridgeRoutes[i].bridgeTokenOutSymbol);
+            console.log(
+                "bridgeTokenOutSymbol:",
+                bridgeRoutes[i].bridgeTokenOutSymbol
+            );
             console.log("receiverContract:", bridgeRoutes[i].receiverContract);
             console.log("fee:", bridgeRoutes[i].fee);
             console.log("--------------------------------");

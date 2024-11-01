@@ -227,7 +227,12 @@ contract DaimoPayAxelarBridger is
     function getBridgeTokenIn(
         uint256 toChainId,
         TokenAmount[] memory bridgeTokenOutOptions
-    ) public view returns (address bridgeTokenIn, uint256 inAmount) {}
+    ) public view returns (address bridgeTokenIn, uint256 inAmount) {
+        (bridgeTokenIn, inAmount, , , , , , ) = _getBridgeData(
+            toChainId,
+            bridgeTokenOutOptions
+        );
+    }
 
     /// Initiate a bridge to a destination chain using Axelar Protocol.
     function sendToChain(

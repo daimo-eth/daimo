@@ -58,6 +58,26 @@ uint32 constant ARBITRUM_DOMAIN = 3;
 uint32 constant BASE_DOMAIN = 6;
 uint32 constant POLYGON_DOMAIN = 7;
 
+function _getCCTPDomain(uint256 chainId) pure returns (uint32) {
+    // Mainnets
+    if (chainId == ETH_MAINNET) return ETH_DOMAIN;
+    if (chainId == AVAX_MAINNET) return AVAX_DOMAIN;
+    if (chainId == OP_MAINNET) return OP_DOMAIN;
+    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_DOMAIN;
+    if (chainId == BASE_MAINNET) return BASE_DOMAIN;
+    if (chainId == POLYGON_MAINNET) return POLYGON_DOMAIN;
+
+    // Testnets
+    if (chainId == ETH_TESTNET) return ETH_DOMAIN;
+    if (chainId == AVAX_TESTNET) return AVAX_DOMAIN;
+    if (chainId == OP_TESTNET) return OP_DOMAIN;
+    if (chainId == ARBITRUM_TESTNET) return ARBITRUM_DOMAIN;
+    if (chainId == BASE_TESTNET) return BASE_DOMAIN;
+    if (chainId == POLYGON_TESTNET) return POLYGON_DOMAIN;
+
+    revert("Unsupported chainId");
+}
+
 // ----------------- Token Addresses ----------------- //
 
 // USDC addresses

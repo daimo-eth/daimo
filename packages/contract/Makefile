@@ -1,4 +1,4 @@
-.PHONY: build clean full test coverage codegen deploy
+.PHONY: build clean full test paytest coverage codegen deploy
 
 build:
 	forge install
@@ -17,6 +17,9 @@ test:
 	forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --no-match-path "test/uniswap/*"
 	forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --fork-block-number 14513720 --match-path "test/uniswap/*" --no-match-path "test/uniswap/Quoter.t.sol"
 	forge test -vvv --fork-url "$(BASE_MAINNET_RPC)" --fork-block-number 15950101 --match-path "test/uniswap/Quoter.t.sol"
+
+paytest:
+	forge test -vvv --match-path "test/pay/*"
 
 coverage:
 	$(eval BASE_MAINNET_RPC ?= $(or $(BASE_MAINNET_RPC),https://base-rpc.publicnode.com)) # Use environment variable if set, otherwise use default

@@ -14,7 +14,7 @@ contract DeployDaimoPayRelayer is Script {
         vm.startBroadcast();
 
         address daimoPayRelayer = CREATE3.deploy(
-            keccak256("DaimoPayRelayer-new3"),
+            keccak256("DaimoPayRelayer-options1"),
             abi.encodePacked(
                 type(DaimoPayRelayer).creationCode,
                 abi.encode(owner)
@@ -25,4 +25,7 @@ contract DeployDaimoPayRelayer is Script {
 
         vm.stopBroadcast();
     }
+
+    // Exclude from forge coverage
+    function test() public {}
 }
