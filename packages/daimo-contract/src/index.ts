@@ -15,10 +15,6 @@ export const teamDaimoFaucetAddr = "0x2A6d311394184EeB6Df8FBBF58626B085374Ffe7";
 // Latest contracts
 export {
   aggregatorV2V3InterfaceAbi,
-  daimoAccountFactoryV2Abi,
-  daimoAccountFactoryV2Address,
-  daimoAccountFactoryV2Config,
-  daimoAccountV2Abi,
   daimoCctpBridgerAbi,
   daimoEphemeralNotesAbi,
   daimoEphemeralNotesV2Abi,

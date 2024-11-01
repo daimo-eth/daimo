@@ -6,15 +6,8 @@ import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /*
- * SwapbotLP is a liquidity provider contract that funds swapbot actions.
- * Swapbot actions are either:
- * 1. Swaps or collects on DaimoAccountv2 accounts.
- * 2. FastCCTP fastFinishes or claimTransfers using the FastCCTP contract.
- *
- * In the first case, SwapbotLP acts as a tipmaster that covers a tip such that
- * swaps are executed at a precise, pre-defined rate (i.e. 1:1 for a stablecoin
- * pair swap). In the second case, SwapbotLP acts as an LP that fronts assets
- * for a receiving DAv2 for FastCCTP and later claims minted assets from CCTP.
+ * SwapbotLP is a liquidity provider contract that funds swapbot actions, incl.
+ * FastCCTP fastFinishes or claimTransfers using the FastCCTP contract.
  *
  * The contract owner is the swapbot EOA, which is the only account that is
  * allowed to invoke SwapbotLP and spend the contract's balance.
