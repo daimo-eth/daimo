@@ -3,6 +3,8 @@ pragma solidity ^0.8.12;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
+import "../pay/TokenUtils.sol";
+
 /// @notice Bridges assets automatically. Specifically, it lets any market maker
 /// initiate a bridge transaction to another chain.
 interface IDaimoPayBridger {
@@ -17,21 +19,20 @@ interface IDaimoPayBridger {
         uint256 toAmount
     );
 
-    /// @dev Get the input token and amount to bridge for the given output token
-    ///      and amount on another chain.
-    function getInputTokenAmount(
+    /// @dev Get the bridge route for the given output token options on
+    ///      destination chain.
+    function getBridgeTokenIn(
         uint256 toChainId,
-        address toToken,
-        uint256 toAmount
-    ) external view returns (address inputToken, uint256 inputAmount);
+        TokenAmount[] memory bridgeTokenOutOptions
+    ) external view returns (address bridgeTokenIn, uint256 inAmount);
 
-    /// @dev Initiate a bridge. Guarantees that (toToken, toAmount) shows up
-    ///      in (toAddress) on (toChainId). Otherwise, reverts.
+    /// @dev Initiate a bridge. Guarantees that one of the bridge token options
+    ///      (bridgeTokenOut, outAmount) shows up in (toAddress) on (toChainId).
+    ///      Otherwise, reverts.
     function sendToChain(
         uint256 toChainId,
         address toAddress,
-        address toToken,
-        uint256 toAmount,
+        TokenAmount[] memory bridgeTokenOutOptions,
         bytes calldata extraData
     ) external;
 }

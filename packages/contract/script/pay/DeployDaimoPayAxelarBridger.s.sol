@@ -66,8 +66,6 @@ contract DeployDaimoPayAxelarBridger is Script {
             );
         }
 
-        // Axelar fees are calculated as the sum of the source and destination
-        // chain fees.
         if (
             block.chainid == ARBITRUM_MAINNET ||
             block.chainid == BASE_MAINNET ||
@@ -76,7 +74,6 @@ contract DeployDaimoPayAxelarBridger is Script {
             block.chainid == POLYGON_MAINNET
         ) {
             chainIds = new uint256[](1);
-            toTokens = new address[](1);
             bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](1);
 
             chainIds[0] = BSC_MAINNET;
@@ -89,8 +86,9 @@ contract DeployDaimoPayAxelarBridger is Script {
                 toTokens[i] = _getAxlUSDCAddress(chainIds[i]);
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
                     destChainName: _getAxelarChainName(chainIds[i]),
-                    tokenSymbol: "axlUSDC",
-                    localTokenAddr: _getAxlUSDCAddress(block.chainid),
+                    bridgeTokenIn: _getAxlUSDCAddress(block.chainid),
+                    bridgeTokenOut: _getAxlUSDCAddress(chainIds[i]),
+                    bridgeTokenOutSymbol: "axlUSDC",
                     receiverContract: axelarReceiver,
                     fee: fee
                 });
@@ -108,13 +106,13 @@ contract DeployDaimoPayAxelarBridger is Script {
             chainIds[5] = POLYGON_MAINNET;
 
             for (uint32 i = 0; i < chainIds.length; ++i) {
-                toTokens[i] = _getAxlUSDCAddress(chainIds[i]);
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
                     destChainName: _getAxelarChainName(chainIds[i]),
-                    tokenSymbol: "axlUSDC",
-                    localTokenAddr: _getAxlUSDCAddress(block.chainid),
+                    bridgeTokenIn: _getAxlUSDCAddress(block.chainid),
+                    bridgeTokenOut: _getAxlUSDCAddress(chainIds[i]),
+                    bridgeTokenOutSymbol: "axlUSDC",
                     receiverContract: axelarReceiver,
-                    fee: 2000000000000000 // 0.002 BNB
+                    fee: 2_000_000_000_000_000 // 2 * 10^15 = 0.002 BNB
                 });
             }
         } else {
@@ -124,8 +122,9 @@ contract DeployDaimoPayAxelarBridger is Script {
         for (uint32 i = 0; i < chainIds.length; ++i) {
             console.log("toChain:", chainIds[i], "toToken:", toTokens[i]);
             console.log("destChainName:", bridgeRoutes[i].destChainName);
-            console.log("tokenSymbol:", bridgeRoutes[i].tokenSymbol);
-            console.log("localTokenAddr:", bridgeRoutes[i].localTokenAddr);
+            console.log("bridgeTokenIn:", bridgeRoutes[i].bridgeTokenIn);
+            console.log("bridgeTokenOut:", bridgeRoutes[i].bridgeTokenOut);
+            console.log("bridgeTokenOutSymbol:", bridgeRoutes[i].bridgeTokenOutSymbol);
             console.log("receiverContract:", bridgeRoutes[i].receiverContract);
             console.log("fee:", bridgeRoutes[i].fee);
             console.log("--------------------------------");

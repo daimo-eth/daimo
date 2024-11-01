@@ -27,12 +27,27 @@ contract DaimoPayAxelarBridger is
     using Strings for address;
 
     struct AxelarBridgeRoute {
+        // Axelar requires the name of the destination chain, e.g. "base",
+        // "binance".
         string destChainName;
-        string tokenSymbol;
-        address localTokenAddr;
+        address bridgeTokenIn;
+        address bridgeTokenOut;
+        // Axelar requires the symbol name of the token to be sent to the
+        // destination chain, e.g. "axlUSDC".
+        string bridgeTokenOutSymbol;
+        // When bridging with an Axelar contract call, the receiver on the
+        // destination chain must be a contract that implements the
+        // AxelarExecutableWithToken interface.
         address receiverContract;
         // Fee to be paid in native token for Axelar's bridging gas fee
         uint256 fee;
+    }
+
+    struct ExtraData {
+        // Address to refund excess gas fees to.
+        address gasRefundAddress;
+        // Whether to use Axelar Express bridging.
+        bool useExpress;
     }
 
     // Axelar contracts for this chain.
@@ -41,27 +56,17 @@ contract DaimoPayAxelarBridger is
 
     // Mapping from destination chain and token to the corresponding token on
     // the current chain.
-    mapping(uint256 toChainId => mapping(address toToken => AxelarBridgeRoute bridgeRoute))
+    mapping(uint256 toChainId => AxelarBridgeRoute bridgeRoute)
         public bridgeRouteMapping;
 
     event BridgeRouteAdded(
         uint256 indexed toChainId,
-        address indexed toToken,
-        string destChainName,
-        string tokenSymbol,
-        address localTokenAddr,
-        address receiverContract,
-        uint256 fee
+        AxelarBridgeRoute bridgeRoute
     );
 
     event BridgeRouteRemoved(
         uint256 indexed toChainId,
-        address indexed toToken,
-        string destChainName,
-        string tokenSymbol,
-        address localTokenAddr,
-        address receiverContract,
-        uint256 fee
+        AxelarBridgeRoute bridgeRoute
     );
 
     /// Specify the localToken mapping to destination chains and tokens
@@ -70,7 +75,6 @@ contract DaimoPayAxelarBridger is
         IAxelarGatewayWithToken _axelarGateway,
         IAxelarGasService _axelarGasService,
         uint256[] memory _toChainIds,
-        address[] memory _toTokens,
         AxelarBridgeRoute[] memory _bridgeRoutes
     )
         Ownable(_owner)
@@ -78,17 +82,10 @@ contract DaimoPayAxelarBridger is
     {
         axelarGateway = _axelarGateway;
         axelarGasService = _axelarGasService;
-
-        uint256 n = _toChainIds.length;
-        require(n == _bridgeRoutes.length, "DPAxB: wrong bridgeRoutes length");
-
-        for (uint256 i = 0; i < n; ++i) {
-            _addBridgeRoute({
-                toChainId: _toChainIds[i],
-                toToken: _toTokens[i],
-                bridgeRoute: _bridgeRoutes[i]
-            });
-        }
+        _setBridgeRoutes({
+            toChainIds: _toChainIds,
+            bridgeRoutes: _bridgeRoutes
+        });
     }
 
     // ----- ADMIN FUNCTIONS -----
@@ -96,52 +93,40 @@ contract DaimoPayAxelarBridger is
     /// Map a token on a destination chain to a token on the current chain.
     /// Assumes the local token has a 1 to 1 price with the corresponding
     /// destination token.
-    function addBridgeRoute(
-        uint256 toChainId,
-        address toToken,
-        AxelarBridgeRoute memory bridgeRoute
+    function setBridgeRoutes(
+        uint256[] memory toChainIds,
+        AxelarBridgeRoute[] memory bridgeRoutes
     ) public onlyOwner {
-        _addBridgeRoute({
-            toChainId: toChainId,
-            toToken: toToken,
-            bridgeRoute: bridgeRoute
-        });
+        _setBridgeRoutes({toChainIds: toChainIds, bridgeRoutes: bridgeRoutes});
     }
 
-    function _addBridgeRoute(
-        uint256 toChainId,
-        address toToken,
-        AxelarBridgeRoute memory bridgeRoute
+    function _setBridgeRoutes(
+        uint256[] memory toChainIds,
+        AxelarBridgeRoute[] memory bridgeRoutes
     ) private {
-        bridgeRouteMapping[toChainId][toToken] = bridgeRoute;
-        emit BridgeRouteAdded({
-            toChainId: toChainId,
-            toToken: toToken,
-            destChainName: bridgeRoute.destChainName,
-            tokenSymbol: bridgeRoute.tokenSymbol,
-            localTokenAddr: bridgeRoute.localTokenAddr,
-            receiverContract: bridgeRoute.receiverContract,
-            fee: bridgeRoute.fee
-        });
+        uint256 n = toChainIds.length;
+        require(n == bridgeRoutes.length, "DPAB: wrong bridgeRoutes length");
+
+        for (uint256 i = 0; i < n; ++i) {
+            bridgeRouteMapping[toChainIds[i]] = bridgeRoutes[i];
+            emit BridgeRouteAdded({
+                toChainId: toChainIds[i],
+                bridgeRoute: bridgeRoutes[i]
+            });
+        }
     }
 
-    function removeBridgeRoute(
-        uint256 toChainId,
-        address toToken
-    ) public onlyOwner {
-        AxelarBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
-            toToken
-        ];
-        delete bridgeRouteMapping[toChainId][toToken];
-        emit BridgeRouteRemoved({
-            toChainId: toChainId,
-            toToken: toToken,
-            destChainName: bridgeRoute.destChainName,
-            tokenSymbol: bridgeRoute.tokenSymbol,
-            localTokenAddr: bridgeRoute.localTokenAddr,
-            receiverContract: bridgeRoute.receiverContract,
-            fee: bridgeRoute.fee
-        });
+    function removeBridgeRoutes(uint256[] memory toChainIds) public onlyOwner {
+        for (uint256 i = 0; i < toChainIds.length; ++i) {
+            AxelarBridgeRoute memory bridgeRoute = bridgeRouteMapping[
+                toChainIds[i]
+            ];
+            delete bridgeRouteMapping[toChainIds[i]];
+            emit BridgeRouteRemoved({
+                toChainId: toChainIds[i],
+                bridgeRoute: bridgeRoute
+            });
+        }
     }
 
     // ----- AXELAR EXECUTABLE FUNCTIONS -----
@@ -177,90 +162,151 @@ contract DaimoPayAxelarBridger is
 
     // ----- BRIDGING FUNCTIONS -----
 
-    /// Get the local token that corresponds to the destination token.
-    function getInputTokenAmount(
-        uint256 toChainId,
-        address toToken,
-        uint256 toAmount
-    ) public view returns (address inputToken, uint256 inputAmount) {
-        AxelarBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
-            toToken
-        ];
-        require(
-            bridgeRoute.localTokenAddr != address(0),
-            "DPAxB: no bridge route"
-        );
-        return (bridgeRoute.localTokenAddr, toAmount);
+    /// Given a list of bridge token options, find the index of the bridge token
+    /// that matches the correct bridge token out. Return the length of the array
+    /// if no match is found.
+    function _findBridgeTokenOut(
+        TokenAmount[] memory bridgeTokenOutOptions,
+        address bridgeTokenOut
+    ) internal pure returns (uint256 index) {
+        uint256 n = bridgeTokenOutOptions.length;
+        for (uint256 i = 0; i < n; ++i) {
+            if (address(bridgeTokenOutOptions[i].token) == bridgeTokenOut) {
+                return i;
+            }
+        }
+        return n;
     }
+
+    /// Get the local token that corresponds to the destination token.
+    function _getBridgeData(
+        uint256 toChainId,
+        TokenAmount[] memory bridgeTokenOutOptions
+    )
+        internal
+        view
+        returns (
+            address inToken,
+            uint256 inAmount,
+            address outToken,
+            string memory outTokenSymbol,
+            uint256 outAmount,
+            string memory destChainName,
+            address receiverContract,
+            uint256 fee
+        )
+    {
+        AxelarBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId];
+        require(
+            bridgeRoute.bridgeTokenOut != address(0),
+            "DPAB: bridge route not found"
+        );
+
+        uint256 index = _findBridgeTokenOut(
+            bridgeTokenOutOptions,
+            bridgeRoute.bridgeTokenOut
+        );
+        // If the index is the length of the array, then the bridge token out
+        // was not found in the list of options.
+        require(index < bridgeTokenOutOptions.length, "DPAB: bad bridge token");
+
+        inToken = bridgeRoute.bridgeTokenIn;
+        // Assumes the input token has a 1 to 1 price with the destination token.
+        // Gas fees are charged in native token and paid separately.
+        inAmount = bridgeTokenOutOptions[index].amount;
+
+        outToken = bridgeRoute.bridgeTokenOut;
+        outTokenSymbol = bridgeRoute.bridgeTokenOutSymbol;
+        outAmount = bridgeTokenOutOptions[index].amount;
+
+        destChainName = bridgeRoute.destChainName;
+        receiverContract = bridgeRoute.receiverContract;
+        fee = bridgeRoute.fee;
+    }
+
+    function getBridgeTokenIn(
+        uint256 toChainId,
+        TokenAmount[] memory bridgeTokenOutOptions
+    ) public view returns (address bridgeTokenIn, uint256 inAmount) {}
 
     /// Initiate a bridge to a destination chain using Axelar Protocol.
     function sendToChain(
         uint256 toChainId,
         address toAddress,
-        address toToken,
-        uint256 toAmount,
+        TokenAmount[] memory bridgeTokenOutOptions,
         bytes calldata extraData
     ) public {
         require(toChainId != block.chainid, "DPAxB: same chain");
-        require(toAmount > 0, "DPAxB: zero amount");
 
-        address refundAddress = abi.decode(extraData, (address));
+        (
+            address inToken,
+            uint256 inAmount,
+            address outToken,
+            string memory outTokenSymbol,
+            uint256 outAmount,
+            string memory destChainName,
+            address receiverContract,
+            uint256 fee
+        ) = _getBridgeData(toChainId, bridgeTokenOutOptions);
+        require(outAmount > 0, "DPAxB: zero amount");
 
-        // Get the local token that corresponds to the destination token.
-        (address inputToken, uint256 inputAmount) = getInputTokenAmount({
-            toChainId: toChainId,
-            toToken: toToken,
-            toAmount: toAmount
-        });
-
-        AxelarBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
-            toToken
-        ];
+        // Parse remaining arguments from extraData
+        ExtraData memory extra;
+        extra = abi.decode(extraData, (ExtraData));
 
         // Move input token from caller to this contract
-        IERC20(inputToken).safeTransferFrom({
+        IERC20(inToken).safeTransferFrom({
             from: msg.sender,
             to: address(this),
-            value: inputAmount
+            value: inAmount
         });
 
         // Pay for Axelar's bridging gas fee.
-        axelarGasService.payNativeGasForContractCallWithToken{
-            value: bridgeRoute.fee
-        }(
-            address(this),
-            bridgeRoute.destChainName,
-            bridgeRoute.receiverContract.toHexString(),
-            abi.encode(toAddress),
-            bridgeRoute.tokenSymbol,
-            toAmount,
-            refundAddress
-        );
+        if (extra.useExpress) {
+            axelarGasService.payNativeGasForExpressCallWithToken{value: fee}(
+                address(this),
+                destChainName,
+                receiverContract.toHexString(),
+                abi.encode(toAddress),
+                outTokenSymbol,
+                outAmount,
+                extra.gasRefundAddress
+            );
+        } else {
+            axelarGasService.payNativeGasForContractCallWithToken{value: fee}(
+                address(this),
+                destChainName,
+                receiverContract.toHexString(),
+                abi.encode(toAddress),
+                outTokenSymbol,
+                outAmount,
+                extra.gasRefundAddress
+            );
+        }
 
         // Approve the AxelarGateway contract and initiate the bridge. Send the
-        // tokens to the DaimoPayAxelarBridger on the destination chain. The
-        // _executeWithToken function will be called on the destination chain
-        // to transfer the tokens to the toAddress.
-        IERC20(inputToken).forceApprove({
+        // tokens to the receiverContract on the destination chain. The
+        // _executeWithToken function will be called on the destination chain.
+        IERC20(inToken).forceApprove({
             spender: address(axelarGateway),
-            value: toAmount
+            value: inAmount
         });
         axelarGateway.callContractWithToken(
-            bridgeRoute.destChainName,
-            bridgeRoute.receiverContract.toHexString(),
+            destChainName,
+            receiverContract.toHexString(),
             abi.encode(toAddress),
-            bridgeRoute.tokenSymbol,
-            toAmount
+            outTokenSymbol,
+            outAmount
         );
 
         emit BridgeInitiated({
             fromAddress: msg.sender,
-            fromToken: inputToken,
-            fromAmount: inputAmount,
+            fromToken: inToken,
+            fromAmount: inAmount,
             toChainId: toChainId,
             toAddress: toAddress,
-            toToken: toToken,
-            toAmount: toAmount
+            toToken: outToken,
+            toAmount: outAmount
         });
     }
 

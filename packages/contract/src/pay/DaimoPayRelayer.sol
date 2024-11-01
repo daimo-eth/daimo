@@ -124,14 +124,13 @@ contract DaimoPayRelayer is Ownable2Step {
         bytes calldata bridgeExtraData,
         uint256 bridgeGasFee
     ) public payable onlyOwner {
-        // We use Axelar when bridging to/from BSC. Axelar requries a native token
-        // payment for the gas fee.
-        if (block.chainid == 56 || intent.toChainId == 56) {
-            DaimoPayBridger bridger = dp.bridger();
-            IDaimoPayBridger axelarBridger = bridger.chainIdToBridger(56);
-            (bool success, ) = address(axelarBridger).call{value: bridgeGasFee}(
-                ""
+        // Axelar requires a native token payment for the gas fee. Transfer
+        // the fee to directly to the bridger contract.
+        if (bridgeGasFee > 0) {
+            IDaimoPayBridger bridger = dp.bridger().chainIdToBridger(
+                intent.toChainId
             );
+            (bool success, ) = address(bridger).call{value: bridgeGasFee}("");
             require(success, "DPR: axelar fee transfer failed");
         }
         dp.startIntent(intent, calls, bridgeExtraData);
@@ -167,14 +166,12 @@ contract DaimoPayRelayer is Ownable2Step {
         dp.claimIntent({intent: intent, calls: calls});
 
         // Transfer any bridgeTokenOut balance back to the owner
-        uint256 balance = TokenUtils.getBalanceOf(
-            intent.bridgeTokenOut.token,
-            address(this)
-        );
-        TokenUtils.transfer({
-            token: intent.bridgeTokenOut.token,
-            recipient: payable(msg.sender),
-            amount: balance
-        });
+        uint256 n = intent.bridgeTokenOutOptions.length;
+        for (uint256 i = 0; i < n; i++) {
+            TransferTokenBalance.transferBalance(
+                intent.bridgeTokenOutOptions[i].token,
+                payable(msg.sender)
+            );
+        }
     }
 }
