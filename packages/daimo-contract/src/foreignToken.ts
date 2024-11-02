@@ -523,6 +523,7 @@ const allBasicTokens = [
 
 const blacklistedTokens: Record<number, Set<Address>> = {
   137: new Set([getAddress("0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc")]), // GAX Liquidity Token Reward (GLTR)
+  42161: new Set([getAddress("0x9ed7E4B1BFF939ad473dA5E7a218C771D1569456")]), // GAX Liquidity Token Reward (GLTR)
 };
 
 const toKey = (t: ForeignToken) => `${t.chainId}-${t.symbol.toLowerCase()}`;
