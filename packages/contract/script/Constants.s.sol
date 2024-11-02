@@ -345,19 +345,6 @@ function _getAxlUsdcAddress(uint256 chainId) pure returns (address) {
     return address(0);
 }
 
-function _getAxlUSDCAddress(uint256 chainId) pure returns (address) {
-    if (chainId == ARBITRUM_MAINNET) return ARBITRUM_MAINNET_AXLUSDC;
-    if (chainId == AVAX_MAINNET) return AVAX_MAINNET_AXLUSDC;
-    if (chainId == BASE_MAINNET) return BASE_MAINNET_AXLUSDC;
-    if (chainId == BSC_MAINNET) return BSC_MAINNET_AXLUSDC;
-    if (chainId == ETH_MAINNET) return ETH_MAINNET_AXLUSDC;
-    if (chainId == LINEA_MAINNET) return LINEA_MAINNET_AXLUSDC;
-    if (chainId == OP_MAINNET) return OP_MAINNET_AXLUSDC;
-    if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_AXLUSDC;
-
-    revert("Unsupported chainID");
-}
-
 // Chainlink DataFeed aggregator addresses (tokenIn --> USD)
 address constant ETH_MAINNET_AAVE_USD_AGGREGATOR = 0x547a514d5e3769680Ce22B2361c10Ea13619e8a9;
 

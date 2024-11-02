@@ -135,6 +135,8 @@ export type DaimoPayHydratedOrder = {
   id: bigint;
   intentAddr: Address;
   bridgeTokenOutOptions: DaimoPayTokenAmount[];
+  bridgeTokenOutAddr: Address | null;
+  bridgeTokenOutAmount: bigint | null;
   destFinalCallTokenAmount: DaimoPayTokenAmount;
   destFinalCall: OnChainCall;
   destRefundAddr: Address;

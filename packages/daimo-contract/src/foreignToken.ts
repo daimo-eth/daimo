@@ -37,7 +37,7 @@ export enum TokenLogo {
 /* --------------------- Tokens Constants --------------------- */
 
 const usdcByChainId: Map<number, ForeignToken> = new Map();
-const axlUsdcByChainId: Map<number, ForeignToken> = new Map();
+const axlUSDCByChainId: Map<number, ForeignToken> = new Map();
 
 //
 // Eth Sepolia
@@ -122,7 +122,7 @@ const ethereumTokens = [
 ];
 
 usdcByChainId.set(1, ethereumUSDC);
-axlUsdcByChainId.set(1, ethereumAxlUSDC);
+axlUSDCByChainId.set(1, ethereumAxlUSDC);
 
 //
 // Base Sepolia
@@ -212,7 +212,7 @@ export const baseUSDT: ForeignToken = {
   logoURI: TokenLogo.USDT,
 };
 
-export const baseAxlUsdc: ForeignToken = {
+export const baseAxlUSDC: ForeignToken = {
   chainId: 8453,
   token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
   decimals: 6,
@@ -229,11 +229,11 @@ const baseTokens = [
   baseUSDbC,
   baseDAI,
   baseUSDT,
-  baseAxlUsdc,
+  baseAxlUSDC,
 ];
 
 usdcByChainId.set(8453, baseUSDC);
-axlUsdcByChainId.set(8453, baseAxlUsdc);
+axlUSDCByChainId.set(8453, baseAxlUSDC);
 
 //
 // Arbitrum Mainnet
@@ -259,7 +259,7 @@ export const arbitrumUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-export const arbitrumAxlUsdc: ForeignToken = {
+export const arbitrumAxlUSDC: ForeignToken = {
   chainId: 42161,
   token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
   decimals: 6,
@@ -272,11 +272,11 @@ const arbitrumTokens = [
   arbitrumETH,
   arbitrumWETH,
   arbitrumUSDC,
-  arbitrumAxlUsdc,
+  arbitrumAxlUSDC,
 ];
 
 usdcByChainId.set(42161, arbitrumUSDC);
-axlUsdcByChainId.set(42161, arbitrumAxlUsdc);
+axlUSDCByChainId.set(42161, arbitrumAxlUSDC);
 
 //
 // Arbitrum Sepolia
@@ -334,7 +334,7 @@ export const optimismUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-export const optimismAxlUsdc: ForeignToken = {
+export const optimismAxlUSDC: ForeignToken = {
   chainId: 10,
   token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
   decimals: 6,
@@ -347,11 +347,11 @@ const optimismTokens = [
   optimismETH,
   optimismWETH,
   optimismUSDC,
-  optimismAxlUsdc,
+  optimismAxlUSDC,
 ];
 
 usdcByChainId.set(10, optimismUSDC);
-axlUsdcByChainId.set(10, optimismAxlUsdc);
+axlUSDCByChainId.set(10, optimismAxlUSDC);
 
 //
 // Optimism Sepolia
@@ -418,7 +418,7 @@ export const polygonUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-export const polygonAxlUsdc: ForeignToken = {
+export const polygonAxlUSDC: ForeignToken = {
   chainId: 137,
   token: getAddress("0x750e4C4984a9e0f12978eA6742Bc1c5D248f40ed"),
   decimals: 6,
@@ -432,11 +432,11 @@ const polygonTokens = [
   polygonWMATIC,
   polygonWETH,
   polygonUSDC,
-  polygonAxlUsdc,
+  polygonAxlUSDC,
 ];
 
 usdcByChainId.set(137, polygonUSDC);
-axlUsdcByChainId.set(137, polygonAxlUsdc);
+axlUSDCByChainId.set(137, polygonAxlUSDC);
 
 //
 // Polygon Amoy
@@ -508,7 +508,7 @@ export const avalancheWAVAX: ForeignToken = {
   logoURI: TokenLogo.AVAX,
 };
 
-export const avalancheAxlUsdc: ForeignToken = {
+export const avalancheAxlUSDC: ForeignToken = {
   chainId: 43114,
   token: getAddress("0xfaB550568C688d5D8A52C7d794cb93Edc26eC0eC"),
   decimals: 6,
@@ -525,7 +525,7 @@ const avalancheTokens = [
 ];
 
 usdcByChainId.set(43114, avalancheUSDC);
-axlUsdcByChainId.set(43114, avalancheAxlUsdc);
+axlUSDCByChainId.set(43114, avalancheAxlUSDC);
 
 //
 // Avalanche Fuji
@@ -588,7 +588,7 @@ export const lineaBridgedUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-export const lineaAxlUsdc: ForeignToken = {
+export const lineaAxlUSDC: ForeignToken = {
   chainId: 59144,
   token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
   decimals: 6,
@@ -597,9 +597,9 @@ export const lineaAxlUsdc: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-const lineaTokens = [lineaETH, lineaWETH, lineaBridgedUSDC, lineaAxlUsdc];
+const lineaTokens = [lineaETH, lineaWETH, lineaBridgedUSDC, lineaAxlUSDC];
 
-axlUsdcByChainId.set(59144, lineaAxlUsdc);
+axlUSDCByChainId.set(59144, lineaAxlUSDC);
 
 //
 // BSC Mainnet
@@ -637,7 +637,7 @@ export const bscUSDC: ForeignToken = {
 const bscTokens = [bscBNB, bscWBNB, bscAxlUSDC, bscUSDC];
 
 usdcByChainId.set(56, bscUSDC);
-axlUsdcByChainId.set(56, bscAxlUSDC);
+axlUSDCByChainId.set(56, bscAxlUSDC);
 
 // --------------------- Native Token Utils ---------------------
 //
@@ -726,13 +726,13 @@ export function getTokensForChain(chainId: number): ForeignToken[] {
 }
 
 /** Get the USDC token for a given chain. */
-export function getChainUsdc(chainId: number): ForeignToken | undefined {
+export function getChainUSDC(chainId: number): ForeignToken | undefined {
   return usdcByChainId.get(chainId);
 }
 
 /** Get the Axelar Wrapped USDC token for a given chain. */
-export function getChainAxlUsdc(chainId: number): ForeignToken | undefined {
-  return axlUsdcByChainId.get(chainId);
+export function getChainAxlUSDC(chainId: number): ForeignToken | undefined {
+  return axlUSDCByChainId.get(chainId);
 }
 
 /** Get a given token */

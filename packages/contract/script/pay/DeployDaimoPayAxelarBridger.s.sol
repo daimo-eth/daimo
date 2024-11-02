@@ -83,8 +83,8 @@ contract DeployDaimoPayAxelarBridger is Script {
 
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
                     destChainName: _getAxelarChainName(chainIds[i]),
-                    bridgeTokenIn: _getAxlUSDCAddress(block.chainid),
-                    bridgeTokenOut: _getAxlUSDCAddress(chainIds[i]),
+                    bridgeTokenIn: _getAxlUsdcAddress(block.chainid),
+                    bridgeTokenOut: _getAxlUsdcAddress(chainIds[i]),
                     bridgeTokenOutSymbol: "axlUSDC",
                     receiverContract: axelarReceiver,
                     fee: fee
@@ -104,8 +104,8 @@ contract DeployDaimoPayAxelarBridger is Script {
             for (uint32 i = 0; i < chainIds.length; ++i) {
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
                     destChainName: _getAxelarChainName(chainIds[i]),
-                    bridgeTokenIn: _getAxlUSDCAddress(block.chainid),
-                    bridgeTokenOut: _getAxlUSDCAddress(chainIds[i]),
+                    bridgeTokenIn: _getAxlUsdcAddress(block.chainid),
+                    bridgeTokenOut: _getAxlUsdcAddress(chainIds[i]),
                     bridgeTokenOutSymbol: "axlUSDC",
                     receiverContract: axelarReceiver,
                     fee: 2_000_000_000_000_000 // 2 * 10^15 = 0.002 BNB
