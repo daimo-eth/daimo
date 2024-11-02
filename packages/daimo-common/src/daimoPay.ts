@@ -54,6 +54,15 @@ export interface DaimoPayOrderItem {
   image?: string;
 }
 
+export const zBridgeTokenOutOption = z.object({
+  token: zAddress.transform((a) => getAddress(a)),
+  amount: z.string().transform((a) => BigInt(a)),
+});
+
+export const zBridgeTokenOutOptions = z.array(zBridgeTokenOutOption);
+
+export type BridgeTokenOutOption = z.infer<typeof zBridgeTokenOutOption>;
+
 // NOTE: be careful to modify this type only in backward-compatible ways.
 //       Add OPTIONAL fields, etc. Anything else requires a migration.
 export const zDaimoPayOrderMetadata = z.object({
@@ -124,8 +133,8 @@ export type DaimoPayDehydratedOrder = {
 export type DaimoPayHydratedOrder = {
   mode: DaimoPayOrderMode.HYDRATED;
   id: bigint;
-  handoffAddr: Address;
-  destMintTokenAmount: DaimoPayTokenAmount;
+  intentAddr: Address;
+  bridgeTokenOutOptions: DaimoPayTokenAmount[];
   destFinalCallTokenAmount: DaimoPayTokenAmount;
   destFinalCall: OnChainCall;
   destRefundAddr: Address;
@@ -146,12 +155,27 @@ export type DaimoPayHydratedOrder = {
   metadata: DaimoPayOrderMetadata;
 };
 
-export type DaimoPayHydratedOrderWithoutHandoffAddr = Omit<
+export type DaimoPayHydratedOrderWithoutIntentAddr = Omit<
   DaimoPayHydratedOrder,
-  "handoffAddr"
+  "intentAddr"
 >;
 
 export type DaimoPayOrder = DaimoPayDehydratedOrder | DaimoPayHydratedOrder;
+
+export function getOrderSourceChainId(
+  order: DaimoPayHydratedOrder,
+): number | null {
+  if (order.sourceTokenAmount == null) {
+    return null;
+  }
+  return order.sourceTokenAmount.token.chainId;
+}
+
+export function getOrderDestChainId(
+  order: DaimoPayOrder | DaimoPayHydratedOrderWithoutIntentAddr,
+): number {
+  return order.destFinalCallTokenAmount.token.chainId;
+}
 
 export type ExternalPaymentOptionMetadata = {
   id: ExternalPaymentOptions;
@@ -185,6 +209,20 @@ export interface DaimoPayTokenAmount {
   token: DaimoPayToken;
   amount: BigIntStr;
   usd: number; // amount in dollars
+}
+
+export type ContractTokenAmount = {
+  token: Address;
+  amount: bigint;
+};
+
+export function DPTokenAmountToContractTokenAmount(
+  tokenAmount: DaimoPayTokenAmount,
+): ContractTokenAmount {
+  return {
+    token: tokenAmount.token.token,
+    amount: BigInt(tokenAmount.amount),
+  };
 }
 
 export type OnChainCall = {

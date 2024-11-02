@@ -15,7 +15,7 @@ import "../interfaces/IDaimoPayBridger.sol";
 /// @author The Daimo team
 /// @custom:security-contact security@daimo.com
 ///
-/// @dev Bridges assets from to a destination chain using Axelar Protocol. Makes
+/// @dev Bridges assets to a destination chain using Axelar Protocol. Makes
 /// the assumption that the local token is an ERC20 token and has a 1 to 1 price
 /// with the corresponding destination token.
 contract DaimoPayAxelarBridger is

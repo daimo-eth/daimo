@@ -599,7 +599,6 @@ export const lineaAxlUsdc: ForeignToken = {
 
 const lineaTokens = [lineaETH, lineaWETH, lineaBridgedUSDC, lineaAxlUsdc];
 
-usdcByChainId.set(59144, lineaBridgedUSDC);
 axlUsdcByChainId.set(59144, lineaAxlUsdc);
 
 //
