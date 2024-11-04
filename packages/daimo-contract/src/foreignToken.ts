@@ -19,6 +19,8 @@ export type ForeignToken = {
   token: Address;
   name?: string;
   symbol: string;
+  /** Optional prefix to add, example "$" or "€" for USDC or EURC. */
+  prefixSymbol?: string;
   decimals: number;
   logoURI?: string;
 };
@@ -56,6 +58,7 @@ export const ethereumSepoliaUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -86,6 +89,7 @@ export const ethereumUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -95,6 +99,7 @@ export const ethereumEURC: ForeignToken = {
   decimals: 6,
   name: "EURC",
   symbol: "EURC",
+  prefixSymbol: "€",
   logoURI: TokenLogo.EURC,
 };
 
@@ -121,6 +126,7 @@ export const baseSepoliaUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -146,6 +152,7 @@ export const baseUSDC: ForeignToken = {
   token: getAddress("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"),
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   decimals: 6,
   logoURI: TokenLogo.USDC,
 };
@@ -156,6 +163,7 @@ export const baseEURC: ForeignToken = {
   decimals: 6,
   name: "EURC",
   symbol: "EURC",
+  prefixSymbol: "€",
   logoURI: TokenLogo.EURC,
 };
 
@@ -164,6 +172,7 @@ export const baseUSDbC: ForeignToken = {
   token: getAddress("0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA"),
   name: "Bridged USD Coin", // USDbC has a bad name & logo on CoinGecko
   symbol: "USDbC",
+  prefixSymbol: "$",
   decimals: 6,
   logoURI: `https://daimo.com/assets/foreign-coin-logos/USDbC.png`,
 };
@@ -173,6 +182,7 @@ export const baseDAI: ForeignToken = {
   token: getAddress("0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"),
   name: "Dai Stablecoin",
   symbol: "DAI",
+  prefixSymbol: "$",
   decimals: 18,
   logoURI: TokenLogo.DAI,
 };
@@ -182,6 +192,7 @@ export const baseUSDT: ForeignToken = {
   token: getAddress("0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2"),
   name: "Tether USD",
   symbol: "USDT",
+  prefixSymbol: "$",
   decimals: 6,
   logoURI: TokenLogo.USDT,
 };
@@ -216,6 +227,7 @@ export const arbitrumUSDC: ForeignToken = {
   token: getAddress("0xaf88d065e77c8cC2239327C5EDb3A432268e5831"),
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   decimals: 6,
   logoURI: TokenLogo.USDC,
 };
@@ -243,6 +255,7 @@ export const arbitrumSepoliaUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -273,6 +286,7 @@ export const optimismUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -299,6 +313,7 @@ export const optimismSepoliaUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -338,6 +353,7 @@ export const polygonUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -369,6 +385,7 @@ export const polygonAmoyUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -390,6 +407,7 @@ export const avalancheUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -435,6 +453,7 @@ export const avalancheFujiUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -474,6 +493,7 @@ export const lineaBridgedUSDC: ForeignToken = {
   decimals: 6,
   name: "USD Coin",
   symbol: "USDC.e",
+  prefixSymbol: "$",
   logoURI: TokenLogo.USDC,
 };
 
@@ -557,6 +577,14 @@ for (const token of codegenTokens as ForeignToken[]) {
   const toks = tokensByChainId.get(token.chainId) || [];
   tokensByChainId.set(token.chainId, toks);
   toks.push(token);
+}
+
+export function getAllTokens(): ForeignToken[] {
+  let ret: ForeignToken[] = [];
+  for (const toks of tokensByChainId.values()) {
+    ret = ret.concat(toks);
+  }
+  return ret;
 }
 
 /** All known tokens on each supported chain. */

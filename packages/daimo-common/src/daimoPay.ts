@@ -174,17 +174,18 @@ export enum ExternalPaymentOptions {
 }
 
 export interface DaimoPayToken extends ForeignToken {
-  usd: number; // per unit price in dollars, example 2300 (USD) for WETH
+  /** Per unit price in dollars, example 2300 (USD) for WETH. */
+  usd: number;
   quoteTimestamp: number;
-  quoteBlockNumber: number;
-  displayDecimals: number; // TODO, human friendly number of decimals for the token
-  fiatSymbol?: string; // e.g. $ for USDC/USDT/DAI, € for EUROC, etc
+  /** Human friendly number of decimals for the token. */
+  displayDecimals: number;
 }
 
 export interface DaimoPayTokenAmount {
   token: DaimoPayToken;
   amount: BigIntStr;
-  usd: number; // amount in dollars
+  /** Amount in dollars. */
+  usd: number;
 }
 
 export type OnChainCall = {
@@ -280,5 +281,5 @@ export function getDisplayPrice(tokenAmount: DaimoPayTokenAmount) {
   const { token, amount } = tokenAmount;
   const amountDec = formatUnits(BigInt(amount), token.decimals);
   const displayPrice = Number(amountDec).toFixed(token.displayDecimals);
-  return (token.fiatSymbol ? `${token.fiatSymbol}` : "") + displayPrice;
+  return (token.prefixSymbol ? `${token.prefixSymbol}` : "") + displayPrice;
 }
