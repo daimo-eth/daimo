@@ -22,7 +22,7 @@ contract DeployDaimoPayAxelarBridger is Script {
         address initOwner = msg.sender;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayAxelarBridger-options1"),
+            keccak256("DaimoPayAxelarBridger-options4"),
             abi.encodePacked(
                 type(DaimoPayAxelarBridger).creationCode,
                 abi.encode(
@@ -52,7 +52,7 @@ contract DeployDaimoPayAxelarBridger is Script {
         // destination chain.
         address axelarReceiver = CREATE3.getDeployed(
             msg.sender,
-            keccak256("DaimoPayAxelarBridger-options1")
+            keccak256("DaimoPayAxelarBridger-options4")
         );
 
         bool testnet = _isTestnet(block.chainid);

@@ -21,7 +21,7 @@ contract DeployDaimoPayAcrossBridger is Script {
         address initOwner = msg.sender;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayAcrossBridger-options1"),
+            keccak256("DaimoPayAcrossBridger-options4"),
             abi.encodePacked(
                 type(DaimoPayAcrossBridger).creationCode,
                 abi.encode(
