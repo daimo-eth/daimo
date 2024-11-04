@@ -24,7 +24,6 @@ contract DaimoPayAxelarBridger is
     Ownable2Step
 {
     using SafeERC20 for IERC20;
-    using Strings for address;
 
     struct AxelarBridgeRoute {
         // Axelar requires the name of the destination chain, e.g. "base",
@@ -271,7 +270,7 @@ contract DaimoPayAxelarBridger is
             axelarGasService.payNativeGasForExpressCallWithToken{value: fee}(
                 address(this),
                 destChainName,
-                receiverContract.toHexString(),
+                Strings.toHexString(receiverContract),
                 abi.encode(toAddress),
                 outTokenSymbol,
                 outAmount,
@@ -281,7 +280,7 @@ contract DaimoPayAxelarBridger is
             axelarGasService.payNativeGasForContractCallWithToken{value: fee}(
                 address(this),
                 destChainName,
-                receiverContract.toHexString(),
+                Strings.toHexString(receiverContract),
                 abi.encode(toAddress),
                 outTokenSymbol,
                 outAmount,
@@ -298,7 +297,7 @@ contract DaimoPayAxelarBridger is
         });
         axelarGateway.callContractWithToken(
             destChainName,
-            receiverContract.toHexString(),
+            Strings.toHexString(receiverContract),
             abi.encode(toAddress),
             outTokenSymbol,
             outAmount

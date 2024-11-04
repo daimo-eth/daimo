@@ -77,17 +77,13 @@ contract DeployDaimoPayAxelarBridger is Script {
             chainIds[0] = BSC_MAINNET;
 
             for (uint32 i = 0; i < chainIds.length; ++i) {
-                uint256 fee = block.chainid == POLYGON_MAINNET
-                    ? 3000000000000000000 // 3.0 POLYGON
-                    : 300000000000000; // 0.0003 ETH
-
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
                     destChainName: _getAxelarChainName(chainIds[i]),
                     bridgeTokenIn: _getAxlUsdcAddress(block.chainid),
                     bridgeTokenOut: _getAxlUsdcAddress(chainIds[i]),
                     bridgeTokenOutSymbol: "axlUSDC",
                     receiverContract: axelarReceiver,
-                    fee: fee
+                    fee: _getAxelarFeeByChain(block.chainid)
                 });
             }
         } else if (block.chainid == BSC_MAINNET) {
@@ -108,7 +104,7 @@ contract DeployDaimoPayAxelarBridger is Script {
                     bridgeTokenOut: _getAxlUsdcAddress(chainIds[i]),
                     bridgeTokenOutSymbol: "axlUSDC",
                     receiverContract: axelarReceiver,
-                    fee: 2_000_000_000_000_000 // 2 * 10^15 = 0.002 BNB
+                    fee: _getAxelarFeeByChain(block.chainid)
                 });
             }
         } else {
@@ -127,6 +123,22 @@ contract DeployDaimoPayAxelarBridger is Script {
             console.log("receiverContract:", bridgeRoutes[i].receiverContract);
             console.log("fee:", bridgeRoutes[i].fee);
             console.log("--------------------------------");
+        }
+    }
+
+    /**
+     * Get the Axelar bridging gas fee for a given chain. The fee should be
+     * approximately worth $1 USD.
+     */
+    function _getAxelarFeeByChain(
+        uint256 chainId
+    ) private pure returns (uint256) {
+        if (chainId == POLYGON_MAINNET) {
+            return 4_000_000_000_000_000_000; // 4 * 10^18 = 4 POL
+        } else if (chainId == BSC_MAINNET) {
+            return 2_000_000_000_000_000; // 2 * 10^15 = 0.002 BNB
+        } else {
+            return 500_000_000_000_000; // 5 * 10^14 = 0.0005 ETH
         }
     }
 

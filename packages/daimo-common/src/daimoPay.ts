@@ -11,7 +11,7 @@ import {
 } from "viem";
 import z from "zod";
 
-import { BigIntStr, zAddress } from "./model";
+import { BigIntStr, zAddress, zBigIntStr } from "./model";
 
 // lifecycle: waiting payment -> pending processing -> start submitted -> processed (onchain tx was successful)
 export enum DaimoPayOrderStatusSource {
@@ -56,7 +56,7 @@ export interface DaimoPayOrderItem {
 
 export const zBridgeTokenOutOption = z.object({
   token: zAddress.transform((a) => getAddress(a)),
-  amount: z.string().transform((a) => BigInt(a)),
+  amount: zBigIntStr.transform((a) => BigInt(a)),
 });
 
 export const zBridgeTokenOutOptions = z.array(zBridgeTokenOutOption);
@@ -135,8 +135,8 @@ export type DaimoPayHydratedOrder = {
   id: bigint;
   intentAddr: Address;
   bridgeTokenOutOptions: DaimoPayTokenAmount[];
-  bridgeTokenOutAddr: Address | null;
-  bridgeTokenOutAmount: bigint | null;
+  selectedBridgeTokenOutAddr: Address | null;
+  selectedBridgeTokenOutAmount: bigint | null;
   destFinalCallTokenAmount: DaimoPayTokenAmount;
   destFinalCall: OnChainCall;
   destRefundAddr: Address;
