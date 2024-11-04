@@ -121,15 +121,29 @@ contract DaimoPayRelayer is Ownable2Step {
         Call[] calldata preCalls,
         DaimoPay dp,
         PayIntent calldata intent,
-        Call[] calldata calls,
-        bytes calldata bridgeExtraData
+        Call[] calldata startCalls,
+        bytes calldata bridgeExtraData,
+        Call[] calldata postCalls
     ) public payable onlyOwner {
+        // Make pre-start calls
         for (uint256 i = 0; i < preCalls.length; ++i) {
             Call calldata call = preCalls[i];
             (bool success, ) = call.to.call{value: call.value}(call.data);
             require(success, "DPR: preCall failed");
         }
-        dp.startIntent(intent, calls, bridgeExtraData);
+
+        dp.startIntent({
+            intent: intent,
+            calls: startCalls,
+            bridgeExtraData: bridgeExtraData
+        });
+
+        // Make post-start calls
+        for (uint256 i = 0; i < postCalls.length; ++i) {
+            Call calldata call = postCalls[i];
+            (bool success, ) = call.to.call{value: call.value}(call.data);
+            require(success, "DPR: postCall failed");
+        }
     }
 
     function fastFinish(
@@ -148,18 +162,27 @@ contract DaimoPayRelayer is Ownable2Step {
     }
 
     function claimAndKeep(
-        Call calldata mintCall,
+        Call[] calldata preCalls,
         DaimoPay dp,
         PayIntent calldata intent,
-        Call[] calldata calls
+        Call[] calldata claimCalls,
+        Call[] calldata postCalls
     ) public onlyOwner {
-        if (mintCall.data.length > 0) {
-            (bool success, ) = mintCall.to.call{value: mintCall.value}(
-                mintCall.data
-            );
+        // Make pre-claim calls
+        for (uint256 i = 0; i < preCalls.length; ++i) {
+            Call calldata call = preCalls[i];
+            (bool success, ) = call.to.call{value: call.value}(call.data);
+            require(success, "DPR: preCall failed");
         }
 
-        dp.claimIntent({intent: intent, calls: calls});
+        dp.claimIntent({intent: intent, calls: claimCalls});
+
+        // Make post-claim calls
+        for (uint256 i = 0; i < postCalls.length; ++i) {
+            Call calldata call = postCalls[i];
+            (bool success, ) = call.to.call{value: call.value}(call.data);
+            require(success, "DPR: postCall failed");
+        }
 
         // Transfer any bridgeTokenOut balance back to the owner
         uint256 n = intent.bridgeTokenOutOptions.length;

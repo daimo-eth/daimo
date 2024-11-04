@@ -69,13 +69,13 @@ export const daimoPayBridgerAddress =
   "0x6b052F3A28eA1078c431FBface949559568ef960";
 /** Daimo Pay Axelar bridger address */
 export const daimoPayAxelarBridgerAddress =
-  "0xd0838A173e6a246928642Ed94b30Ae481Af545a3";
+  "0x32F372328ac108fDbf9009A9729f28699E1919f3";
 /** Daimo Pay intent factory address */
 export const payIntentFactoryAddress =
   "0xF46F51c7855bDa3bFB48161fcAf40484923BeCee";
 /** Daimo Pay relayer address */
 export const daimoPayRelayerAddress =
-  "0x5a648289c56DBF5b3A1F5af838261Bda6e9D0375";
+  "0x9f85421578bd7bd6eC5684cbABB4C77B90575F05";
 
 // DAv2
 export const entryPointV07Address =

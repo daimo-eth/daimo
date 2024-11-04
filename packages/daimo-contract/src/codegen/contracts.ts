@@ -4604,9 +4604,9 @@ export const daimoPayRelayerAbi = [
     type: 'function',
     inputs: [
       {
-        name: 'mintCall',
-        internalType: 'struct Call',
-        type: 'tuple',
+        name: 'preCalls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
         components: [
           { name: 'to', internalType: 'address', type: 'address' },
           { name: 'value', internalType: 'uint256', type: 'uint256' },
@@ -4662,7 +4662,17 @@ export const daimoPayRelayerAbi = [
         ],
       },
       {
-        name: 'calls',
+        name: 'claimCalls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
+      {
+        name: 'postCalls',
         internalType: 'struct Call[]',
         type: 'tuple[]',
         components: [
@@ -4834,7 +4844,7 @@ export const daimoPayRelayerAbi = [
         ],
       },
       {
-        name: 'calls',
+        name: 'startCalls',
         internalType: 'struct Call[]',
         type: 'tuple[]',
         components: [
@@ -4844,6 +4854,16 @@ export const daimoPayRelayerAbi = [
         ],
       },
       { name: 'bridgeExtraData', internalType: 'bytes', type: 'bytes' },
+      {
+        name: 'postCalls',
+        internalType: 'struct Call[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'to', internalType: 'address', type: 'address' },
+          { name: 'value', internalType: 'uint256', type: 'uint256' },
+          { name: 'data', internalType: 'bytes', type: 'bytes' },
+        ],
+      },
     ],
     name: 'startIntent',
     outputs: [],
