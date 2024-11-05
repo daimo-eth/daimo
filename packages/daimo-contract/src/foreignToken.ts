@@ -104,25 +104,9 @@ export const ethereumEURC: ForeignToken = {
   logoURI: TokenLogo.EURC,
 };
 
-export const ethereumAxlUSDC: ForeignToken = {
-  chainId: 1,
-  token: getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
-  decimals: 6,
-  name: "Axelar Wrapped USDC",
-  symbol: "axlUSDC",
-  logoURI: TokenLogo.USDC,
-};
-
-const ethereumTokens = [
-  ethereumETH,
-  ethereumWETH,
-  ethereumUSDC,
-  ethereumEURC,
-  ethereumAxlUSDC,
-];
+const ethereumTokens = [ethereumETH, ethereumWETH, ethereumUSDC, ethereumEURC];
 
 usdcByChainId.set(1, ethereumUSDC);
-axlUSDCByChainId.set(1, ethereumAxlUSDC);
 
 //
 // Base Sepolia
