@@ -1,13 +1,12 @@
-import { assert, zDollarStr } from "@daimo/common";
 import { useContext } from "react";
 import { View } from "react-native";
 import { WebView } from "react-native-webview";
-import { getAddress, isAddress } from "viem";
-import { z } from "zod";
+import { getAddress } from "viem";
 
 import { DispatcherContext } from "../../../action/dispatch";
 import { useNav } from "../../../common/nav";
 import { i18NLocale } from "../../../i18n";
+import { parsePaymentUri } from "../../../logic/paymentURI";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import { useTheme } from "../../style/theme";
 
@@ -22,29 +21,12 @@ export function BitrefillWebView() {
       case "payment_intent": {
         console.log(`[BITREFILL] payment_intent ${paymentUri}`);
 
-        const PaymentUriSchema = z.object({
-          protocol: z.literal("ethereum"),
-          address: z.string().refine((addr) => isAddress(addr), {
-            message: "Invalid Ethereum address",
-          }),
-          amount: zDollarStr,
-        });
-
         try {
-          const [protocol, rest] = paymentUri.split(":");
-          assert(protocol === "ethereum");
-          const [address, queryString] = rest.split("?");
-          const params = new URLSearchParams(queryString);
-
-          const parsedUri = PaymentUriSchema.parse({
-            protocol,
-            address,
-            amount: params.get("amount") || "",
-          });
+          const parsedUri = parsePaymentUri(paymentUri);
 
           dispatcher.dispatch({
             name: "bitrefill",
-            address: getAddress(parsedUri.address),
+            address: getAddress(parsedUri.recipientAddress),
             amount: parsedUri.amount,
           });
         } catch (error) {
