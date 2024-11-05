@@ -21,7 +21,7 @@ SCRIPTS=(
     # "script/pay/DeployDaimoPayBridger.s.sol"
     # "script/pay/DeployPayIntentFactory.s.sol"
     # "script/pay/DeployDaimoPay.s.sol"
-    # "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
+    "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
 
     # DAv2
     # "script/DeployFlexSwapperUniOnly.s.sol"
@@ -41,7 +41,7 @@ CHAINS=(
     # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_LINEA,https://linea-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_BSC,https://bnb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
+    "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
 
     # Not supporting Avalanche, skip.
     # No Alchemy for Avalanche, Etherscan key is "verifyContract"

@@ -97,8 +97,13 @@ contract DeployDaimoPayBridger is Script {
 
         if (block.chainid == LINEA_MAINNET) {
             // Linea bridges to other chains using Across. Override all bridgers with Across.
+            // The only exception is BSC, which uses Axelar.
             for (uint256 i = 0; i < bridgers.length; ++i) {
-                bridgers[i] = acrossBridger;
+                if (chainIds[i] == BSC_MAINNET) {
+                    bridgers[i] = axelarBridger;
+                } else {
+                    bridgers[i] = acrossBridger;
+                }
             }
         } else if (block.chainid == BSC_MAINNET) {
             // BSC bridges to other chains using Axelar. Override all bridgers with Axelar.
