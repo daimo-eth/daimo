@@ -1,4 +1,4 @@
-import { DaimoRequestV2Status, DollarStr, ProposedSwap } from "@daimo/common";
+import { BigIntStr, DaimoRequestV2Status, ProposedSwap } from "@daimo/common";
 import { ReactElement, createContext } from "react";
 import { Address } from "viem";
 
@@ -13,7 +13,7 @@ export type Action =
   | { name: "createBackup" }
   | { name: "hideBottomSheet" }
   | { name: "swap"; swap: ProposedSwap }
-  | { name: "bitrefill"; address: Address; amount: DollarStr };
+  | { name: "bitrefill"; address: Address; amount: BigIntStr };
 
 type ActionName = Action["name"];
 

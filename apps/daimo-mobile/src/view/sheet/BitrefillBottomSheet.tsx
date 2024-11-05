@@ -1,8 +1,8 @@
-import { DollarStr, usdEntry } from "@daimo/common";
+import { BigIntStr, usdEntry } from "@daimo/common";
 import { polygonUSDC } from "@daimo/contract";
 import { useState } from "react";
 import { View } from "react-native";
-import { Address } from "viem";
+import { Address, formatUnits } from "viem";
 
 import { i18n } from "../../i18n";
 import { EAccountContact } from "../../logic/daimoContacts";
@@ -21,7 +21,7 @@ export function BitrefillBottomSheet({
   amount,
 }: {
   address: Address;
-  amount: DollarStr;
+  amount: BigIntStr;
 }) {
   const Inner = useWithAccount(BitrefillBottomSheetInner);
   return <Inner address={address} amount={amount} />;
@@ -34,14 +34,19 @@ function BitrefillBottomSheetInner({
 }: {
   account: Account;
   address: Address;
-  amount: `${number}`;
+  amount: BigIntStr;
 }) {
   const { color } = useTheme();
   const recipient: EAccountContact = { type: "eAcc", addr: address };
   // Show "bitrefill" as the name, but only on the send screen
   const recipientWithName = { ...recipient, name: "Bitrefill" };
 
-  const money = usdEntry(amount);
+  const roundedUpDollars =
+    Math.ceil(
+      parseFloat(formatUnits(BigInt(amount), polygonUSDC.decimals)) * 100
+    ) / 100;
+
+  const money = usdEntry(roundedUpDollars);
   const toCoin = polygonUSDC;
 
   const [success, setSuccess] = useState(false);
