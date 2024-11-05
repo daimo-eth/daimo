@@ -13,6 +13,7 @@ import latestFlexSwapper from "../contract/broadcast/DeployFlexSwapper.s.sol/845
 import latestNameReg from "../contract/broadcast/DeployNameRegistry.s.sol/8453/run-latest.json";
 import latestPayIntentFactory from "../contract/broadcast/DeployPayIntentFactory.s.sol/8453/run-latest.json";
 import latestRequest from "../contract/broadcast/DeployRequest.s.sol/8453/run-latest.json";
+import latestTokenBalanceUtils from "../contract/broadcast/DeployTokenBalanceUtils.s.sol/8453/run-latest.json";
 import latestPaymaster from "../contract/broadcast/ManagePaymaster.s.sol/8453/deploy-latest.json";
 
 /**
@@ -34,6 +35,7 @@ const deployments = Object.fromEntries(
     ...latestDaimoPay.transactions,
     ...latestDaimoPayBridger.transactions,
     ...latestDaimoPayRelayer.transactions,
+    ...latestTokenBalanceUtils.transactions,
   ]
     .filter((t) => t.transactionType === "CREATE2")
     .map((r) => [r.contractName, r.contractAddress as `0x${string}`]),
@@ -52,6 +54,7 @@ export default defineConfig({
         "ERC*.sol/*",
         "EntryPoint.sol/*",
         "AggregatorV2V3Interface.sol/*",
+        "TokenBalanceUtils.sol/*",
       ],
     }),
   ],

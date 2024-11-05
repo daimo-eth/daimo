@@ -1,7 +1,22 @@
 import fs from "node:fs/promises";
-import { getAddress, Hex, isAddress } from "viem";
+import {
+  Address,
+  createPublicClient,
+  erc20Abi,
+  getAddress,
+  Hex,
+  http,
+  isAddress,
+  MulticallResponse,
+  zeroAddress,
+} from "viem";
 
-import { DAv2Chain, getDAv2Chain } from "../src";
+import {
+  DAv2Chain,
+  getAlchemyTransportUrl,
+  getDAv2Chain,
+  getViemChainById,
+} from "../src";
 import { baseUSDbC, baseUSDC, ForeignToken } from "../src/foreignToken";
 // eslint-disable-next-line import/order
 import { assert } from "./util";
@@ -31,10 +46,17 @@ interface TokenListToken {
   logoURI?: string;
 }
 
+const alchemyApiKey = "";
+
 /**
  * Generate a token list across all supported chains.
  */
 async function main() {
+  if (!alchemyApiKey) {
+    console.error("ALCHEMY_API_KEY is not set");
+    process.exit(1);
+  }
+
   console.log("Generating token list...");
 
   const foreignTokens: ForeignToken[] = [];
@@ -49,7 +71,13 @@ async function main() {
       .filter((token) => token != null) as ForeignToken[];
     console.log(`Loaded ${tokens.length} tokens for ${chain.name} from ${url}`);
 
-    foreignTokens.push(...tokens);
+    const validatedTokens = await erc20Validation(chain.chainId, tokens);
+
+    foreignTokens.push(...validatedTokens);
+
+    console.log(
+      `Got ${validatedTokens.length} validated tokens and ${tokens.length} total tokens for ${chain.name}`,
+    );
   }
 
   console.log(`Writing ${foreignTokens.length} tokens to tokens.json`);
@@ -96,6 +124,103 @@ function getForeignToken(
       chainId: token.chainId,
     };
   }
+}
+
+/**
+ * - Remove tokens whose contract does not implement the ERC20 interface.
+ * - Remove tokens whose decimals on-chain don't match the decimals returned by
+ * Coingecko.
+ */
+async function erc20Validation(
+  chainId: number,
+  tokens: ForeignToken[],
+): Promise<ForeignToken[]> {
+  const client = createPublicClient({
+    chain: getViemChainById(chainId),
+    transport: http(getAlchemyTransportUrl(chainId, alchemyApiKey)),
+  });
+
+  const dummyEOA = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+  const dummySpender = "0xb7A593EC62dc447eef23ea0e0B4d5144ac75ABC5";
+
+  const erc20ViewFunctions = (tokenAddress: Address) => [
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "name",
+      args: [],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "symbol",
+      args: [],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "decimals",
+      args: [],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "totalSupply",
+      args: [],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "balanceOf",
+      args: [dummyEOA],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "allowance",
+      args: [dummyEOA, dummySpender],
+    },
+  ];
+  const n = erc20ViewFunctions(zeroAddress).length;
+
+  const multicallContracts = tokens.flatMap((token) =>
+    erc20ViewFunctions(token.token),
+  );
+
+  const multicallResults = await client.multicall({
+    contracts: multicallContracts,
+    batchSize: 512,
+    allowFailure: true,
+  });
+
+  const filteredTokens = tokens
+    .map((token, index) => {
+      const results = multicallResults.slice(index * n, (index + 1) * n) as [
+        MulticallResponse<string, unknown, true>, // name
+        MulticallResponse<string, unknown, true>, // symbol
+        MulticallResponse<number, unknown, true>, // decimals
+        MulticallResponse<bigint, unknown, true>, // totalSupply
+        MulticallResponse<bigint, unknown, true>, // balanceOf
+        MulticallResponse<bigint, unknown, true>, // allowance
+      ];
+
+      // If any of the calls were unsuccessful, filter the token out
+      for (let i = 0; i < results.length; i++) {
+        if (results[i].status !== "success") {
+          return null;
+        }
+      }
+
+      const decimals = results[2];
+      if (token.decimals !== decimals.result) {
+        return null;
+      }
+
+      return token;
+    })
+    .filter((out) => out != null);
+
+  return filteredTokens;
 }
 
 main()

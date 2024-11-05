@@ -37,6 +37,7 @@ export {
   entryPointAbi,
   erc20Abi,
   swapbotLpAbi,
+  tokenBalanceUtilsAbi,
 } from "./codegen/contracts";
 
 export const nameRegistryProxyConfig = {
@@ -62,20 +63,20 @@ export const daimoFastCctpAddrs: Address[] = [
   daimoFastCctpV1Address,
 ];
 
-/** Daimo Pay main contract address */
+// Daimo Pay
 export const daimoPayAddress = "0xf603cE83e28c9E9E699c4df2B11E31B63b1890C0";
-/** Daimo Pay bridger address */
 export const daimoPayBridgerAddress =
   "0xB4418A1EcE96CF1F797fef3Ab2c0Afdf59701C38";
-/** Daimo Pay Axelar bridger address */
 export const daimoPayAxelarBridgerAddress =
   "0x91052AEc686070bc8787fde3d530f21976302867";
-/** Daimo Pay intent factory address */
 export const payIntentFactoryAddress =
   "0x78dC70cC8C3b3a79BF161941934ed4829C9E7DDf";
-/** Daimo Pay relayer address */
 export const daimoPayRelayerAddress =
   "0xD9c53251d364F4E467412EDbD0ecCe6aAEB97cAA";
+
+// Utils
+export const tokenBalanceUtilsAddress =
+  "0x21E23fE26d9879D6f778Ad8B984e378326a7Fd68";
 
 // DAv2
 export const entryPointV07Address =

@@ -11,10 +11,11 @@ set -e
 # ETHERSCAN_API_KEY_... for each target chain
 
 SCRIPTS=(
-    # CREATE3
+    # Utils
     # "script/DeployCreate3Factory.s.sol"
+    # "script/DeployTokenBalanceUtils.s.sol"
 
-    # Daimo Pay.
+    # Daimo Pay
     # "script/pay/DeployDaimoPayAcrossBridger.s.sol"
     # "script/pay/DeployDaimoPayCCTPBridger.s.sol"
     # "script/pay/DeployDaimoPayAxelarBridger.s.sol"
