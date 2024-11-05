@@ -4,8 +4,7 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./TokenRefund.sol";
-import "./TokenUtils.sol";
+import "./TransferTokenBalance.sol";
 import "../interfaces/IDaimoPayBridger.sol";
 
 /// @dev Represents an intended call: "make X of token Y show up on chain Z, then
@@ -13,8 +12,8 @@ import "../interfaces/IDaimoPayBridger.sol";
 struct PayIntent {
     /// @dev Intent only executes on given target chain.
     uint256 toChainId;
-    /// @dev Expected token after bridging to the destination chain.
-    TokenAmount bridgeTokenOut;
+    /// @dev Possible output tokens after bridging to the destination chain.
+    TokenAmount[] bridgeTokenOutOptions;
     /// @dev Expected token amount after swapping on the destination chain.
     TokenAmount finalCallToken;
     /// @dev Destination on target chain. If dest.data != "" specifies a call,
@@ -56,6 +55,23 @@ contract PayIntentContract is Initializable {
         intentHash = _intentHash;
     }
 
+    /// Check if the contract has enough balance for at least one of the bridge
+    /// token outs.
+    function checkBridgeTokenOutBalance(
+        TokenAmount[] calldata bridgeTokenOutOptions
+    ) public view returns (bool) {
+        bool balanceOk = false;
+        for (uint256 i = 0; i < bridgeTokenOutOptions.length; ++i) {
+            TokenAmount calldata tokenOut = bridgeTokenOutOptions[i];
+            uint256 balance = tokenOut.token.balanceOf(address(this));
+            if (balance >= tokenOut.amount) {
+                balanceOk = true;
+                break;
+            }
+        }
+        return balanceOk;
+    }
+
     /// Called on the source chain to initiate the intent. Sends funds to dest
     /// chain.
     function sendAndSelfDestruct(
@@ -79,41 +95,36 @@ contract PayIntentContract is Initializable {
 
         if (intent.toChainId == block.chainid) {
             // Same chain. Check that sufficient token is present.
-            uint256 balance = intent.bridgeTokenOut.token.balanceOf(
-                address(this)
+            bool balanceOk = checkBridgeTokenOutBalance(
+                intent.bridgeTokenOutOptions
             );
-            require(
-                balance >= intent.bridgeTokenOut.amount,
-                "PI: insufficient token"
-            );
+            require(balanceOk, "PI: insufficient token");
         } else {
             // Different chains. Get the input token and amount for the bridge
-            (address inputToken, uint256 inputAmount) = bridger
-                .getInputTokenAmount({
+            (address bridgeTokenIn, uint256 inAmount) = bridger
+                .getBridgeTokenIn({
                     toChainId: intent.toChainId,
-                    toToken: address(intent.bridgeTokenOut.token),
-                    toAmount: intent.bridgeTokenOut.amount
+                    bridgeTokenOutOptions: intent.bridgeTokenOutOptions
                 });
 
-            uint256 balance = IERC20(inputToken).balanceOf(address(this));
-            require(balance >= inputAmount, "PI: insufficient bridge token");
+            uint256 balance = IERC20(bridgeTokenIn).balanceOf(address(this));
+            require(balance >= inAmount, "PI: insufficient bridge token");
 
             // Approve bridger and initiate bridge
-            IERC20(inputToken).forceApprove({
+            IERC20(bridgeTokenIn).forceApprove({
                 spender: address(bridger),
-                value: inputAmount
+                value: inAmount
             });
             bridger.sendToChain({
                 toChainId: intent.toChainId,
                 toAddress: address(this),
-                toToken: address(intent.bridgeTokenOut.token),
-                toAmount: intent.bridgeTokenOut.amount,
+                bridgeTokenOutOptions: intent.bridgeTokenOutOptions,
                 extraData: bridgeExtraData
             });
 
             // Refund any leftover tokens in the contract to caller
-            TokenRefund.refundLeftoverTokens({
-                token: IERC20(inputToken),
+            TransferTokenBalance.refundLeftoverTokens({
+                token: IERC20(bridgeTokenIn),
                 recipient: caller
             });
         }
@@ -131,22 +142,19 @@ contract PayIntentContract is Initializable {
         require(msg.sender == intent.escrow, "PI: only creator");
         require(block.chainid == intent.toChainId, "PI: only dest chain");
 
-        IERC20 bridgeTok = intent.bridgeTokenOut.token;
-        uint256 amount = TokenUtils.getBalanceOf({
-            token: bridgeTok,
-            addr: address(this)
-        });
-        require(
-            amount >= intent.bridgeTokenOut.amount,
-            "PI: insufficient bridge token received"
+        bool balanceOk = checkBridgeTokenOutBalance(
+            intent.bridgeTokenOutOptions
         );
+        require(balanceOk, "PI: insufficient token received");
 
         // Send to escrow contract, which will forward to current recipient
-        TokenUtils.transfer({
-            token: bridgeTok,
-            recipient: intent.escrow,
-            amount: amount
-        });
+        uint256 n = intent.bridgeTokenOutOptions.length;
+        for (uint256 i = 0; i < n; ++i) {
+            TransferTokenBalance.transferBalance({
+                token: intent.bridgeTokenOutOptions[i].token,
+                recipient: intent.escrow
+            });
+        }
 
         // This use of SELFDESTRUCT is compatible with EIP-6780. Intent
         // contracts are deployed, then destroyed in the same transaction.

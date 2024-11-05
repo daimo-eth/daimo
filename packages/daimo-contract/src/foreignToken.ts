@@ -31,9 +31,13 @@ export enum TokenLogo {
   DAI = "https://pay.daimo.com/coin-logos/dai.png",
   MATIC = "https://assets.coingecko.com/coins/images/4713/large/polygon.png",
   AVAX = "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png",
+  BNB = "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png",
 }
 
 /* --------------------- Tokens Constants --------------------- */
+
+const usdcByChainId: Map<number, ForeignToken> = new Map();
+const axlUSDCByChainId: Map<number, ForeignToken> = new Map();
 
 //
 // Eth Sepolia
@@ -64,6 +68,8 @@ const ethereumSepoliaTokens = [
   ethereumSepoliaWETH,
   ethereumSepoliaUSDC,
 ];
+
+usdcByChainId.set(11155111, ethereumSepoliaUSDC);
 
 //
 // Eth Mainnet
@@ -98,7 +104,25 @@ export const ethereumEURC: ForeignToken = {
   logoURI: TokenLogo.EURC,
 };
 
-const ethereumTokens = [ethereumETH, ethereumWETH, ethereumUSDC, ethereumEURC];
+export const ethereumAxlUSDC: ForeignToken = {
+  chainId: 1,
+  token: getAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
+const ethereumTokens = [
+  ethereumETH,
+  ethereumWETH,
+  ethereumUSDC,
+  ethereumEURC,
+  ethereumAxlUSDC,
+];
+
+usdcByChainId.set(1, ethereumUSDC);
+axlUSDCByChainId.set(1, ethereumAxlUSDC);
 
 //
 // Base Sepolia
@@ -125,6 +149,8 @@ export const baseSepoliaUSDC: ForeignToken = {
 };
 
 const baseSepoliaTokens = [baseSepoliaETH, baseSepoliaWETH, baseSepoliaUSDC];
+
+usdcByChainId.set(84532, baseSepoliaUSDC);
 
 //
 // Base Mainnet
@@ -186,6 +212,15 @@ export const baseUSDT: ForeignToken = {
   logoURI: TokenLogo.USDT,
 };
 
+export const baseAxlUSDC: ForeignToken = {
+  chainId: 8453,
+  token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
 const baseTokens = [
   baseETH,
   baseWETH,
@@ -194,7 +229,11 @@ const baseTokens = [
   baseUSDbC,
   baseDAI,
   baseUSDT,
+  baseAxlUSDC,
 ];
+
+usdcByChainId.set(8453, baseUSDC);
+axlUSDCByChainId.set(8453, baseAxlUSDC);
 
 //
 // Arbitrum Mainnet
@@ -220,7 +259,24 @@ export const arbitrumUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-const arbitrumTokens = [arbitrumETH, arbitrumWETH, arbitrumUSDC];
+export const arbitrumAxlUSDC: ForeignToken = {
+  chainId: 42161,
+  token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
+const arbitrumTokens = [
+  arbitrumETH,
+  arbitrumWETH,
+  arbitrumUSDC,
+  arbitrumAxlUSDC,
+];
+
+usdcByChainId.set(42161, arbitrumUSDC);
+axlUSDCByChainId.set(42161, arbitrumAxlUSDC);
 
 //
 // Arbitrum Sepolia
@@ -252,6 +308,8 @@ const arbitrumSepoliaTokens = [
   arbitrumSepoliaUSDC,
 ];
 
+usdcByChainId.set(421614, arbitrumSepoliaUSDC);
+
 //
 // Optimism Mainnet
 //
@@ -276,7 +334,24 @@ export const optimismUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-const optimismTokens = [optimismETH, optimismWETH, optimismUSDC];
+export const optimismAxlUSDC: ForeignToken = {
+  chainId: 10,
+  token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
+const optimismTokens = [
+  optimismETH,
+  optimismWETH,
+  optimismUSDC,
+  optimismAxlUSDC,
+];
+
+usdcByChainId.set(10, optimismUSDC);
+axlUSDCByChainId.set(10, optimismAxlUSDC);
 
 //
 // Optimism Sepolia
@@ -307,6 +382,8 @@ const optimismSepoliaTokens = [
   optimismSepoliaWETH,
   optimismSepoliaUSDC,
 ];
+
+usdcByChainId.set(11155420, optimismSepoliaUSDC);
 
 //
 // Polygon Mainnet
@@ -341,7 +418,25 @@ export const polygonUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-const polygonTokens = [polygonMATIC, polygonWMATIC, polygonWETH, polygonUSDC];
+export const polygonAxlUSDC: ForeignToken = {
+  chainId: 137,
+  token: getAddress("0x750e4C4984a9e0f12978eA6742Bc1c5D248f40ed"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
+const polygonTokens = [
+  polygonMATIC,
+  polygonWMATIC,
+  polygonWETH,
+  polygonUSDC,
+  polygonAxlUSDC,
+];
+
+usdcByChainId.set(137, polygonUSDC);
+axlUSDCByChainId.set(137, polygonAxlUSDC);
 
 //
 // Polygon Amoy
@@ -378,6 +473,8 @@ const polygonAmoyTokens = [
   polygonAmoyUSDC,
 ];
 
+usdcByChainId.set(80002, polygonAmoyUSDC);
+
 //
 // Avalanche C-chain Mainnet
 //
@@ -411,12 +508,24 @@ export const avalancheWAVAX: ForeignToken = {
   logoURI: TokenLogo.AVAX,
 };
 
+export const avalancheAxlUSDC: ForeignToken = {
+  chainId: 43114,
+  token: getAddress("0xfaB550568C688d5D8A52C7d794cb93Edc26eC0eC"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
 const avalancheTokens = [
   avalancheAVAX,
   avalancheUSDC,
   avalancheWETH,
   avalancheWAVAX,
 ];
+
+usdcByChainId.set(43114, avalancheUSDC);
+axlUSDCByChainId.set(43114, avalancheAxlUSDC);
 
 //
 // Avalanche Fuji
@@ -453,6 +562,8 @@ const avalancheFujiTokens = [
   avalancheFujiWAVAX,
 ];
 
+usdcByChainId.set(43113, avalancheFujiUSDC);
+
 //
 // Linea Mainnet
 //
@@ -477,9 +588,57 @@ export const lineaBridgedUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-const lineaTokens = [lineaETH, lineaWETH, lineaBridgedUSDC];
+export const lineaAxlUSDC: ForeignToken = {
+  chainId: 59144,
+  token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
+const lineaTokens = [lineaETH, lineaWETH, lineaBridgedUSDC, lineaAxlUSDC];
+
+axlUSDCByChainId.set(59144, lineaAxlUSDC);
 
 //
+// BSC Mainnet
+//
+
+export const bscBNB = nativeToken(56, "BNB", "BNB", TokenLogo.BNB);
+
+export const bscWBNB: ForeignToken = {
+  chainId: 56,
+  token: getAddress("0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"),
+  decimals: 18,
+  name: "Wrapped BNB",
+  symbol: "WBNB",
+  logoURI: TokenLogo.BNB,
+};
+
+export const bscAxlUSDC: ForeignToken = {
+  chainId: 56,
+  token: getAddress("0x4268B8F0B87b6Eae5d897996E6b845ddbD99Adf3"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
+export const bscUSDC: ForeignToken = {
+  chainId: 56,
+  token: getAddress("0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"),
+  decimals: 18,
+  name: "Binance-Peg USD Coin",
+  symbol: "USDC",
+  logoURI: TokenLogo.USDC,
+};
+
+const bscTokens = [bscBNB, bscWBNB, bscAxlUSDC, bscUSDC];
+
+usdcByChainId.set(56, bscUSDC);
+axlUSDCByChainId.set(56, bscAxlUSDC);
+
 // --------------------- Native Token Utils ---------------------
 //
 
@@ -519,6 +678,7 @@ const allBasicTokens = [
   ...avalancheTokens,
   ...avalancheFujiTokens,
   ...lineaTokens,
+  ...bscTokens,
 ];
 
 const blacklistedTokens: Record<number, Set<Address>> = {
@@ -564,6 +724,16 @@ export function getTokensForChain(chainId: number): ForeignToken[] {
   const ret = tokensByChainId.get(chainId);
   if (ret == null) throw new Error(`Unsupported chain ${chainId}`);
   return ret;
+}
+
+/** Get the USDC token for a given chain. */
+export function getChainUSDC(chainId: number): ForeignToken | undefined {
+  return usdcByChainId.get(chainId);
+}
+
+/** Get the Axelar Wrapped USDC token for a given chain. */
+export function getChainAxlUSDC(chainId: number): ForeignToken | undefined {
+  return axlUSDCByChainId.get(chainId);
 }
 
 /** Get a given token */

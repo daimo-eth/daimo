@@ -66,7 +66,7 @@ export async function getSwapQuote({
   // Onchain Uniswap quoter.
   const swapQuote = await vc.publicClient.readContract({
     abi: daimoFlexSwapperAbi,
-    address: daimoFlexSwapperAddress,
+    address: daimoFlexSwapperAddress(chainId),
     functionName: "quote",
     args: [
       isFromETH ? chain.wrappedNativeToken.token : tokenIn,

@@ -31,6 +31,8 @@ export function getChainExplorerByChainId(chainId: number): string | undefined {
       return "https://testnet.snowtrace.io";
     case 59144:
       return "https://lineascan.build";
+    case 56:
+      return "https://bscscan.com";
     default:
       return undefined;
   }

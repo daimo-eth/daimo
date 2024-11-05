@@ -136,6 +136,33 @@
   },
   {
     "compareOffchain": "",
+    "contractAddress": "0x04d3d700150E03eD1Df763363D746F0E9dEE3BDD",
+    "contractType": "",
+    "contractVersion": 4,
+    "decimalPlaces": null,
+    "ens": "susdz-usdz-exchange-rate",
+    "formatDecimalPlaces": null,
+    "healthPrice": "",
+    "heartbeat": 86400,
+    "history": null,
+    "multiply": "1000000000000000000",
+    "name": "sUSDz / USDz Exchange Rate",
+    "pair": [
+      "",
+      ""
+    ],
+    "path": "susdz-usdz-exchange-rate",
+    "proxyAddress": "0xD89c7fFB39C44b17EAecd8717a75A36c19C07582",
+    "threshold": 0.5,
+    "valuePrefix": "",
+    "assetName": "",
+    "feedCategory": "",
+    "feedType": "",
+    "docs": {},
+    "decimals": 18
+  },
+  {
+    "compareOffchain": "",
     "contractAddress": "0x05acfeE2c0b4efbBCe705932239A30613aCE42f2",
     "contractType": "",
     "contractVersion": 4,
@@ -2886,6 +2913,33 @@
       "underlyingAssetClic": "ETH_CR"
     },
     "decimals": 18
+  },
+  {
+    "compareOffchain": "",
+    "contractAddress": "0xa47344071B503F4B3B34d768e7bAAB0631990825",
+    "contractType": "",
+    "contractVersion": 4,
+    "decimalPlaces": null,
+    "ens": "solvbtc-btc",
+    "formatDecimalPlaces": null,
+    "healthPrice": "",
+    "heartbeat": 86400,
+    "history": null,
+    "multiply": "100000000",
+    "name": "solvBTC / BTC",
+    "pair": [
+      "",
+      ""
+    ],
+    "path": "solvbtc-btc",
+    "proxyAddress": "0xB4a1a7f260C9FF7fEd6A6fbb9fe5a9acFa725DBf",
+    "threshold": 0.5,
+    "valuePrefix": "",
+    "assetName": "",
+    "feedCategory": "",
+    "feedType": "",
+    "docs": {},
+    "decimals": 8
   },
   {
     "compareOffchain": "",

@@ -1995,6 +1995,33 @@
   },
   {
     "compareOffchain": "",
+    "contractAddress": "0x48eED1ac85401c785b10821162C37A6Ab5DA6ed3",
+    "contractType": "",
+    "contractVersion": 6,
+    "decimalPlaces": null,
+    "ens": "usds-usd",
+    "formatDecimalPlaces": null,
+    "healthPrice": "",
+    "heartbeat": 86400,
+    "history": null,
+    "multiply": "100000000",
+    "name": "USDS / USD",
+    "pair": [
+      "",
+      ""
+    ],
+    "path": "usds-usd",
+    "proxyAddress": "0x3B21a277babcB73b5a2325106FC04Df8AA1aC5b6",
+    "threshold": 1,
+    "valuePrefix": "",
+    "assetName": "",
+    "feedCategory": "",
+    "feedType": "",
+    "docs": {},
+    "decimals": 8
+  },
+  {
+    "compareOffchain": "",
     "contractAddress": "0x48f2DB9212342f6F9cD695456BaD2307d147BBE6",
     "contractType": "",
     "contractVersion": 6,

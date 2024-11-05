@@ -138,7 +138,7 @@ contract DaimoPay {
 
         // Finish the intent and return any leftover tokens to the caller
         _finishIntent({intentAddr: intentAddr, intent: intent, calls: calls});
-        TokenRefund.refundLeftoverTokens({
+        TransferTokenBalance.refundLeftoverTokens({
             token: intent.finalCallToken.token,
             recipient: payable(msg.sender)
         });
@@ -175,17 +175,23 @@ contract DaimoPay {
                 intent: intent,
                 calls: calls
             });
-            TokenRefund.refundLeftoverTokens({
+            TransferTokenBalance.refundLeftoverTokens({
                 token: intent.finalCallToken.token,
                 recipient: payable(recipient)
             });
         } else {
             // Otherwise, the relayer fastFinished the intent, give them the recieved
             // amount.
-            intent.bridgeTokenOut.token.safeTransfer({
-                to: recipient,
-                value: intent.bridgeTokenOut.amount
-            });
+            // The intent contract checks that the received amount is sufficient,
+            // so we can simply transfer the balance.
+            uint256 n = intent.bridgeTokenOutOptions.length;
+            for (uint256 i = 0; i < n; ++i) {
+                TokenAmount calldata tokenOut = intent.bridgeTokenOutOptions[i];
+                TransferTokenBalance.transferBalance({
+                    token: tokenOut.token,
+                    recipient: payable(recipient)
+                });
+            }
         }
 
         emit Claim({

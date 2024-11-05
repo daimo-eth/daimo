@@ -12,14 +12,17 @@ contract DeployDaimoPayCCTPBridger is Script {
         address tokenMinter = _getTokenMinterAddress(block.chainid);
         address tokenMessenger = _getTokenMessengerAddress(block.chainid);
 
-        (uint256[] memory chainIds, uint32[] memory domains) = _getCCTPChains();
+        (
+            uint256[] memory chainIds,
+            DaimoPayCCTPBridger.CCTPBridgeRoute[] memory bridgeRoutes
+        ) = _getCCTPBridgeRoutes();
 
         vm.startBroadcast();
 
         address initOwner = msg.sender;
 
         address bridger = CREATE3.deploy(
-            keccak256("DaimoPayCCTPBridger-test5"),
+            keccak256("DaimoPayCCTPBridger-options4"),
             abi.encodePacked(
                 type(DaimoPayCCTPBridger).creationCode,
                 abi.encode(
@@ -27,7 +30,7 @@ contract DeployDaimoPayCCTPBridger is Script {
                     ITokenMinter(tokenMinter),
                     ICCTPTokenMessenger(tokenMessenger),
                     chainIds,
-                    domains
+                    bridgeRoutes
                 )
             )
         );
@@ -36,34 +39,47 @@ contract DeployDaimoPayCCTPBridger is Script {
         vm.stopBroadcast();
     }
 
-    function _getCCTPChains()
+    function _getCCTPBridgeRoutes()
         private
         view
-        returns (uint256[] memory chainIds, uint32[] memory domains)
+        returns (
+            uint256[] memory chainIds,
+            DaimoPayCCTPBridger.CCTPBridgeRoute[] memory bridgeRoutes
+        )
     {
         bool testnet = _isTestnet(block.chainid);
         if (testnet) {
             // Bridging not supported on testnet.
-            return (new uint256[](0), new uint32[](0));
+            return (
+                new uint256[](0),
+                new DaimoPayCCTPBridger.CCTPBridgeRoute[](0)
+            );
         }
 
         chainIds = new uint256[](6);
-        chainIds[0] = testnet ? ETH_TESTNET : ETH_MAINNET;
-        chainIds[1] = testnet ? AVAX_TESTNET : AVAX_MAINNET;
-        chainIds[2] = testnet ? OP_TESTNET : OP_MAINNET;
-        chainIds[3] = testnet ? ARBITRUM_TESTNET : ARBITRUM_MAINNET;
-        chainIds[4] = testnet ? BASE_TESTNET : BASE_MAINNET;
-        chainIds[5] = testnet ? POLYGON_TESTNET : POLYGON_MAINNET;
+        chainIds[0] = ETH_MAINNET;
+        chainIds[1] = AVAX_MAINNET;
+        chainIds[2] = OP_MAINNET;
+        chainIds[3] = ARBITRUM_MAINNET;
+        chainIds[4] = BASE_MAINNET;
+        chainIds[5] = POLYGON_MAINNET;
 
-        domains = new uint32[](6);
-        domains[0] = ETH_DOMAIN;
-        domains[1] = AVAX_DOMAIN;
-        domains[2] = OP_DOMAIN;
-        domains[3] = ARBITRUM_DOMAIN;
-        domains[4] = BASE_DOMAIN;
-        domains[5] = POLYGON_DOMAIN;
+        bridgeRoutes = new DaimoPayCCTPBridger.CCTPBridgeRoute[](6);
+        for (uint256 i = 0; i < chainIds.length; ++i) {
+            bridgeRoutes[i] = DaimoPayCCTPBridger.CCTPBridgeRoute({
+                domain: _getCCTPDomain(chainIds[i]),
+                bridgeTokenOut: _getUSDCAddress(chainIds[i])
+            });
+        }
 
-        return (chainIds, domains);
+        for (uint256 i = 0; i < chainIds.length; ++i) {
+            console.log("Chain ID:", chainIds[i]);
+            console.log("Domain:", bridgeRoutes[i].domain);
+            console.log("Bridge token out:", bridgeRoutes[i].bridgeTokenOut);
+            console.log("--------------------------------");
+        }
+
+        return (chainIds, bridgeRoutes);
     }
 
     // Exclude from forge coverage

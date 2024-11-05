@@ -1,4 +1,5 @@
 import { Address } from "viem";
+import { mainnet } from "viem/chains";
 
 import {
   daimoFastCctpAbi,
@@ -62,24 +63,39 @@ export const daimoFastCctpAddrs: Address[] = [
 ];
 
 /** Daimo Pay main contract address */
-export const daimoPayAddress = "0xBA2a464D510CA7c51778D47547A5b90f95ab7112";
+export const daimoPayAddress = "0xf603cE83e28c9E9E699c4df2B11E31B63b1890C0";
 /** Daimo Pay bridger address */
 export const daimoPayBridgerAddress =
-  "0xe38667B38A4071096b480b67e9C992D1CeeA9A87";
+  "0xB4418A1EcE96CF1F797fef3Ab2c0Afdf59701C38";
+/** Daimo Pay Axelar bridger address */
+export const daimoPayAxelarBridgerAddress =
+  "0x91052AEc686070bc8787fde3d530f21976302867";
 /** Daimo Pay intent factory address */
 export const payIntentFactoryAddress =
-  "0xa4ce06F41FfC631f004e4c451D70C6E5A0f7f175";
+  "0x78dC70cC8C3b3a79BF161941934ed4829C9E7DDf";
 /** Daimo Pay relayer address */
 export const daimoPayRelayerAddress =
-  "0x547F08b3Cd77b94cfd2C90127B829bbDa9b2f9d9";
+  "0x6582418FCE62216615ead694244E796793B6EA5e";
 
 // DAv2
 export const entryPointV07Address =
   "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
 export const daimoCctpBridgerAddress =
   "0x97DA4FaA21DA8bab9b0724B854Bd43250F25FF58";
-export const daimoFlexSwapperAddress =
-  "0x52A7Fb58f1F26fd57B4a3aAE55d6c51a38A73610";
+
+// Mainnet has a different address for flex swapper, one that was deployed long
+// ago once without chainlink feeds. Redeploy with chainlink is too expensive
+// and we don't need it for now.
+export const daimoFlexSwapperUniOnlyAddress = (chainId: number) => {
+  if (chainId === mainnet.id)
+    return "0x207e87f84cff325715f324d09e63b21a03e53b61";
+  else return "0xE7c58dcEe819ca56f5b41E1B627c84420d5cf0cA";
+};
+export const daimoFlexSwapperAddress = (chainId: number) => {
+  if (chainId === mainnet.id)
+    return "0x207e87f84cff325715f324d09e63b21a03e53b61";
+  else return "0xA9F5d58edb8dF8af90f875eac89AA49C57b87Db8";
+};
 
 // DAv1 backcompat
 export * from "./backcompat/daimoAccountV1";
