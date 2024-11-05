@@ -61,56 +61,52 @@ contract DaimoPayBridger is IDaimoPayBridger, Ownable2Step {
 
     // ----- BRIDGER FUNCTIONS -----
 
-    function getInputTokenAmount(
+    function getBridgeTokenIn(
         uint256 toChainId,
-        address toToken,
-        uint256 toAmount
-    ) public view returns (address inputToken, uint256 inputAmount) {
+        TokenAmount[] memory bridgeTokenOutOptions
+    ) external view returns (address bridgeTokenIn, uint256 inAmount) {
         IDaimoPayBridger bridger = chainIdToBridger[toChainId];
         require(address(bridger) != address(0), "DPB: missing bridger");
 
-        return bridger.getInputTokenAmount(toChainId, toToken, toAmount);
+        return bridger.getBridgeTokenIn(toChainId, bridgeTokenOutOptions);
     }
 
     /// Initiate a bridge to a supported destination chain.
     function sendToChain(
         uint256 toChainId,
         address toAddress,
-        address toToken,
-        uint256 toAmount,
+        TokenAmount[] memory bridgeTokenOutOptions,
         bytes calldata extraData
     ) public {
         require(toChainId != block.chainid, "DPB: same chain");
-        require(toAmount > 0, "DPB: zero amount");
 
-        // Get the specific bridger implementation for toChain (CCTP, etc)
+        // Get the specific bridger implementation for toChain (CCTP, Across,
+        // Axelar, etc)
         IDaimoPayBridger bridger = chainIdToBridger[toChainId];
         require(address(bridger) != address(0), "DPB: missing bridger");
 
         // Move input token from caller to this contract and initiate bridging.
-        (address inputToken, uint256 inputAmount) = getInputTokenAmount({
+        (address bridgeTokenIn, uint256 inAmount) = this.getBridgeTokenIn({
             toChainId: toChainId,
-            toToken: toToken,
-            toAmount: toAmount
+            bridgeTokenOutOptions: bridgeTokenOutOptions
         });
-        require(inputToken != address(0), "DPB: missing input token");
+        require(bridgeTokenIn != address(0), "DPB: missing bridge token in");
 
-        IERC20(inputToken).safeTransferFrom({
+        IERC20(bridgeTokenIn).safeTransferFrom({
             from: msg.sender,
             to: address(this),
-            value: inputAmount
+            value: inAmount
         });
 
         // Approve tokens to the bridge contract and intiate bridging.
-        IERC20(inputToken).forceApprove({
+        IERC20(bridgeTokenIn).forceApprove({
             spender: address(bridger),
-            value: inputAmount
+            value: inAmount
         });
         bridger.sendToChain({
             toChainId: toChainId,
             toAddress: toAddress,
-            toToken: toToken,
-            toAmount: toAmount,
+            bridgeTokenOutOptions: bridgeTokenOutOptions,
             extraData: extraData
         });
     }

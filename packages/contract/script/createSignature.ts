@@ -3,7 +3,7 @@
 // The signature is in the format of [r, s] and is compatible with the ERC-4337 standard.
 //
 // Run the script with
-// `npx ts-node script/createUserOpSignature.ts`
+// `npx ts-node script/createSignature.ts`
 
 import { Buffer } from "buffer";
 import * as crypto from "crypto";

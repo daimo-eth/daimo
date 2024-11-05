@@ -11,7 +11,7 @@ contract DeployPayIntentFactory is Script {
         vm.startBroadcast();
 
         address intentFactory = CREATE3.deploy(
-            keccak256("PayIntentFactory-test5"),
+            keccak256("PayIntentFactory-options4"),
             abi.encodePacked(type(PayIntentFactory).creationCode, abi.encode())
         );
 

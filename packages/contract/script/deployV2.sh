@@ -17,14 +17,15 @@ SCRIPTS=(
     # Daimo Pay.
     # "script/pay/DeployDaimoPayAcrossBridger.s.sol"
     # "script/pay/DeployDaimoPayCCTPBridger.s.sol"
+    # "script/pay/DeployDaimoPayAxelarBridger.s.sol"
     # "script/pay/DeployDaimoPayBridger.s.sol"
     # "script/pay/DeployPayIntentFactory.s.sol"
     # "script/pay/DeployDaimoPay.s.sol"
-    # "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
+    "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
 
     # DAv2
     # "script/DeployFlexSwapperUniOnly.s.sol"
-    "script/DeployFlexSwapper.s.sol"
+    # "script/DeployFlexSwapper.s.sol"
     # "script/DeployCCTPBridger.s.sol"
     # "script/DeployAccountFactoryV2.s.sol"
     # "script/DeployTestAccountV2.s.sol"
@@ -34,13 +35,13 @@ SCRIPTS=(
 )
 CHAINS=(
     # MAINNETS
-    "$ETHERSCAN_API_KEY_BASE,https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_BASE,https://base-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_OP,https://opt-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_ARB,https://arb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_POLYGON,https://polygon-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_LINEA,https://linea-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_BSC,https://bnb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
+    # "$ETHERSCAN_API_KEY_LINEA,https://linea-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    # "$ETHERSCAN_API_KEY_BSC,https://bnb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
 
     # Not supporting Avalanche, skip.
     # No Alchemy for Avalanche, Etherscan key is "verifyContract"

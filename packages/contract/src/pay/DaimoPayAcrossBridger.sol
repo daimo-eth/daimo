@@ -12,14 +12,15 @@ import "../../vendor/across/V3SpokePoolInterface.sol";
 /// @author The Daimo team
 /// @custom:security-contact security@daimo.com
 ///
-/// @dev Bridges assets from to a destination chain using Across Protocol. Makes the
+/// @dev Bridges assets to a destination chain using Across Protocol. Makes the
 /// assumption that the local token is an ERC20 token and has a 1 to 1 price
 /// with the corresponding destination token.
 contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2Step {
     using SafeERC20 for IERC20;
 
     struct AcrossBridgeRoute {
-        address localToken;
+        address bridgeTokenIn;
+        address bridgeTokenOut;
         // Minimum percentage fee to pay the Across relayer. The input amount should
         // be at least this much larger than the output amount
         // 1% is represented as 1e16, 100% is 1e18, 50% is 5e17. This is how Across
@@ -43,22 +44,19 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2Step {
     // SpokePool contract address for this chain.
     V3SpokePoolInterface public immutable spokePool;
 
-    // Mapping from destination chain and token to the corresponding token on
-    // the current chain.
-    mapping(uint256 toChainId => mapping(address toToken => AcrossBridgeRoute bridgeRoute))
+    // Mapping destination chainId to the corresponding token on the current
+    // chain and fees associated with the bridge.
+    mapping(uint256 toChainId => AcrossBridgeRoute bridgeRoute)
         public bridgeRouteMapping;
 
     event BridgeRouteAdded(
         uint256 indexed toChainId,
-        address indexed toToken,
-        address indexed localToken,
-        uint256 pctFee
+        AcrossBridgeRoute bridgeRoute
     );
+
     event BridgeRouteRemoved(
         uint256 indexed toChainId,
-        address indexed toToken,
-        address indexed localToken,
-        uint256 pctFee
+        AcrossBridgeRoute bridgeRoute
     );
 
     /// Specify the localToken mapping to destination chains and tokens
@@ -66,117 +64,150 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2Step {
         address _owner,
         V3SpokePoolInterface _spokePool,
         uint256[] memory _toChainIds,
-        address[] memory _toTokens,
         AcrossBridgeRoute[] memory _bridgeRoutes
     ) Ownable(_owner) {
         spokePool = _spokePool;
-
-        uint256 n = _toChainIds.length;
-        require(n == _bridgeRoutes.length, "DPAB: wrong bridgeRoutes length");
-
-        for (uint256 i = 0; i < n; ++i) {
-            _addBridgeRoute({
-                toChainId: _toChainIds[i],
-                toToken: _toTokens[i],
-                bridgeRoute: _bridgeRoutes[i]
-            });
-        }
+        _setBridgeRoutes({
+            toChainIds: _toChainIds,
+            bridgeRoutes: _bridgeRoutes
+        });
     }
 
     // ----- ADMIN FUNCTIONS -----
 
-    /// Map a token on a destination chain to a token on the current chain.
+    /// Map destination chainId to the corresponding token on the current chain
+    /// and fees associated with the bridge.
     /// Assumes the local token has a 1 to 1 price with the corresponding
     /// destination token.
-    function addBridgeRoute(
-        uint256 toChainId,
-        address toToken,
-        AcrossBridgeRoute memory bridgeRoute
+    function setBridgeRoutes(
+        uint256[] memory toChainIds,
+        AcrossBridgeRoute[] memory bridgeRoutes
     ) public onlyOwner {
-        _addBridgeRoute({
-            toChainId: toChainId,
-            toToken: toToken,
-            bridgeRoute: bridgeRoute
-        });
+        _setBridgeRoutes({toChainIds: toChainIds, bridgeRoutes: bridgeRoutes});
     }
 
-    function _addBridgeRoute(
-        uint256 toChainId,
-        address toToken,
-        AcrossBridgeRoute memory bridgeRoute
+    function _setBridgeRoutes(
+        uint256[] memory toChainIds,
+        AcrossBridgeRoute[] memory bridgeRoutes
     ) private {
-        bridgeRouteMapping[toChainId][toToken] = bridgeRoute;
-        emit BridgeRouteAdded({
-            toChainId: toChainId,
-            toToken: toToken,
-            localToken: bridgeRoute.localToken,
-            pctFee: bridgeRoute.pctFee
-        });
+        uint256 n = toChainIds.length;
+        require(n == bridgeRoutes.length, "DPAB: wrong bridgeRoutes length");
+
+        for (uint256 i = 0; i < n; ++i) {
+            bridgeRouteMapping[toChainIds[i]] = bridgeRoutes[i];
+            emit BridgeRouteAdded({
+                toChainId: toChainIds[i],
+                bridgeRoute: bridgeRoutes[i]
+            });
+        }
     }
 
-    function removeBridgeRoute(
-        uint256 toChainId,
-        address toToken
-    ) public onlyOwner {
-        AcrossBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
-            toToken
-        ];
-        delete bridgeRouteMapping[toChainId][toToken];
-        emit BridgeRouteRemoved({
-            toChainId: toChainId,
-            toToken: toToken,
-            localToken: bridgeRoute.localToken,
-            pctFee: bridgeRoute.pctFee
-        });
+    function removeBridgeRoutes(uint256[] memory toChainIds) public onlyOwner {
+        for (uint256 i = 0; i < toChainIds.length; ++i) {
+            AcrossBridgeRoute memory bridgeRoute = bridgeRouteMapping[
+                toChainIds[i]
+            ];
+            delete bridgeRouteMapping[toChainIds[i]];
+            emit BridgeRouteRemoved({
+                toChainId: toChainIds[i],
+                bridgeRoute: bridgeRoute
+            });
+        }
     }
 
     // ----- BRIDGING FUNCTIONS -----
 
-    /// Get the local token that corresponds to the destination token. Get the
+    /// Given a list of bridge token options, find the index of the bridge token
+    /// that matches the correct bridge token out. Return the length of the array
+    /// if no match is found.
+    function _findBridgeTokenOut(
+        TokenAmount[] memory bridgeTokenOutOptions,
+        address bridgeTokenOut
+    ) internal pure returns (uint256 index) {
+        uint256 n = bridgeTokenOutOptions.length;
+        for (uint256 i = 0; i < n; ++i) {
+            if (address(bridgeTokenOutOptions[i].token) == bridgeTokenOut) {
+                return i;
+            }
+        }
+        return n;
+    }
+
+    /// Get the input token that corresponds to the destination token. Get the
     /// minimum input amount for a given output amount. The input amount must
     /// cover the max of the percentage fee and the flat fee.
-    function getInputTokenAmount(
+    function _getBridgeData(
         uint256 toChainId,
-        address toToken,
-        uint256 toAmount
-    ) public view returns (address inputToken, uint256 inputAmount) {
-        AcrossBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId][
-            toToken
-        ];
+        TokenAmount[] memory bridgeTokenOutOptions
+    )
+        internal
+        view
+        returns (
+            address inToken,
+            uint256 inAmount,
+            address outToken,
+            uint256 outAmount
+        )
+    {
+        AcrossBridgeRoute memory bridgeRoute = bridgeRouteMapping[toChainId];
         require(
-            bridgeRoute.localToken != address(0),
+            bridgeRoute.bridgeTokenOut != address(0),
             "DPAB: bridge route not found"
         );
 
-        inputToken = bridgeRoute.localToken;
+        uint256 index = _findBridgeTokenOut(
+            bridgeTokenOutOptions,
+            bridgeRoute.bridgeTokenOut
+        );
+        // If the index is the length of the array, then the bridge token out
+        // was not found in the list of options.
+        require(index < bridgeTokenOutOptions.length, "DPAB: bad bridge token");
 
+        // Calculate the amount that must be deposited to cover the fees.
+        uint256 toAmount = bridgeTokenOutOptions[index].amount;
         uint256 amtWithPctFee = (toAmount *
             (ONE_HUNDRED_PERCENT + bridgeRoute.pctFee)) / ONE_HUNDRED_PERCENT;
         uint256 amtWithFlatFee = toAmount + bridgeRoute.flatFee;
 
+        inToken = bridgeRoute.bridgeTokenIn;
         // Return the larger of the two amounts
-        inputAmount = amtWithPctFee > amtWithFlatFee
+        inAmount = amtWithPctFee > amtWithFlatFee
             ? amtWithPctFee
             : amtWithFlatFee;
+
+        outToken = bridgeRoute.bridgeTokenOut;
+        outAmount = bridgeTokenOutOptions[index].amount;
+    }
+
+    function getBridgeTokenIn(
+        uint256 toChainId,
+        TokenAmount[] memory bridgeTokenOutOptions
+    ) public view returns (address bridgeTokenIn, uint256 inAmount) {
+        (bridgeTokenIn, inAmount, , ) = _getBridgeData(
+            toChainId,
+            bridgeTokenOutOptions
+        );
     }
 
     /// Initiate a bridge to a destination chain using Across Protocol.
     function sendToChain(
         uint256 toChainId,
         address toAddress,
-        address toToken,
-        uint256 toAmount,
+        TokenAmount[] memory bridgeTokenOutOptions,
         bytes calldata extraData
     ) public {
         require(toChainId != block.chainid, "DPAB: same chain");
-        require(toAmount > 0, "DPAB: zero amount");
 
-        // Get the local token that corresponds to the destination token.
-        (address inputToken, uint256 inputAmount) = getInputTokenAmount({
-            toChainId: toChainId,
-            toToken: toToken,
-            toAmount: toAmount
-        });
+        (
+            address inToken,
+            uint256 inAmount,
+            address outToken,
+            uint256 outAmount
+        ) = _getBridgeData({
+                toChainId: toChainId,
+                bridgeTokenOutOptions: bridgeTokenOutOptions
+            });
+        require(outAmount > 0, "DPAB: zero amount");
 
         // Parse remaining arguments from extraData
         ExtraData memory extra;
@@ -184,23 +215,23 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2Step {
 
         // Move input token from caller to this contract and approve the
         // SpokePool contract.
-        IERC20(inputToken).safeTransferFrom({
+        IERC20(inToken).safeTransferFrom({
             from: msg.sender,
             to: address(this),
-            value: inputAmount
+            value: inAmount
         });
-        IERC20(inputToken).forceApprove({
+        IERC20(inToken).forceApprove({
             spender: address(spokePool),
-            value: inputAmount
+            value: inAmount
         });
 
         spokePool.depositV3({
             depositor: address(this),
             recipient: toAddress,
-            inputToken: inputToken,
-            outputToken: toToken,
-            inputAmount: inputAmount,
-            outputAmount: toAmount,
+            inputToken: inToken,
+            outputToken: outToken,
+            inputAmount: inAmount,
+            outputAmount: outAmount,
             destinationChainId: toChainId,
             exclusiveRelayer: extra.exclusiveRelayer,
             quoteTimestamp: extra.quoteTimestamp,
@@ -211,12 +242,12 @@ contract DaimoPayAcrossBridger is IDaimoPayBridger, Ownable2Step {
 
         emit BridgeInitiated({
             fromAddress: msg.sender,
-            fromToken: inputToken,
-            fromAmount: inputAmount,
+            fromToken: inToken,
+            fromAmount: inAmount,
             toChainId: toChainId,
             toAddress: toAddress,
-            toToken: toToken,
-            toAmount: toAmount
+            toToken: outToken,
+            toAmount: outAmount
         });
     }
 }
