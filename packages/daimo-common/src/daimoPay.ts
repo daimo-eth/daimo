@@ -54,14 +54,14 @@ export interface DaimoPayOrderItem {
   image?: string;
 }
 
-export const zBridgeTokenOutOption = z.object({
-  token: zAddress.transform((a) => getAddress(a)),
-  amount: zBigIntStr.transform((a) => BigInt(a)),
-});
+export const zBridgeTokenOutOptions = z.array(
+  z.object({
+    token: zAddress,
+    amount: zBigIntStr.transform((a) => BigInt(a)),
+  }),
+);
 
-export const zBridgeTokenOutOptions = z.array(zBridgeTokenOutOption);
-
-export type BridgeTokenOutOption = z.infer<typeof zBridgeTokenOutOption>;
+export type BridgeTokenOutOptions = z.infer<typeof zBridgeTokenOutOptions>;
 
 // NOTE: be careful to modify this type only in backward-compatible ways.
 //       Add OPTIONAL fields, etc. Anything else requires a migration.
@@ -134,6 +134,11 @@ export type DaimoPayHydratedOrder = {
   mode: DaimoPayOrderMode.HYDRATED;
   id: bigint;
   intentAddr: Address;
+  /**
+   * @deprecated included for backcompat with old paykit versions. Remove once
+   * new paykit version is deployed.
+   * */
+  handoffAddr: Address;
   bridgeTokenOutOptions: DaimoPayTokenAmount[];
   selectedBridgeTokenOutAddr: Address | null;
   selectedBridgeTokenOutAmount: bigint | null;
@@ -159,7 +164,7 @@ export type DaimoPayHydratedOrder = {
 
 export type DaimoPayHydratedOrderWithoutIntentAddr = Omit<
   DaimoPayHydratedOrder,
-  "intentAddr"
+  "intentAddr" | "handoffAddr"
 >;
 
 export type DaimoPayOrder = DaimoPayDehydratedOrder | DaimoPayHydratedOrder;
@@ -211,20 +216,6 @@ export interface DaimoPayTokenAmount {
   token: DaimoPayToken;
   amount: BigIntStr;
   usd: number; // amount in dollars
-}
-
-export type ContractTokenAmount = {
-  token: Address;
-  amount: bigint;
-};
-
-export function DPTokenAmountToContractTokenAmount(
-  tokenAmount: DaimoPayTokenAmount,
-): ContractTokenAmount {
-  return {
-    token: tokenAmount.token.token,
-    amount: BigInt(tokenAmount.amount),
-  };
 }
 
 export type OnChainCall = {
