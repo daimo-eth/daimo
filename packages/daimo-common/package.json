@@ -1,6 +1,6 @@
 {
   "name": "@daimo/common",
-  "version": "0.3.6",
+  "version": "0.3.11",
   "description": "Daimo shared models and utilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
