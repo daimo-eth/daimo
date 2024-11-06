@@ -134,7 +134,10 @@ export type DaimoPayHydratedOrder = {
   mode: DaimoPayOrderMode.HYDRATED;
   id: bigint;
   intentAddr: Address;
-  /** @deprecated included for backcompat with old paykit versions */
+  /**
+   * @deprecated included for backcompat with old paykit versions. Remove once
+   * new paykit version is deployed.
+   * */
   handoffAddr: Address;
   bridgeTokenOutOptions: DaimoPayTokenAmount[];
   selectedBridgeTokenOutAddr: Address | null;
