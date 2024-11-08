@@ -1,8 +1,35 @@
 import fs from "node:fs/promises";
-import { getAddress, Hex, isAddress } from "viem";
+import {
+  Address,
+  createPublicClient,
+  erc20Abi,
+  getAddress,
+  Hex,
+  http,
+  isAddress,
+  MulticallResponse,
+  parseUnits,
+  zeroAddress,
+} from "viem";
 
-import { DAv2Chain, getDAv2Chain } from "../src";
-import { baseUSDbC, baseUSDC, ForeignToken } from "../src/foreignToken";
+import {
+  daimoFlexSwapperAddress,
+  daimoPayBatchReadUtilsAbi,
+  daimoPayBatchReadUtilsAddress,
+  DAv2Chain,
+  ethereum,
+  getAlchemyTransportUrl,
+  getDAv2Chain,
+  getViemChainById,
+  linea,
+} from "../src";
+import {
+  baseUSDbC,
+  baseUSDC,
+  ForeignToken,
+  getChainUSDC,
+  lineaBridgedUSDC,
+} from "../src/foreignToken";
 // eslint-disable-next-line import/order
 import { assert } from "./util";
 
@@ -31,10 +58,17 @@ interface TokenListToken {
   logoURI?: string;
 }
 
+const alchemyApiKey = "";
+
 /**
  * Generate a token list across all supported chains.
  */
 async function main() {
+  if (!alchemyApiKey) {
+    console.error("ALCHEMY_API_KEY is not set. Set it in the script code.");
+    process.exit(1);
+  }
+
   console.log("Generating token list...");
 
   const foreignTokens: ForeignToken[] = [];
@@ -49,7 +83,23 @@ async function main() {
       .filter((token) => token != null) as ForeignToken[];
     console.log(`Loaded ${tokens.length} tokens for ${chain.name} from ${url}`);
 
-    foreignTokens.push(...tokens);
+    const filteredErc20Tokens = await filterNonErc20(chain.chainId, tokens);
+    const filteredLiquidityTokens = await filterLowLiquidity(
+      chain.chainId,
+      filteredErc20Tokens,
+    );
+
+    foreignTokens.push(...filteredLiquidityTokens);
+
+    console.log(
+      `Filtered out ${tokens.length - filteredErc20Tokens.length} non-ERC20 tokens on ${chain.name}`,
+    );
+    console.log(
+      `Filtered out ${filteredErc20Tokens.length - filteredLiquidityTokens.length} low liquidity tokens on ${chain.name}`,
+    );
+    console.log(
+      `Got ${filteredLiquidityTokens.length} validated tokens on ${chain.name}`,
+    );
   }
 
   console.log(`Writing ${foreignTokens.length} tokens to tokens.json`);
@@ -96,6 +146,139 @@ function getForeignToken(
       chainId: token.chainId,
     };
   }
+}
+
+/**
+ * - Remove tokens whose contract does not implement the ERC20 interface.
+ * - Remove tokens whose decimals on-chain don't match the decimals returned by
+ * Coingecko.
+ */
+async function filterNonErc20(
+  chainId: number,
+  tokens: ForeignToken[],
+): Promise<ForeignToken[]> {
+  const client = createPublicClient({
+    chain: getViemChainById(chainId),
+    transport: http(getAlchemyTransportUrl(chainId, alchemyApiKey)),
+  });
+
+  const dummyEOA = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+  const dummySpender = "0xb7A593EC62dc447eef23ea0e0B4d5144ac75ABC5";
+
+  const erc20ViewFunctions = (tokenAddress: Address) => [
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "name",
+      args: [],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "symbol",
+      args: [],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "decimals",
+      args: [],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "totalSupply",
+      args: [],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "balanceOf",
+      args: [dummyEOA],
+    },
+    {
+      abi: erc20Abi,
+      address: tokenAddress,
+      functionName: "allowance",
+      args: [dummyEOA, dummySpender],
+    },
+  ];
+  const n = erc20ViewFunctions(zeroAddress).length;
+
+  // Check that all tokens implement basic ERC20 functions
+  const multicallContracts = tokens.flatMap((token) =>
+    erc20ViewFunctions(token.token),
+  );
+
+  const multicallResults = await client.multicall({
+    contracts: multicallContracts,
+    batchSize: 4096,
+    allowFailure: true,
+    multicallAddress: "0xcA11bde05977b3631167028862bE2a173976CA11",
+  });
+
+  const filteredTokens = tokens
+    .map((token, index) => {
+      const results = multicallResults.slice(index * n, (index + 1) * n) as [
+        MulticallResponse<string, unknown, true>, // name
+        MulticallResponse<string, unknown, true>, // symbol
+        MulticallResponse<number, unknown, true>, // decimals
+        MulticallResponse<bigint, unknown, true>, // totalSupply
+        MulticallResponse<bigint, unknown, true>, // balanceOf
+        MulticallResponse<bigint, unknown, true>, // allowance
+      ];
+
+      // If any of the calls were unsuccessful, filter the token out
+      for (let i = 0; i < results.length; i++) {
+        if (results[i].status !== "success") {
+          return null;
+        }
+      }
+
+      const decimals = results[2];
+      if (token.decimals !== decimals.result) {
+        return null;
+      }
+
+      return token;
+    })
+    .filter((out) => out != null);
+
+  return filteredTokens;
+}
+
+/**
+ * Remove tokens which don't have enough liquidity for a 10k USDC swap.
+ */
+async function filterLowLiquidity(
+  chainId: number,
+  tokens: ForeignToken[],
+): Promise<ForeignToken[]> {
+  // TODO: deploy to ethereum mainnet
+  if (chainId === ethereum.chainId) return tokens;
+
+  const client = createPublicClient({
+    chain: getViemChainById(chainId),
+    transport: http(getAlchemyTransportUrl(chainId, alchemyApiKey)),
+  });
+
+  const quoteToken =
+    chainId === linea.chainId ? lineaBridgedUSDC : getChainUSDC(chainId);
+  if (quoteToken == null) {
+    throw new Error(`No USDC for chain ${chainId}`);
+  }
+  const quoteAmount = parseUnits("10000", quoteToken.decimals);
+  const dfs = daimoFlexSwapperAddress(chainId);
+
+  const quotes = await client.readContract({
+    address: daimoPayBatchReadUtilsAddress,
+    abi: daimoPayBatchReadUtilsAbi,
+    functionName: "getQuotesBatch",
+    args: [tokens.map((t) => t.token), quoteToken.token, quoteAmount, dfs],
+  });
+
+  // 0 means the token doesn't have enough liquidity
+  return tokens.filter((_, i) => quotes[i] > 0);
 }
 
 main()

@@ -26,6 +26,7 @@ export {
   daimoFlexSwapperAbi,
   daimoPayAbi,
   daimoPayAcrossBridgerAbi,
+  daimoPayBatchReadUtilsAbi,
   daimoPayBridgerAbi,
   daimoPayCctpBridgerAbi,
   daimoPaymasterV2Abi,
@@ -62,20 +63,20 @@ export const daimoFastCctpAddrs: Address[] = [
   daimoFastCctpV1Address,
 ];
 
-/** Daimo Pay main contract address */
+// Daimo Pay
 export const daimoPayAddress = "0xf603cE83e28c9E9E699c4df2B11E31B63b1890C0";
-/** Daimo Pay bridger address */
 export const daimoPayBridgerAddress =
   "0xB4418A1EcE96CF1F797fef3Ab2c0Afdf59701C38";
-/** Daimo Pay Axelar bridger address */
 export const daimoPayAxelarBridgerAddress =
   "0x91052AEc686070bc8787fde3d530f21976302867";
-/** Daimo Pay intent factory address */
 export const payIntentFactoryAddress =
   "0x78dC70cC8C3b3a79BF161941934ed4829C9E7DDf";
-/** Daimo Pay relayer address */
 export const daimoPayRelayerAddress =
   "0xD9c53251d364F4E467412EDbD0ecCe6aAEB97cAA";
+
+// Utils
+export const daimoPayBatchReadUtilsAddress =
+  "0xe554Fe204AF7b99E566fc86Ee9b4f34f8364b7B1";
 
 // DAv2
 export const entryPointV07Address =
@@ -93,7 +94,7 @@ export const daimoFlexSwapperUniOnlyAddress = (chainId: number) => {
 };
 export const daimoFlexSwapperAddress = (chainId: number) => {
   if (chainId === mainnet.id)
-    return "0x207e87f84cff325715f324d09e63b21a03e53b61";
+    return "0x207e87f84cff325715f324d09E63b21a03E53b61";
   else return "0xA9F5d58edb8dF8af90f875eac89AA49C57b87Db8";
 };
 
