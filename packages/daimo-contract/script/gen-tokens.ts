@@ -8,16 +8,28 @@ import {
   http,
   isAddress,
   MulticallResponse,
+  parseUnits,
   zeroAddress,
 } from "viem";
 
 import {
+  daimoFlexSwapperAddress,
+  daimoPayBatchReadUtilsAbi,
+  daimoPayBatchReadUtilsAddress,
   DAv2Chain,
+  ethereum,
   getAlchemyTransportUrl,
   getDAv2Chain,
   getViemChainById,
+  linea,
 } from "../src";
-import { baseUSDbC, baseUSDC, ForeignToken } from "../src/foreignToken";
+import {
+  baseUSDbC,
+  baseUSDC,
+  ForeignToken,
+  getChainUSDC,
+  lineaBridgedUSDC,
+} from "../src/foreignToken";
 // eslint-disable-next-line import/order
 import { assert } from "./util";
 
@@ -53,7 +65,7 @@ const alchemyApiKey = "";
  */
 async function main() {
   if (!alchemyApiKey) {
-    console.error("ALCHEMY_API_KEY is not set");
+    console.error("ALCHEMY_API_KEY is not set. Set it in the script code.");
     process.exit(1);
   }
 
@@ -71,12 +83,22 @@ async function main() {
       .filter((token) => token != null) as ForeignToken[];
     console.log(`Loaded ${tokens.length} tokens for ${chain.name} from ${url}`);
 
-    const validatedTokens = await erc20Validation(chain.chainId, tokens);
+    const filteredErc20Tokens = await filterNonErc20(chain.chainId, tokens);
+    const filteredLiquidityTokens = await filterLowLiquidity(
+      chain.chainId,
+      filteredErc20Tokens,
+    );
 
-    foreignTokens.push(...validatedTokens);
+    foreignTokens.push(...filteredLiquidityTokens);
 
     console.log(
-      `Got ${validatedTokens.length} validated tokens and ${tokens.length} total tokens for ${chain.name}`,
+      `Filtered out ${tokens.length - filteredErc20Tokens.length} non-ERC20 tokens on ${chain.name}`,
+    );
+    console.log(
+      `Filtered out ${filteredErc20Tokens.length - filteredLiquidityTokens.length} low liquidity tokens on ${chain.name}`,
+    );
+    console.log(
+      `Got ${filteredLiquidityTokens.length} validated tokens on ${chain.name}`,
     );
   }
 
@@ -131,7 +153,7 @@ function getForeignToken(
  * - Remove tokens whose decimals on-chain don't match the decimals returned by
  * Coingecko.
  */
-async function erc20Validation(
+async function filterNonErc20(
   chainId: number,
   tokens: ForeignToken[],
 ): Promise<ForeignToken[]> {
@@ -183,14 +205,16 @@ async function erc20Validation(
   ];
   const n = erc20ViewFunctions(zeroAddress).length;
 
+  // Check that all tokens implement basic ERC20 functions
   const multicallContracts = tokens.flatMap((token) =>
     erc20ViewFunctions(token.token),
   );
 
   const multicallResults = await client.multicall({
     contracts: multicallContracts,
-    batchSize: 512,
+    batchSize: 4096,
     allowFailure: true,
+    multicallAddress: "0xcA11bde05977b3631167028862bE2a173976CA11",
   });
 
   const filteredTokens = tokens
@@ -221,6 +245,40 @@ async function erc20Validation(
     .filter((out) => out != null);
 
   return filteredTokens;
+}
+
+/**
+ * Remove tokens which don't have enough liquidity for a 10k USDC swap.
+ */
+async function filterLowLiquidity(
+  chainId: number,
+  tokens: ForeignToken[],
+): Promise<ForeignToken[]> {
+  // TODO: deploy to ethereum mainnet
+  if (chainId === ethereum.chainId) return tokens;
+
+  const client = createPublicClient({
+    chain: getViemChainById(chainId),
+    transport: http(getAlchemyTransportUrl(chainId, alchemyApiKey)),
+  });
+
+  const quoteToken =
+    chainId === linea.chainId ? lineaBridgedUSDC : getChainUSDC(chainId);
+  if (quoteToken == null) {
+    throw new Error(`No USDC for chain ${chainId}`);
+  }
+  const quoteAmount = parseUnits("10000", quoteToken.decimals);
+  const dfs = daimoFlexSwapperAddress(chainId);
+
+  const quotes = await client.readContract({
+    address: daimoPayBatchReadUtilsAddress,
+    abi: daimoPayBatchReadUtilsAbi,
+    functionName: "getQuotesBatch",
+    args: [tokens.map((t) => t.token), quoteToken.token, quoteAmount, dfs],
+  });
+
+  // 0 means the token doesn't have enough liquidity
+  return tokens.filter((_, i) => quotes[i] > 0);
 }
 
 main()

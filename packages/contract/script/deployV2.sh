@@ -13,7 +13,7 @@ set -e
 SCRIPTS=(
     # Utils
     # "script/DeployCreate3Factory.s.sol"
-    # "script/DeployTokenBalanceUtils.s.sol"
+    # "script/pay/DeployDaimoPayBatchReadUtils.s.sol"
 
     # Daimo Pay
     # "script/pay/DeployDaimoPayAcrossBridger.s.sol"

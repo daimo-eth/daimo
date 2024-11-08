@@ -26,6 +26,7 @@ export {
   daimoFlexSwapperAbi,
   daimoPayAbi,
   daimoPayAcrossBridgerAbi,
+  daimoPayBatchReadUtilsAbi,
   daimoPayBridgerAbi,
   daimoPayCctpBridgerAbi,
   daimoPaymasterV2Abi,
@@ -37,7 +38,6 @@ export {
   entryPointAbi,
   erc20Abi,
   swapbotLpAbi,
-  tokenBalanceUtilsAbi,
 } from "./codegen/contracts";
 
 export const nameRegistryProxyConfig = {
@@ -75,8 +75,8 @@ export const daimoPayRelayerAddress =
   "0xD9c53251d364F4E467412EDbD0ecCe6aAEB97cAA";
 
 // Utils
-export const tokenBalanceUtilsAddress =
-  "0x21E23fE26d9879D6f778Ad8B984e378326a7Fd68";
+export const daimoPayBatchReadUtilsAddress =
+  "0xe554Fe204AF7b99E566fc86Ee9b4f34f8364b7B1";
 
 // DAv2
 export const entryPointV07Address =
@@ -94,7 +94,7 @@ export const daimoFlexSwapperUniOnlyAddress = (chainId: number) => {
 };
 export const daimoFlexSwapperAddress = (chainId: number) => {
   if (chainId === mainnet.id)
-    return "0x207e87f84cff325715f324d09e63b21a03e53b61";
+    return "0x207e87f84cff325715f324d09E63b21a03E53b61";
   else return "0xA9F5d58edb8dF8af90f875eac89AA49C57b87Db8";
 };
 
