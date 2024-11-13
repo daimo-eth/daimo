@@ -246,10 +246,10 @@ export class ForeignCoinIndexer extends Indexer {
 
       return this.getProposedSwap(
         receivedAt,
-        log.foreignToken.token,
+        getAddress(log.foreignToken.token),
         log.value.toString() as `${bigint}`,
         fromAcc,
-        homeCoin.token,
+        getAddress(homeCoin.token),
         log.to,
       );
     });

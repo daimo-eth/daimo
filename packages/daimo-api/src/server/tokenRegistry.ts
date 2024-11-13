@@ -12,7 +12,7 @@ import { chainConfig } from "../env";
 /** Token Registry sorted by chain id. */
 export class TokenRegistry {
   /** Map of chainId to token address to foreign token type. */
-  private foreignTokensByChain = new Map<number, Map<Address, ForeignToken>>();
+  private foreignTokensByChain = new Map<number, Map<string, ForeignToken>>();
 
   private defaultChainId = chainConfig.chainL2.id;
 
@@ -23,7 +23,7 @@ export class TokenRegistry {
 
     // Load tokens from generated registry
     for (const chain of chains) {
-      const foreignTokens = new Map<Address, ForeignToken>();
+      const foreignTokens = new Map<string, ForeignToken>();
       const tokens = getTokensForChain(chain.chainId);
       tokens.forEach((token) => {
         foreignTokens.set(token.token, token);
@@ -36,7 +36,7 @@ export class TokenRegistry {
   }
 
   /** Get a token by address. */
-  public getToken(addr: Address, chainId?: number): ForeignToken | undefined {
+  public getToken(addr: string, chainId?: number): ForeignToken | undefined {
     const tokenAddress = getAddress(addr);
     const cid = chainId ?? this.defaultChainId;
 

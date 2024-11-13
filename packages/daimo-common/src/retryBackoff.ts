@@ -4,13 +4,14 @@ export async function retryBackoff<T>(
   name: string,
   fn: () => Promise<T>,
   maxRetries = 5,
+  backoffFn: (i: number) => number = (i) => Math.min(2000, 250 * 2 ** i),
 ): Promise<T> {
   for (let i = 1; ; i++) {
     try {
       return await fn();
     } catch (e) {
       if (i <= maxRetries) {
-        const sleepMs = Math.min(2000, 250 * 2 ** i);
+        const sleepMs = backoffFn(i);
         console.log(
           `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error: ${e}`,
         );

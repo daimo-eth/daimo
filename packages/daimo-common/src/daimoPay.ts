@@ -146,10 +146,10 @@ export type DaimoPayHydratedOrder = {
   destFinalCall: OnChainCall;
   destRefundAddr: Address;
   destNonce: bigint;
-  sourceFulfillerAddr: Address | null;
+  sourceFulfillerAddr: Address | SolanaPublicKey | null;
   sourceTokenAmount: DaimoPayTokenAmount | null;
-  sourceInitiateTxHash: Hex | null;
-  sourceStartTxHash: Hex | null;
+  sourceInitiateTxHash: Hex | string | null;
+  sourceStartTxHash: Hex | string | null;
   sourceStatus: DaimoPayOrderStatusSource;
   destStatus: DaimoPayOrderStatusDest;
   destFastFinishTxHash: Hex | null;
@@ -205,10 +205,9 @@ export enum ExternalPaymentOptions {
 }
 
 export interface DaimoPayToken extends ForeignToken {
+  token: Address | SolanaPublicKey;
   usd: number; // per unit price in dollars, example 2300 (USD) for WETH
-  quoteTimestamp: number;
-  quoteBlockNumber: number;
-  displayDecimals: number; // TODO, human friendly number of decimals for the token
+  displayDecimals: number;
   fiatSymbol?: string; // e.g. $ for USDC/USDT/DAI, € for EUROC, etc
 }
 
@@ -251,21 +250,21 @@ export type PaymentStartedEvent = {
   type: "payment_started";
   paymentId: DaimoPayOrderID;
   chainId: number;
-  txHash: Hex | null;
+  txHash: Hex | string | null;
 };
 
 export type PaymentCompletedEvent = {
   type: "payment_completed";
   paymentId: DaimoPayOrderID;
   chainId: number;
-  txHash: Hex;
+  txHash: Hex | string;
 };
 
 export type PaymentBouncedEvent = {
   type: "payment_bounced";
   paymentId: DaimoPayOrderID;
   chainId: number;
-  txHash: Hex;
+  txHash: Hex | string;
 };
 
 export type DaimoPayEvent =
@@ -313,3 +312,7 @@ export function getDisplayPrice(tokenAmount: DaimoPayTokenAmount) {
   const displayPrice = Number(amountDec).toFixed(token.displayDecimals);
   return (token.fiatSymbol ? `${token.fiatSymbol}` : "") + displayPrice;
 }
+
+export const zSolanaPublicKey = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]+$/);
+
+export type SolanaPublicKey = z.infer<typeof zSolanaPublicKey>;

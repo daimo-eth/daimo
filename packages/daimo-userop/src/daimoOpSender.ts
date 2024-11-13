@@ -365,7 +365,7 @@ export class DaimoOpSender {
         this.getTokenApproveCall(
           swap.execRouterAddress,
           BigInt(swap.fromAmount),
-          swap.fromCoin.token,
+          getAddress(swap.fromCoin.token),
         ),
       );
     }
@@ -445,7 +445,7 @@ export class DaimoOpSender {
               toChainId,
               toDomain,
               toAddr,
-              toToken,
+              getAddress(toToken),
               toAmount,
               nonce,
             ],

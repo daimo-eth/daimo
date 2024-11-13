@@ -1,5 +1,3 @@
-import { Address, Hex } from "viem";
-
 /**
  * Get block explorer URL for chain ID
  */
@@ -33,12 +31,14 @@ export function getChainExplorerByChainId(chainId: number): string | undefined {
       return "https://lineascan.build";
     case 56:
       return "https://bscscan.com";
+    case 501:
+      return "https://solscan.io";
     default:
       return undefined;
   }
 }
 
-export function getChainExplorerAddressUrl(chainId: number, address: Address) {
+export function getChainExplorerAddressUrl(chainId: number, address: string) {
   const explorer = getChainExplorerByChainId(chainId);
   if (!explorer) {
     return undefined;
@@ -46,7 +46,7 @@ export function getChainExplorerAddressUrl(chainId: number, address: Address) {
   return `${explorer}/address/${address}`;
 }
 
-export function getChainExplorerTxUrl(chainId: number, txHash: Hex) {
+export function getChainExplorerTxUrl(chainId: number, txHash: string) {
   const explorer = getChainExplorerByChainId(chainId);
   if (!explorer) {
     return undefined;

@@ -13,10 +13,10 @@ import codegenTokens from "./codegen/tokens.json";
 //
 // For all others, see the codegen.
 
-/** Any ERC-20 token on any chain. */
+/** Any ERC-20 or SPL token on any chain. */
 export type ForeignToken = {
   chainId: number;
-  token: Address;
+  token: string;
   name?: string;
   symbol: string;
   decimals: number;
@@ -32,6 +32,7 @@ export enum TokenLogo {
   MATIC = "https://assets.coingecko.com/coins/images/4713/large/polygon.png",
   AVAX = "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png",
   BNB = "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png",
+  SOL = "https://solana.com/src/img/branding/solanaLogoMark.png",
 }
 
 /* --------------------- Tokens Constants --------------------- */
@@ -623,6 +624,41 @@ const bscTokens = [bscBNB, bscWBNB, bscAxlUSDC, bscUSDC];
 usdcByChainId.set(56, bscUSDC);
 axlUSDCByChainId.set(56, bscAxlUSDC);
 
+//
+// Solana
+//
+
+export const solanaUSDC: ForeignToken = {
+  chainId: 501,
+  token: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+  decimals: 6,
+  name: "USD Coin",
+  symbol: "USDC",
+  logoURI: TokenLogo.USDC,
+};
+
+export const solanaWrappedSOL: ForeignToken = {
+  chainId: 501,
+  token: "So11111111111111111111111111111111111111112",
+  decimals: 9,
+  name: "Wrapped SOL",
+  symbol: "WSOL",
+  logoURI: TokenLogo.SOL,
+};
+
+export const solanaNativeSol = nativeToken(
+  501,
+  "Solana",
+  "SOL",
+  TokenLogo.SOL,
+  "11111111111111111111111111111111",
+  9,
+);
+
+const solanaTokens = [solanaUSDC, solanaWrappedSOL, solanaNativeSol];
+
+usdcByChainId.set(501, solanaUSDC);
+
 // --------------------- Native Token Utils ---------------------
 //
 
@@ -635,12 +671,14 @@ function nativeToken(
   name: string,
   symbol: string,
   logoURI: string,
+  token: string = zeroAddress,
+  decimals: number = 18,
 ): ForeignToken {
   return {
     chainId,
-    token: zeroAddress,
+    token,
     name,
-    decimals: 18,
+    decimals,
     symbol,
     logoURI,
   };
@@ -663,9 +701,10 @@ const allBasicTokens = [
   ...avalancheFujiTokens,
   ...lineaTokens,
   ...bscTokens,
+  ...solanaTokens,
 ];
 
-const blacklistedTokens: Record<number, Set<Address>> = {
+const blacklistedTokens: Record<number, Set<string>> = {
   137: new Set([getAddress("0x3801C3B3B5c98F88a9c9005966AA96aa440B9Afc")]), // GAX Liquidity Token Reward (GLTR)
   42161: new Set([getAddress("0x9ed7E4B1BFF939ad473dA5E7a218C771D1569456")]), // GAX Liquidity Token Reward (GLTR)
 };

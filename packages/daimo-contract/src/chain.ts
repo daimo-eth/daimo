@@ -53,6 +53,9 @@ import {
   polygonMATIC,
   polygonUSDC,
   polygonWMATIC,
+  solanaNativeSol,
+  solanaUSDC,
+  solanaWrappedSOL,
 } from "./foreignToken";
 
 /** An EVM chain supported by DaimoAccountV2. */
@@ -229,6 +232,17 @@ export const bsc: DAv2Chain = {
   wrappedNativeToken: bscWBNB,
 };
 
+export const solana: DAv2Chain = {
+  chainId: 501,
+  name: "solana",
+  shortName: "sol",
+  cctpDomain: 5,
+  bridgeCoin: solanaUSDC,
+  localUSDC: solanaUSDC,
+  nativeToken: solanaNativeSol,
+  wrappedNativeToken: solanaWrappedSOL,
+};
+
 const chains = [
   ethereum,
   ethereumSepolia,
@@ -244,6 +258,7 @@ const chains = [
   avalancheFuji,
   linea,
   bsc,
+  solana,
 ];
 
 /** Supported chains for send (+ soon receive). */
@@ -264,7 +279,7 @@ export function getChainName(chainId: number): string {
 }
 
 /** Returns the CCTP domain for the given chainId. */
-export function getCctpDomain(chainId: number): number {
+export function getCCTPDomain(chainId: number): number {
   return getDAv2Chain(chainId).cctpDomain;
 }
 

@@ -3,7 +3,10 @@ export function assert(condition: boolean, msg?: string): asserts condition {
 }
 
 export function assertNotNull<T>(value: T | null | undefined, msg?: string): T {
-  assert(value !== null && value !== undefined, msg);
+  assert(
+    value !== null && value !== undefined,
+    msg ?? `Expected ${value} to be non-null`,
+  );
   return value;
 }
 

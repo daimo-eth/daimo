@@ -10,6 +10,7 @@ import {
   Address,
   Hex,
   encodeFunctionData,
+  getAddress,
   numberToHex,
   zeroAddress,
 } from "viem";
@@ -69,9 +70,9 @@ export async function getSwapQuote({
     address: daimoFlexSwapperAddress(chainId),
     functionName: "quote",
     args: [
-      isFromETH ? chain.wrappedNativeToken.token : tokenIn,
+      isFromETH ? getAddress(chain.wrappedNativeToken.token) : tokenIn,
       amountIn,
-      isToETH ? chain.wrappedNativeToken.token : tokenOut,
+      isToETH ? getAddress(chain.wrappedNativeToken.token) : tokenOut,
     ],
   });
   const amountOut: bigint = swapQuote[0];
