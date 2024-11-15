@@ -1,5 +1,4 @@
 import { Locale } from "expo-localization";
-import { Address } from "viem";
 import z from "zod";
 
 import { i18n } from "./i18n";
@@ -39,7 +38,7 @@ export function getEAccountStr(eAccount: EAccount): string {
   return eAccount.addr;
 }
 
-export function getAddressContraction(address: Address, length = 4): string {
+export function getAddressContraction(address: string, length = 4): string {
   return address.slice(0, 2 + length) + "…" + address.slice(-length);
 }
 
