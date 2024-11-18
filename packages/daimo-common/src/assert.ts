@@ -1,17 +1,22 @@
-export function assert(condition: boolean, msg?: string): asserts condition {
-  if (!condition) throw new Error(msg || "Assertion failed");
+import { debugJson } from "./debug";
+
+export function assert(condition: boolean, ...args: any[]): asserts condition {
+  if (!condition)
+    throw new Error(
+      "Assertion failed: " + args.map((a) => debugJson(a)).join(", "),
+    );
 }
 
-export function assertNotNull<T>(value: T | null | undefined, msg?: string): T {
-  assert(
-    value !== null && value !== undefined,
-    msg ?? `Expected ${value} to be non-null`,
-  );
+export function assertNotNull<T>(
+  value: T | null | undefined,
+  ...args: any[]
+): T {
+  assert(value !== null && value !== undefined, ...args);
   return value;
 }
 
-export function assertEqual<T>(a: T, b: T, msg?: string): void {
-  assert(a === b, `expected ${a} = ${b} ${msg || ""}`.trim());
+export function assertEqual<T>(a: T, b: T, ...args: any[]): void {
+  assert(a === b, ...args);
 }
 
 /** Used to compile-time check that switch statements are exhaustive, etc. */
