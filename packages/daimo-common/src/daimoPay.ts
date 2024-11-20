@@ -192,17 +192,40 @@ export type ExternalPaymentOptionMetadata = {
   paymentToken: DaimoPayToken;
 };
 
-export type ExternalPaymentOptionData = {
-  url: string;
-  waitingMessage: string;
-};
-
 export enum ExternalPaymentOptions {
   Daimo = "Daimo",
   Coinbase = "Coinbase",
   RampNetwork = "RampNetwork",
   Binance = "Binance",
 }
+
+export type ExternalPaymentOptionData = {
+  url: string;
+  waitingMessage: string;
+};
+
+export enum DepositAddressPaymentOptions {
+  BITCOIN = "Bitcoin",
+  TRON_USDT = "USDT on Tron",
+  TON = "TON",
+  MONERO = "Monero",
+  DOGE = "Doge",
+  LITECOIN = "Litecoin",
+  ZCASH = "Zcash",
+  DASH = "Dash",
+}
+
+export type DepositAddressPaymentOptionMetadata = {
+  id: DepositAddressPaymentOptions;
+  logoURI: string;
+};
+
+export type DepositAddressPaymentOptionData = {
+  address: string;
+  uri: string;
+  amount: string;
+  suffix: string;
+};
 
 export interface DaimoPayToken extends ForeignToken {
   token: Address | SolanaPublicKey;
