@@ -12,8 +12,9 @@ export async function retryBackoff<T>(
     } catch (e) {
       if (i <= maxRetries) {
         const sleepMs = backoffFn(i);
-        console.log(
-          `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error: ${e}`,
+        console.error(
+          `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error:`,
+          e,
         );
         await new Promise((r) => setTimeout(r, sleepMs));
       } else {
