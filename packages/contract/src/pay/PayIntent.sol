@@ -4,7 +4,7 @@ pragma solidity ^0.8.12;
 import "openzeppelin-contracts/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./TransferTokenBalance.sol";
+import "./TokenUtils.sol";
 import "../interfaces/IDaimoPayBridger.sol";
 
 /// @dev Represents an intended call: "make X of token Y show up on chain Z, then
@@ -123,7 +123,7 @@ contract PayIntentContract is Initializable {
             });
 
             // Refund any leftover tokens in the contract to caller
-            TransferTokenBalance.refundLeftoverTokens({
+            TokenUtils.transferBalance({
                 token: IERC20(bridgeTokenIn),
                 recipient: caller
             });
@@ -150,7 +150,7 @@ contract PayIntentContract is Initializable {
         // Send to escrow contract, which will forward to current recipient
         uint256 n = intent.bridgeTokenOutOptions.length;
         for (uint256 i = 0; i < n; ++i) {
-            TransferTokenBalance.transferBalance({
+            TokenUtils.transferBalance({
                 token: intent.bridgeTokenOutOptions[i].token,
                 recipient: intent.escrow
             });

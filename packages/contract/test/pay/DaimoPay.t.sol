@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import {GasInfo} from "@axelar-network/contracts/interfaces/IAxelarGasService.sol";
 import "account-abstraction/interfaces/IEntryPoint.sol";
 import "account-abstraction/core/EntryPoint.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 import "../../src/pay/DaimoPay.sol";
 import "../../src/pay/DaimoPayBridger.sol";
@@ -181,7 +182,10 @@ contract DaimoPayTest is Test {
         console.log("DaimoPay address:", address(dp));
         console.log("TestUSDC (fromToken) address:", address(_fromToken));
         console.log("TestUSDC (toToken) address:", address(_toToken));
-        console.log("TestUSDC (bridgeTokenOption) address:", address(_bridgeTokenOption));
+        console.log(
+            "TestUSDC (bridgeTokenOption) address:",
+            address(_bridgeTokenOption)
+        );
     }
 
     function getBridgeTokenOutOptions()
@@ -420,12 +424,8 @@ contract DaimoPayTest is Test {
         });
 
         // Extra tokens should be refunded to the caller
-        vm.expectEmit(LINEA_INTENT_ADDR);
-        emit TransferTokenBalance.RefundedTokens({
-            recipient: _alice,
-            token: address(_fromToken),
-            amount: 10
-        });
+        vm.expectEmit(address(_fromToken));
+        emit IERC20.Transfer(LINEA_INTENT_ADDR, _alice, 10);
 
         vm.expectEmit(address(dp));
         emit DaimoPay.Start(LINEA_INTENT_ADDR, intent);
@@ -619,12 +619,8 @@ contract DaimoPayTest is Test {
         _toToken.transfer({to: address(dp), value: 10});
 
         // An extra 9 of finalCallToken should be sent back to the LP
-        vm.expectEmit(address(dp));
-        emit TransferTokenBalance.RefundedTokens({
-            recipient: _lp,
-            token: address(_toToken),
-            amount: 9
-        });
+        vm.expectEmit(address(_toToken));
+        emit IERC20.Transfer(address(dp), _lp, 9);
 
         dp.fastFinishIntent({intent: intent, calls: new Call[](0)});
 
