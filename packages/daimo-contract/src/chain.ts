@@ -72,6 +72,14 @@ export type DAv2Chain = {
   isTestnet?: boolean;
 };
 
+/**
+ * Returns whether a given chainID is an EVM chain.
+ * TODO: move Solana etc to their own ID space.
+ */
+export function isEvmChain(chainId: number) {
+  return chainId !== solana.chainId;
+}
+
 export const ethereum: DAv2Chain = {
   chainId: 1,
   name: "ethereum",
