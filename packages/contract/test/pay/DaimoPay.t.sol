@@ -3,8 +3,6 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import {GasInfo} from "@axelar-network/contracts/interfaces/IAxelarGasService.sol";
-import "account-abstraction/interfaces/IEntryPoint.sol";
-import "account-abstraction/core/EntryPoint.sol";
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 import "../../src/pay/DaimoPay.sol";
