@@ -3,12 +3,12 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
 import { Linking, Platform, StyleSheet, View } from "react-native";
 
-import { useExitToHome } from "../../common/nav";
-import { Colorway } from "../style/skins";
-import { useTheme } from "../style/theme";
 import { ButtonBig } from "./Button";
 import Spacer from "./Spacer";
 import { DaimoText, TextCenter, TextError, TextH3 } from "./text";
+import { useExitToHome } from "../../common/nav";
+import { Colorway } from "../style/skins";
+import { useTheme } from "../style/theme";
 
 export function ErrorRowCentered({
   error,

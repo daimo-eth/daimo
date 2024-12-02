@@ -11,7 +11,7 @@ on:
 jobs:
   api-deploy:
     # master and prod only, no tags
-    if: startsWith(github.ref, 'refs/heads/')
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod'
     name: API Deploy
     runs-on: ubuntu-latest
     steps:
@@ -123,6 +123,15 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "22.x"
+
+      - name: Build JS bundle
+        run: |
+          npm ci
+          npx turbo build --filter='@daimo/clippy'
 
       - name: Build, tag, and push docker image to Amazon ECR
         uses: docker/build-push-action@v5

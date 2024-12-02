@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "echo Use 'npm start' for Clippy dev",
-    "start": "tsx src/index.ts",
+    "dev": "tsx src/index.ts",
+    "build": "esbuild --bundle src/index.ts --platform=node --external:readline/promises --outdir=dist",
     "lint": "npm run lint:deps && npm run lint:style",
     "lint:deps": "npx depcheck --ignores @tsconfig/node20,@types/tape",
     "lint:style": "eslint . --max-warnings=0"

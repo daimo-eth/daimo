@@ -5,16 +5,10 @@ FROM node:20
 WORKDIR /usr/src/app
 
 # Copy app code
-COPY . .
-
-# Install dependencies
-RUN npm ci
-
-# Build app
-RUN npm run build:clippy
+COPY apps/daimo-clippy/dist ./dist
 
 # Expose the port the app runs on
 EXPOSE 4200
 
 # Start app
-CMD ["npm", "start", "--prefix", "./apps/daimo-clippy"]
+CMD ["node", "dist/index.js"]
