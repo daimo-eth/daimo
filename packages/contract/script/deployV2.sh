@@ -22,7 +22,7 @@ SCRIPTS=(
     # "script/pay/DeployDaimoPayBridger.s.sol"
     # "script/pay/DeployPayIntentFactory.s.sol"
     # "script/pay/DeployDaimoPay.s.sol"
-    "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
+    # "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
 
     # DAv2
     # "script/DeployFlexSwapperUniOnly.s.sol"
@@ -50,7 +50,7 @@ CHAINS=(
 
     # TESTNETS
     # "$ETHERSCAN_API_KEY_L1,https://eth-sepolia.g.alchemy.com/v2/$ALCHEMY_API_KEY"
-    "$ETHERSCAN_API_KEY_BASE,https://sepolia.base.org"
+    # "$ETHERSCAN_API_KEY_BASE,https://sepolia.base.org"
  
 )
 

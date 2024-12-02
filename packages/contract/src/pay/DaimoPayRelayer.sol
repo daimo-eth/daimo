@@ -195,10 +195,9 @@ contract DaimoPayRelayer is AccessControl {
         TokenAmount calldata tokenIn,
         Call[] calldata calls
     ) public onlyRole(RELAYER_ROLE) {
-        TokenUtils.transferFrom({
+        TokenUtils.transfer({
             token: tokenIn.token,
-            from: msg.sender,
-            to: address(dp),
+            recipient: payable(address(dp)),
             amount: tokenIn.amount
         });
         dp.fastFinishIntent(intent, calls);
@@ -225,15 +224,6 @@ contract DaimoPayRelayer is AccessControl {
             Call calldata call = postCalls[i];
             (bool success, ) = call.to.call{value: call.value}(call.data);
             require(success, "DPR: postCall failed");
-        }
-
-        // Transfer any bridgeTokenOut balance back to the owner
-        uint256 n = intent.bridgeTokenOutOptions.length;
-        for (uint256 i = 0; i < n; ++i) {
-            TokenUtils.transferBalance(
-                intent.bridgeTokenOutOptions[i].token,
-                payable(msg.sender)
-            );
         }
     }
 
