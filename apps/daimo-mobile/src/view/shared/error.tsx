@@ -3,12 +3,12 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
 import { Linking, Platform, StyleSheet, View } from "react-native";
 
-import { ButtonBig } from "./Button";
-import Spacer from "./Spacer";
-import { DaimoText, TextCenter, TextError, TextH3 } from "./text";
 import { useExitToHome } from "../../common/nav";
 import { Colorway } from "../style/skins";
 import { useTheme } from "../style/theme";
+import { ButtonBig } from "./Button";
+import Spacer from "./Spacer";
+import { DaimoText, TextCenter, TextError, TextH3 } from "./text";
 
 export function ErrorRowCentered({
   error,
@@ -89,16 +89,16 @@ export function ErrorBanner({
         <ButtonBig
           type="subtle"
           title="Contact Support"
-          onPress={openSupportTG}
+          onPress={contactSupport}
         />
       </View>
     </View>
   );
 }
 
-export function openSupportTG() {
-  console.log("[ERROR] Opening Telegram support");
-  Linking.openURL("https://t.me/daimo_support");
+export function contactSupport() {
+  console.log("[ERROR] Opening email support");
+  Linking.openURL("mailto:support@daimo.com");
 }
 
 const getStyles = (color: Colorway) =>
