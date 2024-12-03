@@ -72,7 +72,7 @@ export const daimoPayAxelarBridgerAddress =
 export const payIntentFactoryAddress =
   "0x90498530e2FddcD937faB0Ab56cF6a7c1FB08b62";
 export const daimoPayRelayerAddress =
-  "0xD238901E410A67e63ba8A55ed3A74BE5d2e2f161";
+  "0x3919F06Fc366A1a429908a942463A5632f942f33";
 
 // Utils
 export const daimoPayBatchReadUtilsAddress =

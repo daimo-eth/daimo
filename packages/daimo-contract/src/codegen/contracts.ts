@@ -4775,7 +4775,7 @@ export const daimoPayRelayerAbi = [
   {
     type: 'function',
     inputs: [],
-    name: 'RELAYER_ROLE',
+    name: 'RELAYER_EOA_ROLE',
     outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
     stateMutability: 'view',
   },
@@ -4950,7 +4950,7 @@ export const daimoPayRelayerAbi = [
   {
     type: 'function',
     inputs: [{ name: 'relayer', internalType: 'address', type: 'address' }],
-    name: 'grantRelayerRole',
+    name: 'grantRelayerEOARole',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -5147,7 +5147,7 @@ export const daimoPayRelayerAbi = [
       { name: 'token', internalType: 'contract IERC20', type: 'address' },
     ],
     name: 'withdrawBalance',
-    outputs: [],
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     stateMutability: 'nonpayable',
   },
   {

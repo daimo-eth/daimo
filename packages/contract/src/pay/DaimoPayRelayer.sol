@@ -14,7 +14,7 @@ import "./TokenUtils.sol";
 contract DaimoPayRelayer is AccessControl {
     using SafeERC20 for IERC20;
 
-    bytes32 public constant RELAYER_ROLE = keccak256("RELAYER_ROLE");
+    bytes32 public constant RELAYER_EOA_ROLE = keccak256("RELAYER_EOA_ROLE");
 
     event SwapAndTip(
         address indexed requiredTokenIn,
@@ -27,14 +27,14 @@ contract DaimoPayRelayer is AccessControl {
 
     constructor(address admin) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-        _grantRole(RELAYER_ROLE, admin);
+        _grantRole(RELAYER_EOA_ROLE, admin);
     }
 
     // Add a new address that can use the relayer functions.
-    function grantRelayerRole(
+    function grantRelayerEOARole(
         address relayer
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _grantRole(RELAYER_ROLE, relayer);
+        _grantRole(RELAYER_EOA_ROLE, relayer);
     }
 
     // Withdraws an amount of tokens from the contract to the admin.
@@ -46,16 +46,23 @@ contract DaimoPayRelayer is AccessControl {
     }
 
     // Withdraws the full balance of a token from the contract to the admin.
-    function withdrawBalance(IERC20 token) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        TokenUtils.transferBalance(token, payable(msg.sender));
+    function withdrawBalance(
+        IERC20 token
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
+        return TokenUtils.transferBalance(token, payable(msg.sender));
     }
 
-    // Makes a swap from requiredTokenIn to requiredTokenOut. The relayer "tips"
-    // the difference between the required input amount and the input amount
-    // supplied by the user to ensure the swap succeeds.
-    // The relayer also "tips" the difference between the required output amount
-    // and the output amount received from the swap to ensure the output is
-    // exactly the amount required.
+    // Makes a swap from requiredTokenIn.token to requiredTokenOut.token. The
+    // relayer supplies a "tip" either on the input or output side so that
+    // we get sufficient token output.
+    //
+    // Pre-tip: The relayer tips up to maxPreTip of requiredTokenIn.token so
+    // that there is sufficient input to guarantee the swap outputs enough of
+    // the output token.
+    //
+    // Post-tip: Swap with however much input token the user has provided. The
+    // relayer tips up to maxPostTip of requiredTokenOut.token so that the
+    // output amount reaches the required amount.
     function swapAndTip(
         // supplied comes from the user, required is the gap we need to fill with tip.
         TokenAmount calldata requiredTokenIn,
@@ -65,7 +72,7 @@ contract DaimoPayRelayer is AccessControl {
         uint256 maxPostTip,
         Call calldata innerSwap
     ) external payable {
-        require(hasRole(RELAYER_ROLE, tx.origin), "DPR: only relayer");
+        require(hasRole(RELAYER_EOA_ROLE, tx.origin), "DPR: only relayer");
 
         //////////////////////////////////////////////////////////////
         // PRE-SWAP
@@ -109,12 +116,14 @@ contract DaimoPayRelayer is AccessControl {
         // SWAP
         //////////////////////////////////////////////////////////////
 
-        // forceApprove() not necessary, we check correct tokenOut amount.
         // Approve requiredTokenIn.amount even if it's greater than
         // suppliedTokenInAmount. The difference is tipped by the contract. We
         // already checked that the tip is within maxPreTip.
         if (innerSwap.to != address(0)) {
-            requiredTokenIn.token.approve(innerSwap.to, requiredTokenIn.amount);
+            requiredTokenIn.token.forceApprove({
+                spender: innerSwap.to,
+                value: requiredTokenIn.amount
+            });
         }
 
         // Execute inner swap
@@ -167,7 +176,7 @@ contract DaimoPayRelayer is AccessControl {
         Call[] calldata startCalls,
         bytes calldata bridgeExtraData,
         Call[] calldata postCalls
-    ) public payable onlyRole(RELAYER_ROLE) {
+    ) public payable onlyRole(RELAYER_EOA_ROLE) {
         // Make pre-start calls
         for (uint256 i = 0; i < preCalls.length; ++i) {
             Call calldata call = preCalls[i];
@@ -194,7 +203,7 @@ contract DaimoPayRelayer is AccessControl {
         PayIntent calldata intent,
         TokenAmount calldata tokenIn,
         Call[] calldata calls
-    ) public onlyRole(RELAYER_ROLE) {
+    ) public onlyRole(RELAYER_EOA_ROLE) {
         TokenUtils.transfer({
             token: tokenIn.token,
             recipient: payable(address(dp)),
@@ -209,7 +218,7 @@ contract DaimoPayRelayer is AccessControl {
         PayIntent calldata intent,
         Call[] calldata claimCalls,
         Call[] calldata postCalls
-    ) public onlyRole(RELAYER_ROLE) {
+    ) public onlyRole(RELAYER_EOA_ROLE) {
         // Make pre-claim calls
         for (uint256 i = 0; i < preCalls.length; ++i) {
             Call calldata call = preCalls[i];

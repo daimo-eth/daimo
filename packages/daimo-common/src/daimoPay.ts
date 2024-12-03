@@ -134,6 +134,7 @@ export type DaimoPayHydratedOrder = {
   mode: DaimoPayOrderMode.HYDRATED;
   id: bigint;
   intentAddr: Address;
+  escrowContractAddress: Address;
   /**
    * @deprecated included for backcompat with old paykit versions. Remove once
    * new paykit version is deployed.

@@ -30,7 +30,7 @@ contract RelayerTest is Test {
         mockSwap = new MockSwap(_token1, _token2);
 
         vm.startPrank(_admin);
-        relayerContract.grantRelayerRole(_relayer);
+        relayerContract.grantRelayerEOARole(_relayer);
         vm.stopPrank();
 
         // Give tokens to mockSwap for swap output
@@ -60,7 +60,7 @@ contract RelayerTest is Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 _noRole,
-                relayerContract.RELAYER_ROLE()
+                relayerContract.RELAYER_EOA_ROLE()
             )
         );
         relayerContract.startIntent({
@@ -91,7 +91,7 @@ contract RelayerTest is Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 _noRole,
-                relayerContract.RELAYER_ROLE()
+                relayerContract.RELAYER_EOA_ROLE()
             )
         );
         relayerContract.fastFinish({
@@ -118,7 +118,7 @@ contract RelayerTest is Test {
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
                 _noRole,
-                relayerContract.RELAYER_ROLE()
+                relayerContract.RELAYER_EOA_ROLE()
             )
         );
         relayerContract.claimAndKeep({
@@ -141,7 +141,7 @@ contract RelayerTest is Test {
         vm.stopPrank();
     }
 
-    function testOnlyAdminCanGrantRelayerRole() public {
+    function testOnlyAdminCanGrantRelayerEOARole() public {
         vm.startPrank(_noRole);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -150,7 +150,7 @@ contract RelayerTest is Test {
                 relayerContract.DEFAULT_ADMIN_ROLE()
             )
         );
-        relayerContract.grantRelayerRole(_relayer);
+        relayerContract.grantRelayerEOARole(_relayer);
         vm.stopPrank();
 
         vm.startPrank(_relayer);
@@ -161,11 +161,11 @@ contract RelayerTest is Test {
                 relayerContract.DEFAULT_ADMIN_ROLE()
             )
         );
-        relayerContract.grantRelayerRole(_relayer);
+        relayerContract.grantRelayerEOARole(_relayer);
         vm.stopPrank();
 
         vm.startPrank(_admin);
-        relayerContract.grantRelayerRole(_relayer);
+        relayerContract.grantRelayerEOARole(_relayer);
         vm.stopPrank();
     }
 
@@ -253,20 +253,24 @@ contract RelayerTest is Test {
         _token1.transfer(address(relayerContract), 1000);
 
         vm.startPrank(_admin);
-        relayerContract.withdrawBalance(_token1);
+        uint256 withdrawnAmount = relayerContract.withdrawBalance(_token1);
         vm.stopPrank();
 
         assertEq(_token1.balanceOf(_admin), 1000);
+        assertEq(withdrawnAmount, 1000);
     }
 
     function testWithdrawBalanceNative() public {
         vm.deal(address(relayerContract), 1000);
 
         vm.startPrank(_admin);
-        relayerContract.withdrawBalance(IERC20(address(0)));
+        uint256 withdrawnAmount = relayerContract.withdrawBalance(
+            IERC20(address(0))
+        );
         vm.stopPrank();
 
         assertEq(address(_admin).balance, 1000);
+        assertEq(withdrawnAmount, 1000);
     }
 
     function testNonRelayerCannotSwapAndTip() public {
@@ -285,7 +289,7 @@ contract RelayerTest is Test {
 
         // msg.sender is _relayer, tx.origin is _noRole
         // This should revert because swapAndTip requires tx.origin to have the
-        // RELAYER_ROLE.
+        // RELAYER_EOA_ROLE.
         vm.startPrank(_relayer, _noRole);
         vm.expectRevert("DPR: only relayer");
         relayerContract.swapAndTip({
