@@ -2,8 +2,8 @@
 pragma solidity ^0.8.12;
 
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 import "./DaimoPay.sol";
 import "./TokenUtils.sol";
@@ -11,74 +11,122 @@ import "./TokenUtils.sol";
 /*
  * Relayer contract that funds completes DaimoPay intents.
  */
-contract DaimoPayRelayer is Ownable2Step {
+contract DaimoPayRelayer is AccessControl {
     using SafeERC20 for IERC20;
 
-    constructor(address _owner) Ownable(_owner) {}
+    bytes32 public constant RELAYER_EOA_ROLE = keccak256("RELAYER_EOA_ROLE");
 
-    // Makes a swap from requiredTokenIn to requiredTokenOut. The relayer "tips"
-    // the difference between the required input amount and the input amount
-    // supplied by the user to ensure the swap succeeds.
-    // The relayer also "tips" the difference between the required output amount
-    // and the output amount received from the swap.
+    event SwapAndTip(
+        address indexed requiredTokenIn,
+        uint256 suppliedAmountIn,
+        address indexed requiredTokenOut,
+        uint256 swapAmountOut,
+        uint256 maxPreTip,
+        uint256 maxPostTip
+    );
+
+    constructor(address admin) {
+        _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(RELAYER_EOA_ROLE, admin);
+    }
+
+    // Add a new address that can use the relayer functions.
+    function grantRelayerEOARole(
+        address relayer
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _grantRole(RELAYER_EOA_ROLE, relayer);
+    }
+
+    // Withdraws an amount of tokens from the contract to the admin.
+    function withdrawAmount(
+        IERC20 token,
+        uint256 amount
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        TokenUtils.transfer(token, payable(msg.sender), amount);
+    }
+
+    // Withdraws the full balance of a token from the contract to the admin.
+    function withdrawBalance(
+        IERC20 token
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) returns (uint256) {
+        return TokenUtils.transferBalance(token, payable(msg.sender));
+    }
+
+    // Makes a swap from requiredTokenIn.token to requiredTokenOut.token. The
+    // relayer supplies a "tip" either on the input or output side so that
+    // we get sufficient token output.
+    //
+    // Pre-tip: The relayer tips up to maxPreTip of requiredTokenIn.token so
+    // that there is sufficient input to guarantee the swap outputs enough of
+    // the output token.
+    //
+    // Post-tip: Swap with however much input token the user has provided. The
+    // relayer tips up to maxPostTip of requiredTokenOut.token so that the
+    // output amount reaches the required amount.
     function swapAndTip(
         // supplied comes from the user, required is the gap we need to fill with tip.
         TokenAmount calldata requiredTokenIn,
         uint256 suppliedTokenInAmount,
         TokenAmount calldata requiredTokenOut,
-        uint256 maxTip,
+        uint256 maxPreTip,
+        uint256 maxPostTip,
         Call calldata innerSwap
     ) external payable {
-        require(tx.origin == owner(), "DPR: only usable by owner");
+        require(hasRole(RELAYER_EOA_ROLE, tx.origin), "DPR: only relayer");
+
+        //////////////////////////////////////////////////////////////
+        // PRE-SWAP
+        //////////////////////////////////////////////////////////////
 
         uint256 amountPreSwap = TokenUtils.getBalanceOf(
             requiredTokenOut.token,
             address(this)
         );
 
-        // Check the amount supplied by the user. The contract owner tips the
-        // difference if needed
+        // Check that the amount supplied by the user is exactly suppliedTokenIn.
+        // In the case of native token input, the value should've been supplied
+        // in msg.value. In the case of ERC20 input, move the tokens using
+        // transferFrom.
         if (address(requiredTokenIn.token) == address(0)) {
-            // Should never require extra input from owner
+            // Caller should have supplied the exact amount in msg.value
+            require(suppliedTokenInAmount == msg.value, "DPR: wrong msg.value");
+            // Inner swap should not require more than the required input amount
             require(
-                requiredTokenIn.amount == msg.value,
-                "DPR: wrong msg.value"
+                innerSwap.value <= requiredTokenIn.amount,
+                "DPR: wrong inner swap value"
             );
         } else {
-            TokenUtils.transferFrom(
-                requiredTokenIn.token,
-                msg.sender,
-                address(this),
-                suppliedTokenInAmount
-            );
-
-            if (suppliedTokenInAmount < requiredTokenIn.amount) {
-                // Input more tokens from the owner up to maxTip to make up for
-                // the shortfall so that the swap can go through.
-                uint256 inShortfall = requiredTokenIn.amount -
-                    suppliedTokenInAmount;
-                require(inShortfall <= maxTip, "DPR: excessive tip");
-                TokenUtils.transferFrom(
-                    requiredTokenIn.token,
-                    owner(),
-                    address(this),
-                    inShortfall
-                );
-            }
-            // If we're about to send more tokens than required, it's fine --
-            // we'll just get more output back, allowing us to account for
-            // expected slippage.
-
-            // forceApprove() not necessary, we check correct tokenOut amount
-            if (innerSwap.to != address(0)) {
-                requiredTokenIn.token.approve(
-                    innerSwap.to,
-                    requiredTokenIn.amount
-                );
-            }
+            // Transfer the supplied tokens to the contract
+            TokenUtils.transferFrom({
+                token: requiredTokenIn.token,
+                from: msg.sender,
+                to: address(this),
+                amount: suppliedTokenInAmount
+            });
         }
 
-        // Execute (inner) swap
+        // Check that the tip doesn't exceed maxPreTip
+        if (suppliedTokenInAmount < requiredTokenIn.amount) {
+            uint256 inShortfall = requiredTokenIn.amount -
+                suppliedTokenInAmount;
+            require(inShortfall <= maxPreTip, "DPR: excessive pre tip");
+        }
+
+        //////////////////////////////////////////////////////////////
+        // SWAP
+        //////////////////////////////////////////////////////////////
+
+        // Approve requiredTokenIn.amount even if it's greater than
+        // suppliedTokenInAmount. The difference is tipped by the contract. We
+        // already checked that the tip is within maxPreTip.
+        if (innerSwap.to != address(0)) {
+            requiredTokenIn.token.forceApprove({
+                spender: innerSwap.to,
+                value: requiredTokenIn.amount
+            });
+        }
+
+        // Execute inner swap
         if (innerSwap.to != address(0)) {
             (bool success, ) = innerSwap.to.call{value: innerSwap.value}(
                 innerSwap.data
@@ -91,30 +139,34 @@ contract DaimoPayRelayer is Ownable2Step {
             address(this)
         ) - amountPreSwap;
 
-        // Check the amount output from the swap. The contract owner tips the
-        // difference if needed. If there are excess tokens, transfer them to
-        // the owner.
+        //////////////////////////////////////////////////////////////
+        // POST-SWAP
+        //////////////////////////////////////////////////////////////
+
+        // If we received less than required, check that the amount we need to
+        // tip is within maxPostTip.
         if (swapAmountOut < requiredTokenOut.amount) {
-            // Output more tokens from owner.
             uint256 outShortfall = requiredTokenOut.amount - swapAmountOut;
-            require(outShortfall <= maxTip, "DPR: excessive tip");
-            TokenUtils.transferFrom(
-                requiredTokenOut.token,
-                owner(),
-                address(this),
-                outShortfall
-            );
-        } else {
-            // Give excess tokens to owner.
-            uint256 tip = swapAmountOut - requiredTokenOut.amount;
-            TokenUtils.transfer(requiredTokenOut.token, payable(owner()), tip);
+            require(outShortfall <= maxPostTip, "DPR: excessive post tip");
         }
 
+        // Transfer the required output tokens to the caller, tipping the
+        // shortfall if needed. If there are surplus tokens from the swap, keep
+        // them.
         TokenUtils.transfer(
             requiredTokenOut.token,
             payable(msg.sender),
             requiredTokenOut.amount
         );
+
+        emit SwapAndTip({
+            requiredTokenIn: address(requiredTokenIn.token),
+            suppliedAmountIn: suppliedTokenInAmount,
+            requiredTokenOut: address(requiredTokenOut.token),
+            swapAmountOut: swapAmountOut,
+            maxPreTip: maxPreTip,
+            maxPostTip: maxPostTip
+        });
     }
 
     function startIntent(
@@ -124,7 +176,7 @@ contract DaimoPayRelayer is Ownable2Step {
         Call[] calldata startCalls,
         bytes calldata bridgeExtraData,
         Call[] calldata postCalls
-    ) public payable onlyOwner {
+    ) public payable onlyRole(RELAYER_EOA_ROLE) {
         // Make pre-start calls
         for (uint256 i = 0; i < preCalls.length; ++i) {
             Call calldata call = preCalls[i];
@@ -151,11 +203,10 @@ contract DaimoPayRelayer is Ownable2Step {
         PayIntent calldata intent,
         TokenAmount calldata tokenIn,
         Call[] calldata calls
-    ) public onlyOwner {
-        TokenUtils.transferFrom({
+    ) public onlyRole(RELAYER_EOA_ROLE) {
+        TokenUtils.transfer({
             token: tokenIn.token,
-            from: msg.sender,
-            to: address(dp),
+            recipient: payable(address(dp)),
             amount: tokenIn.amount
         });
         dp.fastFinishIntent(intent, calls);
@@ -167,7 +218,7 @@ contract DaimoPayRelayer is Ownable2Step {
         PayIntent calldata intent,
         Call[] calldata claimCalls,
         Call[] calldata postCalls
-    ) public onlyOwner {
+    ) public onlyRole(RELAYER_EOA_ROLE) {
         // Make pre-claim calls
         for (uint256 i = 0; i < preCalls.length; ++i) {
             Call calldata call = preCalls[i];
@@ -182,15 +233,6 @@ contract DaimoPayRelayer is Ownable2Step {
             Call calldata call = postCalls[i];
             (bool success, ) = call.to.call{value: call.value}(call.data);
             require(success, "DPR: postCall failed");
-        }
-
-        // Transfer any bridgeTokenOut balance back to the owner
-        uint256 n = intent.bridgeTokenOutOptions.length;
-        for (uint256 i = 0; i < n; i++) {
-            TransferTokenBalance.transferBalance(
-                intent.bridgeTokenOutOptions[i].token,
-                payable(msg.sender)
-            );
         }
     }
 

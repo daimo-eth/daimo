@@ -138,10 +138,6 @@ contract DaimoPay {
 
         // Finish the intent and return any leftover tokens to the caller
         _finishIntent({intentAddr: intentAddr, intent: intent, calls: calls});
-        TransferTokenBalance.refundLeftoverTokens({
-            token: intent.finalCallToken.token,
-            recipient: payable(msg.sender)
-        });
 
         emit FastFinish({intentAddr: intentAddr, newRecipient: msg.sender});
     }
@@ -175,10 +171,6 @@ contract DaimoPay {
                 intent: intent,
                 calls: calls
             });
-            TransferTokenBalance.refundLeftoverTokens({
-                token: intent.finalCallToken.token,
-                recipient: payable(recipient)
-            });
         } else {
             // Otherwise, the relayer fastFinished the intent, give them the recieved
             // amount.
@@ -187,7 +179,7 @@ contract DaimoPay {
             uint256 n = intent.bridgeTokenOutOptions.length;
             for (uint256 i = 0; i < n; ++i) {
                 TokenAmount calldata tokenOut = intent.bridgeTokenOutOptions[i];
-                TransferTokenBalance.transferBalance({
+                TokenUtils.transferBalance({
                     token: tokenOut.token,
                     recipient: payable(recipient)
                 });
@@ -203,6 +195,7 @@ contract DaimoPay {
     // Swap the token the relayer transferred to finalCallToken
     // Then, if the intent has a finalCall, make the intent call.
     // Otherwise, transfer the token to the final address.
+    // Finally, send any leftover final token to the caller.
     function _finishIntent(
         address intentAddr,
         PayIntent calldata intent,
@@ -268,6 +261,11 @@ contract DaimoPay {
                 intent: intent
             });
         }
+
+        TokenUtils.transferBalance({
+            token: intent.finalCallToken.token,
+            recipient: payable(msg.sender)
+        });
     }
 
     receive() external payable {}

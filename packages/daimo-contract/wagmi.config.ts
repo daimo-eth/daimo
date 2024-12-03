@@ -50,6 +50,7 @@ export default defineConfig({
       forge: { build: false },
       include: [
         "Daimo*.sol/*",
+        "Dummy*.sol/*",
         "Pay*.sol/*",
         "ERC*.sol/*",
         "EntryPoint.sol/*",

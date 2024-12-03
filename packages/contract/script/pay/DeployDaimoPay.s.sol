@@ -12,7 +12,7 @@ contract DeployDaimoPay is Script {
 
         address intentFactory = CREATE3.getDeployed(
             msg.sender,
-            keccak256("PayIntentFactory-options4")
+            keccak256("PayIntentFactory-5")
         );
         address bridger = CREATE3.getDeployed(
             msg.sender,
@@ -22,7 +22,7 @@ contract DeployDaimoPay is Script {
         console.log("using bridger at", bridger);
 
         address daimoPay = CREATE3.deploy(
-            keccak256("DaimoPay-options4"),
+            keccak256("DaimoPay-5"),
             abi.encodePacked(
                 type(DaimoPay).creationCode,
                 abi.encode(intentFactory, bridger)

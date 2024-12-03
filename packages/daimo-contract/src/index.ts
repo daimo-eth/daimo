@@ -64,15 +64,15 @@ export const daimoFastCctpAddrs: Address[] = [
 ];
 
 // Daimo Pay
-export const daimoPayAddress = "0xf603cE83e28c9E9E699c4df2B11E31B63b1890C0";
+export const daimoPayAddress = "0x9BD9caF29B76E98d57Fc3a228A39C7efe8ca0eAf";
 export const daimoPayBridgerAddress =
   "0xB4418A1EcE96CF1F797fef3Ab2c0Afdf59701C38";
 export const daimoPayAxelarBridgerAddress =
   "0x91052AEc686070bc8787fde3d530f21976302867";
 export const payIntentFactoryAddress =
-  "0x78dC70cC8C3b3a79BF161941934ed4829C9E7DDf";
+  "0x90498530e2FddcD937faB0Ab56cF6a7c1FB08b62";
 export const daimoPayRelayerAddress =
-  "0xD9c53251d364F4E467412EDbD0ecCe6aAEB97cAA";
+  "0x3919F06Fc366A1a429908a942463A5632f942f33";
 
 // Utils
 export const daimoPayBatchReadUtilsAddress =

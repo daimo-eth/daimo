@@ -2892,31 +2892,6 @@ export const daimoPayAbi = [
     anonymous: false,
     inputs: [
       {
-        name: 'recipient',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'token',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'amount',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: true,
-      },
-    ],
-    name: 'RefundedTokens',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
         name: 'intentAddr',
         internalType: 'address',
         type: 'address',
@@ -4786,16 +4761,23 @@ export const daimoPayCctpBridgerAbi = [
 export const daimoPayRelayerAbi = [
   {
     type: 'constructor',
-    inputs: [{ name: '_owner', internalType: 'address', type: 'address' }],
+    inputs: [{ name: 'admin', internalType: 'address', type: 'address' }],
     stateMutability: 'nonpayable',
   },
   { type: 'receive', stateMutability: 'payable' },
   {
     type: 'function',
     inputs: [],
-    name: 'acceptOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
+    name: 'DEFAULT_ADMIN_ROLE',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'RELAYER_EOA_ROLE',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -4960,22 +4942,55 @@ export const daimoPayRelayerAbi = [
   },
   {
     type: 'function',
-    inputs: [],
-    name: 'owner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    inputs: [{ name: 'role', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'getRoleAdmin',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
     stateMutability: 'view',
   },
   {
     type: 'function',
-    inputs: [],
-    name: 'pendingOwner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    inputs: [{ name: 'relayer', internalType: 'address', type: 'address' }],
+    name: 'grantRelayerEOARole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'account', internalType: 'address', type: 'address' },
+    ],
+    name: 'grantRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'account', internalType: 'address', type: 'address' },
+    ],
+    name: 'hasRole',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
     stateMutability: 'view',
   },
   {
     type: 'function',
-    inputs: [],
-    name: 'renounceOwnership',
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'callerConfirmation', internalType: 'address', type: 'address' },
+    ],
+    name: 'renounceRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'account', internalType: 'address', type: 'address' },
+    ],
+    name: 'revokeRole',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -5068,6 +5083,13 @@ export const daimoPayRelayerAbi = [
   },
   {
     type: 'function',
+    inputs: [{ name: 'interfaceId', internalType: 'bytes4', type: 'bytes4' }],
+    name: 'supportsInterface',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     inputs: [
       {
         name: 'requiredTokenIn',
@@ -5092,7 +5114,8 @@ export const daimoPayRelayerAbi = [
           { name: 'amount', internalType: 'uint256', type: 'uint256' },
         ],
       },
-      { name: 'maxTip', internalType: 'uint256', type: 'uint256' },
+      { name: 'maxPreTip', internalType: 'uint256', type: 'uint256' },
+      { name: 'maxPostTip', internalType: 'uint256', type: 'uint256' },
       {
         name: 'innerSwap',
         internalType: 'struct Call',
@@ -5110,48 +5133,134 @@ export const daimoPayRelayerAbi = [
   },
   {
     type: 'function',
-    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
-    name: 'transferOwnership',
+    inputs: [
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+      { name: 'amount', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'withdrawAmount',
     outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'token', internalType: 'contract IERC20', type: 'address' },
+    ],
+    name: 'withdrawBalance',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     stateMutability: 'nonpayable',
   },
   {
     type: 'event',
     anonymous: false,
     inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32', indexed: true },
       {
-        name: 'previousOwner',
+        name: 'previousAdminRole',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'newAdminRole',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+    ],
+    name: 'RoleAdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32', indexed: true },
+      {
+        name: 'account',
         internalType: 'address',
         type: 'address',
         indexed: true,
       },
       {
-        name: 'newOwner',
+        name: 'sender',
         internalType: 'address',
         type: 'address',
         indexed: true,
       },
     ],
-    name: 'OwnershipTransferStarted',
+    name: 'RoleGranted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32', indexed: true },
+      {
+        name: 'account',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'sender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'RoleRevoked',
   },
   {
     type: 'event',
     anonymous: false,
     inputs: [
       {
-        name: 'previousOwner',
+        name: 'requiredTokenIn',
         internalType: 'address',
         type: 'address',
         indexed: true,
       },
       {
-        name: 'newOwner',
+        name: 'suppliedAmountIn',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'requiredTokenOut',
         internalType: 'address',
         type: 'address',
         indexed: true,
       },
+      {
+        name: 'swapAmountOut',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'maxPreTip',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+      {
+        name: 'maxPostTip',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
     ],
-    name: 'OwnershipTransferred',
+    name: 'SwapAndTip',
+  },
+  { type: 'error', inputs: [], name: 'AccessControlBadConfirmation' },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'account', internalType: 'address', type: 'address' },
+      { name: 'neededRole', internalType: 'bytes32', type: 'bytes32' },
+    ],
+    name: 'AccessControlUnauthorizedAccount',
   },
   {
     type: 'error',
@@ -5164,16 +5273,6 @@ export const daimoPayRelayerAbi = [
     name: 'AddressInsufficientBalance',
   },
   { type: 'error', inputs: [], name: 'FailedInnerCall' },
-  {
-    type: 'error',
-    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
-    name: 'OwnableInvalidOwner',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
-    name: 'OwnableUnauthorizedAccount',
-  },
   {
     type: 'error',
     inputs: [{ name: 'token', internalType: 'address', type: 'address' }],
@@ -6839,31 +6938,6 @@ export const payIntentContractAbi = [
       },
     ],
     name: 'Initialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'recipient',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'token',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'amount',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: true,
-      },
-    ],
-    name: 'RefundedTokens',
   },
   {
     type: 'error',

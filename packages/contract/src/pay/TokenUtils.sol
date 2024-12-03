@@ -71,4 +71,16 @@ library TokenUtils {
         );
         token.safeTransferFrom({from: from, to: to, value: amount});
     }
+
+    /// Sends any token balance in the contract to the recipient.
+    function transferBalance(
+        IERC20 token,
+        address payable recipient
+    ) internal returns (uint256) {
+        uint256 balance = getBalanceOf({token: token, addr: address(this)});
+        if (balance > 0) {
+            transfer({token: token, recipient: recipient, amount: balance});
+        }
+        return balance;
+    }
 }
