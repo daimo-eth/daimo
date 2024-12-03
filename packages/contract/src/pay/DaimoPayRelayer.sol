@@ -89,7 +89,10 @@ contract DaimoPayRelayer is AccessControl {
         // transferFrom.
         if (address(requiredTokenIn.token) == address(0)) {
             // Caller should have supplied the exact amount in msg.value
-            require(suppliedTokenInAmount == msg.value, "DPR: wrong msg.value");
+            require(
+                requiredTokenIn.amount == msg.value,
+                "DPR: wrong msg.value"
+            );
             // Inner swap should not require more than the required input amount
             require(
                 innerSwap.value <= requiredTokenIn.amount,
@@ -103,28 +106,38 @@ contract DaimoPayRelayer is AccessControl {
                 to: address(this),
                 amount: suppliedTokenInAmount
             });
-        }
 
-        // Check that the tip doesn't exceed maxPreTip
-        if (suppliedTokenInAmount < requiredTokenIn.amount) {
-            uint256 inShortfall = requiredTokenIn.amount -
-                suppliedTokenInAmount;
-            require(inShortfall <= maxPreTip, "DPR: excessive pre tip");
+            // Check that the tip doesn't exceed maxPreTip
+            if (suppliedTokenInAmount < requiredTokenIn.amount) {
+                uint256 inShortfall = requiredTokenIn.amount -
+                    suppliedTokenInAmount;
+                require(inShortfall <= maxPreTip, "DPR: excessive pre tip");
+
+                uint256 balance = TokenUtils.getBalanceOf({
+                    token: requiredTokenIn.token,
+                    addr: address(this)
+                });
+                require(
+                    balance >= requiredTokenIn.amount,
+                    "DPR: balance less than required input"
+                );
+            }
+
+            // Approve requiredTokenIn.amount even if it's greater than
+            // suppliedTokenInAmount. The difference is tipped by the contract. We
+            // already checked that the tip is within maxPreTip and the contract
+            // has enough balance.
+            if (innerSwap.to != address(0)) {
+                requiredTokenIn.token.forceApprove({
+                    spender: innerSwap.to,
+                    value: requiredTokenIn.amount
+                });
+            }
         }
 
         //////////////////////////////////////////////////////////////
         // SWAP
         //////////////////////////////////////////////////////////////
-
-        // Approve requiredTokenIn.amount even if it's greater than
-        // suppliedTokenInAmount. The difference is tipped by the contract. We
-        // already checked that the tip is within maxPreTip.
-        if (innerSwap.to != address(0)) {
-            requiredTokenIn.token.forceApprove({
-                spender: innerSwap.to,
-                value: requiredTokenIn.amount
-            });
-        }
 
         // Execute inner swap
         if (innerSwap.to != address(0)) {
@@ -134,10 +147,11 @@ contract DaimoPayRelayer is AccessControl {
             require(success, "DPR: inner swap failed");
         }
 
-        uint256 swapAmountOut = TokenUtils.getBalanceOf(
+        uint256 postSwapBalance = TokenUtils.getBalanceOf(
             requiredTokenOut.token,
             address(this)
-        ) - amountPreSwap;
+        );
+        uint256 swapAmountOut = postSwapBalance - amountPreSwap;
 
         //////////////////////////////////////////////////////////////
         // POST-SWAP
@@ -148,6 +162,10 @@ contract DaimoPayRelayer is AccessControl {
         if (swapAmountOut < requiredTokenOut.amount) {
             uint256 outShortfall = requiredTokenOut.amount - swapAmountOut;
             require(outShortfall <= maxPostTip, "DPR: excessive post tip");
+            require(
+                postSwapBalance >= requiredTokenOut.amount,
+                "DPR: balance less than required output"
+            );
         }
 
         // Transfer the required output tokens to the caller, tipping the
