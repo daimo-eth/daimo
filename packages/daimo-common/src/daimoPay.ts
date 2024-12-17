@@ -43,10 +43,28 @@ export enum DaimoPayIntentStatus {
   REFUNDED = "refunded",
 }
 
+/** Order updates used by services outside orderProcessor to listen for any
+ * relevant or interesting changes to the order status. */
 export type DaimoPayOrderUpdate =
-  | DaimoPayOrderMode
-  | DaimoPayOrderStatusSource
-  | DaimoPayOrderStatusDest;
+  | {
+      type: "mode";
+      value: DaimoPayOrderMode;
+    }
+  | {
+      type: "source";
+      value: DaimoPayOrderStatusSource;
+      txHash: string | undefined; // Ethereum or Solana tx hash
+    }
+  | {
+      type: "dest";
+      value: DaimoPayOrderStatusDest;
+      txHash: Hex;
+    }
+  | {
+      type: "intent";
+      value: DaimoPayIntentStatus;
+      txHash: Hex;
+    };
 
 export interface DaimoPayOrderItem {
   name: string;

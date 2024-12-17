@@ -96,6 +96,24 @@ export const ethereumUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
+export const ethereumDAI: ForeignToken = {
+  chainId: 1,
+  token: getAddress("0x6B175474E89094C44Da98b954EedeAC495271d0F"),
+  decimals: 18,
+  name: "Dai Stablecoin",
+  symbol: "DAI",
+  logoURI: TokenLogo.DAI,
+};
+
+export const ethereumUSDT: ForeignToken = {
+  chainId: 1,
+  token: getAddress("0xdAC17F958D2ee523a2206206994597C13D831ec7"),
+  decimals: 6,
+  name: "Tether USD",
+  symbol: "USDT",
+  logoURI: TokenLogo.USDT,
+};
+
 export const ethereumEURC: ForeignToken = {
   chainId: 1,
   token: getAddress("0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c"),
@@ -105,7 +123,14 @@ export const ethereumEURC: ForeignToken = {
   logoURI: TokenLogo.EURC,
 };
 
-const ethereumTokens = [ethereumETH, ethereumWETH, ethereumUSDC, ethereumEURC];
+const ethereumTokens = [
+  ethereumETH,
+  ethereumWETH,
+  ethereumUSDC,
+  ethereumEURC,
+  ethereumDAI,
+  ethereumUSDT,
+];
 
 usdcByChainId.set(1, ethereumUSDC);
 
@@ -253,11 +278,41 @@ export const arbitrumAxlUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
+export const arbitrumDAI: ForeignToken = {
+  chainId: 42161,
+  token: getAddress("0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"),
+  decimals: 18,
+  name: "Dai Stablecoin",
+  symbol: "DAI",
+  logoURI: TokenLogo.DAI,
+};
+
+export const arbitrumUSDT: ForeignToken = {
+  chainId: 42161,
+  token: getAddress("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"),
+  decimals: 6,
+  name: "Tether USD",
+  symbol: "USDT",
+  logoURI: TokenLogo.USDT,
+};
+
+export const arbitrumUSDCe: ForeignToken = {
+  chainId: 42161,
+  token: getAddress("0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8"),
+  decimals: 6,
+  name: "Bridged USD Coin",
+  symbol: "USDCe",
+  logoURI: TokenLogo.USDC,
+};
+
 const arbitrumTokens = [
   arbitrumETH,
   arbitrumWETH,
   arbitrumUSDC,
   arbitrumAxlUSDC,
+  arbitrumDAI,
+  arbitrumUSDT,
+  arbitrumUSDCe,
 ];
 
 usdcByChainId.set(42161, arbitrumUSDC);
@@ -328,11 +383,41 @@ export const optimismAxlUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
+export const optimismDAI: ForeignToken = {
+  chainId: 10,
+  token: getAddress("0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"),
+  decimals: 18,
+  name: "Dai Stablecoin",
+  symbol: "DAI",
+  logoURI: TokenLogo.DAI,
+};
+
+export const optimismUSDT: ForeignToken = {
+  chainId: 10,
+  token: getAddress("0x94b008aA00579c1307B0EF2c499aD98a8ce58e58"),
+  decimals: 6,
+  name: "Tether USD",
+  symbol: "USDT",
+  logoURI: TokenLogo.USDT,
+};
+
+export const optimismUSDCe: ForeignToken = {
+  chainId: 10,
+  token: getAddress("0x7F5c764cBc14f9669B88837ca1490cCa17c31607"),
+  decimals: 6,
+  name: "Bridged USD Coin",
+  symbol: "USDCe",
+  logoURI: TokenLogo.USDC,
+};
+
 const optimismTokens = [
   optimismETH,
   optimismWETH,
   optimismUSDC,
   optimismAxlUSDC,
+  optimismDAI,
+  optimismUSDT,
+  optimismUSDCe,
 ];
 
 usdcByChainId.set(10, optimismUSDC);
@@ -412,12 +497,42 @@ export const polygonAxlUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
+export const polygonDAI: ForeignToken = {
+  chainId: 137,
+  token: getAddress("0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063"),
+  decimals: 18,
+  name: "Dai Stablecoin",
+  symbol: "DAI",
+  logoURI: TokenLogo.DAI,
+};
+
+export const polygonUSDT: ForeignToken = {
+  chainId: 137,
+  token: getAddress("0xc2132D05D31c914a87C6611C10748AEb04B58e8F"),
+  decimals: 6,
+  name: "Tether USD",
+  symbol: "USDT",
+  logoURI: TokenLogo.USDT,
+};
+
+export const polygonUSDCe: ForeignToken = {
+  chainId: 137,
+  token: getAddress("0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"),
+  decimals: 6,
+  name: "Bridged USD Coin",
+  symbol: "USDCe",
+  logoURI: TokenLogo.USDC,
+};
+
 const polygonTokens = [
   polygonMATIC,
   polygonWMATIC,
   polygonWETH,
   polygonUSDC,
   polygonAxlUSDC,
+  polygonDAI,
+  polygonUSDT,
+  polygonUSDCe,
 ];
 
 usdcByChainId.set(137, polygonUSDC);
@@ -619,7 +734,16 @@ export const bscUSDC: ForeignToken = {
   logoURI: TokenLogo.USDC,
 };
 
-const bscTokens = [bscBNB, bscWBNB, bscAxlUSDC, bscUSDC];
+export const bscUSDT: ForeignToken = {
+  chainId: 56,
+  token: getAddress("0x55d398326f99059fF775485246999027B3197955"),
+  decimals: 6,
+  name: "Tether USD",
+  symbol: "USDT",
+  logoURI: TokenLogo.USDT,
+};
+
+const bscTokens = [bscBNB, bscWBNB, bscAxlUSDC, bscUSDC, bscUSDT];
 
 usdcByChainId.set(56, bscUSDC);
 axlUSDCByChainId.set(56, bscAxlUSDC);
