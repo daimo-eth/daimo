@@ -100,6 +100,8 @@ export const zDaimoPayOrderMetadata = z.object({
         name: z.string(),
         description: z.string(),
         image: z.string().optional(),
+        price: z.string().optional(),
+        priceSubtitle: z.string().optional(),
       }),
     )
     .describe("Details about what's being ordered, donated, deposited, etc."),
