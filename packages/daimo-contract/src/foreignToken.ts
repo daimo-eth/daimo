@@ -33,6 +33,7 @@ export enum TokenLogo {
   AVAX = "https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png",
   BNB = "https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png",
   SOL = "https://solana.com/src/img/branding/solanaLogoMark.png",
+  WLD = "https://assets.coingecko.com/coins/images/31069/large/worldcoin.jpeg",
 }
 
 /* --------------------- Tokens Constants --------------------- */
@@ -783,6 +784,46 @@ const solanaTokens = [solanaUSDC, solanaWrappedSOL, solanaNativeSol];
 
 usdcByChainId.set(501, solanaUSDC);
 
+//
+// Worldchain
+//
+
+export const worldchainETH = nativeETH(480);
+
+export const worldchainWETH: ForeignToken = {
+  chainId: 480,
+  token: getAddress("0x4200000000000000000000000000000000000006"),
+  decimals: 18,
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  logoURI: TokenLogo.ETH,
+};
+
+export const worldchainUSDCe: ForeignToken = {
+  chainId: 480,
+  token: getAddress("0x79A02482A880bCE3F13e09Da970dC34db4CD24d1"),
+  decimals: 6,
+  name: "Bridged USD Coin",
+  symbol: "USDCe",
+  logoURI: TokenLogo.USDC,
+};
+
+export const worldchainWLD: ForeignToken = {
+  chainId: 480,
+  token: getAddress("0x2cFc85d8E48F8EAB294be644d9E25C3030863003"),
+  decimals: 18,
+  name: "Worldcoin",
+  symbol: "WLD",
+  logoURI: TokenLogo.WLD,
+};
+
+const worldchainTokens = [
+  worldchainETH,
+  worldchainWETH,
+  worldchainUSDCe,
+  worldchainWLD,
+];
+
 // --------------------- Native Token Utils ---------------------
 //
 
@@ -826,6 +867,7 @@ const allBasicTokens = [
   ...lineaTokens,
   ...bscTokens,
   ...solanaTokens,
+  ...worldchainTokens,
 ];
 
 const blacklistedTokens: Record<number, Set<string>> = {

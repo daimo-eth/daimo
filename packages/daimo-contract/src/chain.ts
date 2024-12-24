@@ -56,6 +56,9 @@ import {
   solanaNativeSol,
   solanaUSDC,
   solanaWrappedSOL,
+  worldchainETH,
+  worldchainUSDCe,
+  worldchainWETH,
 } from "./foreignToken";
 
 /** An EVM chain supported by DaimoAccountV2. */
@@ -251,6 +254,17 @@ export const solana: DAv2Chain = {
   wrappedNativeToken: solanaWrappedSOL,
 };
 
+export const worldchain: DAv2Chain = {
+  chainId: 480,
+  name: "worldchain",
+  shortName: "world",
+  cctpDomain: -1,
+  bridgeCoin: worldchainUSDCe,
+  localUSDC: worldchainUSDCe,
+  nativeToken: worldchainETH,
+  wrappedNativeToken: worldchainWETH,
+};
+
 const chains = [
   ethereum,
   ethereumSepolia,
@@ -267,6 +281,7 @@ const chains = [
   linea,
   bsc,
   solana,
+  worldchain,
 ];
 
 /** Supported chains for send (+ soon receive). */
