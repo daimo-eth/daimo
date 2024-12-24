@@ -61,8 +61,8 @@ contract DeployDaimoPayBridger is Script {
         // Bridge to CCTP chains using CCTP.
         // Linea uses Across.
         // BSC uses Axelar.
-        uint256[] memory allChainIds = new uint256[](8);
-        address[] memory allBridgers = new address[](8);
+        uint256[] memory allChainIds = new uint256[](9);
+        address[] memory allBridgers = new address[](9);
 
         allChainIds[0] = ARBITRUM_MAINNET;
         allChainIds[1] = AVAX_MAINNET;
@@ -72,6 +72,7 @@ contract DeployDaimoPayBridger is Script {
         allChainIds[5] = POLYGON_MAINNET;
         allChainIds[6] = LINEA_MAINNET;
         allChainIds[7] = BSC_MAINNET;
+        allChainIds[8] = WORLDCHAIN_MAINNET;
 
         allBridgers[0] = cctpBridger;
         allBridgers[1] = cctpBridger;
@@ -81,9 +82,10 @@ contract DeployDaimoPayBridger is Script {
         allBridgers[5] = cctpBridger;
         allBridgers[6] = acrossBridger;
         allBridgers[7] = axelarBridger;
+        allBridgers[8] = acrossBridger;
 
-        chainIds = new uint256[](7);
-        bridgers = new address[](7);
+        chainIds = new uint256[](8);
+        bridgers = new address[](8);
 
         // Include all chainIds except the current chainId
         uint256 count = 0;
@@ -95,8 +97,12 @@ contract DeployDaimoPayBridger is Script {
             }
         }
 
-        if (block.chainid == LINEA_MAINNET) {
-            // Linea bridges to other chains using Across. Override all bridgers with Across.
+        if (
+            block.chainid == LINEA_MAINNET ||
+            block.chainid == WORLDCHAIN_MAINNET
+        ) {
+            // Linea and Worldchain bridges to other chains using Across.
+            // Override all bridgers with Across.
             // The only exception is BSC, which uses Axelar.
             for (uint256 i = 0; i < bridgers.length; ++i) {
                 if (chainIds[i] == BSC_MAINNET) {
