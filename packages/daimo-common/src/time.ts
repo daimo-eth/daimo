@@ -1,7 +1,6 @@
 import { DaimoChain } from "@daimo/contract";
-import { Locale } from "expo-localization";
 
-import { i18n } from "./i18n";
+import { i18n, Locale } from "./i18n";
 
 /** Returns current unix time, in seconds */
 export function now() {

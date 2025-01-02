@@ -4,10 +4,9 @@ import {
   getChainDisplayName,
   getDAv2Chain,
 } from "@daimo/contract";
-import { Locale } from "expo-localization";
 import { formatUnits, Hex, hexToBytes } from "viem";
 
-import { i18n } from "./i18n";
+import { i18n, Locale } from "./i18n";
 import { MoneyEntry } from "./moneyEntry";
 import { TransferClog } from "./op";
 

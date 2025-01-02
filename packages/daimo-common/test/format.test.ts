@@ -42,10 +42,10 @@ test("debugJson", async (t) => {
     assert.strictEqual(result, '{"foo":123}');
   });
 
-  await t.test("should truncate output to 1000 characters", () => {
-    const input = new Array(1234).fill(0).map((_, i) => i); // >1KB of JSON
+  await t.test("should truncate output to 10000 characters", () => {
+    const input = new Array(10000).fill(0).map((_, i) => i); // >10KB of JSON
     const result = debugJson(input);
-    assert.strictEqual(result.length, 1000); // 1000 chars max output
+    assert.strictEqual(result.length, 10000); // 10000 chars max output
   });
 
   await t.test("should handle BigInt", () => {
