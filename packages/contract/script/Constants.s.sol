@@ -38,6 +38,7 @@ uint256 constant OP_MAINNET = 10;
 uint256 constant POLYGON_MAINNET = 137; // PoS
 uint256 constant REDSTONE_MAINNET = 690;
 uint256 constant SCROLL_MAINNET = 534352;
+uint256 constant WORLDCHAIN_MAINNET = 480;
 uint256 constant ZORA_MAINNET = 7777777;
 
 uint256 constant ARBITRUM_TESTNET = 421614;
@@ -126,6 +127,7 @@ address constant BSC_MAINNET_BRIDGED_USDC = 0x8AC76a51cc950d9822D68b83fE1Ad97B32
 address constant MODE_MAINNET_BRIDGED_USDC = 0xd988097fb8612cc24eeC14542bC03424c656005f;
 address constant OP_MAINNET_BRIDGED_USDC = 0x7F5c764cBc14f9669B88837ca1490cCa17c31607;
 address constant POLYGON_MAINNET_BRIDGED_USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+address constant WORLDCHAIN_MAINNET_BRIDGED_USDC = 0x79A02482A880bCE3F13e09Da970dC34db4CD24d1;
 
 // axlUSDC (Axelar wrapped USDC) addresses
 address constant ARBITRUM_MAINNET_AXLUSDC = 0xEB466342C4d449BC9f53A865D5Cb90586f405215;
@@ -264,6 +266,7 @@ function _getWETH(uint256 chainId) pure returns (address) {
     if (chainId == OP_MAINNET) return OP_STACK_WETH;
     if (chainId == POLYGON_MAINNET) return POLYGON_WETH;
     if (chainId == LINEA_MAINNET) return LINEA_WETH;
+    if (chainId == WORLDCHAIN_MAINNET) return OP_STACK_WETH;
 
     // Testnets
     if (chainId == ARBITRUM_TESTNET) return ARBITRUM_TESTNET_WETH;
@@ -329,6 +332,7 @@ function _getBridgedUSDCAddress(uint256 chainId) pure returns (address) {
     if (chainId == MODE_MAINNET) return MODE_MAINNET_BRIDGED_USDC;
     if (chainId == OP_MAINNET) return OP_MAINNET_BRIDGED_USDC;
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_BRIDGED_USDC;
+    if (chainId == WORLDCHAIN_MAINNET) return WORLDCHAIN_MAINNET_BRIDGED_USDC;
 
     return address(0);
 }
@@ -475,6 +479,7 @@ address constant ZORA_MAINNET_SPOKE_POOL = 0x13fDac9F9b4777705db45291bbFF3c972c6
 address constant MODE_MAINNET_SPOKE_POOL = 0x3baD7AD0728f9917d1Bf08af5782dCbD516cDd96;
 address constant LISK_MAINNET_SPOKE_POOL = 0x9552a0a6624A23B848060AE5901659CDDa1f83f8;
 address constant REDSTONE_MAINNET_SPOKE_POOL = 0x13fDac9F9b4777705db45291bbFF3c972c6d1d97;
+address constant WORLDCHAIN_MAINNET_SPOKE_POOL = 0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64;
 
 function _getSpokePoolAddress(uint256 chainId) pure returns (address) {
     // Mainnets
@@ -490,7 +495,7 @@ function _getSpokePoolAddress(uint256 chainId) pure returns (address) {
     if (chainId == MODE_MAINNET) return MODE_MAINNET_SPOKE_POOL;
     if (chainId == LISK_MAINNET) return LISK_MAINNET_SPOKE_POOL;
     if (chainId == REDSTONE_MAINNET) return REDSTONE_MAINNET_SPOKE_POOL;
-
+    if (chainId == WORLDCHAIN_MAINNET) return WORLDCHAIN_MAINNET_SPOKE_POOL;
     return address(0);
 }
 

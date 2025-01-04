@@ -13,6 +13,8 @@ contract DeployScript is Script {
 
         factory = new CREATE3Factory{salt: salt}();
 
+        console.log("CREATE3Factory deployed to:", address(factory));
+
         vm.stopBroadcast();
     }
 }
