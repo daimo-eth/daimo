@@ -6,12 +6,8 @@ function pluralize(n: number, noun: string): string {
 }
 
 // Import required types
-type Name = Parameters<
-  typeof en.note.accepted.long
->[0];
-type TokenSymbol = Parameters<
-  typeof en.depositAddressBottom.description
->[0];
+type Name = Parameters<typeof en.note.accepted.long>[0];
+type TokenSymbol = Parameters<typeof en.depositAddressBottom.description>[0];
 
 // Burmese (Myanmar) translations
 export const my: LanguageDefinition = {
@@ -226,8 +222,11 @@ export const my: LanguageDefinition = {
     holdButton: () => `အတည်ပြုရန်နှိပ်ထားပါ`,
   },
   routeDisplay: {
-    theyWillReceive: (amount: string, tokenSymbol: TokenSymbol, chainName: string) =>
-      `They will receive ${amount} ${tokenSymbol} on ${chainName}`,
+    theyWillReceive: (
+      amount: string,
+      tokenSymbol: TokenSymbol,
+      chainName: string
+    ) => `They will receive ${amount} ${tokenSymbol} on ${chainName}`,
   },
   sendNav: {
     screenHeader: () => `Send`,
