@@ -23,11 +23,16 @@ contract DeployDaimoPayRelayer is Script {
 
         console.log("daimoPayRelayer deployed at address:", daimoPayRelayer);
 
-        address startAndClaimRelayer = 0xA602141Bfc2577A37B43D6156728b09c900b33c3;
-        DaimoPayRelayer(payable(daimoPayRelayer)).grantRelayerEOARole(
-            startAndClaimRelayer
-        );
-        console.log("Relayer role granted to", startAndClaimRelayer);
+        address[] memory additionalRelayers = new address[](2);
+        additionalRelayers[0] = 0xA602141Bfc2577A37B43D6156728b09c900b33c3; // startAndClaimRelayer
+        additionalRelayers[1] = 0x2F321372E8A9755CD2Ca6114eB8da32A14F8100b; // dev relayer
+
+        for (uint256 i = 0; i < additionalRelayers.length; i++) {
+            DaimoPayRelayer(payable(daimoPayRelayer)).grantRelayerEOARole(
+                additionalRelayers[i]
+            );
+            console.log("Relayer role granted to", additionalRelayers[i]);
+        }
 
         vm.stopBroadcast();
     }

@@ -28,6 +28,9 @@ import {
   baseSepoliaWETH,
   baseUSDC,
   baseWETH,
+  blastETH,
+  blastUSDB,
+  blastWETH,
   bscAxlUSDC,
   bscBNB,
   bscUSDC,
@@ -265,6 +268,17 @@ export const worldchain: DAv2Chain = {
   wrappedNativeToken: worldchainWETH,
 };
 
+export const blast: DAv2Chain = {
+  chainId: 81457,
+  name: "blast",
+  shortName: "blast",
+  cctpDomain: -1,
+  bridgeCoin: blastWETH,
+  localUSDC: blastUSDB, // Blast doesn't have local USDC
+  nativeToken: blastETH,
+  wrappedNativeToken: blastWETH,
+};
+
 const chains = [
   ethereum,
   ethereumSepolia,
@@ -282,6 +296,7 @@ const chains = [
   bsc,
   solana,
   worldchain,
+  blast,
 ];
 
 /** Supported chains for send (+ soon receive). */
@@ -335,4 +350,9 @@ export function getChainDisplayName(
     displayName = displayName.replace("Sepolia", noSepolia ? "" : " Sepolia");
   }
   return displayName;
+}
+
+/** Returns the native token for the given chain. */
+export function getChainNativeToken(chainId: number): ForeignToken {
+  return getDAv2Chain(chainId).nativeToken;
 }
