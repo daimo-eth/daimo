@@ -150,7 +150,7 @@ export const my: LanguageDefinition = {
       usingTitle: () => `You're using this device now`,
       deleteTitle: () => `အကောင့်ကိုဖျက်သိမ်းမည်`,
       usingSubtitle: () =>
-        `ယခုလုပ်ငန်းစဥ်ကိုဆောင်ရွက်မည်ဆိုပါက အကောင့်မှထွက်သွားမည်ဖြစ်ပါသည်`,
+          `ယခုလုပ်ငန်းစဥ်ကိုဆောင်ရွက်မည်ဆိုပါက အကောင့်မှထွက်သွားမည်ဖြစ်ပါသည်`,
       deleteSubtitle: () =>
         `ယခု Device သည်သင့်အကောင့်တွင်တစ်ခုတည်းသာရှိပါသည်။ ပယ်ဖျက်ပါက သင့်အကောင့်ပါဖျက်သိမ်းသွားမည်ဖြစ်ပါသည်။`,
     },
@@ -172,7 +172,8 @@ export const my: LanguageDefinition = {
     cancel: {
       title: () => `ပယ်ဖျက်မည်`,
 
-      link: () => `Linkကိုပယ်ဖျက်မည်`,
+      link: () =>
+        `Linkကိုပယ်ဖျက်မည်`,
       long: (dollars: string) =>
         `${dollars} ကိုပြန်လည်ရယူရန် ယခုLinkကိုဖျက်သိမ်းမည်`,
     },
@@ -211,7 +212,8 @@ export const my: LanguageDefinition = {
   },
   noteAction: {
     disabledReason: {
-      insufficientFunds: () => `လက်ကျန်ငွေမလုံလောက်ပါ`,
+      insufficientFunds: () =>
+        `လက်ကျန်ငွေမလုံလောက်ပါ`,
     },
     statusMsg: {
       totalDollars: (dollars: TokenSymbol) =>
@@ -253,7 +255,8 @@ export const my: LanguageDefinition = {
       },
     },
     enterAmount: () => `ပမာဏအားထည့်သွင်းပါ`,
-    createLinkButton: () => `ပေးချေရန်လင့်ကိုပြုလုပ်ပါ`,
+    createLinkButton: () =>
+      `ပေးချေရန်လင့်ကိုပြုလုပ်ပါ`,
   },
   swapNotification: {
     msg: (readableAmount: string, coinName: string) =>
