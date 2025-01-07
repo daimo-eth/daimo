@@ -378,7 +378,8 @@ export const my: LanguageDefinition = {
       requestLink: () => `လင့်မှတဆင့်တောင်းခံမည်`,
       sendLink: () => `လင့်မှတဆင့်ပို့မည်`,
       showQR: () => `QR ကုဒ်ပြမည်`,
-      scanQR: () => `QR ကုဒ်စကင်ဖတ်မည်`,
+      scanQR: () =>
+        `QR ကုဒ်စကင်ဖတ်မည်`,
     },
   },
   invitesNotification: {
@@ -392,7 +393,8 @@ export const my: LanguageDefinition = {
   allowNotifs: {
     screenHeader: () => `အကြောင်းကြားချက်များ`,
     allowButton: () => `အကြောင်းကြားချက်များခွင့်ပြုမည်`,
-    skipButton: () => `ကျော်မည်`,
+    skipButton: () =>
+      `ကျော်မည်`,
     instructions: () =>
       `သင့်အကောင့်လှုပ်ရှားမှုများအတွက်သာ အကြောင်းကြားချက်များရရှိမည်ဖြစ်သည်။`,
   },
@@ -458,7 +460,8 @@ export const my: LanguageDefinition = {
     },
     withdrawStatus: {
       standard: () => `ငွေများသည် 3 ရက်အတွင်းရောက်ရှိမည်။`,
-      maxWithdrawal: () => `အများဆုံးငွေထုတ်နိုင်သည့်ပမာဏ`,
+      maxWithdrawal: () =>
+        `အများဆုံးငွေထုတ်နိုင်သည့်ပမာဏ`,
     },
   },
   yourInvites: {
@@ -493,7 +496,8 @@ export const my: LanguageDefinition = {
     openWarpcastButton: () => `WARPCAST တွင်ဖွင့်မည်`,
     welcome: (fcUsername: string) => `ကြိုဆိုပါသည် ${fcUsername}`,
     loading: () => `ဆောင်ရွက်နေပါသည်...`,
-    removeFromProfile: () => `ပရိုဖိုင်မှဖယ်ရှားမည်`,
+    removeFromProfile: () =>
+      `ပရိုဖိုင်မှဖယ်ရှားမည်`,
     addToProfile: () =>
       `ပရိုဖိုင်သို့ထည့်သွင်းမည်`,
   },
@@ -569,7 +573,8 @@ export const my: LanguageDefinition = {
     useBackup: () => `အရန်သိမ်းဆည်းမှုအသုံးပြုမည်`,
   },
   existingSeedPhrase: {
-    screenHeader: () => `Seed phrase ဖြင့်ဝင်ရောက်မည်`,
+    screenHeader: () =>
+      `Seed phrase ဖြင့်ဝင်ရောက်မည်`,
   },
   existingUseBackup: {
     screenHeader: () =>
@@ -640,7 +645,8 @@ export const my: LanguageDefinition = {
     alreadyHaveAccountButton: () => `အကောင့်ရှိပြီးသားလား?`,
     rows: {
       selfCustody: {
-        title: () => `သင့်သော့၊ သင့်ငွေကြေး`,
+        title: () =>
+        `သင့်သော့၊ သင့်ငွေကြေး`,
         description: () => `Base ပေါ်ရှိ USDC။`,
       },
       help: {
@@ -675,7 +681,8 @@ export const my: LanguageDefinition = {
     },
   },
   receiveNav: {
-    screenHeader: () => `တောင်းခံမည်`,
+    screenHeader: () =>
+      `တောင်းခံမည်`,
   },
   receive: {
     screenHeader: () => `တောင်းခံမည်မှ`,
@@ -690,7 +697,8 @@ export const my: LanguageDefinition = {
       insufficientFunds: () => `လက်ကျန်ငွေမလုံလောက်ပါ`,
       self: () => `ကိုယ့်ကိုယ်ကို ပို့၍မရပါ`,
       other: () => `ဤအကောင့်သို့ပို့၍မရပါ`,
-      zero: () => `ပမာဏထည့်သွင်းပါ`,
+      zero: () =>
+        `ပမာဏထည့်သွင်းပါ`,
       min: (minTransferAmount: number) =>
         `အနည်းဆုံးလွှဲပြောင်းနိုင်သည့်ပမာဏမှာ ${minTransferAmount} USDC ဖြစ်သည်`,
     },
@@ -717,7 +725,8 @@ export const my: LanguageDefinition = {
     depositStatus: {
       creating: () => "ငွေဖြည့်ခြင်းပြုလုပ်နေသည်",
       success: () => "ငွေဖြည့်ခြင်းအောင်မြင်ပါသည်!",
-      failed: () => "ငွေဖြည့်ခြင်းမအောင်မြင်ပါ",
+      failed: () =>
+        "ငွေဖြည့်ခြင်းမအောင်မြင်ပါ",
     },
   },
   deposit: {
@@ -739,7 +748,8 @@ export const my: LanguageDefinition = {
       cta: () => `လိပ်စာသို့ငွေဖြည့်မည်`,
       title: () => `သင့်လိပ်စာသို့ပို့မည်`,
     },
-    loading: () => `ဖွင့်နေသည်...`,
+    loading: () =>
+      `ဖွင့်နေသည်...`,
     initiated: {
       title: () => `ငွေဖြည့်ခြင်းစတင်ပြီးပါပြီ`,
       subtitle: () =>
@@ -803,7 +813,8 @@ export const my: LanguageDefinition = {
   createBackup: {
     default: {
       header: () => `အရန်သိမ်းဆည်းမှုပြုလုပ်မည်`,
-      passkeyTitle: () => `Passkey အရန်သိမ်းဆည်းမှုပြုလုပ်မည်`,
+      passkeyTitle: () =>
+        `Passkey အရန်သိမ်းဆည်းမှုပြုလုပ်မည်`,
       passkeyBullet1: () => `အဆင်ပြေ၊ လုံခြုံ၊ phishing ဒဏ်ခံနိုင်သော`,
       passkeyBullet2: () =>
         `သင့်စကားဝှက်စီမံခန့်ခွဲသူတွင် သိမ်းဆည်းထားသည်၊ ဥပမာ iCloud Keychain သို့မဟုတ် 1Password`,
