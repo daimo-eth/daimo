@@ -149,7 +149,8 @@ export const my: LanguageDefinition = {
 
       usingTitle: () => `You're using this device now`,
       deleteTitle: () => `အကောင့်ကိုဖျက်သိမ်းမည်`,
-      usingSubtitle: () => `ယခုလုပ်ငန်းစဥ်ကိုဆောင်ရွက်မည်ဆိုပါက အကောင့်မှထွက်သွားမည်ဖြစ်ပါသည်`,
+      usingSubtitle: () =>
+        `ယခုလုပ်ငန်းစဥ်ကိုဆောင်ရွက်မည်ဆိုပါက အကောင့်မှထွက်သွားမည်ဖြစ်ပါသည်`,
       deleteSubtitle: () =>
         `ယခု Device သည်သင့်အကောင့်တွင်တစ်ခုတည်းသာရှိပါသည်။ ပယ်ဖျက်ပါက သင့်အကောင့်ပါဖျက်သိမ်းသွားမည်ဖြစ်ပါသည်။`,
     },
@@ -172,7 +173,8 @@ export const my: LanguageDefinition = {
       title: () => `ပယ်ဖျက်မည်`,
 
       link: () => `Linkကိုပယ်ဖျက်မည်`,
-      long: (dollars: string) => `${dollars} ကိုပြန်လည်ရယူရန် ယခုLinkကိုဖျက်သိမ်းမည်`,
+      long: (dollars: string) =>
+        `${dollars} ကိုပြန်လည်ရယူရန် ယခုLinkကိုဖျက်သိမ်းမည်`,
     },
     cancelled: {
       title: () => `ပယ်ဖျက်ပြီးပါပြီ`,
@@ -212,7 +214,8 @@ export const my: LanguageDefinition = {
       insufficientFunds: () => `လက်ကျန်ငွေမလုံလောက်ပါ`,
     },
     statusMsg: {
-      totalDollars: (dollars: TokenSymbol) => `စုစုပေါင်းကုန်ကျစရိတ် ${dollars}`,
+      totalDollars: (dollars: TokenSymbol) =>
+        `စုစုပေါင်းကုန်ကျစရိတ် ${dollars}`,
     },
     externalAction: {
       sms: () => `မက်ဆေ့ပို့ရန်`,
@@ -253,7 +256,8 @@ export const my: LanguageDefinition = {
     createLinkButton: () => `ပေးချေရန်လင့်ကိုပြုလုပ်ပါ`,
   },
   swapNotification: {
-    msg: (readableAmount: string, coinName: string) => `Accept ${readableAmount} ${coinName} from `,
+    msg: (readableAmount: string, coinName: string) =>
+      `Accept ${readableAmount} ${coinName} from `,
   },
   profile: {
     screenHeader: () => `ပရိုဖိုင်`,
@@ -378,7 +382,8 @@ export const my: LanguageDefinition = {
     },
   },
   invitesNotification: {
-    description: (inviteCount: number) => `ဖိတ်ခေါ်မှု ${pluralize(inviteCount, "ခု")} ရရှိနိုင်ပါသည်`,
+    description: (inviteCount: number) =>
+      `ဖိတ်ခေါ်မှု ${pluralize(inviteCount, "ခု")} ရရှိနိုင်ပါသည်`,
   },
   notifications: {
     screenHeader: () => `အသိပေးချက်`,
@@ -392,8 +397,10 @@ export const my: LanguageDefinition = {
       `သင့်အကောင့်လှုပ်ရှားမှုများအတွက်သာ အကြောင်းကြားချက်များရရှိမည်ဖြစ်သည်။`,
   },
   home: {
-    pending: (pendingDollars: string) => `+ $${pendingDollars} စောင့်ဆိုင်းနေသည်`,
-    finishAccountSetUp: () => `သင့်အကောင့်လုံခြုံအောင်ပြုလုပ်ပါ`,
+    pending: (pendingDollars: string) =>
+      `+ $${pendingDollars} စောင့်ဆိုင်းနေသည်`,
+    finishAccountSetUp: () =>
+      `သင့်အကောင့်လုံခြုံအောင်ပြုလုပ်ပါ`,
     yourBalance: () => `သင့်လက်ကျန်ငွေ`,
     deposit: () => `ငွေသွင်းမည်`,
     request: () => `တောင်းခံမည်`,
@@ -487,7 +494,8 @@ export const my: LanguageDefinition = {
     welcome: (fcUsername: string) => `ကြိုဆိုပါသည် ${fcUsername}`,
     loading: () => `ဆောင်ရွက်နေပါသည်...`,
     removeFromProfile: () => `ပရိုဖိုင်မှဖယ်ရှားမည်`,
-    addToProfile: () => `ပရိုဖိုင်သို့ထည့်သွင်းမည်`,
+    addToProfile: () =>
+      `ပရိုဖိုင်သို့ထည့်သွင်းမည်`,
   },
   helpBottom: {
     gotItButton: () => `နားလည်ပါပြီ`,
@@ -564,7 +572,8 @@ export const my: LanguageDefinition = {
     screenHeader: () => `Seed phrase ဖြင့်ဝင်ရောက်မည်`,
   },
   existingUseBackup: {
-    screenHeader: () => `ပြန်လည်ရယူရန်နည်းလမ်းရွေးချယ်ပါ`,
+    screenHeader: () =>
+      `ပြန်လည်ရယူရန်နည်းလမ်းရွေးချယ်ပါ`,
     description: () =>
       `အရန်သော့ဖြင့်ဝင်ရောက်မည်။\nဤလုပ်ဆောင်ချက်သည် သင့်စက်ကို အကောင့်သို့ထည့်သွင်းပေးမည်ဖြစ်သည်။`,
     logInWithSeedPhrase: () => `SEED PHRASE ဖြင့်ဝင်ရောက်မည်`,
