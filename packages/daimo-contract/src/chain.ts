@@ -71,7 +71,11 @@ export type DAv2Chain = {
   shortName: string;
   cctpDomain: number;
   bridgeCoin: ForeignToken;
-  /** The USDC token to use for quoting / pricing other tokens on this chain. */
+  /**
+   * The USDC token to use for quoting / pricing other tokens on this chain.
+   *
+   * TODO: this is not always USDC. Rename to localUSDToken
+   */
   localUSDC: ForeignToken;
   nativeToken: ForeignToken;
   wrappedNativeToken: ForeignToken;
