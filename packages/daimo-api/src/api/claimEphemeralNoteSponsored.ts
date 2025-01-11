@@ -28,12 +28,12 @@ export async function claimEphemeralNoteSponsored(
     throw new Error("invalid signature");
   }
 
-  const claimTxHash = await vc.writeContract({
+  const { txHash } = await vc.writeContractAndGetReceipt({
     abi: daimoEphemeralNotesV2Abi,
     address: chainConfig.notesV2Address,
     functionName: "claimNoteRecipient",
     args: [ephemeralOwner, recipient, signature],
   });
 
-  return claimTxHash;
+  return txHash;
 }

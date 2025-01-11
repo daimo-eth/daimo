@@ -1,4 +1,4 @@
-import { derKeytoContractFriendlyKey, DaimoAccountCall } from "@daimo/common";
+import { DaimoAccountCall, derKeytoContractFriendlyKey } from "@daimo/common";
 import { daimoAccountFactoryConfig } from "@daimo/contract";
 import { Hex, TransactionReceipt } from "viem";
 
@@ -33,14 +33,14 @@ export class AccountFactory {
     pubKeyHex: Hex,
     initCalls: DaimoAccountCall[]
   ): Promise<TransactionReceipt> {
-    const hash = await this.vc.writeContract({
+    const { txHash } = await this.vc.writeContractAndGetReceipt({
       ...daimoAccountFactoryConfig,
       functionName: "createAccount",
       args: [0, derKeytoContractFriendlyKey(pubKeyHex), initCalls, SALT],
     });
-    console.log(`[API] deploy transaction ${hash}`);
+    console.log(`[API] deploy transaction ${txHash}`);
     const receipt = await this.vc.publicClient.waitForTransactionReceipt({
-      hash,
+      hash: txHash,
     });
     console.log(`[API] deploy transaction status ${receipt.status}`);
     return receipt;

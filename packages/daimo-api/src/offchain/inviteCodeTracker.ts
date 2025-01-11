@@ -86,12 +86,13 @@ export class InviteCodeTracker {
   // Try sending USDC to an address. Prints error if unsuccessful.
   async trySendUSDC(to: Address, dollars: number) {
     try {
-      return await this.vc.writeContract({
+      const { txHash } = await this.vc.writeContractAndGetReceipt({
         abi: erc20Abi,
         address: chainConfig.tokenAddress,
         functionName: "transfer",
         args: [to, dollarsToAmount(dollars)],
       });
+      return txHash;
     } catch (e) {
       console.log(`[INVITE] failed to send USDC to ${to}: ${e}`);
       return null;
