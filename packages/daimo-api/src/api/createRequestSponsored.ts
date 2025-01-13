@@ -46,7 +46,7 @@ export async function createRequestSponsored(
 
   // Create onchain request
   console.log(`[API] creating req ${id} ${recipient} ${amount} ${fulfiller}`);
-  const txHash = await vc.writeContract({
+  const { txHash } = await vc.writeContractAndGetReceipt({
     abi: daimoRequestAbi,
     address: daimoRequestAddress,
     functionName: "createRequest",
