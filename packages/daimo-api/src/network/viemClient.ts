@@ -106,9 +106,10 @@ export class ViemClient {
     private extApiCache: IExternalApiCache
   ) {
     this.account = this.walletClient.account;
+    const { waitForTransactionReceipt } = publicClient;
     publicClient.waitForTransactionReceipt = (args) => {
       // Viem's default is 6 = ~24s
-      return publicClient.waitForTransactionReceipt({
+      return waitForTransactionReceipt({
         ...args,
         retryCount: 10,
         timeout: 60_000, // Wait at most 1 minute for a tx to confirm
@@ -449,7 +450,9 @@ export class ViemClient {
           )} Tx submission attempt ${attempt} with txId ${txAttemptId}`
         );
 
-        await this.setOverrideParams(localTxId, args, prevGasFees);
+        await retryBackoff("setOverrideParams", () =>
+          this.setOverrideParams(localTxId, args, prevGasFees)
+        );
 
         try {
           const txHash = await this.walletClient.writeContract(args);

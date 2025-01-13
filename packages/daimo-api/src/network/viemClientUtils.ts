@@ -13,8 +13,8 @@ import { privateKeyToAccount } from "viem/accounts";
 import { getEnvApi } from "../env";
 
 export function getTransportFromEnv() {
-  const l1RPCs = getEnvApi().DAIMO_API_L1_RPC_WS.split(",");
-  const l2RPCs = getEnvApi().DAIMO_API_L2_RPC_WS.split(",");
+  const l1RPCs = getEnvApi().DAIMO_API_L1_RPC.split(",");
+  const l2RPCs = getEnvApi().DAIMO_API_L2_RPC.split(",");
 
   console.log(`[VIEM] using transport RPCs L1: ${l1RPCs}, L2: ${l2RPCs}`);
 

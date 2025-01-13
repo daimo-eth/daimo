@@ -26,9 +26,9 @@ const zEnv = {
   // we submit [compressed] bundles ourselves.
   DAIMO_BUNDLER_RPC: z.string().startsWith("https://"),
   // Ethereum L1 RPC, with comma-delimited fallbacks.
-  DAIMO_API_L1_RPC_WS: z.string(),
+  DAIMO_API_L1_RPC: z.string(),
   // Ethereum L2 RPC, with comma-delimited fallbacks.
-  DAIMO_API_L2_RPC_WS: z.string(),
+  DAIMO_API_L2_RPC: z.string(),
   // Deployer, compressed userop bundler, + faucet EOA private key.
   DAIMO_API_PRIVATE_KEY: z.string().optional().default(""),
   // Push notifications enabled? Should only be true in prod.
