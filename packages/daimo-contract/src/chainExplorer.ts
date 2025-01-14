@@ -15,6 +15,14 @@ export function getChainExplorerByChainId(chainId: number): string | undefined {
       return "https://polygonscan.com";
     case 43114:
       return "https://snowtrace.io";
+    case 59144:
+      return "https://lineascan.build";
+    case 56:
+      return "https://bscscan.com";
+    case 480:
+      return "https://worldscan.org";
+    case 81457:
+      return "https://blastscan.io";
     case 11155111:
       return "https://sepolia.etherscan.io";
     case 84532:
@@ -27,10 +35,6 @@ export function getChainExplorerByChainId(chainId: number): string | undefined {
       return "https://amoy.polygonscan.com";
     case 43113:
       return "https://testnet.snowtrace.io";
-    case 59144:
-      return "https://lineascan.build";
-    case 56:
-      return "https://bscscan.com";
     case 501:
       return "https://solscan.io";
     default:
