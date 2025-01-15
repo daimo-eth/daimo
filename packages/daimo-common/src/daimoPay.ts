@@ -211,6 +211,8 @@ export type ExternalPaymentOptionMetadata = {
   logoURI: string;
   logoShape: "circle" | "squircle";
   paymentToken: DaimoPayToken;
+  disabled: boolean;
+  message?: string;
 };
 
 export enum ExternalPaymentOptions {
