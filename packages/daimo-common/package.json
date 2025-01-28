@@ -1,6 +1,6 @@
 {
   "name": "@daimo/common",
-  "version": "0.3.18",
+  "version": "1.1.0",
   "description": "Daimo shared models and utilities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "typescript": "5.5.2"
   },
   "dependencies": {
-    "@daimo/contract": "*",
+    "@daimo/contract": "1.1.0",
     "@noble/curves": "^1.6.0",
     "@scure/base": "^1.1.9",
     "@scure/bip39": "^1.3.0",
