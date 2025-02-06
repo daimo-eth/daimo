@@ -3,7 +3,6 @@ import { base58 } from "@scure/base";
 import {
   Address,
   bytesToBigInt,
-  formatUnits,
   getAddress,
   Hex,
   numberToBytes,
@@ -205,6 +204,13 @@ export function getOrderDestChainId(
   return order.destFinalCallTokenAmount.token.chainId;
 }
 
+export type WalletPaymentOption = {
+  required: DaimoPayTokenAmount;
+  balance: DaimoPayTokenAmount;
+  minimumRequired: DaimoPayTokenAmount;
+  fees: DaimoPayTokenAmount;
+};
+
 export type ExternalPaymentOptionMetadata = {
   id: ExternalPaymentOptions;
   cta: string;
@@ -213,6 +219,7 @@ export type ExternalPaymentOptionMetadata = {
   paymentToken: DaimoPayToken;
   disabled: boolean;
   message?: string;
+  minimumUsd?: number;
 };
 
 export enum ExternalPaymentOptions {
@@ -350,13 +357,6 @@ export interface WebhookDelivery {
   httpStatus: number | null;
   body: string | null;
   createdAt: Date;
-}
-
-export function getDisplayPrice(tokenAmount: DaimoPayTokenAmount) {
-  const { token, amount } = tokenAmount;
-  const amountDec = formatUnits(BigInt(amount), token.decimals);
-  const displayPrice = Number(amountDec).toFixed(token.displayDecimals);
-  return (token.fiatSymbol ? `${token.fiatSymbol}` : "") + displayPrice;
 }
 
 export const zSolanaPublicKey = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]+$/);
