@@ -24,10 +24,10 @@ import {
 } from "@daimo/contract";
 import { Address, Hex, getAddress } from "viem";
 
+import { env, getEnvMobile } from "../env";
 import { StoredV16Account } from "./storedAccount";
 import { migrateOldAccount } from "./storedAccountMigrations";
 import { StoredModel } from "./storedModel";
-import { env, getEnvMobile } from "../env";
 
 const appVariant = getEnvMobile().DAIMO_APP_VARIANT;
 
@@ -228,7 +228,29 @@ export function serializeAccount(account: Account | null): string {
     lastBlockTimestamp: account.lastBlockTimestamp,
     lastFinalizedBlock: account.lastFinalizedBlock,
 
-    recentTransfers: account.recentTransfers,
+    recentTransfers: account.recentTransfers.map((t) => ({
+      ...t,
+      preSwapTransfer:
+        "preSwapTransfer" in t && t.preSwapTransfer
+          ? {
+              ...t.preSwapTransfer,
+              coin: {
+                ...t.preSwapTransfer.coin,
+                token: getAddress(t.preSwapTransfer.coin.token),
+              },
+            }
+          : undefined,
+      postSwapTransfer:
+        "postSwapTransfer" in t && t.postSwapTransfer
+          ? {
+              ...t.postSwapTransfer,
+              coin: {
+                ...t.postSwapTransfer.coin,
+                token: getAddress(t.postSwapTransfer.coin.token),
+              },
+            }
+          : undefined,
+    })),
     namedAccounts: account.namedAccounts,
     accountKeys: account.accountKeys,
     pendingKeyRotation: account.pendingKeyRotation,
@@ -248,7 +270,13 @@ export function serializeAccount(account: Account | null): string {
 
     notificationRequestStatuses: account.notificationRequestStatuses,
     lastReadNotifTimestamp: account.lastReadNotifTimestamp,
-    proposedSwaps: account.proposedSwaps,
+    proposedSwaps: account.proposedSwaps.map((s) => ({
+      ...s,
+      fromCoin: {
+        ...s.fromCoin,
+        token: getAddress(s.fromCoin.token),
+      },
+    })),
     exchangeRates: account.exchangeRates,
     sentPaymentLinks: account.sentPaymentLinks,
 

@@ -15,13 +15,11 @@ import { Telemetry } from "@daimo/api/src/server/telemetry";
 import { TokenRegistry } from "@daimo/api/src/server/tokenRegistry";
 import { guessTimestampFromNum } from "@daimo/common";
 import { daimoChainFromId, nameRegistryProxyConfig } from "@daimo/contract";
-import csv from "csvtojson";
 import { dnsEncode } from "ethers/lib/utils";
 
 import { checkAccount, checkAccountDesc } from "./checkAccount";
 import { chainConfig } from "./env";
 import { getEacc, getEaccDesc } from "./getEacc";
-import { getFids, getFidsDesc } from "./getFids";
 import { pushNotify, pushNotifyDesc } from "./pushNotify";
 import { testBinance, testBinanceDesc } from "./testBinance";
 
@@ -34,9 +32,7 @@ async function main() {
     { name: "default", desc: defaultDesc(), fn: defaultScript },
     { name: "metrics", desc: metricsDesc(), fn: metrics },
     { name: "check", desc: checkAccountDesc(), fn: checkAccount },
-    { name: "mailing-list", desc: mailingListDesc(), fn: mailingList },
     { name: "push-notify", desc: pushNotifyDesc(), fn: pushNotify },
-    { name: "get-fids", desc: getFidsDesc(), fn: getFids },
     { name: "get-eaccount", desc: getEaccDesc(), fn: getEacc },
     { name: "test-binance", desc: testBinanceDesc(), fn: testBinance },
   ];
@@ -148,29 +144,4 @@ function getWeek(tsMs: number): string {
   const date = new Date(tsMs);
   const sundayTs = tsMs - date.getUTCDay() * 24 * 60 * 60 * 1000;
   return new Date(sundayTs).toISOString().slice(0, 10);
-}
-
-function mailingListDesc() {
-  return `Format BCC line for the mailing list`;
-}
-
-// Given a CSV file, extracts the name and email column and formats it.
-async function mailingList() {
-  const csvPath = process.argv[3];
-  if (!csvPath) throw new Error("Usage: mailing-list <csv path>");
-
-  const json = await csv().fromFile(csvPath);
-
-  console.log("RECIPIENTS");
-  const recipients = json
-    .filter((row) => row["Email"].includes("@"))
-    .map((row) => {
-      const name = row["Name"];
-      const email = row["Email"];
-      console.log(`${name} <${email}>`);
-      return email;
-    });
-  console.log("");
-
-  console.log(`BCC ONLY\n${recipients.join(", ")}\n\n`);
 }

@@ -1,6 +1,6 @@
 {
   "name": "@daimo/contract",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Daimo contracts, ABIs, and generated Typescript types",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
