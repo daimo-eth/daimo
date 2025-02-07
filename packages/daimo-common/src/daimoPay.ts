@@ -209,6 +209,7 @@ export type WalletPaymentOption = {
   balance: DaimoPayTokenAmount;
   minimumRequired: DaimoPayTokenAmount;
   fees: DaimoPayTokenAmount;
+  disabledReason?: string;
 };
 
 export type ExternalPaymentOptionMetadata = {
