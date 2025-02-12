@@ -136,6 +136,27 @@ export const zDaimoPayOrderMetadata = z.object({
 
 export type DaimoPayOrderMetadata = z.infer<typeof zDaimoPayOrderMetadata>;
 
+/**
+ * The user-passed metadata must meet these criteria:
+ * - All keys must be strings
+ * - All values must be strings
+ * - At most 50 key-value pairs
+ * - Maximum of 40 characters per key
+ * - Maximum of 500 characters per value
+ */
+export const zDaimoPayUserMetadata = z
+  .record(
+    z.string().max(40, "Metadata keys cannot be longer than 40 characters"),
+    z.string().max(500, "Metadata values cannot be longer than 500 characters"),
+  )
+  .nullable()
+  .refine(
+    (obj) => !obj || Object.keys(obj).length <= 50,
+    "Metadata cannot have more than 50 key-value pairs",
+  );
+
+export type DaimoPayUserMetadata = z.infer<typeof zDaimoPayUserMetadata>;
+
 export type DaimoPayDehydratedOrder = {
   mode: DaimoPayOrderMode.SALE | DaimoPayOrderMode.CHOOSE_AMOUNT;
   id: bigint;
@@ -147,6 +168,7 @@ export type DaimoPayDehydratedOrder = {
   createdAt: number | null;
   lastUpdatedAt: number | null;
   metadata: DaimoPayOrderMetadata;
+  userMetadata: DaimoPayUserMetadata | null;
 };
 
 export type DaimoPayHydratedOrder = {
@@ -180,6 +202,7 @@ export type DaimoPayHydratedOrder = {
   lastUpdatedAt: number | null;
   intentStatus: DaimoPayIntentStatus;
   metadata: DaimoPayOrderMetadata;
+  userMetadata: DaimoPayUserMetadata | null;
 };
 
 export type DaimoPayHydratedOrderWithoutIntentAddr = Omit<
@@ -305,6 +328,7 @@ export type PaymentStartedEvent = {
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string | null;
+  metadata: DaimoPayUserMetadata | null;
 };
 
 export type PaymentCompletedEvent = {
@@ -312,6 +336,7 @@ export type PaymentCompletedEvent = {
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string;
+  metadata: DaimoPayUserMetadata | null;
 };
 
 export type PaymentBouncedEvent = {
@@ -319,6 +344,7 @@ export type PaymentBouncedEvent = {
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string;
+  metadata: DaimoPayUserMetadata | null;
 };
 
 export type DaimoPayEvent =
