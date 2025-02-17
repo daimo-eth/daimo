@@ -3,6 +3,7 @@ import { base58 } from "@scure/base";
 import {
   Address,
   bytesToBigInt,
+  formatUnits,
   getAddress,
   Hex,
   numberToBytes,
@@ -10,6 +11,7 @@ import {
 } from "viem";
 import z from "zod";
 
+import { assertNotNull } from "./assert";
 import { BigIntStr, zAddress, zBigIntStr } from "./model";
 
 // lifecycle: waiting payment -> pending processing -> start submitted -> processed (onchain tx was successful)
@@ -36,10 +38,20 @@ export enum DaimoPayOrderMode {
   HYDRATED = "hydrated", // once hydrated, the order is final and all parameters are known and immutable
 }
 
+/**
+ * Status values:
+ * - `payment_unpaid` - the user has not paid yet
+ * - `payment_started` - the user has paid & payment is in progress. This status
+ *    typically lasts a few seconds.
+ * - `payment_completed` - the final call or transfer succeeded
+ * - `payment_bounced` - the final call or transfer reverted. Funds were sent
+ *    to the payment's configured refund address on the destination chain.
+ */
 export enum DaimoPayIntentStatus {
-  PENDING = "pending",
-  SUCCESSFUL = "successful",
-  REFUNDED = "refunded",
+  UNPAID = "payment_unpaid",
+  STARTED = "payment_started",
+  COMPLETED = "payment_completed",
+  BOUNCED = "payment_bounced",
 }
 
 /** Order updates used by services outside orderProcessor to listen for any
@@ -136,6 +148,27 @@ export const zDaimoPayOrderMetadata = z.object({
 
 export type DaimoPayOrderMetadata = z.infer<typeof zDaimoPayOrderMetadata>;
 
+/**
+ * The user-passed metadata must meet these criteria:
+ * - All keys must be strings
+ * - All values must be strings
+ * - At most 50 key-value pairs
+ * - Maximum of 40 characters per key
+ * - Maximum of 500 characters per value
+ */
+export const zDaimoPayUserMetadata = z
+  .record(
+    z.string().max(40, "Metadata keys cannot be longer than 40 characters"),
+    z.string().max(500, "Metadata values cannot be longer than 500 characters"),
+  )
+  .nullable()
+  .refine(
+    (obj) => !obj || Object.keys(obj).length <= 50,
+    "Metadata cannot have more than 50 key-value pairs",
+  );
+
+export type DaimoPayUserMetadata = z.infer<typeof zDaimoPayUserMetadata>;
+
 export type DaimoPayDehydratedOrder = {
   mode: DaimoPayOrderMode.SALE | DaimoPayOrderMode.CHOOSE_AMOUNT;
   id: bigint;
@@ -146,7 +179,10 @@ export type DaimoPayDehydratedOrder = {
   orgId: string | null;
   createdAt: number | null;
   lastUpdatedAt: number | null;
+  intentStatus: DaimoPayIntentStatus;
   metadata: DaimoPayOrderMetadata;
+  externalId: string | null;
+  userMetadata: DaimoPayUserMetadata | null;
 };
 
 export type DaimoPayHydratedOrder = {
@@ -164,12 +200,13 @@ export type DaimoPayHydratedOrder = {
   selectedBridgeTokenOutAmount: bigint | null;
   destFinalCallTokenAmount: DaimoPayTokenAmount;
   destFinalCall: OnChainCall;
+  usdValue: number;
   destRefundAddr: Address;
   destNonce: bigint;
   sourceFulfillerAddr: Address | SolanaPublicKey | null;
   sourceTokenAmount: DaimoPayTokenAmount | null;
-  sourceInitiateTxHash: Hex | string | null;
-  sourceStartTxHash: Hex | string | null;
+  sourceInitiateTxHash: Hex | null;
+  sourceStartTxHash: Hex | null;
   sourceStatus: DaimoPayOrderStatusSource;
   destStatus: DaimoPayOrderStatusDest;
   destFastFinishTxHash: Hex | null;
@@ -180,6 +217,8 @@ export type DaimoPayHydratedOrder = {
   lastUpdatedAt: number | null;
   intentStatus: DaimoPayIntentStatus;
   metadata: DaimoPayOrderMetadata;
+  externalId: string | null;
+  userMetadata: DaimoPayUserMetadata | null;
 };
 
 export type DaimoPayHydratedOrderWithoutIntentAddr = Omit<
@@ -188,6 +227,36 @@ export type DaimoPayHydratedOrderWithoutIntentAddr = Omit<
 >;
 
 export type DaimoPayOrder = DaimoPayDehydratedOrder | DaimoPayHydratedOrder;
+
+export type DaimoPayOrderView = {
+  id: DaimoPayOrderID;
+  status: DaimoPayIntentStatus;
+  createdAt: string;
+  display: {
+    intent: string;
+    paymentValue: string;
+    currency: "USD";
+  };
+  source: {
+    payerAddress: Address;
+    txHash: Hex;
+    chainId: string;
+    amountUnits: string;
+    tokenSymbol: string;
+    tokenAddress: Address;
+  } | null;
+  destination: {
+    destinationAddress: Address;
+    txHash: Hex | null;
+    chainId: string;
+    amountUnits: string;
+    tokenSymbol: string;
+    tokenAddress: Address;
+    callData: Hex | null;
+  };
+  externalId: string | null;
+  metadata: DaimoPayUserMetadata | null;
+};
 
 export function getOrderSourceChainId(
   order: DaimoPayHydratedOrder,
@@ -202,6 +271,66 @@ export function getOrderDestChainId(
   order: DaimoPayOrder | DaimoPayHydratedOrderWithoutIntentAddr,
 ): number {
   return order.destFinalCallTokenAmount.token.chainId;
+}
+
+export function getDaimoPayOrderView(order: DaimoPayOrder): DaimoPayOrderView {
+  return {
+    id: writeDaimoPayOrderID(order.id),
+    status: order.intentStatus,
+    createdAt: assertNotNull(
+      order.createdAt,
+      `createdAt is null for order with id: ${order.id}`,
+    ).toString(),
+    display: {
+      intent: order.metadata.intent,
+      // Show 2 decimal places for USD
+      paymentValue: order.destFinalCallTokenAmount.usd.toFixed(2),
+      currency: "USD",
+    },
+    source:
+      order.mode === DaimoPayOrderMode.HYDRATED &&
+      order.sourceTokenAmount != null
+        ? {
+            payerAddress: getAddress(
+              assertNotNull(
+                order.sourceFulfillerAddr,
+                `sourceFulfillerAddr is null for order with source token: ${order.id}`,
+              ),
+            ),
+            txHash: assertNotNull(
+              order.sourceInitiateTxHash,
+              `sourceInitiateTxHash is null for order with source token: ${order.id}`,
+            ),
+            chainId: assertNotNull(
+              getOrderSourceChainId(order),
+              `source chain id is null for order with source token: ${order.id}`,
+            ).toString(),
+            amountUnits: formatUnits(
+              BigInt(order.sourceTokenAmount.amount),
+              order.sourceTokenAmount.token.decimals,
+            ),
+            tokenSymbol: order.sourceTokenAmount.token.symbol,
+            tokenAddress: getAddress(order.sourceTokenAmount.token.token),
+          }
+        : null,
+    destination: {
+      destinationAddress: order.destFinalCall.to,
+      txHash:
+        order.mode === DaimoPayOrderMode.HYDRATED
+          ? (order.destFastFinishTxHash ?? order.destClaimTxHash)
+          : null,
+      chainId: getOrderDestChainId(order).toString(),
+      amountUnits: formatUnits(
+        BigInt(order.destFinalCallTokenAmount.amount),
+        order.destFinalCallTokenAmount.token.decimals,
+      ),
+      tokenSymbol: order.destFinalCallTokenAmount.token.symbol,
+      tokenAddress: getAddress(order.destFinalCallTokenAmount.token.token),
+      callData: order.destFinalCall.data,
+    },
+    externalId: order.externalId,
+    metadata: order.userMetadata,
+  };
 }
 
 export type WalletPaymentOption = {
@@ -288,10 +417,16 @@ const zDaimoPayOrderID = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]+$/);
 
 export type DaimoPayOrderID = z.infer<typeof zDaimoPayOrderID>;
 
+/**
+ * Read a base58-encoded id into a bigint.
+ */
 export function readDaimoPayOrderID(id: string): bigint {
   return bytesToBigInt(base58.decode(id));
 }
 
+/**
+ * Write a bigint into a base58-encoded id.
+ */
 export function writeDaimoPayOrderID(id: bigint): string {
   return base58.encode(numberToBytes(id));
 }
@@ -305,6 +440,7 @@ export type PaymentStartedEvent = {
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string | null;
+  payment: DaimoPayOrderView;
 };
 
 export type PaymentCompletedEvent = {
@@ -312,6 +448,7 @@ export type PaymentCompletedEvent = {
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string;
+  payment: DaimoPayOrderView;
 };
 
 export type PaymentBouncedEvent = {
@@ -319,6 +456,7 @@ export type PaymentBouncedEvent = {
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string;
+  payment: DaimoPayOrderView;
 };
 
 export type DaimoPayEvent =
