@@ -231,15 +231,12 @@ export type DaimoPayOrder = DaimoPayDehydratedOrder | DaimoPayHydratedOrder;
 export type DaimoPayOrderView = {
   id: DaimoPayOrderID;
   status: DaimoPayIntentStatus;
-  intentAddress: Address | null;
   createdAt: string;
   display: {
     intent: string;
     paymentValue: string;
     currency: "USD";
   };
-  externalId: string | null;
-  metadata: DaimoPayUserMetadata | null;
   source: {
     payerAddress: Address;
     txHash: Hex;
@@ -255,7 +252,10 @@ export type DaimoPayOrderView = {
     amountUnits: string;
     tokenSymbol: string;
     tokenAddress: Address;
+    callData: Hex | null;
   };
+  externalId: string | null;
+  metadata: DaimoPayUserMetadata | null;
 };
 
 export function getOrderSourceChainId(
@@ -281,16 +281,12 @@ export function getDaimoPayOrderView(order: DaimoPayOrder): DaimoPayOrderView {
       order.createdAt,
       `createdAt is null for order with id: ${order.id}`,
     ).toString(),
-    intentAddress:
-      order.mode === DaimoPayOrderMode.HYDRATED ? order.intentAddr : null,
     display: {
       intent: order.metadata.intent,
       // Show 2 decimal places for USD
       paymentValue: order.destFinalCallTokenAmount.usd.toFixed(2),
       currency: "USD",
     },
-    externalId: order.externalId,
-    metadata: order.userMetadata,
     source:
       order.mode === DaimoPayOrderMode.HYDRATED &&
       order.sourceTokenAmount != null
@@ -330,7 +326,10 @@ export function getDaimoPayOrderView(order: DaimoPayOrder): DaimoPayOrderView {
       ),
       tokenSymbol: order.destFinalCallTokenAmount.token.symbol,
       tokenAddress: getAddress(order.destFinalCallTokenAmount.token.token),
+      callData: order.destFinalCall.data,
     },
+    externalId: order.externalId,
+    metadata: order.userMetadata,
   };
 }
 
