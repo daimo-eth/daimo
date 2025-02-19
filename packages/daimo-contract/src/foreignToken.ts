@@ -36,6 +36,7 @@ export enum TokenLogo {
   WLD = "https://assets.coingecko.com/coins/images/31069/large/worldcoin.jpeg",
   USDB = "https://assets.coingecko.com/coins/images/35595/large/65c67f0ebf2f6a1bd0feb13c_usdb-icon-yellow.png",
   BLAST = "https://assets.coingecko.com/coins/images/35494/large/Blast.jpg",
+  WBTC = "https://s2.coinmarketcap.com/static/img/coins/128x128/3717.png",
 }
 
 /* --------------------- Tokens Constants --------------------- */
@@ -841,11 +842,21 @@ export const worldchainWLD: ForeignToken = {
   logoURI: TokenLogo.WLD,
 };
 
+export const worldchainWBTC: ForeignToken = {
+  chainId: 480,
+  token: getAddress("0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3"),
+  decimals: 8,
+  name: "Wrapped Bitcoin",
+  symbol: "WBTC",
+  logoURI: TokenLogo.WBTC,
+};
+
 const worldchainTokens = [
   worldchainETH,
   worldchainWETH,
   worldchainUSDCe,
   worldchainWLD,
+  worldchainWBTC,
 ];
 
 //
