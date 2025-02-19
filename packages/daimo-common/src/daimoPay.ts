@@ -238,12 +238,12 @@ export type DaimoPayOrderView = {
     currency: "USD";
   };
   source: {
-    payerAddress: Address;
-    txHash: Hex;
+    payerAddress: Address | SolanaPublicKey | null;
+    txHash: Hex | string;
     chainId: string;
     amountUnits: string;
     tokenSymbol: string;
-    tokenAddress: Address;
+    tokenAddress: Address | string;
   } | null;
   destination: {
     destinationAddress: Address;
@@ -291,12 +291,7 @@ export function getDaimoPayOrderView(order: DaimoPayOrder): DaimoPayOrderView {
       order.mode === DaimoPayOrderMode.HYDRATED &&
       order.sourceTokenAmount != null
         ? {
-            payerAddress: getAddress(
-              assertNotNull(
-                order.sourceFulfillerAddr,
-                `sourceFulfillerAddr is null for order with source token: ${order.id}`,
-              ),
-            ),
+            payerAddress: order.sourceFulfillerAddr,
             txHash: assertNotNull(
               order.sourceInitiateTxHash,
               `sourceInitiateTxHash is null for order with source token: ${order.id}`,
@@ -310,7 +305,7 @@ export function getDaimoPayOrderView(order: DaimoPayOrder): DaimoPayOrderView {
               order.sourceTokenAmount.token.decimals,
             ),
             tokenSymbol: order.sourceTokenAmount.token.symbol,
-            tokenAddress: getAddress(order.sourceTokenAmount.token.token),
+            tokenAddress: order.sourceTokenAmount.token.token,
           }
         : null,
     destination: {
