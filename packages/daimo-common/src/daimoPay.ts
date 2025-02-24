@@ -135,6 +135,14 @@ export const zDaimoPayOrderMetadata = z.object({
         .describe(
           "Preferred tokens, in descending order. Any preferred assets the user owns will appear first. Defaults to destination token.",
         ),
+      // Filter to only allow payments on these chains. Keep this
+      // parameter undocumented. Only for specific customers.
+      evmChains: z
+        .array(z.number())
+        .optional()
+        .describe(
+          "Filter to only allow payments on these EVM chains. Defaults to all chains.",
+        ),
       paymentOptions: z
         .array(z.string())
         .optional()
@@ -352,6 +360,9 @@ export enum ExternalPaymentOptions {
   Coinbase = "Coinbase",
   RampNetwork = "RampNetwork",
   Binance = "Binance",
+  Solana = "Solana",
+  // ChangeNow chains. Bitcoin, Litecoin, Doge, Tron, etc.
+  ExternalChains = "ExternalChains",
 }
 
 export type ExternalPaymentOptionData = {
