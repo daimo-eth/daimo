@@ -363,6 +363,7 @@ export enum ExternalPaymentOptions {
   Solana = "Solana",
   // ChangeNow chains. Bitcoin, Litecoin, Doge, Tron, etc.
   ExternalChains = "ExternalChains",
+  Lemon = "Lemon",
 }
 
 export type ExternalPaymentOptionData = {
