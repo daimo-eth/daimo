@@ -444,6 +444,7 @@ export type UUID = z.infer<typeof zUUID>;
 
 export type PaymentStartedEvent = {
   type: "payment_started";
+  isTestEvent?: boolean;
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string | null;
@@ -452,6 +453,7 @@ export type PaymentStartedEvent = {
 
 export type PaymentCompletedEvent = {
   type: "payment_completed";
+  isTestEvent?: boolean;
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string;
@@ -460,6 +462,7 @@ export type PaymentCompletedEvent = {
 
 export type PaymentBouncedEvent = {
   type: "payment_bounced";
+  isTestEvent?: boolean;
   paymentId: DaimoPayOrderID;
   chainId: number;
   txHash: Hex | string;
@@ -491,6 +494,7 @@ export enum WebhookEventStatus {
 export interface WebhookEvent {
   id: UUID;
   endpoint: WebhookEndpoint;
+  isTestEvent: boolean;
   body: DaimoPayEvent;
   status: WebhookEventStatus;
   deliveries: WebhookDelivery[];
