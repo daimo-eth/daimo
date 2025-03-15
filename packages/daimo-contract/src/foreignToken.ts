@@ -763,7 +763,7 @@ export const bscUSDC: ForeignToken = {
 export const bscUSDT: ForeignToken = {
   chainId: 56,
   token: getAddress("0x55d398326f99059fF775485246999027B3197955"),
-  decimals: 6,
+  decimals: 18,
   name: "Tether USD",
   symbol: "USDT",
   logoURI: TokenLogo.USDT,
