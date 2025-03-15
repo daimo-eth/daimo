@@ -13,25 +13,14 @@ import "./PayIntentFactory.sol";
 import "./TokenUtils.sol";
 
 // A Daimo Pay transfer has 4 steps:
-// 1. Alice sends (tokenIn, amountIn) to the intent address on chain A -- simple erc20 transfer
-// 2. Relayer swaps tokenIn to bridgeTokenIn and burns on chain A -- relayer runs this in sendAndSelfDestruct
-//    - the bridger contract makes the assumption that the price of bridgeTokenIn <> bridgeTokenOut is 1:1
-//    - the quote for the swap comes from the intent address which commits to the
-//      destination bridgeTokenOut amount, and therefore bridgeTokenIn amount.
-//    - relayer has to fetch the swap call from Uniswap or similar
-
-// Fork: fastFinish, then claim
-// Fork: claim directly
-
-// 3. Relayer swaps bridgeTokenOut to the finalCallToken on chain B -- relayer runs this in _finishIntent
-// 4. The bridge transfer arrives on chain B later, and the relayer can call claimIntent
-
-// Alice is responsible for putting a quote for the bridgeTokenOut <> finalCallToken swap
-// This fixes bridgeTokenOut expected amount, which in turn fixes the bridgeTokenIn burn amount,
-// locking in the amounts expected for all intermediary swaps.
-
-// Alice can put a a slightly worse quote than the market price to incentivize
-// relayers to complete the intent.
+// 1. Alice sends (tokenIn, amountIn) to the intent address on chain A. This is
+//    a simple erc20 transfer.
+// 2. Relayer swaps tokenIn to bridgeTokenIn and initiates bridge using
+//    startIntent. The intent commits to a destination bridgeTokenOut, and the
+//    bridger guarantees this amount (or reverts if not enough bridgeTokenIn).
+// 3. Relayer immediately calls finishIntent on chain B.
+// 4. Finally, the slow bridge transfer arrives on chain B later, and the
+//    relayer can call claimIntent.
 
 /// @title Daimo Pay contract for creating and fulfilling cross-chain intents
 /// @author The Daimo team
@@ -42,9 +31,9 @@ import "./TokenUtils.sol";
 /// `startIntent` on chain A. After the bridging delay (10+ min for CCTP),
 /// funds arrive at the intent address deployed on chain B. Alice can call
 /// `claimIntent` on chain B to finish her intent. Alternatively, immediately
-/// after the first call, a relayer can call `fastFinishIntent` to finish Alice's
-/// intent immediately. Later, when the funds arrive from the bridge, the relayer
-/// (rather than Alice) will claim.
+/// after the first call, a relayer can call `fastFinishIntent` to finish
+/// Alice's intent immediately. Later, when the funds arrive from the bridge,
+/// the relayer (rather than Alice) will claim.
 ///
 /// @notice WARNING: Never approve tokens directly to this contract. Never
 /// transfer tokens to this contract as a standalone transaction.
@@ -55,28 +44,45 @@ import "./TokenUtils.sol";
 contract DaimoPay {
     using SafeERC20 for IERC20;
 
+    address constant ADDR_MAX = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
+
+    /// Efficiently generates + deploys CREATE2 intent addresses.
     PayIntentFactory public immutable intentFactory;
+    /// Bridges tokens across chains.
     DaimoPayBridger public immutable bridger;
 
     /// Commit to transfer details. Each intent address is single-use.
     mapping(address intentAddr => bool) public intentSent;
     /// On the receiving chain, map each intent to a recipient (relayer or Bob).
+    /// - address(0) = not finished.
+    /// - LP address = fast-finished, awaiting claim to repay LP.
+    /// - ADDR_MAX   = claimed. any additional funds received are refunded.
     mapping(address intentAddr => address) public intentToRecipient;
 
-    // Intent initiated on chain A
+    /// Intent initiated on chain A
     event Start(address indexed intentAddr, PayIntent intent);
 
-    // Intent completed ~immediately on chain B
+    /// Intent completed ~immediately on chain B
     event FastFinish(address indexed intentAddr, address indexed newRecipient);
 
-    // Intent settled later, once the underlying bridge transfer completes.
+    /// Intent settled later, once the underlying bridge transfer completes.
     event Claim(address indexed intentAddr, address indexed finalRecipient);
 
-    // When the intent is completed as expected, emit this event
+    /// When the intent is completed, emit this event. Success false indicates
+    /// that the final call reverted, and funds were refunded to refundAddr.
     event IntentFinished(
         address indexed intentAddr,
         address indexed destinationAddr,
         bool indexed success,
+        PayIntent intent
+    );
+
+    // When a double-paid intent is refunded, emit this event
+    event IntentRefunded(
+        address indexed intentAddr,
+        address indexed refundAddr,
+        address token,
+        uint256 amount,
         PayIntent intent
     );
 
@@ -85,6 +91,35 @@ contract DaimoPay {
         bridger = _bridger;
     }
 
+    /// Refund a double-paid intent.
+    function refundIntent(PayIntent calldata intent, IERC20 token) public {
+        PayIntentContract intentContract = intentFactory.createIntent(intent);
+        address intentAddr = address(intentContract);
+        if (intent.toChainId == block.chainid) {
+            // Refund only if already claimed.
+            bool claimed = intentToRecipient[address(intentContract)] ==
+                ADDR_MAX;
+            require(claimed, "DP: not claimed");
+        } else {
+            // Refund only if already started.
+            require(intentSent[intentAddr], "DP: not started");
+        }
+
+        // Collect and refund overpaid amount.
+        uint256 amount = intentContract.refundAndSelfDestruct(intent, token);
+        require(amount > 0, "DP: no funds to refund");
+        TokenUtils.transfer(token, payable(intent.refundAddress), amount);
+
+        emit IntentRefunded({
+            intentAddr: intentAddr,
+            refundAddr: intent.refundAddress,
+            token: address(token),
+            amount: amount,
+            intent: intent
+        });
+    }
+
+    /// Initiates an intent, starting a bridge to dest chain if necessary.
     function startIntent(
         PayIntent calldata intent,
         Call[] calldata calls,
@@ -109,14 +144,14 @@ contract DaimoPay {
         emit Start({intentAddr: address(intentContract), intent: intent});
     }
 
-    // Pays Bob immediately on chain B. The caller relayer should make a transfer
-    // atomically in the same transaction and call this function. The relayer
-    // transfers some amount of token, and can make arbitrary calls to convert
-    // it into the required amount of finalCallToken.
-    //
-    // Later, when the slower bridge transfer arrives, the relayer will be able to
-    // claim (bridgeTokenOut.token, bridgeTokenOut.amount), keeping the spread
-    // (if any) between the amounts.
+    /// Completes intent immediately on chain B. The caller relayer makes a
+    /// transfer atomically in the same transaction and calls this function. The
+    /// relayer transfers some amount of token, and can make arbitrary calls to
+    /// convert it into the required amount of finalCallToken.
+    ///
+    /// Later, when the slower bridge transfer arrives, the relayer will be able
+    /// to claim (bridgeTokenOut.token, bridgeTokenOut.amount), keeping the
+    /// spread (if any) between the amounts.
     function fastFinishIntent(
         PayIntent calldata intent,
         Call[] calldata calls
@@ -142,10 +177,10 @@ contract DaimoPay {
         emit FastFinish({intentAddr: intentAddr, newRecipient: msg.sender});
     }
 
-    // Claim a bridge transfer to its current recipient. If FastFinish happened
-    // for this transfer, then the recipient is the relayer who fronted the amount.
-    // Otherwise, the recipient remains the original toAddr. The bridge transfer
-    // must already have been completed; coins are already in intent contract.
+    /// Completes an intent, claiming funds. If FastFinish happened for this
+    /// intent, then the recipient is the relayer who fronted the amount.
+    /// Otherwise, the recipient remains the original addr. The bridge transfer
+    /// must already have been completed; coins are already in intent contract.
     function claimIntent(
         PayIntent calldata intent,
         Call[] calldata calls
@@ -163,8 +198,6 @@ contract DaimoPay {
             // No relayer showed up, so just complete the intent.
             recipient = intent.finalCall.to;
 
-            intentToRecipient[address(intentContract)] = recipient;
-
             // Complete the intent and return any leftover tokens to the caller
             _finishIntent({
                 intentAddr: address(intentContract),
@@ -172,10 +205,9 @@ contract DaimoPay {
                 calls: calls
             });
         } else {
-            // Otherwise, the relayer fastFinished the intent, give them the recieved
-            // amount.
-            // The intent contract checks that the received amount is sufficient,
-            // so we can simply transfer the balance.
+            // Otherwise, the relayer fastFinished the intent. Repay them. The
+            // intent contract checks that the received amount is sufficient, so
+            // we can simply transfer the balance.
             uint256 n = intent.bridgeTokenOutOptions.length;
             for (uint256 i = 0; i < n; ++i) {
                 TokenAmount calldata tokenOut = intent.bridgeTokenOutOptions[i];
@@ -186,23 +218,26 @@ contract DaimoPay {
             }
         }
 
+        // Mark as claimed
+        intentToRecipient[address(intentContract)] = ADDR_MAX;
+
         emit Claim({
             intentAddr: address(intentContract),
             finalRecipient: recipient
         });
     }
 
-    // Swap the token the relayer transferred to finalCallToken
-    // Then, if the intent has a finalCall, make the intent call.
-    // Otherwise, transfer the token to the final address.
-    // Finally, send any leftover final token to the caller.
+    /// Swap the token the relayer transferred to finalCallToken.
+    /// Then, if the intent has a finalCall, make the intent call.
+    /// Otherwise, transfer the token to the final address.
+    /// Finally, send any leftover final token to the caller.
     function _finishIntent(
         address intentAddr,
         PayIntent calldata intent,
         Call[] calldata calls
     ) internal {
-        // Run arbitrary calls provided by the relayer. These will generally approve
-        // the swap contract and swap if necessary
+        // Run arbitrary calls provided by the relayer. These will generally
+        // approve the swap contract and swap if necessary.
         for (uint256 i = 0; i < calls.length; ++i) {
             Call calldata call = calls[i];
             (bool success, ) = call.to.call{value: call.value}(call.data);

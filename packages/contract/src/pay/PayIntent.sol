@@ -7,12 +7,13 @@ import "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./TokenUtils.sol";
 import "../interfaces/IDaimoPayBridger.sol";
 
-/// @dev Represents an intended call: "make X of token Y show up on chain Z, then
-///      use it to do an arbitrary contract call".
+/// @dev Represents an intended call: "make X of token Y show up on chain Z,
+///      then [optionally] use it to do an arbitrary contract call".
 struct PayIntent {
     /// @dev Intent only executes on given target chain.
     uint256 toChainId;
     /// @dev Possible output tokens after bridging to the destination chain.
+    ///      Currently, ative token is not supported as a bridge token output.
     TokenAmount[] bridgeTokenOutOptions;
     /// @dev Expected token amount after swapping on the destination chain.
     TokenAmount finalCallToken;
@@ -84,9 +85,9 @@ contract PayIntentContract is Initializable {
         require(calcIntentHash(intent) == intentHash, "PI: intent");
         require(msg.sender == intent.escrow, "PI: only escrow");
 
-        // Run arbitrary calls provided by the relayer. These will generally approve
-        // the swap contract and swap if necessary, then approve tokens to the
-        // bridger.
+        // Run arbitrary calls provided by the relayer. These will generally
+        // approve the swap contract and swap if necessary, then approve tokens
+        // to the bridger.
         for (uint256 i = 0; i < calls.length; ++i) {
             Call calldata call = calls[i];
             (bool success, ) = call.to.call{value: call.value}(call.data);
@@ -129,11 +130,7 @@ contract PayIntentContract is Initializable {
             });
         }
 
-        // This use of SELFDESTRUCT is compatible with EIP-6780. Ephemeral
-        // contracts are deployed, then destroyed in the same transaction.
-        // solhint-disable-next-line
-        // Certain chains (like Scroll) don't support SELFDESTRUCT
-        selfdestruct(intent.escrow);
+        cleanup(intent.escrow);
     }
 
     /// One step: receive  bridgeTokenOut and send to creator
@@ -156,11 +153,31 @@ contract PayIntentContract is Initializable {
             });
         }
 
+        cleanup(intent.escrow);
+    }
+
+    /** Refund double payments. */
+    function refundAndSelfDestruct(
+        PayIntent calldata intent,
+        IERC20 token
+    ) public returns (uint256 amount) {
+        require(calcIntentHash(intent) == intentHash, "PI: intent");
+        require(msg.sender == intent.escrow, "PI: only escrow");
+
+        amount = TokenUtils.transferBalance({
+            token: token,
+            recipient: intent.escrow
+        });
+        require(amount > 0, "PI: no funds to refund");
+
+        // Not necessary: cleanup(intent.escrow);
+    }
+
+    function cleanup(address payable escrow) private {
         // This use of SELFDESTRUCT is compatible with EIP-6780. Intent
         // contracts are deployed, then destroyed in the same transaction.
         // solhint-disable-next-line
-        // Certain chains (like Scroll) don't support SELFDESTRUCT
-        selfdestruct(intent.escrow);
+        selfdestruct(escrow);
     }
 
     /// Accept native-token (eg ETH) inputs

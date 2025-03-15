@@ -16,6 +16,13 @@ contract PayIntentFactory {
     function createIntent(
         PayIntent calldata intent
     ) public returns (PayIntentContract ret) {
+        address intentAddr = getIntentAddress(intent);
+        if (intentAddr.code.length > 0) {
+            // Handling this case allows eg. start+claim in a single tx.
+            // This allows more efficient relaying & easier unit testing.
+            // See https://github.com/foundry-rs/foundry/issues/8485
+            return PayIntentContract(payable(intentAddr));
+        }
         ret = PayIntentContract(
             payable(
                 address(

@@ -50,6 +50,7 @@ contract DaimoPayTest is Test {
     IERC20 immutable _toToken = new TestUSDC{salt: bytes32(uint256(2))}();
     IERC20 immutable _bridgeTokenOption =
         new TestUSDC{salt: bytes32(uint256(3))}();
+
     // Token that's not registered in the token minter and Across
     IERC20 immutable _unregisteredToken =
         new TestUSDC{salt: bytes32(uint256(420))}();
@@ -252,27 +253,14 @@ contract DaimoPayTest is Test {
         assertEq(actualBnbIntentAddr, BSC_INTENT_ADDR);
     }
 
-    // Test that startIntent reverts when the intent is on the same chain.
-    // Simple = no swap, no finalCall
-    function testSimpleSameChainStart() public {
-        vm.chainId(_fromChainId);
-
-        // Give Alice some native token
-        vm.deal(_alice, 555);
-
-        // Alice initiates a transfer
-        vm.startPrank(_alice);
-
-        // Create a payment intent which specifies the native token
-        // The 0 address is used to specify native token
-        TokenAmount[] memory bridgeTokenOutOptions = new TokenAmount[](1);
-        bridgeTokenOutOptions[0] = TokenAmount({
-            token: IERC20(address(0)),
-            amount: _toAmount
-        });
-        PayIntent memory intent = PayIntent({
+    function getSimplePayIntent()
+        public
+        view
+        returns (PayIntent memory intent)
+    {
+        intent = PayIntent({
             toChainId: _fromChainId,
-            bridgeTokenOutOptions: bridgeTokenOutOptions,
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
             finalCallToken: TokenAmount({
                 token: IERC20(address(0)),
                 amount: _toAmount
@@ -282,20 +270,76 @@ contract DaimoPayTest is Test {
             refundAddress: _alice,
             nonce: _nonce
         });
+    }
 
-        // Alice sends some native token to the intent address
+    // Test that startIntent succeeds when the intent is on the same chain.
+    // Simple = no swap, no finalCall.
+    function testSimpleSameChainStart() public {
+        vm.chainId(_fromChainId);
+
+        // Give Alice some USDC
+        _toToken.transfer(_alice, 555);
+
+        // Create a payment intent which specifies the native token as output.
+        PayIntent memory intent = getSimplePayIntent();
         address intentAddr = intentFactory.getIntentAddress(intent);
-        (bool success, ) = intentAddr.call{value: 100}("");
-        require(success, "Failed to send native token to intent address");
 
-        vm.expectRevert();
+        // Alice sends some TestUSDC to the intent address
+        vm.prank(_alice);
+        require(_toToken.transfer(intentAddr, 100));
+        require(_toToken.balanceOf(intentAddr) == 100);
+
+        // Since we're already on dest chain, startIntent verifies that we have
+        // enough of bridgeTokenOut (see bridgeTokenOutOptions) post swap.
+        // Simplest case: no swap, initial payment was already in correct token.
         dp.startIntent({
             intent: intent,
             calls: new Call[](0),
             bridgeExtraData: ""
         });
+        require(_toToken.balanceOf(intentAddr) == 100);
+    }
 
-        vm.stopPrank();
+    function testSimpleRefundAfterClaim() public {
+        testSimpleSameChainStart();
+
+        PayIntent memory intent = getSimplePayIntent();
+        address intentAddr = intentFactory.getIntentAddress(intent);
+
+        // Since we are on the dest chain already, we *cannot* refund on start.
+        vm.expectRevert(bytes("DP: not claimed"));
+        dp.refundIntent({intent: intent, token: _toToken});
+
+        // Fast-finish it, fronting some native token.
+        (bool success, ) = payable(address(dp)).call{value: 100}("");
+        require(success, "send failed");
+        dp.fastFinishIntent({intent: intent, calls: new Call[](0)});
+
+        // We still can't refund.
+        vm.expectRevert(bytes("DP: not claimed"));
+        dp.refundIntent({intent: intent, token: _toToken});
+
+        // Claim the intent.
+        require(_toToken.balanceOf(intentAddr) == 100);
+        dp.claimIntent({intent: intent, calls: new Call[](0)});
+        require(_toToken.balanceOf(intentAddr) == 0);
+
+        // Nothing to refund.
+        vm.expectRevert(bytes("PI: no funds to refund"));
+        dp.refundIntent({intent: intent, token: _toToken});
+
+        // Double-pay the intent...
+        vm.prank(_alice);
+        require(_toToken.transfer(intentAddr, 100));
+        assertEq(_toToken.balanceOf(intentAddr), 100);
+        assertEq(_toToken.balanceOf(_alice), 355);
+
+        // ...and refund.
+        dp.refundIntent({intent: intent, token: _toToken});
+
+        // Check that the intent was refunded.
+        assertEq(_toToken.balanceOf(intentAddr), 0);
+        assertEq(_toToken.balanceOf(_alice), 455);
     }
 
     // Test a simple startIntent call that bridges using CCTP.
