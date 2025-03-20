@@ -24,6 +24,9 @@ import {CREATE3Factory} from "../vendor/create3/CREATE3Factory.sol";
 // https://docs.across.to/reference/contract-addresses
 // https://github.com/across-protocol/contracts/blob/master/deployments/README.md
 
+// Axelar contract deployments and token addresses
+// https://docs.axelar.dev/resources/contract-addresses/mainnet
+
 // ----------------- Chain IDs ----------------- //
 uint256 constant ARBITRUM_MAINNET = 42161;
 uint256 constant AVAX_MAINNET = 43114; // C-chain
@@ -344,6 +347,7 @@ function _getAxlUsdcAddress(uint256 chainId) pure returns (address) {
     if (chainId == AVAX_MAINNET) return AVAX_MAINNET_AXLUSDC;
     if (chainId == BASE_MAINNET) return BASE_MAINNET_AXLUSDC;
     if (chainId == BSC_MAINNET) return BSC_MAINNET_AXLUSDC;
+    if (chainId == ETH_MAINNET) return ETH_MAINNET_AXLUSDC;
     if (chainId == LINEA_MAINNET) return LINEA_MAINNET_AXLUSDC;
     if (chainId == OP_MAINNET) return OP_MAINNET_AXLUSDC;
     if (chainId == POLYGON_MAINNET) return POLYGON_MAINNET_AXLUSDC;

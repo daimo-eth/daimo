@@ -67,12 +67,19 @@ contract DeployDaimoPayAxelarBridger is Script {
         if (
             block.chainid == ARBITRUM_MAINNET ||
             block.chainid == BASE_MAINNET ||
+            block.chainid == ETH_MAINNET ||
             block.chainid == LINEA_MAINNET ||
             block.chainid == OP_MAINNET ||
             block.chainid == POLYGON_MAINNET
         ) {
             chainIds = new uint256[](1);
             bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](1);
+            // TODO: bridgeTokenOutSymbol is a misnomer in our contracts. In
+            // the Axelar contracts, the variable is just called "tokenSymbol".
+            // ETH_MAINNET bridges USDC with Axelar instead of axlUSDC.
+            string memory bridgeTokenOutSymbol = block.chainid == ETH_MAINNET
+                ? "USDC"
+                : "axlUSDC";
 
             chainIds[0] = BSC_MAINNET;
 
@@ -81,7 +88,7 @@ contract DeployDaimoPayAxelarBridger is Script {
                     destChainName: _getAxelarChainName(chainIds[i]),
                     bridgeTokenIn: _getAxlUsdcAddress(block.chainid),
                     bridgeTokenOut: _getAxlUsdcAddress(chainIds[i]),
-                    bridgeTokenOutSymbol: "axlUSDC",
+                    bridgeTokenOutSymbol: bridgeTokenOutSymbol,
                     receiverContract: axelarReceiver,
                     fee: _getAxelarFeeByChain(block.chainid)
                 });
