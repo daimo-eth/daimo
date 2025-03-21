@@ -911,7 +911,7 @@ export const mantleWMNT: ForeignToken = {
   logoURI: TokenLogo.MNT,
 };
 
-export const mantleUSDC: ForeignToken = {
+export const mantleBridgedUSDC: ForeignToken = {
   chainId: 5000,
   token: getAddress("0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9"),
   decimals: 6,
@@ -941,7 +941,7 @@ export const mantleAxlUSDC: ForeignToken = {
 const mantleTokens = [
   mantleMNT,
   mantleWMNT,
-  mantleUSDC,
+  mantleBridgedUSDC,
   mantleUSDT,
   mantleAxlUSDC,
 ];
