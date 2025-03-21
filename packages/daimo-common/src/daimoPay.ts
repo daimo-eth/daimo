@@ -191,6 +191,13 @@ export type DaimoPayDehydratedOrder = {
   metadata: DaimoPayOrderMetadata;
   externalId: string | null;
   userMetadata: DaimoPayUserMetadata | null;
+  fees: DaimoPaymentFees | null;
+};
+
+export type DaimoPaymentFees = {
+  orgFeeUsd: number;
+  userFeeUsd: number;
+  feeDetails: any /** TODO */;
 };
 
 export type DaimoPayHydratedOrder = {
@@ -227,6 +234,7 @@ export type DaimoPayHydratedOrder = {
   metadata: DaimoPayOrderMetadata;
   externalId: string | null;
   userMetadata: DaimoPayUserMetadata | null;
+  fees: DaimoPaymentFees | null;
 };
 
 export type DaimoPayHydratedOrderWithoutIntentAddr = Omit<
