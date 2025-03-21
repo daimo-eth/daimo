@@ -44,6 +44,9 @@ import {
   lineaBridgedUSDC,
   lineaETH,
   lineaWETH,
+  mantleBridgedUSDC,
+  mantleMNT,
+  mantleWMNT,
   optimismETH,
   optimismSepoliaETH,
   optimismSepoliaUSDC,
@@ -283,6 +286,17 @@ export const blast: DAv2Chain = {
   wrappedNativeToken: blastWETH,
 };
 
+export const mantle: DAv2Chain = {
+  chainId: 5000,
+  name: "mantle",
+  shortName: "mantle",
+  cctpDomain: -1,
+  bridgeCoin: mantleBridgedUSDC,
+  localUSDC: mantleBridgedUSDC,
+  nativeToken: mantleMNT,
+  wrappedNativeToken: mantleWMNT,
+};
+
 const chains = [
   ethereum,
   ethereumSepolia,
@@ -301,6 +315,7 @@ const chains = [
   solana,
   worldchain,
   blast,
+  mantle,
 ];
 
 /** Supported chains for send (+ soon receive). */

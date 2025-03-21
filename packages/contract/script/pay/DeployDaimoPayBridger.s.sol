@@ -61,8 +61,8 @@ contract DeployDaimoPayBridger is Script {
         // Bridge to CCTP chains using CCTP.
         // Linea uses Across.
         // BSC uses Axelar.
-        uint256[] memory allChainIds = new uint256[](10);
-        address[] memory allBridgers = new address[](10);
+        uint256[] memory allChainIds = new uint256[](11);
+        address[] memory allBridgers = new address[](11);
 
         allChainIds[0] = ARBITRUM_MAINNET;
         allChainIds[1] = AVAX_MAINNET;
@@ -74,6 +74,7 @@ contract DeployDaimoPayBridger is Script {
         allChainIds[7] = BSC_MAINNET;
         allChainIds[8] = WORLDCHAIN_MAINNET;
         allChainIds[9] = BLAST_MAINNET;
+        allChainIds[10] = MANTLE_MAINNET;
 
         allBridgers[0] = cctpBridger;
         allBridgers[1] = cctpBridger;
@@ -85,9 +86,10 @@ contract DeployDaimoPayBridger is Script {
         allBridgers[7] = axelarBridger;
         allBridgers[8] = acrossBridger;
         allBridgers[9] = acrossBridger;
+        allBridgers[10] = axelarBridger;
 
-        chainIds = new uint256[](9);
-        bridgers = new address[](9);
+        chainIds = new uint256[](10);
+        bridgers = new address[](10);
 
         // Include all chainIds except the current chainId
         uint256 count = 0;
@@ -106,16 +108,21 @@ contract DeployDaimoPayBridger is Script {
         ) {
             // Linea, Worldchain, and Blast bridge to other chains using Across.
             // Override all bridgers with Across.
-            // The only exception is BSC, which uses Axelar.
+            // The exceptions are BSC and Mantle, which use Axelar.
             for (uint256 i = 0; i < bridgers.length; ++i) {
-                if (chainIds[i] == BSC_MAINNET) {
+                if (
+                    chainIds[i] == BSC_MAINNET || chainIds[i] == MANTLE_MAINNET
+                ) {
                     bridgers[i] = axelarBridger;
                 } else {
                     bridgers[i] = acrossBridger;
                 }
             }
-        } else if (block.chainid == BSC_MAINNET) {
-            // BSC bridges to other chains using Axelar. Override all bridgers with Axelar.
+        } else if (
+            block.chainid == BSC_MAINNET || block.chainid == MANTLE_MAINNET
+        ) {
+            // BSC and Mantle bridges to other chains using Axelar. Override all
+            // bridgers with Axelar.
             for (uint256 i = 0; i < bridgers.length; ++i) {
                 bridgers[i] = axelarBridger;
             }

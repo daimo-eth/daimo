@@ -37,6 +37,7 @@ export enum TokenLogo {
   USDB = "https://assets.coingecko.com/coins/images/35595/large/65c67f0ebf2f6a1bd0feb13c_usdb-icon-yellow.png",
   BLAST = "https://assets.coingecko.com/coins/images/35494/large/Blast.jpg",
   WBTC = "https://s2.coinmarketcap.com/static/img/coins/128x128/3717.png",
+  MNT = "https://assets.coingecko.com/coins/images/30980/large/Mantle-Logo-mark.png",
 }
 
 /* --------------------- Tokens Constants --------------------- */
@@ -895,6 +896,58 @@ export const blastBlast: ForeignToken = {
 
 const blastTokens = [blastETH, blastWETH, blastUSDB, blastBlast];
 
+//
+// Mantle
+//
+
+export const mantleMNT = nativeToken(5000, "Mantle", "MNT", TokenLogo.MNT);
+
+export const mantleWMNT: ForeignToken = {
+  chainId: 5000,
+  token: getAddress("0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8"),
+  decimals: 18,
+  name: "Wrapped Mantle",
+  symbol: "WMNT",
+  logoURI: TokenLogo.MNT,
+};
+
+export const mantleBridgedUSDC: ForeignToken = {
+  chainId: 5000,
+  token: getAddress("0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9"),
+  decimals: 6,
+  name: "USD Coin",
+  symbol: "USDC",
+  logoURI: TokenLogo.USDC,
+};
+
+export const mantleUSDT: ForeignToken = {
+  chainId: 5000,
+  token: getAddress("0x201eba5cc46d216ce6dc03f6a759e8e766e956ae"),
+  decimals: 6,
+  name: "Tether USD",
+  symbol: "USDT",
+  logoURI: TokenLogo.USDT,
+};
+
+export const mantleAxlUSDC: ForeignToken = {
+  chainId: 5000,
+  token: getAddress("0xEB466342C4d449BC9f53A865D5Cb90586f405215"),
+  decimals: 6,
+  name: "Axelar Wrapped USDC",
+  symbol: "axlUSDC",
+  logoURI: TokenLogo.USDC,
+};
+
+const mantleTokens = [
+  mantleMNT,
+  mantleWMNT,
+  mantleBridgedUSDC,
+  mantleUSDT,
+  mantleAxlUSDC,
+];
+
+axlUSDCByChainId.set(5000, mantleAxlUSDC);
+
 // --------------------- Native Token Utils ---------------------
 //
 
@@ -940,6 +993,7 @@ const allBasicTokens = [
   ...solanaTokens,
   ...worldchainTokens,
   ...blastTokens,
+  ...mantleTokens,
 ];
 
 const blacklistedTokens: Record<number, Set<string>> = {
