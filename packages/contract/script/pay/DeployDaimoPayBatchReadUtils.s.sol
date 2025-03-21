@@ -37,10 +37,12 @@ contract DeployDaimoPayBatchReadUtils is Script {
     }
 
     function _getQuoteToken(uint256 chainId) internal pure returns (address) {
-        if (chainId == LINEA_MAINNET) {
-            return LINEA_MAINNET_BRIDGED_USDC;
-        } else if (chainId == BSC_MAINNET) {
+        if (chainId == BSC_MAINNET) {
             return BSC_MAINNET_BRIDGED_USDC;
+        } else if (chainId == LINEA_MAINNET) {
+            return LINEA_MAINNET_BRIDGED_USDC;
+        } else if (chainId == MANTLE_MAINNET) {
+            return MANTLE_MAINNET_BRIDGED_USDC;
         } else {
             return _getUSDCAddress(chainId);
         }

@@ -19,7 +19,7 @@ SCRIPTS=(
     # "script/pay/DeployDaimoPayAcrossBridger.s.sol"
     # "script/pay/DeployDaimoPayCCTPBridger.s.sol"
     # "script/pay/DeployDaimoPayAxelarBridger.s.sol"
-    # "script/pay/DeployDaimoPayBridger.s.sol"
+    "script/pay/DeployDaimoPayBridger.s.sol"
     # "script/pay/DeployPayIntentFactory.s.sol"
     # "script/pay/DeployDaimoPay.s.sol"
     # "script/pay/DeployDaimoPayRelayer.s.sol" # The deployer must be the LP that calls this contract.
@@ -44,6 +44,7 @@ CHAINS=(
     # "$ETHERSCAN_API_KEY_BSC,https://bnb-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_WORLD,https://worldchain-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
     # "$ETHERSCAN_API_KEY_BLAST,https://blast-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY"
+    "$ETHERSCAN_API_KEY_MANTLE,https://mantle-rpc.publicnode.com"
     # "$ETHERSCAN_API_KEY_L1,https://eth-mainnet.g.alchemy.com/v2/$ALCHEMY_API_KEY" # Expensive, deploy last
 
     # Not supporting Avalanche, skip.
@@ -64,7 +65,7 @@ for SCRIPT in "${SCRIPTS[@]}"; do
         echo "ETHERSCAN_API_KEY: $ETHERSCAN_API_KEY"
         echo "RPC_URL          : $RPC_URL"
 
-        FORGE_CMD="forge script $SCRIPT --sig run --fork-url $RPC_URL --private-key $PRIVATE_KEY --verify --etherscan-api-key $ETHERSCAN_API_KEY --broadcast"
+        FORGE_CMD="forge script $SCRIPT --sig run --fork-url $RPC_URL"
 
         echo $FORGE_CMD
         echo ""

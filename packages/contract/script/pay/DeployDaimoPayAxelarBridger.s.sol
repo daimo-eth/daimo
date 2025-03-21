@@ -72,8 +72,8 @@ contract DeployDaimoPayAxelarBridger is Script {
             block.chainid == OP_MAINNET ||
             block.chainid == POLYGON_MAINNET
         ) {
-            chainIds = new uint256[](1);
-            bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](1);
+            chainIds = new uint256[](2);
+            bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](2);
             // TODO: bridgeTokenOutSymbol is a misnomer in our contracts. In
             // the Axelar contracts, the variable is just called "tokenSymbol".
             // ETH_MAINNET bridges USDC with Axelar instead of axlUSDC.
@@ -82,6 +82,7 @@ contract DeployDaimoPayAxelarBridger is Script {
                 : "axlUSDC";
 
             chainIds[0] = BSC_MAINNET;
+            chainIds[1] = MANTLE_MAINNET;
 
             for (uint32 i = 0; i < chainIds.length; ++i) {
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
@@ -94,15 +95,38 @@ contract DeployDaimoPayAxelarBridger is Script {
                 });
             }
         } else if (block.chainid == BSC_MAINNET) {
-            chainIds = new uint256[](6);
-            bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](6);
+            chainIds = new uint256[](7);
+            bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](7);
 
             chainIds[0] = ARBITRUM_MAINNET;
             chainIds[1] = BASE_MAINNET;
             chainIds[2] = ETH_MAINNET;
             chainIds[3] = LINEA_MAINNET;
-            chainIds[4] = OP_MAINNET;
-            chainIds[5] = POLYGON_MAINNET;
+            chainIds[4] = MANTLE_MAINNET;
+            chainIds[5] = OP_MAINNET;
+            chainIds[6] = POLYGON_MAINNET;
+
+            for (uint32 i = 0; i < chainIds.length; ++i) {
+                bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
+                    destChainName: _getAxelarChainName(chainIds[i]),
+                    bridgeTokenIn: _getAxlUsdcAddress(block.chainid),
+                    bridgeTokenOut: _getAxlUsdcAddress(chainIds[i]),
+                    bridgeTokenOutSymbol: "axlUSDC",
+                    receiverContract: axelarReceiver,
+                    fee: _getAxelarFeeByChain(block.chainid)
+                });
+            }
+        } else if (block.chainid == MANTLE_MAINNET) {
+            chainIds = new uint256[](7);
+            bridgeRoutes = new DaimoPayAxelarBridger.AxelarBridgeRoute[](7);
+
+            chainIds[0] = ARBITRUM_MAINNET;
+            chainIds[1] = BASE_MAINNET;
+            chainIds[2] = BSC_MAINNET;
+            chainIds[3] = ETH_MAINNET;
+            chainIds[4] = LINEA_MAINNET;
+            chainIds[5] = OP_MAINNET;
+            chainIds[6] = POLYGON_MAINNET;
 
             for (uint32 i = 0; i < chainIds.length; ++i) {
                 bridgeRoutes[i] = DaimoPayAxelarBridger.AxelarBridgeRoute({
@@ -140,10 +164,12 @@ contract DeployDaimoPayAxelarBridger is Script {
     function _getAxelarFeeByChain(
         uint256 chainId
     ) private pure returns (uint256) {
-        if (chainId == POLYGON_MAINNET) {
-            return 4_000_000_000_000_000_000; // 4 * 10^18 = 4 POL
-        } else if (chainId == BSC_MAINNET) {
+        if (chainId == BSC_MAINNET) {
             return 2_000_000_000_000_000; // 2 * 10^15 = 0.002 BNB
+        } else if (chainId == MANTLE_MAINNET) {
+            return 1_200_000_000_000_000_000; // 1.2 * 10^18 = 1.2 MNT
+        } else if (chainId == POLYGON_MAINNET) {
+            return 4_000_000_000_000_000_000; // 4 * 10^18 = 4 POL
         } else {
             return 500_000_000_000_000; // 5 * 10^14 = 0.0005 ETH
         }
