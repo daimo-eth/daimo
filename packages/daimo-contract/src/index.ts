@@ -26,6 +26,7 @@ export {
   daimoFlexSwapperAbi,
   daimoPayAbi,
   daimoPayAcrossBridgerAbi,
+  daimoPayAxelarBridgerAbi,
   daimoPayBatchReadUtilsAbi,
   daimoPayBridgerAbi,
   daimoPayCctpBridgerAbi,
@@ -69,6 +70,10 @@ export const daimoPayBridgerAddress =
   "0xB4418A1EcE96CF1F797fef3Ab2c0Afdf59701C38";
 export const daimoPayAxelarBridgerAddress =
   "0x91052AEc686070bc8787fde3d530f21976302867";
+export const daimoPayAcrossBridgerAddress =
+  "0x4518f95Bd1aB24B73aeB6AeaFd1567e1e04894Ea";
+export const daimoPayCctpBridgerAddress =
+  "0xD9a2126f5d80f2dd56BDd6aFbea5cAb3f9705191";
 export const payIntentFactoryAddress =
   "0x90498530e2FddcD937faB0Ab56cF6a7c1FB08b62";
 export const daimoPayRelayerAddress =
