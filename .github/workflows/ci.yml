@@ -46,7 +46,7 @@ jobs:
           echo TOOLCHAIN
           forge --version
           echo TEST
-          make test
+          make paytest
           echo CODEGEN
           cd ../.. && npm ci && npm run codegen
           git diff --exit-code
