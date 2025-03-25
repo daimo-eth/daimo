@@ -253,7 +253,7 @@ contract DaimoPayTest is Test {
         assertEq(actualBnbIntentAddr, BSC_INTENT_ADDR);
     }
 
-    function getSimplePayIntent()
+    function getSimpleSameChainPayIntent()
         public
         view
         returns (PayIntent memory intent)
@@ -281,7 +281,7 @@ contract DaimoPayTest is Test {
         _toToken.transfer(_alice, 555);
 
         // Create a payment intent which specifies the native token as output.
-        PayIntent memory intent = getSimplePayIntent();
+        PayIntent memory intent = getSimpleSameChainPayIntent();
         address intentAddr = intentFactory.getIntentAddress(intent);
 
         // Alice sends some TestUSDC to the intent address
@@ -305,7 +305,7 @@ contract DaimoPayTest is Test {
     function testSameChainRefundAfterClaim() public {
         testSimpleSameChainStart();
 
-        PayIntent memory intent = getSimplePayIntent();
+        PayIntent memory intent = getSimpleSameChainPayIntent();
         address intentAddr = intentFactory.getIntentAddress(intent);
 
         // Since we are on the dest chain already, we *cannot* refund after
@@ -345,6 +345,22 @@ contract DaimoPayTest is Test {
         assertEq(_toToken.balanceOf(_alice), 455);
     }
 
+    function getSimpleCrossChainPayIntent()
+        public
+        view
+        returns (PayIntent memory intent)
+    {
+        intent = PayIntent({
+            toChainId: _baseChainId,
+            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
+            finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
+            finalCall: Call({to: _bob, value: 0, data: ""}),
+            escrow: payable(address(dp)),
+            refundAddress: _alice,
+            nonce: _nonce
+        });
+    }
+
     // Test a simple startIntent call that bridges using CCTP.
     // Simple = no pre-swap, no post-call.
     function testSimpleCCTPStart() public {
@@ -356,15 +372,7 @@ contract DaimoPayTest is Test {
         // Alice initiates a transfer
         vm.startPrank(_alice);
 
-        PayIntent memory intent = PayIntent({
-            toChainId: _baseChainId,
-            bridgeTokenOutOptions: getBridgeTokenOutOptions(),
-            finalCallToken: TokenAmount({token: _toToken, amount: _toAmount}),
-            finalCall: Call({to: _bob, value: 0, data: ""}),
-            escrow: payable(address(dp)),
-            refundAddress: _alice,
-            nonce: _nonce
-        });
+        PayIntent memory intent = getSimpleCrossChainPayIntent();
 
         // Alice sends some coins to the intent address
         address intentAddr = intentFactory.getIntentAddress(intent);
@@ -414,6 +422,38 @@ contract DaimoPayTest is Test {
             0,
             "incorrect Axelar amount received"
         );
+    }
+
+    // Test refundIntent for a cross-chain intent. The refund should only be
+    // possible after the intent has been started.
+    function testCrossChainRefundAfterStart() public {
+        PayIntent memory intent = getSimpleCrossChainPayIntent();
+        address intentAddr = intentFactory.getIntentAddress(intent);
+
+        // The intent hasn't been started yet, so we can't refund.
+        vm.expectRevert(bytes("DP: not started"));
+        dp.refundIntent({intent: intent, token: _toToken});
+
+        // Start the intent.
+        testSimpleCCTPStart();
+
+        // Nothing to refund.
+        vm.expectRevert(bytes("PI: no funds to refund"));
+        dp.refundIntent({intent: intent, token: _toToken});
+
+        // Double-pay the intent...
+        vm.chainId(_fromChainId);
+        vm.prank(_alice);
+        require(_fromToken.transfer(intentAddr, 100));
+        assertEq(_fromToken.balanceOf(intentAddr), 100);
+        assertEq(_fromToken.balanceOf(_alice), 355);
+
+        // ...and refund.
+        dp.refundIntent({intent: intent, token: _fromToken});
+
+        // Check that the intent was refunded.
+        assertEq(_fromToken.balanceOf(intentAddr), 0);
+        assertEq(_fromToken.balanceOf(_alice), 455);
     }
 
     // Test a simple startIntent call that bridges using Across.
