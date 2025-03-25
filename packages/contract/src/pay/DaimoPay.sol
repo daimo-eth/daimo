@@ -144,10 +144,10 @@ contract DaimoPay {
         emit Start({intentAddr: address(intentContract), intent: intent});
     }
 
-    /// Completes intent immediately on chain B. The caller relayer makes a
-    /// transfer atomically in the same transaction and calls this function. The
-    /// relayer transfers some amount of token, and can make arbitrary calls to
-    /// convert it into the required amount of finalCallToken.
+    /// Completes intent immediately on chain B. The relayer calls this function
+    /// and atomically makes a transfer in the same transaction. The relayer
+    /// can make arbitrary calls to convert the transferred tokens into the
+    /// required amount of finalCallToken.
     ///
     /// Later, when the slower bridge transfer arrives, the relayer will be able
     /// to claim (bridgeTokenOut.token, bridgeTokenOut.amount), keeping the

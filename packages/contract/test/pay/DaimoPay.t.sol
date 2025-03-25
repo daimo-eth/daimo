@@ -300,13 +300,16 @@ contract DaimoPayTest is Test {
         require(_toToken.balanceOf(intentAddr) == 100);
     }
 
-    function testSimpleRefundAfterClaim() public {
+    // Test refundIntent for a same-chain intent. The refund should only be
+    // possible after the intent has been claimed.
+    function testSameChainRefundAfterClaim() public {
         testSimpleSameChainStart();
 
         PayIntent memory intent = getSimplePayIntent();
         address intentAddr = intentFactory.getIntentAddress(intent);
 
-        // Since we are on the dest chain already, we *cannot* refund on start.
+        // Since we are on the dest chain already, we *cannot* refund after
+        // startIntent.
         vm.expectRevert(bytes("DP: not claimed"));
         dp.refundIntent({intent: intent, token: _toToken});
 

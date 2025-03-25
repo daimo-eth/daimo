@@ -13,7 +13,7 @@ struct PayIntent {
     /// @dev Intent only executes on given target chain.
     uint256 toChainId;
     /// @dev Possible output tokens after bridging to the destination chain.
-    ///      Currently, ative token is not supported as a bridge token output.
+    ///      Currently, native token is not supported as a bridge token output.
     TokenAmount[] bridgeTokenOutOptions;
     /// @dev Expected token amount after swapping on the destination chain.
     TokenAmount finalCallToken;
