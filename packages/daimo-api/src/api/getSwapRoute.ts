@@ -87,7 +87,7 @@ export async function getSwapQuote({
 
   // By default, the router holds the funds until the last swap, then it is
   // sent to the recipient. Special case: if outputToken is ETH, unwrap first.
-  // Reference: https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/entities/protocols/uniswap.ts
+  // Reference: https://github.com/Uniswap/sdks/blob/main/sdks/universal-router-sdk/src/entities/actions/uniswap.ts
   const swapRecipient: Address = isToETH ? swapRouter02Address : toAddr;
 
   const t = now();
