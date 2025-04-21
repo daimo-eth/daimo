@@ -1,3 +1,4 @@
+import { debugJson } from "@daimo/common";
 import React, { useMemo, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
@@ -23,6 +24,7 @@ export function DaimoPayWebView({
     (event: WebViewMessageEvent) => {
       try {
         const data = JSON.parse(event.nativeEvent.data);
+        console.log(`[DAIMO PAY] Received message: ${debugJson(data)}`);
         if (data?.source !== "daimo-pay") return;
         if (data.type === "modalClosed") {
           onClose();
@@ -56,7 +58,7 @@ function buildDaimoPayUrl(account: Account) {
   const baseUrl = "https://miniapp.daimo.com/embed";
   const params = new URLSearchParams({
     toAddress: account.address,
-    refundAddress: "0xEEee8B1371f1664b7C2A8c111D6062b6576fA6f0", // daimo.eth
+    refundAddress: "0xDa130a3573e1a5F54f1B7C2F324bf5d4F89b3c27",
     toChain: account.homeChainId.toString(),
     toToken: account.homeCoinAddress,
     intent: "Deposit to Daimo",
