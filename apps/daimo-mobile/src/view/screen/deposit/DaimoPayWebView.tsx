@@ -4,7 +4,7 @@ import { WebView, WebViewMessageEvent } from "react-native-webview";
 
 import { Account } from "../../../storage/account";
 
-export type DaimoPayWebViewProps = {
+type DaimoPayWebViewProps = {
   account: Account;
   visible: boolean;
   onClose: () => void;
@@ -53,7 +53,7 @@ export function DaimoPayWebView({
 }
 
 function buildDaimoPayUrl(account: Account) {
-  const baseUrl = "http://localhost:3005/embed";
+  const baseUrl = "https://miniapp.daimo.com/embed";
   const params = new URLSearchParams({
     toAddress: account.address,
     refundAddress: "0xEEee8B1371f1664b7C2A8c111D6062b6576fA6f0", // daimo.eth
