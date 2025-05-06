@@ -162,7 +162,7 @@ export function parseAccount(accountJSON?: string): Account | null {
 
   assert(
     model.storageVersion === latestVersion,
-    `Unknown account storage version ${model.storageVersion}`,
+    `Unknown account storage version ${model.storageVersion}`
   );
   const a = model as StoredV16Account;
 
@@ -294,7 +294,7 @@ export function createEmptyAccount(
     name: string;
     address: Address;
   },
-  daimoChain: DaimoChain,
+  daimoChain: DaimoChain
 ): Account {
   return {
     ...inputAccount,

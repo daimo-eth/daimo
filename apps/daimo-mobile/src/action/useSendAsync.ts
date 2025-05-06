@@ -67,7 +67,7 @@ export function useSendWithDeviceKeyAsync(args: UseSendArgs) {
 
   const keySlot = deviceAccount
     ? deviceAccount.accountKeys.find(
-        (k) => k.pubKey === deviceAccount.enclavePubKey,
+        (k) => k.pubKey === deviceAccount.enclavePubKey
       )?.slot
     : undefined;
 
@@ -78,7 +78,7 @@ export function useSendWithDeviceKeyAsync(args: UseSendArgs) {
           keySlot,
           wrappedSigner: getWrappedDeviceKeySigner(
             deviceAccount.enclaveKeyName,
-            keySlot,
+            keySlot
           ),
           account: deviceAccount,
         } as DeviceKeySigner)
@@ -105,7 +105,7 @@ export function useSendAsync({
 
   const exec = useCallback(async () => {
     console.log(
-      `[SEND] sending userOp. account: ${account?.name}, signer: ${signer?.type}, total cost: $${cost.totalDollars}`,
+      `[SEND] sending userOp. account: ${account?.name}, signer: ${signer?.type}, total cost: $${cost.totalDollars}`
     );
     assert(account != null, "No account");
 
@@ -149,7 +149,7 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
         "claimLink",
         "inboundSwap",
         "outboundSwap",
-      ].includes(pendingOp.type),
+      ].includes(pendingOp.type)
     );
     // Filter to new named accounts only
     const findAccount = (addr: Address) =>
@@ -170,7 +170,7 @@ export function transferAccountTransform(namedAccounts: EAccount[]) {
 // userop successfully authenticates the user to the API.
 function addInviteLinkStatus(account: Account, pendingOp: PendingOp): Account {
   console.log(
-    `[SEND] attaching authenticate invite link status: ${debugJson(pendingOp)}`,
+    `[SEND] attaching authenticate invite link status: ${debugJson(pendingOp)}`
   );
   const inviteLinkStatus: DaimoInviteCodeStatus | null = pendingOp.inviteCode
     ? {
@@ -192,7 +192,7 @@ async function sendAsync(
   setAS: SetActStatus,
   account: Account,
   signer: Signer | undefined,
-  sendFn: SendOpFn,
+  sendFn: SendOpFn
 ): Promise<PendingOp> {
   try {
     const { address, homeChainId } = account;
@@ -218,7 +218,7 @@ async function sendAsync(
     if (
       e instanceof NamedError &&
       ["ExpoEnclaveSign", "ExpoPasskeysCreate", "ExpoPasskeysSign"].includes(
-        e.name,
+        e.name
       )
     ) {
       setAS("error", e.message);

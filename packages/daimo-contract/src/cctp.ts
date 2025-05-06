@@ -22,10 +22,10 @@ const chainToCctpMessengerAddr: Record<number, Address> = {
 
   // https://developers.circle.com/stablecoins/docs/evm-smart-contracts#testnet-contract-addresses
   [ethereumSepolia.chainId]: getAddress(
-    "0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5",
+    "0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5"
   ),
   [baseSepolia.chainId]: getAddress(
-    "0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5",
+    "0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5"
   ),
 } as const;
 

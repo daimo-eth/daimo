@@ -12,7 +12,7 @@ export async function verifyERC1271Signature(
   vc: ViemClient,
   addr: Address,
   messageHash: Hex,
-  signature: Hex,
+  signature: Hex
 ): Promise<boolean> {
   const verifySigResult = await vc.publicClient.readContract({
     abi: daimoAccountAbi,

@@ -38,7 +38,7 @@ export function toBase64(valueBase64URL: string): string {
 
 export function toAndroidCreateRequest(
   request: CreateRequest,
-  userIDB64: string,
+  userIDB64: string
 ): string {
   const requestObj = {
     rp: {

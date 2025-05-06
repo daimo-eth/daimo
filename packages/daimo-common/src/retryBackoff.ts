@@ -4,7 +4,7 @@ export async function retryBackoff<T>(
   name: string,
   fn: () => Promise<T>,
   maxRetries = 5,
-  backoffFn: (i: number) => number = (i) => Math.min(2000, 250 * 2 ** i),
+  backoffFn: (i: number) => number = (i) => Math.min(2000, 250 * 2 ** i)
 ): Promise<T> {
   for (let i = 1; ; i++) {
     try {
@@ -14,7 +14,7 @@ export async function retryBackoff<T>(
         const sleepMs = backoffFn(i);
         console.error(
           `[RETRY] ${name} sleeping ${sleepMs}ms after try ${i}, error:`,
-          e,
+          e
         );
         await new Promise((r) => setTimeout(r, sleepMs));
       } else {

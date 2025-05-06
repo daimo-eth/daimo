@@ -9,7 +9,7 @@ export async function testBinance() {
   console.log(`[TEST] verifying API availability ${bn}`);
   const res = await bn.createWithdrawalURL(
     "0x27785Ad361898B526F37d87C4fAcFD757Ff0622F",
-    "ios",
+    "ios"
   );
   console.log(`[TEST] withdraw URL: ${res}`);
 }

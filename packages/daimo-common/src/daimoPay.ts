@@ -87,7 +87,7 @@ export const zBridgeTokenOutOptions = z.array(
   z.object({
     token: zAddress,
     amount: zBigIntStr.transform((a) => BigInt(a)),
-  }),
+  })
 );
 
 export type BridgeTokenOutOptions = z.infer<typeof zBridgeTokenOutOptions>;
@@ -113,7 +113,7 @@ export const zDaimoPayOrderMetadata = z.object({
         image: z.string().optional(),
         price: z.string().optional(),
         priceDetails: z.string().optional(),
-      }),
+      })
     )
     .describe("Details about what's being ordered, donated, deposited, etc."),
   payer: z
@@ -122,18 +122,18 @@ export const zDaimoPayOrderMetadata = z.object({
         .array(z.number())
         .optional()
         .describe(
-          "Preferred chain IDs, in descending order. Any assets the user owns on preferred chains will appear first. Defaults to destination chain.",
+          "Preferred chain IDs, in descending order. Any assets the user owns on preferred chains will appear first. Defaults to destination chain."
         ),
       preferredTokens: z
         .array(
           z.object({
             chain: z.number(),
             address: zAddress.transform((a) => getAddress(a)),
-          }),
+          })
         )
         .optional()
         .describe(
-          "Preferred tokens, in descending order. Any preferred assets the user owns will appear first. Defaults to destination token.",
+          "Preferred tokens, in descending order. Any preferred assets the user owns will appear first. Defaults to destination token."
         ),
       // Filter to only allow payments on these chains. Keep this
       // parameter undocumented. Only for specific customers.
@@ -141,13 +141,13 @@ export const zDaimoPayOrderMetadata = z.object({
         .array(z.number())
         .optional()
         .describe(
-          "Filter to only allow payments on these EVM chains. Defaults to all chains.",
+          "Filter to only allow payments on these EVM chains. Defaults to all chains."
         ),
       paymentOptions: z
         .array(z.string())
         .optional()
         .describe(
-          "Payment options like Coinbase, Binance, etc. Defaults to all available options.",
+          "Payment options like Coinbase, Binance, etc. Defaults to all available options."
         ),
     })
     .optional()
@@ -167,12 +167,12 @@ export type DaimoPayOrderMetadata = z.infer<typeof zDaimoPayOrderMetadata>;
 export const zDaimoPayUserMetadata = z
   .record(
     z.string().max(40, "Metadata keys cannot be longer than 40 characters"),
-    z.string().max(500, "Metadata values cannot be longer than 500 characters"),
+    z.string().max(500, "Metadata values cannot be longer than 500 characters")
   )
   .nullable()
   .refine(
     (obj) => !obj || Object.keys(obj).length <= 50,
-    "Metadata cannot have more than 50 key-value pairs",
+    "Metadata cannot have more than 50 key-value pairs"
   );
 
 export type DaimoPayUserMetadata = z.infer<typeof zDaimoPayUserMetadata>;
@@ -275,7 +275,7 @@ export type DaimoPayOrderView = {
 };
 
 export function getOrderSourceChainId(
-  order: DaimoPayHydratedOrder,
+  order: DaimoPayHydratedOrder
 ): number | null {
   if (order.sourceTokenAmount == null) {
     return null;
@@ -284,7 +284,7 @@ export function getOrderSourceChainId(
 }
 
 export function getOrderDestChainId(
-  order: DaimoPayOrder | DaimoPayHydratedOrderWithoutIntentAddr,
+  order: DaimoPayOrder | DaimoPayHydratedOrderWithoutIntentAddr
 ): number {
   return order.destFinalCallTokenAmount.token.chainId;
 }
@@ -295,7 +295,7 @@ export function getDaimoPayOrderView(order: DaimoPayOrder): DaimoPayOrderView {
     status: order.intentStatus,
     createdAt: assertNotNull(
       order.createdAt,
-      `createdAt is null for order with id: ${order.id}`,
+      `createdAt is null for order with id: ${order.id}`
     ).toString(),
     display: {
       intent: order.metadata.intent,
@@ -310,15 +310,15 @@ export function getDaimoPayOrderView(order: DaimoPayOrder): DaimoPayOrderView {
             payerAddress: order.sourceFulfillerAddr,
             txHash: assertNotNull(
               order.sourceInitiateTxHash,
-              `sourceInitiateTxHash is null for order with source token: ${order.id}`,
+              `sourceInitiateTxHash is null for order with source token: ${order.id}`
             ),
             chainId: assertNotNull(
               getOrderSourceChainId(order),
-              `source chain id is null for order with source token: ${order.id}`,
+              `source chain id is null for order with source token: ${order.id}`
             ).toString(),
             amountUnits: formatUnits(
               BigInt(order.sourceTokenAmount.amount),
-              order.sourceTokenAmount.token.decimals,
+              order.sourceTokenAmount.token.decimals
             ),
             tokenSymbol: order.sourceTokenAmount.token.symbol,
             tokenAddress: order.sourceTokenAmount.token.token,
@@ -328,12 +328,12 @@ export function getDaimoPayOrderView(order: DaimoPayOrder): DaimoPayOrderView {
       destinationAddress: order.destFinalCall.to,
       txHash:
         order.mode === DaimoPayOrderMode.HYDRATED
-          ? (order.destFastFinishTxHash ?? order.destClaimTxHash)
+          ? order.destFastFinishTxHash ?? order.destClaimTxHash
           : null,
       chainId: getOrderDestChainId(order).toString(),
       amountUnits: formatUnits(
         BigInt(order.destFinalCallTokenAmount.amount),
-        order.destFinalCallTokenAmount.token.decimals,
+        order.destFinalCallTokenAmount.token.decimals
       ),
       tokenSymbol: order.destFinalCallTokenAmount.token.symbol,
       tokenAddress: getAddress(order.destFinalCallTokenAmount.token.token),

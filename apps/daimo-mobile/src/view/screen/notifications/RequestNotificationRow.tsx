@@ -144,8 +144,8 @@ function RequestNotificationMessage({
     otherAcc.label === AddrLabel.RequestLink
       ? i18.msgVerb.via()
       : type === "recipient"
-        ? i18.msgVerb.from()
-        : i18.msgVerb.for();
+      ? i18.msgVerb.from()
+      : i18.msgVerb.for();
 
   const otherAccText = (
     <TextBody color={color.midnight}>

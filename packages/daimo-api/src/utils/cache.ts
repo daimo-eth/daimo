@@ -14,7 +14,7 @@ import { assert } from "@daimo/common";
 export function lazyCache<T>(
   fn: () => Promise<T>,
   cacheTime: number,
-  staleTime = cacheTime,
+  staleTime = cacheTime
 ) {
   const undefinedCachedValue = Symbol();
   let currentPromise: Promise<T> | null = null;

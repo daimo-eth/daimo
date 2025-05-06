@@ -21,7 +21,7 @@ export function SeedPhraseDisplay({ words }: { words: string[] }) {
         num={index}
       />
     ),
-    [words],
+    [words]
   );
 
   const n2 = words.length / 2;
@@ -64,7 +64,7 @@ export function SeedPhraseEntry({
         onChangeText={(text) => handleInputChange(index, text)}
       />
     ),
-    [state],
+    [state]
   );
 
   const indices = [...state.keys()];
@@ -123,7 +123,7 @@ const SeedPhraseCell = memo(SeedPhraseCellInner);
 
 type SeedPhraseInputReducer = (
   state: SeedPhraseInputState,
-  action: SeedPhraseInputAction,
+  action: SeedPhraseInputAction
 ) => SeedPhraseInputState;
 
 // Pass indices to have user enter a subset of the words.
@@ -135,7 +135,7 @@ export function useSeedPhraseInput(indices?: number[]) {
 
   return useReducer<SeedPhraseInputReducer>(
     (state, next) => state.set(next.key, next.value),
-    initState,
+    initState
   );
 }
 

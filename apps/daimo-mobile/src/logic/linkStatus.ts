@@ -12,7 +12,7 @@ import { getRpcFunc, getRpcHook } from "./trpc";
 
 export function useFetchLinkStatus(
   link: DaimoLink | undefined,
-  daimoChain: DaimoChain,
+  daimoChain: DaimoChain
 ) {
   const sanitizedLink = link && stripSeedFromNoteLink(link);
   const url = sanitizedLink && formatDaimoLink(sanitizedLink);
@@ -22,7 +22,7 @@ export function useFetchLinkStatus(
 
 export async function fetchLinkStatus(
   link: DaimoLink,
-  daimoChain: DaimoChain,
+  daimoChain: DaimoChain
 ): Promise<DaimoLinkStatus> {
   const sanitizedLink = stripSeedFromNoteLink(link);
   const url = formatDaimoLink(sanitizedLink);
@@ -32,7 +32,7 @@ export async function fetchLinkStatus(
 
 export async function fetchInviteLinkStatus(
   daimoChain: DaimoChain,
-  inviteLink: DaimoLink | undefined,
+  inviteLink: DaimoLink | undefined
 ): Promise<LinkInviteStatus | undefined> {
   if (!inviteLink) return undefined;
 

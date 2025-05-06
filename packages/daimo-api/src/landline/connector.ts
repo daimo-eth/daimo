@@ -27,7 +27,7 @@ export async function getLandlineSession(
   }: {
     daimoAddress: Address;
   },
-  context: TrpcRequestContext,
+  context: TrpcRequestContext
 ): Promise<LandlineSessionKey> {
   console.log(`[LANDLINE] getting session key for ${daimoAddress}`);
 
@@ -39,14 +39,14 @@ export async function getLandlineSession(
       },
       {
         context,
-      },
+      }
     );
     console.log(`[LANDLINE] got session key for ${daimoAddress}`);
     return sessionKey;
   } catch (err: any) {
     console.error(
       `[LANDLINE] error getting session key for ${daimoAddress}`,
-      err,
+      err
     );
     // Gracefully return empty string
     return { key: "" };
@@ -59,7 +59,7 @@ export async function getLandlineAccounts(
   }: {
     daimoAddress: Address;
   },
-  context: TrpcRequestContext,
+  context: TrpcRequestContext
 ): Promise<LandlineAccount[]> {
   console.log(`[LANDLINE] getting external accounts for ${daimoAddress}`);
 
@@ -72,7 +72,7 @@ export async function getLandlineAccounts(
         },
         {
           context,
-        },
+        }
       );
     console.log(`[LANDLINE] got external accounts for ${daimoAddress}`);
     // TODO: change to number. Currently a string for backcompat
@@ -83,7 +83,7 @@ export async function getLandlineAccounts(
   } catch (err: any) {
     console.error(
       `[LANDLINE] error getting external accounts for ${daimoAddress}`,
-      err,
+      err
     );
     // Gracefully return empty array
     return [];
@@ -98,7 +98,7 @@ export async function getLandlineTransfers(
     daimoAddress: Address;
     createdAfterS?: number;
   },
-  context: TrpcRequestContext,
+  context: TrpcRequestContext
 ): Promise<LandlineTransfer[]> {
   // Convert createdAfter from Unix seconds to a Date object if it's provided
   const createdAfter = createdAfterS
@@ -114,7 +114,7 @@ export async function getLandlineTransfers(
       },
       {
         context,
-      },
+      }
     );
   return transfers;
 }
@@ -131,7 +131,7 @@ export async function landlineDeposit(
     amount: string;
     memo?: string;
   },
-  context: TrpcRequestContext,
+  context: TrpcRequestContext
 ): Promise<LandlineDepositResponse> {
   console.log("[LANDLINE] making deposit", {
     daimoAddress,
@@ -151,11 +151,11 @@ export async function landlineDeposit(
       },
       {
         context,
-      },
+      }
     );
     console.log(
       `[LANDLINE] created deposit for ${daimoAddress}, landlineAccountUuid: ${landlineAccountUuid}, amount: ${amount}, memo: ${memo}`,
-      depositResponse,
+      depositResponse
     );
     return depositResponse;
   } catch (err: any) {
@@ -183,7 +183,7 @@ export async function validateLandlineDeposit(
     daimoAddress: Address;
     amount: string;
   },
-  context: TrpcRequestContext,
+  context: TrpcRequestContext
 ) {
   console.log(`[LANDLINE] validating deposit ${debugJson(args)}`);
   try {
@@ -196,10 +196,10 @@ export async function validateLandlineDeposit(
         },
         {
           context,
-        },
+        }
       );
     console.log(
-      `[LANDLINE] validateLandlineDeposit ${debugJson({ args, response })}`,
+      `[LANDLINE] validateLandlineDeposit ${debugJson({ args, response })}`
     );
     return response;
   } catch (err: any) {

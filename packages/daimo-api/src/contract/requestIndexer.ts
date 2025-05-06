@@ -66,7 +66,7 @@ export class RequestIndexer extends Indexer {
   constructor(
     private db: DB,
     private nameReg: NameRegistry,
-    private paymentMemoTracker: PaymentMemoTracker,
+    private paymentMemoTracker: PaymentMemoTracker
   ) {
     super("REQUEST");
   }
@@ -83,7 +83,7 @@ export class RequestIndexer extends Indexer {
         .where((eb) => eb.between("block_num", "" + from, "" + to))
         .orderBy("block_num")
         .orderBy("log_idx")
-        .execute(),
+        .execute()
     );
 
     // Load context + update in-memory request index
@@ -128,7 +128,7 @@ export class RequestIndexer extends Indexer {
     // Log
     const elapsedMs = (performance.now() - startTime) | 0;
     console.log(
-      `[REQUEST] handled ${rows.length} request updates in ${elapsedMs}ms`,
+      `[REQUEST] handled ${rows.length} request updates in ${elapsedMs}ms`
     );
 
     // Finally, invoke listeners to send notifications etc.
@@ -155,14 +155,14 @@ export class RequestIndexer extends Indexer {
     this.listeners.push(listener);
   }
   private async handleRequestsCreated(
-    logs: RequestCreatedLog[],
+    logs: RequestCreatedLog[]
   ): Promise<DaimoRequestV2Status[]> {
     const promises = logs.map((log) => this.handleRequestCreated(log));
     return Promise.all(promises);
   }
 
   private async handleRequestCreated(
-    log: RequestCreatedLog,
+    log: RequestCreatedLog
   ): Promise<DaimoRequestV2Status> {
     console.log(`[REQUEST] RequestCreated ${log.id}`);
     if (this.requests.get(log.id) != null) {
@@ -217,7 +217,7 @@ export class RequestIndexer extends Indexer {
   }
 
   private async handleRequestsFulfilled(
-    reqs: RequestFulfilledLog[],
+    reqs: RequestFulfilledLog[]
   ): Promise<DaimoRequestV2Status[]> {
     const promises = reqs
       .map(async (req) => {
@@ -233,7 +233,7 @@ export class RequestIndexer extends Indexer {
         this.requests.set(req.id, request);
         this.logCoordinateToRequestFulfill.set(
           logCoordinateKey(req.transactionHash, req.logIndex),
-          req.id,
+          req.id
         );
         return request;
       })
@@ -243,7 +243,7 @@ export class RequestIndexer extends Indexer {
   }
 
   private async handleRequestsCancelled(
-    reqs: RequestCancelledLog[],
+    reqs: RequestCancelledLog[]
   ): Promise<DaimoRequestV2Status[]> {
     const statuses = reqs
       .map((req) => {
@@ -255,7 +255,7 @@ export class RequestIndexer extends Indexer {
         request.status = DaimoRequestState.Cancelled;
         request.updatedAt = guessTimestampFromNum(
           req.blockNumber,
-          chainConfig.daimoChain,
+          chainConfig.daimoChain
         );
         this.requests.set(req.id, request);
         return request;
@@ -322,10 +322,10 @@ export class RequestIndexer extends Indexer {
 
   getRequestStatusByFulfillLogCoordinate(
     transactionHash: Hex,
-    logIndex: number,
+    logIndex: number
   ) {
     const id = this.logCoordinateToRequestFulfill.get(
-      logCoordinateKey(transactionHash, logIndex),
+      logCoordinateKey(transactionHash, logIndex)
     );
     if (id == null) return null;
     return this.getRequestStatusById(id);

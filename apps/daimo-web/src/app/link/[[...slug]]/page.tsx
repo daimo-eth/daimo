@@ -48,7 +48,7 @@ type TitleDesc = {
 const defaultMeta = metadata(
   "Daimo",
   "Payments on Ethereum",
-  getAbsoluteUrl(`/logo-link-preview.png`),
+  getAbsoluteUrl(`/logo-link-preview.png`)
 );
 
 function getUrl(props: LinkProps): string {
@@ -61,7 +61,7 @@ function getUrl(props: LinkProps): string {
 function getPreviewURL(
   name: string | undefined,
   action: string | undefined,
-  dollars: `${number}` | undefined,
+  dollars: `${number}` | undefined
 ) {
   if (!name) return getAbsoluteUrl(`/logo-link-preview.png`);
 
@@ -127,7 +127,7 @@ async function LinkPageInner(props: LinkProps) {
 function metadata(
   title: string,
   description: string,
-  previewURL: string,
+  previewURL: string
 ): Metadata {
   return {
     title,
@@ -236,7 +236,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           name: `${name}`,
           action: i18n.link.actions.requestedPayment(),
           description: i18n.link.responses.request.desc2(
-            getAccountName(fulfilledBy),
+            getAccountName(fulfilledBy)
           ),
         };
         if (res.link.dollars) {
@@ -267,7 +267,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: i18n.link.actions.cancelledRequest(),
             dollars: `${res.link.dollars}`,
             description: i18n.link.responses.requestsv2.canceled(
-              getAccountName(recipient),
+              getAccountName(recipient)
             ),
           };
         }
@@ -277,7 +277,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: i18n.link.actions.requested(),
             dollars: `${res.link.dollars}`,
             description: i18n.link.responses.requestsv2.fulfilled(
-              getAccountName(fulfilledBy!),
+              getAccountName(fulfilledBy!)
             ),
           };
         }
@@ -317,7 +317,7 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
             action: i18n.link.actions.cancelledSend(),
             dollars: `${dollars}`,
             description: i18n.link.responses.notev2.cancelled(
-              getAccountName(sender),
+              getAccountName(sender)
             ),
           };
         }
@@ -338,11 +338,11 @@ async function loadTitleDesc(url: string): Promise<TitleDesc | null> {
           bonusDollarsInvitee === bonusDollarsInviter
         ) {
           return i18n.link.responses.invite.acceptTheInviteBoth(
-            bonusDollarsInvitee,
+            bonusDollarsInvitee
           );
         } else if (bonusDollarsInvitee) {
           return i18n.link.responses.invite.acceptTheInvite(
-            bonusDollarsInvitee,
+            bonusDollarsInvitee
           );
         } else return i18n.link.responses.invite.getDaimo();
       })();

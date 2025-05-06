@@ -128,7 +128,7 @@ function LandlineAccountList() {
           <LandlineOptionRow
             key={`landline-account-${idx}`}
             title={i18.landline.optionRowTitle(
-              timeAgo(accCreatedAtS, i18NLocale, nowS),
+              timeAgo(accCreatedAtS, i18NLocale, nowS)
             )}
             cta={`${acc.bankName} ****${acc.accountNumberLastFour}`}
             logo={getContactProfilePicture(recipient) as ImageSourcePropType}
@@ -149,7 +149,7 @@ function LandlineAccountList() {
 // in Binance app, so we can't include it in the recommendedExchanges API-side.
 function getOnDemandExchanges(
   account: Account,
-  setProgress: (progress: Progress) => void,
+  setProgress: (progress: Progress) => void
 ) {
   const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
 
@@ -239,7 +239,7 @@ function DepositList({ account }: { account: Account }) {
         sortId: rec.sortId || 0,
         onClick: () => openExchange(rec.url),
       })),
-      ...getOnDemandExchanges(account, setProgress),
+      ...getOnDemandExchanges(account, setProgress)
     );
     options.sort((a, b) => (a.sortId || 0) - (b.sortId || 0));
   }

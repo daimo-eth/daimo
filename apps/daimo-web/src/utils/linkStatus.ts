@@ -26,7 +26,7 @@ export interface LinkStatusDesc {
 }
 
 export async function loadLinkStatusDesc(
-  url: string,
+  url: string
 ): Promise<LinkStatusDesc | null> {
   let linkStatus: DaimoLinkStatus;
   try {
@@ -132,7 +132,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
           name: `${name}`,
           action: i18n.link.actions.requested(),
           description: i18n.link.responses.request.desc2(
-            getAccountName(fulfilledBy),
+            getAccountName(fulfilledBy)
           ),
         };
         if (res.link.dollars) {
@@ -164,7 +164,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             action: i18n.link.actions.cancelledRequest(),
             dollars: `${res.link.dollars}`,
             description: i18n.link.responses.requestsv2.canceled(
-              getAccountName(recipient),
+              getAccountName(recipient)
             ),
             memo,
           };
@@ -175,7 +175,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             action: i18n.link.actions.requested(),
             dollars: `${res.link.dollars}`,
             description: i18n.link.responses.requestsv2.fulfilled(
-              getAccountName(fulfilledBy!),
+              getAccountName(fulfilledBy!)
             ),
             memo,
           };
@@ -217,7 +217,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
             action: i18n.link.actions.cancelledSend(),
             dollars: `${dollars}`,
             description: i18n.link.responses.notev2.cancelled(
-              getAccountName(sender),
+              getAccountName(sender)
             ),
             memo,
           };
@@ -239,11 +239,11 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
           bonusDollarsInvitee === bonusDollarsInviter
         ) {
           return i18n.link.responses.invite.acceptTheInviteBoth(
-            bonusDollarsInvitee,
+            bonusDollarsInvitee
           );
         } else if (bonusDollarsInvitee) {
           return i18n.link.responses.invite.acceptTheInvite(
-            bonusDollarsInvitee,
+            bonusDollarsInvitee
           );
         } else return i18n.link.responses.invite.getDaimo();
       })();
@@ -257,7 +257,7 @@ function getLinkDescFromStatus(res: DaimoLinkStatus): LinkStatusDesc {
       return {
         name: "Daimo",
         description: i18n.utils.linkStatus.unhandeledLinkForType(
-          i18n.utils.linkStatus.unhandeledLinkForType(resLinkType),
+          i18n.utils.linkStatus.unhandeledLinkForType(resLinkType)
         ),
       };
     }

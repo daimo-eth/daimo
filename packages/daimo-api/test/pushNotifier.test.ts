@@ -329,7 +329,7 @@ function createNotifierAliceBob() {
   const stubRequestIndexer = {
     getRequestStatusByFulfillLogCoordinate: (
       transactionHash: Hex,
-      logIndex: number,
+      logIndex: number
     ): DaimoRequestV2Status | null => {
       if (transactionHash === "0x42") {
         return {
@@ -361,7 +361,7 @@ function createNotifierAliceBob() {
         status: OpStatus.confirmed,
         timestamp: guessTimestampFromNum(
           Number(log.blockNumber),
-          daimoChainFromId(chainConfig.chainL2.id),
+          daimoChainFromId(chainConfig.chainL2.id)
         ),
         from: log.from,
         to: log.to,
@@ -393,7 +393,7 @@ function createNotifierAliceBob() {
           requestStatus:
             stubRequestIndexer.getRequestStatusByFulfillLogCoordinate(
               log.transactionHash,
-              log.logIndex - 1,
+              log.logIndex - 1
             ) || undefined,
         } as TransferClog;
       }
@@ -436,7 +436,7 @@ function createNotifierAliceBob() {
         status: OpStatus.confirmed,
         timestamp: guessTimestampFromNum(
           Number(log.blockNumber),
-          daimoChainFromId(chainConfig.chainL2.id),
+          daimoChainFromId(chainConfig.chainL2.id)
         ),
         from: log.from,
         to: log.to,
@@ -465,7 +465,7 @@ function createNotifierAliceBob() {
     nullAny,
     stubRequestIndexer,
     stubKeyReg,
-    nullAny,
+    nullAny
   );
   pn.pushTokens.set(addrAlice, ["pushTokenAlice"]);
   pn.pushTokens.set(addrBob, ["pushTokenBob1", "pushTokenBob2"]);
@@ -485,10 +485,10 @@ function createTransfer(args: {
   const txHash = args.isRequestResponse
     ? "0x42"
     : args.memo
-      ? "0x43"
-      : args.isSwap
-        ? "0x44"
-        : "0x0";
+    ? "0x43"
+    : args.isSwap
+    ? "0x44"
+    : "0x0";
 
   return {
     address: "0x0",

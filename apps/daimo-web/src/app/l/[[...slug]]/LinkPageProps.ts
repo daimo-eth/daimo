@@ -9,7 +9,7 @@ export type LinkPageProps = {
 export function getUrl(props: LinkPageProps): string {
   const path = (props.params.slug || []).join("/");
   const queryString = new URLSearchParams(
-    props.searchParams as Record<string, string>,
+    props.searchParams as Record<string, string>
   ).toString();
   return `${daimoLinkBaseV2}/${path}?${queryString}`;
 }

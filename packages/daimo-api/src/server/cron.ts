@@ -39,7 +39,7 @@ export class Crontab {
     private inviteCodeTracker: InviteCodeTracker,
     private inviteGraph: InviteGraph,
     private nameRegistry: NameRegistry,
-    private telemetry: Telemetry,
+    private telemetry: Telemetry
   ) {}
 
   async init() {
@@ -72,12 +72,12 @@ export class Crontab {
     balance: number,
     label: string,
     thresholdWarn: number,
-    thresholdError: number,
+    thresholdError: number
   ) {
     if (balance < thresholdError) {
       this.telemetry.recordClippy(
         `${label} balance too low: ${balance}`,
-        "error",
+        "error"
       );
     } else if (balance < thresholdWarn) {
       this.telemetry.recordClippy(`${label} balance low: ${balance}`, "warn");
@@ -99,7 +99,7 @@ export class Crontab {
       depositEth,
       `Paymaster ${daimoPaymasterV2Address} ETH`,
       0.15,
-      0.05,
+      0.05
     );
   }
 
@@ -115,7 +115,7 @@ export class Crontab {
       balanceEth,
       `Faucet ${faucetAddr} ETH`,
       0.05,
-      0.005,
+      0.005
     );
 
     const balanceUSDC = await this.vc.publicClient.readContract({
@@ -131,7 +131,7 @@ export class Crontab {
       balanceDollars,
       `Faucet ${faucetAddr} USDC`,
       250,
-      25,
+      25
     );
   }
 
@@ -156,7 +156,7 @@ export class Crontab {
   async postRecentTransfer(
     opEvent: TransferClog,
     fromName?: string,
-    toName?: string,
+    toName?: string
   ) {
     assert(fromName != null || toName != null);
 
@@ -209,18 +209,18 @@ export class Crontab {
     if (fromName == null && toName == null) return;
 
     const fromDisplayName = getAccountName(
-      await this.nameRegistry.getEAccount(transfer.from),
+      await this.nameRegistry.getEAccount(transfer.from)
     );
     const toDisplayName = getAccountName(
-      await this.nameRegistry.getEAccount(transfer.to),
+      await this.nameRegistry.getEAccount(transfer.to)
     );
 
     const humanReadableValue = getForeignCoinDisplayAmount(
       transfer.value.toString() as `${bigint}`,
-      transfer.foreignToken,
+      transfer.foreignToken
     );
     this.telemetry.recordClippy(
-      `Forex Transfer: ${fromDisplayName} -> ${toDisplayName} ${humanReadableValue} ${transfer.foreignToken.symbol} `,
+      `Forex Transfer: ${fromDisplayName} -> ${toDisplayName} ${humanReadableValue} ${transfer.foreignToken.symbol} `
     );
   }
 }

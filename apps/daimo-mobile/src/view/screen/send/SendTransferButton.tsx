@@ -66,7 +66,7 @@ export function SendTransferButton({
   // Generate nonce
   const nonce = useMemo(
     () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.Send)),
-    [],
+    []
   );
 
   // Note whether the transfer has a swap or not for op creation.
@@ -103,7 +103,7 @@ export function SendTransferButton({
     sendFn: async (opSender: DaimoOpSender) => {
       assert(dollars > 0);
       console.log(
-        `[ACTION] sending $${dollarsStr} ${toCoin.symbol} to ${recipient.addr}`,
+        `[ACTION] sending $${dollarsStr} ${toCoin.symbol} to ${recipient.addr}`
       );
       const opMetadata = {
         nonce,
@@ -118,7 +118,7 @@ export function SendTransferButton({
           toChain,
           dollarsStr,
           opMetadata,
-          memo,
+          memo
         );
       } else if (isSwap) {
         if (route == null) {
@@ -134,12 +134,12 @@ export function SendTransferButton({
         recipient.addr,
         dollarsStr,
         opMetadata,
-        memo,
+        memo
       );
     },
     pendingOp,
     accountTransform: transferAccountTransform(
-      hasAccountName(recipient) ? [recipient as EAccount] : [],
+      hasAccountName(recipient) ? [recipient as EAccount] : []
     ),
   });
 

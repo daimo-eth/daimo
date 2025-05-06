@@ -38,7 +38,7 @@ export function getFrameLinkServiceFromEnv(): FrameLinkService {
 export class FrameLinkService {
   constructor(
     private neynarClient: NeynarAPIClient,
-    private fcClient: FarcasterCacheClient,
+    private fcClient: FarcasterCacheClient
   ) {}
 
   // Load frame by ID
@@ -54,7 +54,7 @@ export class FrameLinkService {
     const body: FrameRequest = await req.json();
     const { valid, action } = await neynarClient.validateFrameAction(
       body.trustedData.messageBytes,
-      { followContext: true },
+      { followContext: true }
     );
     console.log("Frame request. valid? " + valid);
 
@@ -77,7 +77,7 @@ export class FrameLinkService {
 
   async respondToFrameClick(
     action: ValidatedFrameAction,
-    frame: InviteFrameLink,
+    frame: InviteFrameLink
   ): Promise<NextResponse> {
     const { fcClient } = this;
 
@@ -89,7 +89,7 @@ export class FrameLinkService {
     const [bonus, authMsg] = await this.auth(user, frame);
     const bonusStr = bonus ? "BONUS" : "NO BONUS";
     console.log(
-      `[FRAME] frame click from ${fid} @${user.username} ${bonusStr} ${authMsg}`,
+      `[FRAME] frame click from ${fid} @${user.username} ${bonusStr} ${authMsg}`
     );
 
     // Create a single-use invite link specific to this user (fid)
@@ -106,7 +106,7 @@ export class FrameLinkService {
   // Check whether this Farcaster user gets a Daimo invite from this frame
   private async auth(
     user: User,
-    frame: InviteFrameLink,
+    frame: InviteFrameLink
   ): Promise<[boolean, string]> {
     const { auth } = frame;
     console.log(`[FRAME] authenticating ${JSON.stringify(user)}`);
@@ -126,7 +126,7 @@ export class FrameLinkService {
     }
     for (const whitelist of auth.addressWhitelists || []) {
       const whitelistAddrs = new Set(
-        whitelist.addrs.map((addr) => getAddress(addr)),
+        whitelist.addrs.map((addr) => getAddress(addr))
       );
       const userAddrs = user.verified_addresses.eth_addresses;
       if (userAddrs.some((addr) => whitelistAddrs.has(getAddress(addr)))) {
@@ -142,7 +142,7 @@ export class FrameLinkService {
   // Hits Daimo API to create an invite link for a given key
   private async createInviteLink(
     fid: number,
-    frame: InviteFrameLink,
+    frame: InviteFrameLink
   ): Promise<string> {
     const apiKey = assertNotNull(envVarsWeb.DAIMO_API_KEY, "Set DAIMO_API_KEY");
     const preimage = `${frame.id}-${fid}-${apiKey}`;
@@ -166,7 +166,7 @@ export class FrameLinkService {
   private successResponse(
     frame: InviteFrameLink,
     inviteLink: string,
-    buttonText: string,
+    buttonText: string
   ) {
     const link = parseDaimoLink(inviteLink);
     assert(link != null && link.type === "invite");
@@ -177,7 +177,7 @@ export class FrameLinkService {
       getFrameHtmlResponse({
         buttons: [{ label: buttonText, action: "link", target: url }],
         image: getAbsoluteUrl(frame.appearance.imgSuccess),
-      }),
+      })
     );
   }
 }

@@ -3,7 +3,7 @@ import { parseUnits } from "viem";
 /** Returns token units, 6000000 for $6 USDC */
 export function dollarsToAmount(
   dollars: number | string,
-  tokenDecimals: number = 6,
+  tokenDecimals: number = 6
 ) {
   if (typeof dollars === "number") {
     dollars = dollars.toFixed(tokenDecimals);
@@ -14,7 +14,7 @@ export function dollarsToAmount(
 /** Returns eg "6.00" for 6000123 USDC units. */
 export function amountToDollars(
   amount: bigint | number,
-  tokenDecimals: number = 6,
+  tokenDecimals: number = 6
 ): `${number}` {
   const dispDecimals = 2;
 

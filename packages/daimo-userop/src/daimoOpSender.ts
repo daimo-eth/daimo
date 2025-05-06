@@ -60,7 +60,7 @@ interface DaimoOpConfig {
 export class DaimoOpSender {
   private constructor(
     public opConfig: DaimoOpConfig,
-    private opBuilder: DaimoOpBuilder,
+    private opBuilder: DaimoOpBuilder
   ) {}
 
   /**
@@ -77,7 +77,7 @@ export class DaimoOpSender {
         tokenAddress,
         tokenDecimals,
         notesAddressV1: opConfig.notesAddressV1,
-      })})}`,
+      })})}`
     );
 
     return new DaimoOpSender(opConfig, builder);
@@ -90,7 +90,7 @@ export class DaimoOpSender {
   /** Submits a user op to bundler. Returns PendingOp. */
   public async sendUserOp(
     opBuilder: DaimoOpBuilder,
-    memo?: string,
+    memo?: string
   ): Promise<PendingOp> {
     const nowS = now();
     const validUntil = nowS + this.opConfig.deadlineSecs;
@@ -110,7 +110,7 @@ export class DaimoOpSender {
   private getTokenApproveCall(
     dest: Address,
     amount: bigint = maxUint256, // defaults to infinite
-    tokenAddress: Address = this.opConfig.tokenAddress, // defaults to home coin
+    tokenAddress: Address = this.opConfig.tokenAddress // defaults to home coin
   ): DaimoAccountCall {
     return {
       // Approve contract `amount` spending on behalf of the account
@@ -128,7 +128,7 @@ export class DaimoOpSender {
   public async addSigningKey(
     slot: number,
     derPublicKey: Hex,
-    opMetadata: DaimoOpMetadata,
+    opMetadata: DaimoOpMetadata
   ) {
     const contractFriendlyKey = derKeytoContractFriendlyKey(derPublicKey);
 
@@ -144,7 +144,7 @@ export class DaimoOpSender {
           }),
         },
       ],
-      opMetadata,
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -164,7 +164,7 @@ export class DaimoOpSender {
           }),
         },
       ],
-      opMetadata,
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -175,7 +175,7 @@ export class DaimoOpSender {
     to: Address,
     amount: `${number}`, // in the native unit of the token
     opMetadata: DaimoOpMetadata,
-    memo?: string,
+    memo?: string
   ) {
     const { tokenAddress, tokenDecimals } = this.opConfig;
 
@@ -194,7 +194,7 @@ export class DaimoOpSender {
           }),
         },
       ],
-      opMetadata,
+      opMetadata
     );
 
     return this.sendUserOp(op, memo);
@@ -206,7 +206,7 @@ export class DaimoOpSender {
     amount: `${number}`,
     approveFirst: boolean,
     opMetadata: DaimoOpMetadata,
-    memo?: string,
+    memo?: string
   ) {
     const { tokenDecimals, notesAddressV2 } = this.opConfig;
 
@@ -238,7 +238,7 @@ export class DaimoOpSender {
   public async claimEphemeralNoteV1(
     ephemeralOwner: Hex,
     signature: Hex,
-    opMetadata: DaimoOpMetadata,
+    opMetadata: DaimoOpMetadata
   ) {
     console.log(`[OP] claim ephemeral note ${ephemeralOwner}`);
 
@@ -254,7 +254,7 @@ export class DaimoOpSender {
           }),
         },
       ],
-      opMetadata,
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -262,7 +262,7 @@ export class DaimoOpSender {
 
   public claimEphemeralNoteSelf(
     ephemeralOwner: Hex,
-    opMetadata: DaimoOpMetadata,
+    opMetadata: DaimoOpMetadata
   ) {
     console.log(`[OP] cancel ephemeral note V2 ${ephemeralOwner}`);
 
@@ -278,7 +278,7 @@ export class DaimoOpSender {
           }),
         },
       ],
-      opMetadata,
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -287,7 +287,7 @@ export class DaimoOpSender {
   public async claimEphemeralNoteRecipient(
     ephemeralOwner: Hex,
     signature: Hex,
-    opMetadata: DaimoOpMetadata,
+    opMetadata: DaimoOpMetadata
   ) {
     console.log(`[OP] claim ephemeral note v2 ${ephemeralOwner}`);
 
@@ -305,7 +305,7 @@ export class DaimoOpSender {
           }),
         },
       ],
-      opMetadata,
+      opMetadata
     );
 
     return this.sendUserOp(op);
@@ -314,7 +314,7 @@ export class DaimoOpSender {
   public async approveAndFulfillRequest(
     id: bigint,
     amount: `${number}`, // in the native unit of the token
-    opMetadata: DaimoOpMetadata,
+    opMetadata: DaimoOpMetadata
   ) {
     console.log(`[OP] fulfill request ${id} ${amount}`);
 
@@ -340,10 +340,10 @@ export class DaimoOpSender {
 
   public async executeProposedSwap(
     swap: ProposedSwap,
-    opMetadata: DaimoOpMetadata,
+    opMetadata: DaimoOpMetadata
   ) {
     console.log(
-      `[OP] execute swap ${swap.fromAmount} ${swap.fromCoin.symbol} ${swap.fromCoin.token} to ${swap.toAmount} ${swap.toCoin} via ${swap.execRouterAddress}`,
+      `[OP] execute swap ${swap.fromAmount} ${swap.fromCoin.symbol} ${swap.fromCoin.token} to ${swap.toAmount} ${swap.toCoin} via ${swap.execRouterAddress}`
     );
 
     // Approve, then swap
@@ -365,8 +365,8 @@ export class DaimoOpSender {
         this.getTokenApproveCall(
           swap.execRouterAddress,
           BigInt(swap.fromAmount),
-          getAddress(swap.fromCoin.token),
-        ),
+          getAddress(swap.fromCoin.token)
+        )
       );
     }
 
@@ -401,7 +401,7 @@ export class DaimoOpSender {
     toChain: DAv2Chain,
     amount: `${number}`, // in the native unit of the token
     opMetadata: DaimoOpMetadata,
-    memo?: string,
+    memo?: string
   ) {
     const { tokenAddress, tokenDecimals, chainId } = this.opConfig;
 
@@ -418,7 +418,7 @@ export class DaimoOpSender {
     const nonce = generateRandom256BitInteger();
 
     console.log(
-      `[OP] FastCCTP startTransfer to ${to} on chain ${toChain.name} for ${amount} USDC`,
+      `[OP] FastCCTP startTransfer to ${to} on chain ${toChain.name} for ${amount} USDC`
     );
 
     const op = this.opBuilder.executeBatch(
@@ -452,7 +452,7 @@ export class DaimoOpSender {
           }),
         },
       ],
-      opMetadata,
+      opMetadata
     );
 
     return this.sendUserOp(op, memo);

@@ -106,12 +106,12 @@ export async function getAccountHistory(
   db: DB,
   extApiCache: ExternalApiCache,
   blockNumber: number,
-  version: string | undefined,
+  version: string | undefined
 ): Promise<AccountHistoryResult> {
   const eAcc = nameReg.getDaimoAccount(address);
   assert(
     eAcc != null && eAcc.name != null,
-    `${address} is not a Daimo account`,
+    `${address} is not a Daimo account`
   );
   const startMs = performance.now();
   // Split version string into appVersion and buildVersion
@@ -121,7 +121,7 @@ export async function getAccountHistory(
     appVersion = parts[0];
     assert(
       semver.valid(appVersion) != null,
-      `${version} is not a valid app version`,
+      `${version} is not a valid app version`
     );
   }
   const log = `[API] getAccountHist: ${eAcc.name} ${address} since ${sinceBlockNum}`;
@@ -137,12 +137,12 @@ export async function getAccountHistory(
   // Get the latest block + current balance.
   assert(
     blockNumber >= Number(finBlock.number),
-    `Latest block ${blockNumber} < finalized ${finBlock.number}`,
+    `Latest block ${blockNumber} < finalized ${finBlock.number}`
   );
   const lastBlock = blockNumber;
   const lastBlockTimestamp = guessTimestampFromNum(
     lastBlock,
-    chainConfig.daimoChain,
+    chainConfig.daimoChain
   );
   const lastBalance = homeCoinIndexer.getCurrentBalance(address);
 
@@ -172,7 +172,7 @@ export async function getAccountHistory(
         noteIndexer,
         requestIndexer,
         inviteCodeTracker,
-        db,
+        db
       )) as DaimoInviteCodeStatus)
     : null;
 
@@ -218,7 +218,7 @@ export async function getAccountHistory(
     transferClogs = addLandlineTransfers(
       landlineTransfers,
       transferClogs,
-      chainConfig.daimoChain,
+      chainConfig.daimoChain
     );
   }
 
@@ -226,7 +226,7 @@ export async function getAccountHistory(
   const namedAccounts = await getNamedAccountsFromClogs(
     transferClogs,
     landlineAccounts,
-    nameReg,
+    nameReg
   );
 
   // Prefetch info required to deposit to your Daimo account.
@@ -275,7 +275,7 @@ export async function getAccountHistory(
 async function getNamedAccountsFromClogs(
   clogs: TransferClog[],
   landlineAccounts: LandlineAccount[],
-  nameReg: NameRegistry,
+  nameReg: NameRegistry
 ): Promise<EAccount[]> {
   const addrs = new Set<Address>();
   clogs.forEach((clog) => {
@@ -305,7 +305,7 @@ function getSuggestedActions(
   eAcc: EAccount,
   hist: AccountHistoryResult,
   ctx: TrpcRequestContext,
-  lang?: string,
+  lang?: string
 ) {
   const ret: SuggestedAction[] = [];
   const t = i18n(lang).suggestedActions;

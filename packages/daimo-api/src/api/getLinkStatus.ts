@@ -27,7 +27,7 @@ export async function getLinkStatus(
   noteIndexer: NoteIndexer,
   requestIndexer: RequestIndexer,
   inviteCodeTracker: InviteCodeTracker,
-  db: DB,
+  db: DB
 ): Promise<DaimoLinkStatus> {
   const link = parseDaimoLink(url);
   if (link == null) {
@@ -152,7 +152,7 @@ export async function getLinkStatus(
         noteIndexer,
         requestIndexer,
         inviteCodeTracker,
-        db,
+        db
       );
 
       // For now, all tag requests are a valid invite.

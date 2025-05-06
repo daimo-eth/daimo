@@ -75,7 +75,7 @@ test("addLandlineTransfers", (t) => {
     const result = addLandlineTransfers(
       landlineTransfers,
       transferClogs,
-      "base",
+      "base"
     );
 
     assert.strictEqual(result.length, 2);
@@ -207,7 +207,7 @@ test("addLandlineTransfers", (t) => {
       const result = addLandlineTransfers(
         landlineTransfers,
         transferClogs,
-        "base",
+        "base"
       );
 
       // The two on-chain transfer clogs and two landline transfers should all
@@ -268,7 +268,7 @@ test("addLandlineTransfers", (t) => {
       assert.deepStrictEqual(result[3], expectedWithdrawalClog);
 
       t.end();
-    },
+    }
   );
 
   t.end();

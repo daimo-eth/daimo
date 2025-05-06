@@ -7,7 +7,7 @@ const i18 = i18n.settingsModal;
 // Ask to open settings to enable `type` access.
 export async function askOpenSettings(
   type: "contacts" | "notifications" | "camera",
-  resolve: (value: void) => void,
+  resolve: (value: void) => void
 ) {
   const settingPhrase = i18.settingPhrase[type]();
 

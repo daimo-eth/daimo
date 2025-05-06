@@ -111,7 +111,7 @@ export function useInAppNotifications(): InAppNotificationInfo {
     notifications.sort((a, b) => b.timestamp - a.timestamp);
 
     const unread = notifications.some(
-      (n) => n.marksUnread && n.timestamp > lastReadNotifTimestamp,
+      (n) => n.marksUnread && n.timestamp > lastReadNotifTimestamp
     );
 
     setNotifInfo({

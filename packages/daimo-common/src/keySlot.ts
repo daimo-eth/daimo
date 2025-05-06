@@ -53,7 +53,7 @@ export function getSlotLabel(slot: number): string {
 
 export function findAccountUnusedSlot(
   account: { accountKeys: KeyData[] },
-  type: SlotType,
+  type: SlotType
 ): number {
   const allUsedSlots = account.accountKeys.map((k) => k.slot);
   return findUnusedSlot(allUsedSlots, type);
@@ -61,7 +61,7 @@ export function findAccountUnusedSlot(
 
 export function findUnusedSlot(allUsedSlots: number[], type: SlotType): number {
   const typeUsedSlots = allUsedSlots.filter(
-    (slot) => getSlotType(slot) === type,
+    (slot) => getSlotType(slot) === type
   );
 
   if (typeUsedSlots.length === 0) {

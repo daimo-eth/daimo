@@ -51,7 +51,7 @@ export class BinanceClient {
   private async signDeeplink(
     nonce: string,
     timestamp: string,
-    transactionId: string,
+    transactionId: string
   ) {
     const payload = `nonce=${nonce}&timestamp=${timestamp}&transactionId=${transactionId}`;
     return this.signPayload(payload);
@@ -59,7 +59,7 @@ export class BinanceClient {
 
   private async queryBinanceAPI<T>(
     path: string,
-    body: Record<string, string>,
+    body: Record<string, string>
   ): Promise<T | undefined> {
     const bodyStr = JSON.stringify({ source: "daimo", ...body }); // Add source
 
@@ -78,7 +78,7 @@ export class BinanceClient {
 
     const headersStr = JSON.stringify(headers);
     console.log(
-      `[BINANCE] POSTing ${url}:\nbody: ${bodyStr}\nheaders: ${headersStr}`,
+      `[BINANCE] POSTing ${url}:\nbody: ${bodyStr}\nheaders: ${headersStr}`
     );
 
     const res = await fetch(url, {
@@ -89,7 +89,7 @@ export class BinanceClient {
     const resBody = (await res.json()) as { data: T; success: boolean };
     if (res.status !== 200 || !resBody.success) {
       console.error(
-        `[BINANCE] API error: ${res.status} ${JSON.stringify(resBody)}`,
+        `[BINANCE] API error: ${res.status} ${JSON.stringify(resBody)}`
       );
       return undefined;
     }
@@ -120,7 +120,7 @@ export class BinanceClient {
     }
     if (getAddress(base.contractAddress) !== chainConfig.tokenAddress) {
       throw new Error(
-        `Wrong contract: ${base.contractAddress}, not ${chainConfig.tokenAddress}`,
+        `Wrong contract: ${base.contractAddress}, not ${chainConfig.tokenAddress}`
       );
     }
   }
@@ -151,7 +151,7 @@ export class BinanceClient {
       const deeplinkUrl = `bnc://app.binance.com/payment/onchainpay?transactionId=${transactionId}&nonce=${nonce}&timeStamp=${timestamp}&sign=${sig}&redirectUrl=${redirectUrl}`;
       console.log(`[BINANCE] created deeplink: ${deeplinkUrl}`);
       const encodedDeeplinkUrl = base64urlnopad.encode(
-        Buffer.from(deeplinkUrl),
+        Buffer.from(deeplinkUrl)
       );
       return `${universalLinkUrl}?_dp=${encodedDeeplinkUrl}`;
     } else if (platform === "android") {

@@ -5,7 +5,7 @@ import { retryBackoff } from "@daimo/common";
 export async function fetchWithBackoff(
   url: string | URL,
   init?: RequestInit,
-  maxRetries = 3,
+  maxRetries = 3
 ) {
   return retryBackoff(
     `fetchWithBackoff(${url})`,
@@ -15,6 +15,6 @@ export async function fetchWithBackoff(
       const reqInit = { ...init, signal: controller.signal };
       return await fetch(url, reqInit);
     },
-    maxRetries,
+    maxRetries
   );
 }

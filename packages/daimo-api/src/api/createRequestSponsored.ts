@@ -29,7 +29,7 @@ export async function createRequestSponsored(
   requestIndexer: RequestIndexer,
   paymentMemoTracker: PaymentMemoTracker,
   nameReg: NameRegistry,
-  input: RequestV2Input,
+  input: RequestV2Input
 ): Promise<{ txHash: Hex; status: DaimoRequestV2Status }> {
   const { idString, recipient, amount, fulfiller, memo } = input;
 

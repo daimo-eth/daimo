@@ -79,7 +79,7 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
   const preventOverscrollOffset = useSharedValue(0);
 
   console.log(
-    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`,
+    `[HOME] rendering ${account.name}, ${account.recentTransfers.length} ops`
   );
 
   // For speed, preload DaimoOpSender
@@ -125,24 +125,21 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
 
   // Re-render HistoryListSwipe only transfer count or status changes.
   const statusCountsStr = JSON.stringify(
-    account.recentTransfers.reduce(
-      (counts, transfer) => {
-        let statusStr = getTransferClogStatus(transfer);
-        const { offchainTransfer } = transfer as TransferSwapClog;
-        statusStr += `-${offchainTransfer?.timeExpected}`;
-        counts[statusStr] = (counts[statusStr] || 0) + 1;
-        return counts;
-      },
-      {} as Record<string, number>,
-    ),
+    account.recentTransfers.reduce((counts, transfer) => {
+      let statusStr = getTransferClogStatus(transfer);
+      const { offchainTransfer } = transfer as TransferSwapClog;
+      statusStr += `-${offchainTransfer?.timeExpected}`;
+      counts[statusStr] = (counts[statusStr] || 0) + 1;
+      return counts;
+    }, {} as Record<string, number>)
   );
   const histListMini = useMemo(
     () => <HistoryListSwipe account={account} showDate={false} maxToShow={5} />,
-    [statusCountsStr],
+    [statusCountsStr]
   );
   const histListFull = useMemo(
     () => <HistoryListSwipe account={account} showDate />,
-    [statusCountsStr],
+    [statusCountsStr]
   );
 
   // Show history
@@ -265,28 +262,28 @@ function AmountAndButtons({ account }: { account: Account }) {
         screen: "SendNav",
         params: { autoFocus: true },
       }),
-    [nav],
+    [nav]
   );
   const goRequest = useCallback(
     () =>
       nav.navigate("HomeTab", {
         screen: "ReceiveNav",
       }),
-    [nav],
+    [nav]
   );
   const goDeposit = useCallback(
     () =>
       nav.navigate("DepositTab", {
         screen: "Deposit",
       }),
-    [nav],
+    [nav]
   );
 
   const isEmpty = account.lastBalance === 0n;
 
   // sum over all proposed swaps toAmount
   const pendingDollars = amountToDollars(
-    account.proposedSwaps.reduce((acc, swap) => acc + swap.toAmount, 0),
+    account.proposedSwaps.reduce((acc, swap) => acc + swap.toAmount, 0)
   );
 
   return (
@@ -439,7 +436,7 @@ function useInitNavLinks() {
     });
 
     const sub = addEventListener("url", ({ url }) =>
-      handleDeepLink(nav, dispatcher, url, account.homeChainId),
+      handleDeepLink(nav, dispatcher, url, account.homeChainId)
     );
     return () => sub.remove();
   }, [accountMissing, nav]);

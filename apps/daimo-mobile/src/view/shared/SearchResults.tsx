@@ -67,7 +67,7 @@ function SearchResultsScroll({
     account,
     prefix,
     contactsPermission?.granted || false,
-    mode === "receive",
+    mode === "receive"
   );
 
   const recentsOnly = prefix === "";

@@ -73,7 +73,7 @@ export function SectionHero() {
 
 // A white background behind the phone frame while the gif is loading
 function PhoneScreenBackground(
-  props: React.ComponentPropsWithoutRef<"svg"> & { color?: string },
+  props: React.ComponentPropsWithoutRef<"svg"> & { color?: string }
 ) {
   return (
     <svg

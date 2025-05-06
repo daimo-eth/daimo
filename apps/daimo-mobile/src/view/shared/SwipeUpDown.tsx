@@ -60,7 +60,7 @@ export type SwipeUpDownRef = {
 export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
   (
     { itemMini, itemFull, swipeHeight, onShowMini, onShowFull, disabled },
-    ref,
+    ref
   ) => {
     const { color } = useTheme();
     const ins = useSafeAreaInsets();
@@ -104,7 +104,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
           pressBehavior="none" // Disable fully closing to swipeIndex -1
         />
       ),
-      [snapPointCount],
+      [snapPointCount]
     );
 
     const handleSheetChanges = (snapIndex: number) => {
@@ -163,7 +163,7 @@ export const SwipeUpDown = forwardRef<SwipeUpDownRef, SwipeUpDownProps>(
         </SetBottomSheetDetailHeight.Provider>
       </BottomSheet>
     );
-  },
+  }
 );
 
 type SwipeContextValue = {

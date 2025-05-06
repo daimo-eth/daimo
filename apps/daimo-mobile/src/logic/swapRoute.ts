@@ -37,7 +37,7 @@ export function useSwapRoute({
     },
     {
       enabled: isSwap,
-    },
+    }
   );
 
   if (!isSwap) return null;

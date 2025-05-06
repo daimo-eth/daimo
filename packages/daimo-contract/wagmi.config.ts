@@ -38,7 +38,7 @@ const deployments = Object.fromEntries(
     ...latestDaimoPayBatchReadUtils.transactions,
   ]
     .filter((t) => t.transactionType === "CREATE2")
-    .map((r) => [r.contractName, r.contractAddress as `0x${string}`]),
+    .map((r) => [r.contractName, r.contractAddress as `0x${string}`])
 );
 
 export default defineConfig({

@@ -10,7 +10,7 @@ export function cacheLandlineAccounts(accounts: LandlineAccount[]) {
 }
 
 export function getCachedLandlineAccount(
-  landlineAccountUuid: string,
+  landlineAccountUuid: string
 ): LandlineAccount | null {
   return landlineAccountCache.get(landlineAccountUuid) || null;
 }

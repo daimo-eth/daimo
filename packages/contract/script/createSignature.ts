@@ -35,7 +35,7 @@ function base64ToBase64url(base64: string): string {
 
 function generateEcdsaSignature(
     pemKey: string,
-    message: Buffer,
+    message: Buffer
 ): { signature: string; r: string; s: string } {
     const privateKey = crypto.createPrivateKey(pemKey);
     const signatureBuffer = crypto.sign(null, message, {
@@ -129,7 +129,7 @@ Cf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3
     console.log("Data to sign:", hexEncodedString(messageData));
     console.log(
         "SHA256 digest of data to sign:",
-        crypto.createHash("sha256").update(messageData).digest("hex"),
+        crypto.createHash("sha256").update(messageData).digest("hex")
     );
 
     const privateKey = createPrivateKey(pemKeyString);
@@ -148,7 +148,7 @@ Cf3HGlb1KqOS5Ep6nkYEqjaJggmZcojpAqxUSlVeS14Knv7ytZIz8/Q3
     const signature = generateEcdsaSignature(pemKeyString, messageData);
 
     const N = BigInt(
-        "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551",
+        "0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551"
     );
     let sBigInt = BigInt(`0x${signature.s}`);
     console.log("s:", `0x${sBigInt.toString(16).padStart(64, "0")}`);

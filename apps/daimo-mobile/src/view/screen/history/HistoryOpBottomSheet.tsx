@@ -310,7 +310,7 @@ function TransferBody({
       transferClog,
       chainConfig.chainL2.name,
       ss,
-      foreignChainName,
+      foreignChainName
     );
   }, [transferClog]);
 
@@ -339,7 +339,7 @@ function TransferBody({
   const opSummary = getTransferSummary(
     transferClog,
     env(daimoChainFromId(account.homeChainId)).chainConfig,
-    i18NLocale,
+    i18NLocale
   );
 
   const viewAccount = () => {
@@ -418,7 +418,7 @@ function showHelpWhyNoFees(
   transferClog: TransferClog,
   chainName: string,
   ss: SkinStyleSheet,
-  foreignChainName?: string,
+  foreignChainName?: string
 ) {
   const i1 = i18.help;
 

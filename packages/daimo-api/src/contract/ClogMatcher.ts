@@ -29,7 +29,7 @@ export class ClogMatcher {
     from: number,
     to: number,
     chainId: number,
-    txHashes: Set<Hex>,
+    txHashes: Set<Hex>
   ) {
     const startTime = Date.now();
 
@@ -55,7 +55,7 @@ export class ClogMatcher {
           .where("chain_id", "=", "" + chainId)
           .where((e) => e.between("block_num", "" + from, "" + to))
           .where("tx_hash", "in", txList)
-          .execute(),
+          .execute()
     );
 
     for (const row of transferResult) {
@@ -94,7 +94,7 @@ export class ClogMatcher {
           .where((e) => e.between("block_num", "" + from, "" + to))
           .where("tx_hash", "in", txList)
           .where("log_name", "=", "Start")
-          .execute(),
+          .execute()
     );
 
     for (const row of startResult) {
@@ -112,7 +112,7 @@ export class ClogMatcher {
 
       const crossChainToken = this.tokenReg.getToken(
         fastCctpLog.address,
-        Number(row.to_chain_id), // cross-chain (to chain)
+        Number(row.to_chain_id) // cross-chain (to chain)
       );
       if (crossChainToken == null) continue;
 
@@ -129,7 +129,7 @@ export class ClogMatcher {
 
     const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[MATCHER] loaded ${transferResult.length} bundled transfers and ${startResult.length} Start FastCCTP events in ${elapsedMs}ms`,
+      `[MATCHER] loaded ${transferResult.length} bundled transfers and ${startResult.length} Start FastCCTP events in ${elapsedMs}ms`
     );
   }
 
@@ -142,7 +142,7 @@ export class ClogMatcher {
     from: number,
     to: number,
     chainId: number,
-    txHashes: Set<Hex>,
+    txHashes: Set<Hex>
   ) {
     const startTime = Date.now();
     const txList = [...txHashes].map((tx) => Buffer.from(hexToBytes(tx)));
@@ -159,7 +159,7 @@ export class ClogMatcher {
               .onRef("start.chain_id", "=", "ff.from_chain_id")
               .onRef("start.handoff_addr", "=", "ff.handoff_addr")
               .onRef("start.nonce", "=", "ff.nonce")
-              .on("start.log_name", "=", "Start"),
+              .on("start.log_name", "=", "Start")
           )
           .select([
             // Use FastFinish event for block/tx/log info
@@ -179,7 +179,7 @@ export class ClogMatcher {
           .where((e) => e.between("ff.block_num", "" + from, "" + to))
           .where("ff.tx_hash", "in", txList)
           .where("ff.log_name", "=", "FastFinish")
-          .execute(),
+          .execute()
     );
 
     for (const row of fastCctpRes) {
@@ -196,7 +196,7 @@ export class ClogMatcher {
       };
       const crossChainToken = this.tokenReg.getToken(
         fastCctpLog.address,
-        Number(row.from_chain_id), // cross-chain (from chain)
+        Number(row.from_chain_id) // cross-chain (from chain)
       );
       if (crossChainToken == null) continue;
 
@@ -213,7 +213,7 @@ export class ClogMatcher {
 
     const elapsedMs = (Date.now() - startTime) | 0;
     console.log(
-      `[MATCHER] loaded ${fastCctpRes.length} FastCCTP cross-chain events in ${elapsedMs}ms`,
+      `[MATCHER] loaded ${fastCctpRes.length} FastCCTP cross-chain events in ${elapsedMs}ms`
     );
   }
 
@@ -225,7 +225,7 @@ export class ClogMatcher {
     from: Address,
     to: Address,
     transactionHash: string,
-    isInbound?: boolean,
+    isInbound?: boolean
   ) {
     const transfers = this.txHashToTransfers.get(transactionHash);
     if (!transfers || transfers.length === 0) return null;
@@ -233,7 +233,7 @@ export class ClogMatcher {
     // First check whether the transfer is cross-chain.
     if (daimoFastCctpAddrs.includes(to) || isInbound) {
       return transfers.find(
-        (t) => t.foreignToken.chainId !== chainConfig.chainL2.id,
+        (t) => t.foreignToken.chainId !== chainConfig.chainL2.id
       );
     }
 
@@ -257,7 +257,7 @@ export class ClogMatcher {
     // Follow the chain of transfers to find the end of the cycle.
     while (true) {
       const nextTransfer = transfers.find(
-        (t) => t.from === curTransfer!.to && !visited.has(t.logIndex),
+        (t) => t.from === curTransfer!.to && !visited.has(t.logIndex)
       );
       if (!nextTransfer) break;
 
@@ -271,8 +271,8 @@ export class ClogMatcher {
 
     console.log(
       `[MATCHER] matched ${debugJson(startTransfer)} to ${debugJson(
-        curTransfer,
-      )}`,
+        curTransfer
+      )}`
     );
     return curTransfer;
   }

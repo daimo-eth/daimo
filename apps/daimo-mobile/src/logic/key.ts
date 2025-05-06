@@ -52,7 +52,7 @@ export function createAddDeviceString(pubKey: Hex, slot: SlotType): string {
 // This makes verification easier on-chain.
 function wrapRawSignerAsWebauthn(
   sign: (message: Hex) => Promise<Hex>,
-  keySlot: number,
+  keySlot: number
 ): SigningCallback {
   return async (challengeHex: Hex) => {
     const bChallenge = hexToBytes(challengeHex);
@@ -66,8 +66,8 @@ function wrapRawSignerAsWebauthn(
     const clientDataHash = new Uint8Array(
       await Crypto.digest(
         Crypto.CryptoDigestAlgorithm.SHA256,
-        new TextEncoder().encode(clientDataJSON),
-      ),
+        new TextEncoder().encode(clientDataJSON)
+      )
     );
 
     const authenticatorData = new Uint8Array(37); // rpIdHash (32) + flags (1) + counter (4)
@@ -106,23 +106,23 @@ function wrapRawSignerAsWebauthn(
 
 export function getWrappedDeviceKeySigner(
   enclaveKeyName: string,
-  keySlot: number,
+  keySlot: number
 ): SigningCallback {
   return wrapRawSignerAsWebauthn(
     (message) =>
       requestEnclaveSignature(
         enclaveKeyName,
         message.slice(2),
-        "Authorize transaction",
+        "Authorize transaction"
       ),
-    keySlot,
+    keySlot
   );
 }
 
 export async function requestEnclaveSignature(
   enclaveKeyName: string,
   hexMessage: string,
-  usageMessage: string,
+  usageMessage: string
 ): Promise<Hex> {
   const promptCopy: ExpoEnclave.PromptCopy = {
     usageMessage,
@@ -132,7 +132,7 @@ export async function requestEnclaveSignature(
   // Signature is raw hex DER, no 0x prefix
   const signature = await Log.promise(
     "ExpoEnclaveSign",
-    ExpoEnclave.sign(enclaveKeyName, hexMessage, promptCopy),
+    ExpoEnclave.sign(enclaveKeyName, hexMessage, promptCopy)
   );
 
   return `0x${signature}`;
@@ -140,10 +140,10 @@ export async function requestEnclaveSignature(
 
 export function getWrappedMnemonicSigner(
   mnemonic: string,
-  keySlot: number,
+  keySlot: number
 ): SigningCallback {
   return wrapRawSignerAsWebauthn(
     (message) => signWithMnemonic(mnemonic, message),
-    keySlot,
+    keySlot
   );
 }

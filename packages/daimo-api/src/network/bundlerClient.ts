@@ -37,10 +37,7 @@ interface GasPrice {
 export class BundlerClient {
   provider: BundlerJsonRpcProvider;
 
-  constructor(
-    bundlerRpcUrl: string,
-    private opIndexer?: OpIndexer,
-  ) {
+  constructor(bundlerRpcUrl: string, private opIndexer?: OpIndexer) {
     this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
   }
 
@@ -104,13 +101,13 @@ export class BundlerClient {
     } catch (err) {
       if (err instanceof BaseError) {
         const revertError = err.walk(
-          (err) => err instanceof ContractFunctionRevertedError,
+          (err) => err instanceof ContractFunctionRevertedError
         );
         if (revertError instanceof ContractFunctionRevertedError) {
           const errorName = revertError.data?.errorName ?? "";
           const reason = revertError.reason;
           console.log(
-            `[BUNDLER] error submitting uncompressed bundle: ${errorName} ${reason}`,
+            `[BUNDLER] error submitting uncompressed bundle: ${errorName} ${reason}`
           );
         }
       }
@@ -121,10 +118,10 @@ export class BundlerClient {
     console.log(`[BUNDLER] fetching gas price params`);
     const gasPrice = (await this.provider.send(
       "pimlico_getUserOperationGasPrice",
-      [],
+      []
     )) as GasPrice;
     console.log(
-      `[BUNDLER] fetched gas price params: ${JSON.stringify(gasPrice)}`,
+      `[BUNDLER] fetched gas price params: ${JSON.stringify(gasPrice)}`
     );
     return gasPrice.fast;
   }

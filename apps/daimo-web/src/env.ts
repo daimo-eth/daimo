@@ -22,7 +22,7 @@ export const envVarsWeb = getEnvVars(
     NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
     DAIMO_API_KEY: process.env.DAIMO_API_KEY,
     DAIMO_NEYNAR_KEY: process.env.DAIMO_NEYNAR_KEY,
-  },
+  }
 );
 
 console.log(`[ENV] envVarsWeb: ${JSON.stringify(envVarsWeb)}`);

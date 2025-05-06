@@ -12,7 +12,7 @@ export const en = {
       readableAmount: string,
       otherCoinSymbol: string,
       homeCoinSymbol: string,
-      chain?: string,
+      chain?: string
     ) =>
       `Accepted ${readableAmount} ${otherCoinSymbol}${
         chain ? ` on ${chain}` : ""
@@ -20,7 +20,7 @@ export const en = {
     sentOutbound: (
       readableAmount: string,
       coinSymbol: string,
-      chain?: string,
+      chain?: string
     ) => `Sent ${readableAmount} ${coinSymbol}${chain ? ` on ${chain}` : ""}`,
   },
 

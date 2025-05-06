@@ -3,7 +3,7 @@
 /** In-memory cache a function. */
 export function memoize<K, I, O>(
   func: (i: I) => O,
-  keyFunc: (i: I) => K = (i) => i as any,
+  keyFunc: (i: I) => K = (i) => i as any
 ) {
   const cache = new Map<K, O>();
   return (i: I) => {

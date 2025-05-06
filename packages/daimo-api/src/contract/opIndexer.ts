@@ -54,7 +54,7 @@ export class OpIndexer extends Indexer {
           .select(["block_num", "tx_hash", "log_idx", "op_nonce", "op_hash"])
           .where((eb) => eb.between("block_num", "" + from, "" + to))
           .where("chain_id", "=", "" + chainConfig.chainL2.id)
-          .execute(),
+          .execute()
     );
     if (result.length === 0) return;
 
@@ -76,11 +76,11 @@ export class OpIndexer extends Indexer {
       const newLogs = curLogs ? [...curLogs, userOp] : [userOp];
       this.txHashToSortedUserOps.set(
         userOp.transactionHash,
-        newLogs.sort((a, b) => a.logIndex - b.logIndex),
+        newLogs.sort((a, b) => a.logIndex - b.logIndex)
       );
 
       const nonceMetadata = DaimoNonce.fromHex(
-        numberToHex(userOp.nonce, { size: 32 }),
+        numberToHex(userOp.nonce, { size: 32 })
       )?.metadata.toHex();
       if (!nonceMetadata) return;
 
@@ -96,7 +96,7 @@ export class OpIndexer extends Indexer {
       from,
       to,
       chainConfig.chainL2.id,
-      txHashes,
+      txHashes
     );
   }
 

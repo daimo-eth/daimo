@@ -325,7 +325,7 @@ test("DaimoLink format direct link", () => {
     if (link == null) continue;
     assert.equal(
       formatDaimoLinkDirect(link),
-      url.replace("https://daimo.com/l/", "daimo://"),
+      url.replace("https://daimo.com/l/", "daimo://")
     );
   }
 });

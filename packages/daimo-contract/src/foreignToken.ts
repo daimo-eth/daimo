@@ -557,7 +557,7 @@ export const polygonAmoyMATIC = nativeToken(
   80002,
   "MATIC",
   "MATIC",
-  TokenLogo.MATIC,
+  TokenLogo.MATIC
 );
 
 export const polygonAmoyWMATIC: ForeignToken = {
@@ -646,7 +646,7 @@ export const avalancheFujiAVAX = nativeToken(
   43113,
   "AVAX",
   "AVAX",
-  TokenLogo.AVAX,
+  TokenLogo.AVAX
 );
 
 export const avalancheFujiUSDC: ForeignToken = {
@@ -803,7 +803,7 @@ export const solanaNativeSol = nativeToken(
   "SOL",
   TokenLogo.SOL,
   "11111111111111111111111111111111",
-  9,
+  9
 );
 
 const solanaTokens = [solanaUSDC, solanaWrappedSOL, solanaNativeSol];
@@ -961,7 +961,7 @@ function nativeToken(
   symbol: string,
   logoURI: string,
   token: string = zeroAddress,
-  decimals: number = 18,
+  decimals: number = 18
 ): ForeignToken {
   return {
     chainId,
@@ -1059,7 +1059,7 @@ export function getChainDAI(chainId: number): ForeignToken | undefined {
 /** Get a given token */
 export function getTokenByAddress(
   chainId: number,
-  addr: Address,
+  addr: Address
 ): ForeignToken {
   const ret = getTokensForChain(chainId).find((t) => t.token === addr);
   if (ret == null) throw new Error(`Unknown token ${addr} on chain ${chainId}`);

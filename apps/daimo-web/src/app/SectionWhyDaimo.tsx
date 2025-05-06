@@ -37,7 +37,7 @@ function FeaturesDesktop() {
 
   const goToPreviousTab = () => {
     setSelectedIndex(
-      (currentIndex) => (currentIndex - 1 + features.length) % features.length,
+      (currentIndex) => (currentIndex - 1 + features.length) % features.length
     );
   };
 
@@ -46,7 +46,7 @@ function FeaturesDesktop() {
       setSelectedIndex(selectedIndex);
     },
     100,
-    { leading: true },
+    { leading: true }
   );
 
   return (
@@ -108,7 +108,7 @@ function FeaturesDesktop() {
                 "relative h-2 w-2 rounded-full",
                 featureIndex === selectedIndex
                   ? "bg-primaryDark"
-                  : "bg-grayLight",
+                  : "bg-grayLight"
               )}
               aria-label={`Go to slide ${featureIndex + 1}`}
               onClick={() => {
@@ -185,7 +185,7 @@ function FeaturesMobile() {
       {
         root: slideContainerRef.current,
         threshold: 0.6,
-      },
+      }
     );
 
     for (const slide of slideRefs.current) {
@@ -213,7 +213,7 @@ function FeaturesMobile() {
             key={featureIndex}
             className={clsx(
               "relative h-2 w-2 rounded-full",
-              featureIndex === activeIndex ? "bg-primaryDark" : "bg-grayLight",
+              featureIndex === activeIndex ? "bg-primaryDark" : "bg-grayLight"
             )}
             aria-label={`Go to slide ${featureIndex + 1}`}
             onClick={() => {
@@ -234,9 +234,7 @@ function FeaturesMobile() {
             key={featureIndex}
             className={clsx(
               "relative font-semibold",
-              featureIndex === activeIndex
-                ? "text-primaryDark"
-                : "text-grayMid",
+              featureIndex === activeIndex ? "text-primaryDark" : "text-grayMid"
             )}
             aria-label={`Go to slide ${featureIndex + 1}`}
             onClick={() => {

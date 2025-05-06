@@ -41,8 +41,8 @@ export function PrimaryOpenInAppButton({
       {justCopied
         ? i18.justCopiedLink()
         : inviteDeepLink
-          ? i18.copyAndInstall()
-          : i18.install()}
+        ? i18.copyAndInstall()
+        : i18.install()}
     </PrimaryButton>
   );
 }

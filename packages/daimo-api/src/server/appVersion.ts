@@ -30,7 +30,7 @@ export class AppVersionTracker {
     try {
       this.latestVersion = await this.getLatestVersionIOS();
       console.log(
-        `[APP-VERSION] got latest iOS version: ${this.latestVersion}`,
+        `[APP-VERSION] got latest iOS version: ${this.latestVersion}`
       );
     } catch (e) {
       console.error(`[APP-VERSION] error checking iOS version`, e);

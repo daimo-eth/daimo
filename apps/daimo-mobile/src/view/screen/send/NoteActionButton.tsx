@@ -68,13 +68,13 @@ function NoteActionButtonInner({
   const noteId = getNoteId(noteAddress);
 
   const [nonce] = useState(
-    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote)),
+    () => new DaimoNonce(new DaimoNonceMetadata(DaimoNonceType.CreateNote))
   );
 
   // Check if we need to approve() first
   const notesV2Addr = assertNotNull(notesV2AddressMap.get(account.homeChainId));
   const notesV2isApproved = account.recentTransfers.some(
-    (op) => op.type === "createLink" && op.to === notesV2Addr,
+    (op) => op.type === "createLink" && op.to === notesV2Addr
   );
 
   // Get the dollar amount + the memo
@@ -100,7 +100,7 @@ function NoteActionButtonInner({
           nonce,
           chainGasConstants: account.chainGasConstants,
         },
-        fullMemo,
+        fullMemo
       );
     },
     pendingOp: {
@@ -148,7 +148,7 @@ function NoteActionButtonInner({
         return i18.statusMsg.totalDollars(
           getAmountText({
             dollars: cost.totalDollars,
-          }),
+          })
         );
       case "loading":
         return message;

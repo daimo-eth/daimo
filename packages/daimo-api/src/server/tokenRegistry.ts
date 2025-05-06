@@ -31,7 +31,7 @@ export class TokenRegistry {
       this.foreignTokensByChain.set(chain.chainId, foreignTokens);
     }
     console.log(
-      `[TOKEN-REG] loaded ${this.foreignTokensByChain.size} mainnet tokens`,
+      `[TOKEN-REG] loaded ${this.foreignTokensByChain.size} mainnet tokens`
     );
   }
 

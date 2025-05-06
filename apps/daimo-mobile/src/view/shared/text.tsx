@@ -126,7 +126,7 @@ export function EmojiToOcticon({ text, size }: { text: string; size: number }) {
     parts.push(
       <Text key={last} allowFontScaling={false}>
         {joiningPart}
-      </Text>,
+      </Text>
     );
     const octiconName = emojiToOcticon[match[0]];
     parts.push(<Octicons key={last + 1} size={size} name={octiconName} />);
@@ -134,7 +134,7 @@ export function EmojiToOcticon({ text, size }: { text: string; size: number }) {
   parts.push(
     <Text key={last} allowFontScaling={false}>
       {text.substring(last)}
-    </Text>,
+    </Text>
   );
 
   return <>{parts}</>;

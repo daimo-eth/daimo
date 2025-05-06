@@ -136,7 +136,7 @@ function MobileNavLink(
   props: Omit<
     React.ComponentPropsWithoutRef<typeof Popover.Button<typeof Link>>,
     "as" | "className"
-  >,
+  >
 ) {
   return (
     <Popover.Button

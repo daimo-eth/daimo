@@ -2,7 +2,7 @@
 export function debugJson(obj: any) {
   try {
     const serialized = JSON.stringify(obj, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value,
+      typeof value === "bigint" ? value.toString() : value
     );
     return serialized.slice(0, 10000);
   } catch (e: any) {

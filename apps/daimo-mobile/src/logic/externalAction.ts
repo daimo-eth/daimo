@@ -60,7 +60,7 @@ function generateSMSCopy(link: DaimoLink) {
 }
 
 async function composeEmail(
-  to: EmailContact,
+  to: EmailContact
 ): Promise<ComposeSend | undefined> {
   // Test if we can email first
   const emailClients = await getEmailClients();
@@ -88,7 +88,7 @@ async function composeEmail(
 }
 
 async function composeSMS(
-  to: PhoneNumberContact,
+  to: PhoneNumberContact
 ): Promise<ComposeSend | undefined> {
   // Test if we can SMS first
   const testOpenString =
@@ -153,7 +153,7 @@ export type ExternalAction = {
 // Get an external action to compose an email or SMS, with a fallback to the
 // share sheet in case composing is unavailable for whatever reason.
 export async function getComposeExternalAction(
-  to: MsgContact,
+  to: MsgContact
 ): Promise<ExternalAction> {
   const composer =
     to.type === "email" ? await composeEmail(to) : await composeSMS(to);

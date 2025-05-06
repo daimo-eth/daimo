@@ -3,7 +3,7 @@ import { debugJson } from "./debug";
 export function assert(condition: boolean, ...args: any[]): asserts condition {
   if (!condition)
     throw new Error(
-      "Assertion failed: " + args.map((a) => debugJson(a)).join(", "),
+      "Assertion failed: " + args.map((a) => debugJson(a)).join(", ")
     );
 }
 
