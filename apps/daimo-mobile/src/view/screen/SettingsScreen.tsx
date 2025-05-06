@@ -39,7 +39,7 @@ import { ClockIcon, PlusIcon } from "../shared/Icons";
 import { ScreenHeader } from "../shared/ScreenHeader";
 import Spacer from "../shared/Spacer";
 import { PendingDot } from "../shared/StatusDot";
-import { openSupportTG } from "../shared/error";
+import { contactSupport } from "../shared/error";
 import {
   TextBody,
   TextBodyMedium,
@@ -297,7 +297,7 @@ function DevicesSection({ account }: { account: Account }) {
         <ButtonMed
           type="subtle"
           title={i18.devices.contactSupport.button()}
-          onPress={openSupportTG}
+          onPress={contactSupport}
         />
       )}
 

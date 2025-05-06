@@ -7,7 +7,7 @@ export const es: LanguageDefinition = {
       success: () => `Success`,
       error: () => `Error`,
       retry: () => `Reintentar`,
-      sent: () => `Envidado`,
+      sent: () => `Enviado`,
       request: () => `Solicitar`,
     },
     buttonAction: {
@@ -57,7 +57,7 @@ export const es: LanguageDefinition = {
       fulfilledRequest: () => `Petición satisfecha`,
       cancelledLink: () => `Link cancelado`,
       sent: () => `Enviado`,
-      received: () => `Recibida`,
+      received: () => `Recibido`,
       deposited: () => `Depositado`,
       depositing: () => `Depositando`,
       withdrew: () => `Retirado`,
@@ -67,13 +67,13 @@ export const es: LanguageDefinition = {
       title: () => `Sobre esta transferencia`,
       whyNoFees: {
         firstPara: (chainName: string) =>
-          `Esta transacción fue resuelta en ${chainName}, un rollup de Ethereum.`,
+          `Esta transacción se resolvió en ${chainName}, un rollup de Ethereum.`,
         firstPara2Chain: (chainA: string, chainB: string) =>
-          `Esta transacción fue resuelta en ${chainA} y ${chainB}.`,
+          `Esta transacción se resolvió en ${chainA} y ${chainB}.`,
         secondPara: () =>
-          `Las Rollups heredan la seguridad de Ethereum, a un coste menor.`,
+          `Los rollups heredan la seguridad de Ethereum, a un coste menor.`,
         thirdPara: () =>
-          `Las transacciones cuestan unos centimos. Daimo patrocinó esta transferencia, haciéndola gratuita.`,
+          `Las transacciones cuestan unos céntimos. Daimo patrocinó esta transferencia, haciéndola gratuita.`,
       },
       landlineDepositProcessing: {
         firstPara: () =>
@@ -120,7 +120,7 @@ export const es: LanguageDefinition = {
   addDevice: {
     screenHeader: () => `Añade Dispositivo`,
     headerDescription: () =>
-      `Link a new device to your account by scanning its QR code during setup.`,
+      `Vincula un nuevo dispositivo a tu cuenta escaneando su código QR durante la configuración.`,
     scanQR: {
       error: () => `Error al procesar el código QR`,
       scanned: (slot: string) => `Escaneado ${slot}`,
@@ -137,16 +137,16 @@ export const es: LanguageDefinition = {
     confirmation: {
       titleRemoveDevice: (deviceName: string) => `Eliminar ${deviceName}\n`,
       msgRemoveDevice: () =>
-        `Esta seguro que quiera eliminar este dispositivo?`,
+        `¿Está seguro de que quiere eliminar este dispositivo?`,
       titleDeleteAccount: () => `Eliminar Su Cuenta`,
-      msgDeleteAccount: () => `Esta seguro que quiera eliminar su cuenta?`,
+      msgDeleteAccount: () => `¿Está seguro de que quiere eliminar su cuenta?`,
       remove: () => `Eliminar`,
       cancel: () => `Cancelar`,
     },
     current: {
       cannotRemove: () =>
-        `Este es su unico dispositivo. Transfiera su saldo a otro lugar antes de eliminar su cuenta.`,
-      usingTitle: () => `Esta usando este dispositivo`,
+        `Este es su único dispositivo. Transfiera su saldo a otro lugar antes de eliminar su cuenta.`,
+      usingTitle: () => `Está usando este dispositivo`,
       deleteTitle: () => `Eliminar su cuenta`,
       usingSubtitle: () => `Eliminarlo de esta cuenta le cerrará la sesión`,
       deleteSubtitle: () =>
@@ -160,8 +160,8 @@ export const es: LanguageDefinition = {
     payment: () => `Link de Pago`,
     accept: {
       title: () => `Aceptar`,
-      link: () => `Link aceptar`,
-      long: (dollars: string) => `Aceptar este link, reciviendo ${dollars}`,
+      link: () => `Aceptar link`,
+      long: (dollars: string) => `Aceptar este link, recibiendo ${dollars}`,
       loading: () => `Aceptando link...`,
     },
     accepted: {
@@ -171,7 +171,7 @@ export const es: LanguageDefinition = {
     },
     cancel: {
       title: () => `Cancelar`,
-      link: () => `link cancelar`,
+      link: () => `Cancelar link`,
       long: (dollars: string) => `Cancelar este link, reclamando ${dollars}`,
     },
     cancelled: {
@@ -181,7 +181,7 @@ export const es: LanguageDefinition = {
       longOther: () => `Cancelado por emisor`,
     },
     pending: {
-      long: () => `Link de pago no encontrado. Pendiente?`,
+      long: () => `Link de pago no encontrado. ¿Pendiente?`,
     },
     gasTooHigh: () => `El gas es muy caro para reclamar`,
     invalid: () => `Link de pago inválido`,
@@ -347,7 +347,7 @@ export const es: LanguageDefinition = {
   // OnboardingIntroScreen.tsx
   onboardingIntro: {
     title: () => `Bienvenido a Daimo`,
-    subtitle: () => `Pague o reciva USDC donde sea`,
+    subtitle: () => `Pague o recibe USDC donde sea`,
     acceptInviteButton: () => `ACEPTAR INVITACIÓN`,
     alreadyHaveAccountButton: () => `YA TIENE UNA CUENTA?`,
     rows: {
@@ -745,7 +745,7 @@ export const es: LanguageDefinition = {
     noResults: () => `Sin resultados`,
     paymentLinkButton: () => `ENVÍA LINK PAGO EN SU LUGAR`,
     sentAgo: (timeAgo: string) => `Enviado ${timeAgo}`,
-    receivedAgo: (timeAgo: string) => `Recivido ${timeAgo}`,
+    receivedAgo: (timeAgo: string) => `Recibido ${timeAgo}`,
     extra: {
       contact: () => `Enviar a contacto`,
       requestLink: () => `Solicitar via link`,
@@ -862,8 +862,8 @@ export const es: LanguageDefinition = {
       title: () => `Retirar a Coinbase`,
       description: () => `Ve a Coinbase, y haga click `,
       steps: {
-        sendReceive: () => `Enviar y Recivir`,
-        receive: () => `Recivir`,
+        sendReceive: () => `Enviar y Recibir`,
+        receive: () => `Recibir`,
         choose: () => `Elije`,
         setNetwork: () => `Cambia la red a`,
       },

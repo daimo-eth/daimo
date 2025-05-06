@@ -89,16 +89,16 @@ export function ErrorBanner({
         <ButtonBig
           type="subtle"
           title="Contact Support"
-          onPress={openSupportTG}
+          onPress={contactSupport}
         />
       </View>
     </View>
   );
 }
 
-export function openSupportTG() {
-  console.log("[ERROR] Opening Telegram support");
-  Linking.openURL("https://t.me/daimo_support");
+export function contactSupport() {
+  console.log("[ERROR] Opening email support");
+  Linking.openURL("mailto:support@daimo.com");
 }
 
 const getStyles = (color: Colorway) =>

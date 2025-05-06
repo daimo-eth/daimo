@@ -1,5 +1,5 @@
-import { HomePage } from "./HomePage";
+import { redirect } from "next/navigation";
 
 export default function HomePageWrap() {
-  return <HomePage />;
+  return redirect("https://pay.daimo.com");
 }

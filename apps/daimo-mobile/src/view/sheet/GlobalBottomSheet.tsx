@@ -1,4 +1,4 @@
-import { DaimoRequestV2Status, ProposedSwap } from "@daimo/common";
+import { BigIntStr, DaimoRequestV2Status, ProposedSwap } from "@daimo/common";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -89,7 +89,7 @@ type DisplayedSheet =
   | { action: "swap"; payload: { swap: ProposedSwap } }
   | {
       action: "bitrefill";
-      payload: { address: Address; amount: `${number}` };
+      payload: { address: Address; amount: BigIntStr };
     };
 
 // Shows the main, global bottom sheet. This ensures that only a single of

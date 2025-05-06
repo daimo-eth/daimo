@@ -1,77 +1,48 @@
-import { assert } from "@daimo/common";
+import { assertNotNull, debugJson, retryBackoff } from "@daimo/common";
 import AwaitLock from "await-lock";
 import {
   Abi,
   Account,
   Address,
+  Block,
   Chain,
   ContractFunctionArgs,
   ContractFunctionName,
+  EstimateContractGasParameters,
   GetContractReturnType,
   Hex,
   PublicClient,
-  SendTransactionParameters,
-  SendTransactionReturnType,
+  TransactionReceipt,
   Transport,
   WalletClient,
   WriteContractParameters,
   createPublicClient,
   createWalletClient,
-  fallback,
   getAddress,
-  hexToBigInt,
-  http,
-  isHex,
-  webSocket,
 } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 
+import {
+  getEOA,
+  getTransportFromEnv,
+  isNonceAlreadyUsedError,
+  isReplacementGasFeeTooLowError,
+  isWaitForReceiptTimeoutError,
+} from "./viemClientUtils";
 import { IExternalApiCache } from "../db/externalApiCache";
 import { chainConfig, getEnvApi } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { lazyCache } from "../utils/cache";
 import { memoize } from "../utils/func";
 
-function getTransportFromEnv() {
-  const l1RPCs = getEnvApi().DAIMO_API_L1_RPC_WS.split(",");
-  const l2RPCs = getEnvApi().DAIMO_API_L2_RPC_WS.split(",");
+const GAS_LIMIT_RESCALE_PERCENT = 150; // Scale gas limit to 150% of estimate
+const BASE_FEE_RESCALE_PERCENT = 200; // Scale base fee to 200% of original in maxFeePerGas calculation
+const PRIO_FEE_SCALE_RESCALE_PERCENT = 120; // Scale priority fee to 120% of original
 
-  console.log(`[VIEM] using transport RPCs L1: ${l1RPCs}, L2: ${l2RPCs}`);
+const REPLACEMENT_MAX_FEE_PERCENT = 200; // Replace maxFeePerGas with double previous fee
+const REPLACEMENT_MAX_PRIO_FEE_PERCENT = 200; // Replace maxPriorityFeePerGas with double previous fee
 
-  const stringToTransport = (url: string) => {
-    const rpc = url.startsWith("wss") ? webSocket(url) : http(url);
-    return addLogging(rpc, url);
-  };
-
-  return {
-    l1: fallback(l1RPCs.map(stringToTransport), { rank: true }),
-    l2: fallback(l2RPCs.map(stringToTransport), { rank: true }),
-  };
-}
-
-// Log JSON RPC requests. This helps debug RPC errors.
-function addLogging(transport: Transport, url: string) {
-  return (args: Parameters<Transport>[0]) => {
-    const chainId = args.chain?.id;
-    const ret = transport(args);
-    const { request } = ret;
-    ret.request = async (args) => {
-      const reqID = Math.floor(Math.random() * 1e6).toString(36);
-      const { method } = args;
-      console.log(`[VIEM] request ${chainId} ${method} ${reqID} ${url}`);
-      try {
-        const resp = (await request(args)) as any;
-        const detail =
-          method === "eth_blockNumber" ? ` ${hexToBigInt(resp as Hex)}` : "";
-        console.log(`[VIEM] response ${chainId} ${method} ${reqID}${detail}`);
-        return resp;
-      } catch (e) {
-        console.error(`[VIEM] ERROR ${chainId} ${method} ${reqID}`, e);
-        throw e;
-      }
-    };
-    return ret;
-  };
+function calcPercentOf(value: bigint, percent: number): bigint {
+  return (value * BigInt(percent)) / 100n;
 }
 
 /**
@@ -80,7 +51,7 @@ function addLogging(transport: Transport, url: string) {
  */
 export function getViemClientFromEnv(
   monitor: Telemetry,
-  extApiCache: IExternalApiCache,
+  extApiCache: IExternalApiCache
 ) {
   const transports = getTransportFromEnv();
 
@@ -108,15 +79,8 @@ export function getViemClientFromEnv(
     publicClient,
     walletClient,
     monitor,
-    extApiCache,
+    extApiCache
   );
-}
-
-export function getEOA(privateKey: string) {
-  if (!privateKey.startsWith("0x")) privateKey = `0x${privateKey}`;
-  assert(isHex(privateKey) && privateKey.length === 66, "Invalid private key");
-
-  return privateKeyToAccount(privateKey);
 }
 
 /**
@@ -124,19 +88,33 @@ export function getEOA(privateKey: string) {
  * read L2, and post transactions to L2.
  */
 export class ViemClient {
-  // Lock to ensure sequential nonce for walletClient writes
-  private lockNonce = new AwaitLock();
-  private nextNonce = 0;
+  /** When a tx doesn't confirm, retry with higher gas n times. */
+  public readonly maxWriteContractAttempts = 5;
+  /** When a tx doesn't confirm, wait before retrying with higher gas. */
+  public readonly writeContractRetryDelayMs = 5000;
+
+  /** EOA for sending txs. */
   public account: Account;
+  /** Lock to ensure sequential nonce for walletClient writes */
+  private txLock = new AwaitLock();
 
   constructor(
     private l1Client: PublicClient<Transport, Chain>,
     public publicClient: PublicClient<Transport, Chain>,
     private walletClient: WalletClient<Transport, Chain, Account>,
     private telemetry: Telemetry,
-    private extApiCache: IExternalApiCache,
+    private extApiCache: IExternalApiCache
   ) {
     this.account = this.walletClient.account;
+    const { waitForTransactionReceipt } = publicClient;
+    publicClient.waitForTransactionReceipt = (args) => {
+      // Viem's default is 6 = ~24s
+      return waitForTransactionReceipt({
+        ...args,
+        retryCount: 10,
+        timeout: 60_000, // Wait at most 1 minute for a tx to confirm
+      });
+    };
   }
 
   getEnsAddress = memoize(
@@ -149,7 +127,7 @@ export class ViemClient {
             console.log(`[VIEM] getEnsAddress for '${name}'`);
             return this.l1Client.getEnsAddress({ name }).then((a) => a || "");
           },
-          24 * 3600,
+          24 * 3600
         );
         return !result ? null : getAddress(result);
       } catch (e: any) {
@@ -157,7 +135,7 @@ export class ViemClient {
         return null;
       }
     },
-    ({ name }: { name: string }) => name,
+    ({ name }: { name: string }) => name
   );
 
   getEnsName = memoize(
@@ -179,11 +157,11 @@ export class ViemClient {
               }
             });
         },
-        24 * 3600,
+        24 * 3600
       );
       return result || null;
     },
-    ({ address }: { address: Address }) => address,
+    ({ address }: { address: Address }) => address
   );
 
   private onReceiptError(hash: Hex, e: unknown) {
@@ -191,11 +169,11 @@ export class ViemClient {
     const txURL = `${explorerURL}/tx/${hash}`;
     this.telemetry.recordClippy(
       `Receipt error ${hash} - ${txURL}: ${e}`,
-      "error",
+      "error"
     );
   }
 
-  private async waitForReceipt(hash: Hex) {
+  private async waitForReceipt(hash: Hex): Promise<TransactionReceipt> {
     try {
       const receipt = await this.publicClient.waitForTransactionReceipt({
         hash,
@@ -204,100 +182,329 @@ export class ViemClient {
       if (receipt.status !== "success") {
         this.onReceiptError(hash, JSON.stringify(receipt));
       }
+      return receipt;
     } catch (e) {
       console.error(`[VIEM] waitForReceipt ${hash} error: ${e}`);
       this.onReceiptError(hash, e);
+      throw e;
     }
   }
 
-  // We do this to avoid race conditions with nonces. We can't rely on
-  // Viem to do this for us, as it's not atomic. Other places that use
-  // similar logic include Pimlico's Alto bundler:
-  // https://github.com/pimlicolabs/alto/blob/main/src/entrypoint-0.6/executor/executor.ts
-  private async updateNonce() {
-    const txCount = await this.publicClient.getTransactionCount({
-      address: this.walletClient.account.address,
-      blockTag: "pending",
-    });
-    console.log(
-      `[VIEM] nonce: got tx count ${txCount}, updating nonce ${this.nextNonce}`,
+  /** Get the nonce from the chain */
+  async getNonce(block: Block): Promise<number> {
+    const blockNumber = assertNotNull(block.number, "block number is null");
+    return await retryBackoff(
+      "getTransactionCount",
+      () =>
+        this.publicClient.getTransactionCount({
+          address: this.walletClient.account.address,
+          blockNumber,
+        }),
+      3
     );
-    this.nextNonce = Math.max(this.nextNonce, txCount);
   }
 
-  private async runWithOverrideParams<
-    Args extends {
-      nonce?: number;
-      gas?: bigint;
-      chain?: Chain | null;
-    },
-    Ret,
-  >(args: Args, fn: (args: Args) => Ret): Promise<Ret> {
-    const startMs = performance.now();
-    const localTxId = Math.floor(Math.random() * 1e6);
-    console.log(
-      `[VIEM] ready to run ${localTxId} with override, waiting for lock`,
+  /** Calculate the EIP-1559 gas prices using defensive defaults. */
+  async calcGasPrice(block: Block): Promise<{
+    maxFeePerGas: bigint;
+    maxPriorityFeePerGas: bigint;
+  }> {
+    const maxPriorityFeePerGas =
+      await this.publicClient.estimateMaxPriorityFeePerGas();
+    const baseBlockFee = assertNotNull(
+      block.baseFeePerGas,
+      "baseBlockFee is null"
     );
-    await this.lockNonce.acquireAsync();
 
-    try {
-      const elapsedMs = () => (performance.now() - startMs) | 0;
-      console.log(`[VIEM] tx ${localTxId} ${elapsedMs()}ms: got lock`);
-      await this.updateNonce();
-      console.log(
-        `[VIEM] tx ${localTxId} ${elapsedMs()}ms: got nonce ${this.nextNonce}`,
-      );
+    // Add buffer to maxFeePerGas to ensure tx can still be included in future
+    // blocks even if the base fee rises.
+    const baseFeeBuffer = calcPercentOf(baseBlockFee, BASE_FEE_RESCALE_PERCENT);
 
-      args.nonce = this.nextNonce; // Override nonce
-      args.gas = 2_000_000n; // Saves estimateGas roundtrip
-      args.chain = null; // Saves eth_chainId roundtrip, see https://github.com/wevm/viem/pull/474#discussion_r1190476819
+    // Add tip to maxPriorityFeePerGas for faster processing
+    const maxPriorityFeePerGasWithTip = calcPercentOf(
+      maxPriorityFeePerGas,
+      PRIO_FEE_SCALE_RESCALE_PERCENT
+    );
 
-      const ret = await fn(args);
+    const maxFeePerGas = baseFeeBuffer + maxPriorityFeePerGasWithTip;
 
-      console.log(`[VIEM] tx ${localTxId} ${elapsedMs()}ms: submitted: ${ret}`);
-
-      // Increment nonce for later
-      this.nextNonce += 1;
-      return ret;
-    } finally {
-      this.lockNonce.release();
-    }
+    return {
+      maxFeePerGas,
+      maxPriorityFeePerGas: maxPriorityFeePerGasWithTip,
+    };
   }
 
-  async writeContract<
+  private onEstimateGasError(argsJson: string, e: unknown) {
+    const message = `[VIEM] getGasLimit error ${argsJson}: ${e}`;
+    console.error(message, "error");
+    this.telemetry.recordClippy(message, "error");
+  }
+
+  /** Estimate the gas limit for a tx with a defensive buffer. */
+  async getGasLimit<
     const TAbi extends Abi | readonly unknown[],
-    TFunctionName extends ContractFunctionName<TAbi, "nonpayable" | "payable">,
-    TFunctionArgs extends ContractFunctionArgs<TAbi, "nonpayable" | "payable">,
-    TChainOverride extends Chain | undefined = undefined,
+    TFunctionName extends ContractFunctionName<TAbi, "payable" | "nonpayable">,
+    TArgs extends ContractFunctionArgs<
+      TAbi,
+      "payable" | "nonpayable",
+      TFunctionName
+    >,
+    TChainOverride extends Chain | undefined = undefined
   >(
+    block: Block,
     args: WriteContractParameters<
       TAbi,
       TFunctionName,
-      TFunctionArgs,
+      TArgs,
+      Chain,
+      Account,
+      TChainOverride
+    >
+  ): Promise<bigint> {
+    try {
+      // Don't retry. estimateContractGas usually fails because of reverts
+      // during simulation. We want to surface these errors.
+      const gasLimit = await this.publicClient.estimateContractGas({
+        address: args.address,
+        abi: args.abi,
+        functionName: args.functionName,
+        args: args.args,
+        account: this.walletClient.account.address,
+        value: args.value,
+        blockNumber: block.number,
+      } as EstimateContractGasParameters);
+
+      // Add buffer to the gas limit to be safe
+      return calcPercentOf(gasLimit, GAS_LIMIT_RESCALE_PERCENT);
+    } catch (e) {
+      console.error(`[VIEM] getGasLimit error: ${e}`);
+      this.onEstimateGasError(debugJson(args), e);
+      throw e;
+    }
+  }
+
+  /**
+   * Set the override params for a tx like gas limit, maxFeePerGas,
+   * maxPriorityFeePerGas, and nonce.
+   */
+  async setOverrideParams<
+    const TAbi extends Abi | readonly unknown[],
+    TFunctionName extends ContractFunctionName<TAbi, "payable" | "nonpayable">,
+    TArgs extends ContractFunctionArgs<
+      TAbi,
+      "payable" | "nonpayable",
+      TFunctionName
+    >,
+    TChainOverride extends Chain | undefined = undefined
+  >(
+    localTxId: number,
+    args: WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
       Chain,
       Account,
       TChainOverride
     >,
-  ): Promise<Hex> {
-    console.log(`[CHAIN] exec ${args.functionName}`);
-    const ret = await this.runWithOverrideParams(
-      args,
-      this.walletClient.writeContract,
+    prevGasFees: { maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }
+  ): Promise<void> {
+    const block = await this.publicClient.getBlock({ blockTag: "latest" });
+
+    const [gasLimit, nonce, { maxFeePerGas, maxPriorityFeePerGas }] =
+      await Promise.all([
+        this.getGasLimit(block, args),
+        this.getNonce(block),
+        this.calcGasPrice(block),
+      ]);
+
+    args.gas = gasLimit;
+    args.nonce = nonce;
+
+    // Increase the previous gas price to get the new tx through and avoid
+    // "replacement transaction underpriced" errors.
+    const replacementMaxFeePerGas = calcPercentOf(
+      prevGasFees.maxFeePerGas,
+      REPLACEMENT_MAX_FEE_PERCENT
     );
-    this.waitForReceipt(ret);
-    return ret;
+    const replacementMaxPriorityFeePerGas = calcPercentOf(
+      prevGasFees.maxPriorityFeePerGas,
+      REPLACEMENT_MAX_PRIO_FEE_PERCENT
+    );
+
+    // Use the larger of the replacement price or the current price
+    args.maxFeePerGas =
+      replacementMaxFeePerGas > maxFeePerGas
+        ? replacementMaxFeePerGas
+        : maxFeePerGas;
+    args.maxPriorityFeePerGas =
+      replacementMaxPriorityFeePerGas > maxPriorityFeePerGas
+        ? replacementMaxPriorityFeePerGas
+        : maxPriorityFeePerGas;
+
+    console.log(
+      `${this.getWriteContractLogMessage(
+        localTxId,
+        args
+      )} Gas and nonce tx params: ${debugJson({
+        chainId: this.publicClient.chain.id,
+        blockNumber: block.number,
+        accountAddress: this.walletClient.account.address,
+        gas: args.gas,
+        nonce: args.nonce,
+        blockBaseFeePerGas: block.baseFeePerGas,
+        maxFeePerGas: args.maxFeePerGas,
+        maxPriorityFeePerGas: args.maxPriorityFeePerGas,
+        prevMaxFeePerGas: prevGasFees.maxFeePerGas,
+        prevMaxPriorityFeePerGas: prevGasFees.maxPriorityFeePerGas,
+      })}`
+    );
   }
 
-  async sendTransaction<TChainOverride extends Chain | undefined = undefined>(
-    args: SendTransactionParameters<Chain, Account, TChainOverride>,
-  ): Promise<SendTransactionReturnType> {
-    console.log(`[VIEM] send ${args.to}, waiting for lock`);
-    const ret = await this.runWithOverrideParams(
-      args,
-      this.walletClient.sendTransaction,
+  private getWriteContractLogMessage<
+    const TAbi extends Abi | readonly unknown[],
+    TFunctionName extends ContractFunctionName<TAbi, "payable" | "nonpayable">,
+    TArgs extends ContractFunctionArgs<
+      TAbi,
+      "payable" | "nonpayable",
+      TFunctionName
+    >,
+    TChainOverride extends Chain | undefined = undefined
+  >(
+    localTxId: number,
+    args: WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      Chain,
+      Account,
+      TChainOverride
+    >
+  ) {
+    return `[VIEM] txId ${localTxId} from ${this.walletClient.account.address}: ${args.functionName} on ${args.address} chain ${this.publicClient.chain.id}`;
+  }
+
+  /**
+   * Write to a contract and wait for the receipt, retrying until successful.
+   */
+  async writeContractAndGetReceipt<
+    const TAbi extends Abi | readonly unknown[],
+    TFunctionName extends ContractFunctionName<TAbi, "payable" | "nonpayable">,
+    TArgs extends ContractFunctionArgs<
+      TAbi,
+      "payable" | "nonpayable",
+      TFunctionName
+    >,
+    TChainOverride extends Chain | undefined = undefined
+  >(
+    args: WriteContractParameters<
+      TAbi,
+      TFunctionName,
+      TArgs,
+      Chain,
+      Account,
+      TChainOverride
+    >
+  ): Promise<{ txHash: Hex; receipt: TransactionReceipt }> {
+    const startMs = performance.now();
+    const localTxId = Math.floor(Math.random() * 1e6);
+    console.log(
+      `${this.getWriteContractLogMessage(
+        localTxId,
+        args
+      )} Ready to run. Waiting for lock`
     );
-    this.waitForReceipt(ret);
-    return ret;
+
+    // Only one tx at a time per account to avoid nonce issues.
+    await this.txLock.acquireAsync();
+    const elapsedMs = () => (performance.now() - startMs) | 0;
+    console.log(
+      `${this.getWriteContractLogMessage(
+        localTxId,
+        args
+      )} Got lock after ${elapsedMs()}ms`
+    );
+
+    try {
+      const prevGasFees = { maxFeePerGas: 0n, maxPriorityFeePerGas: 0n };
+      let finalTxHash: Hex | undefined;
+      let finalReceipt: TransactionReceipt | undefined;
+
+      let attempt = 1;
+
+      // Keep trying to submit the tx until we get a txHash and receipt
+      while (!finalTxHash || !finalReceipt) {
+        if (attempt > this.maxWriteContractAttempts) {
+          const message = `${this.getWriteContractLogMessage(
+            localTxId,
+            args
+          )} max attempts (${this.maxWriteContractAttempts} attempts) reached`;
+          this.telemetry.recordClippy(message, "error");
+          throw new Error(message);
+        }
+
+        const txAttemptId = Math.floor(Math.random() * 1e6);
+        console.log(
+          `${this.getWriteContractLogMessage(
+            localTxId,
+            args
+          )} Tx submission attempt ${attempt} with txId ${txAttemptId}`
+        );
+
+        await retryBackoff("setOverrideParams", () =>
+          this.setOverrideParams(localTxId, args, prevGasFees)
+        );
+
+        try {
+          const txHash = await this.walletClient.writeContract(args);
+          const receipt = await this.waitForReceipt(txHash);
+
+          finalTxHash = txHash;
+          finalReceipt = receipt;
+        } catch (error) {
+          // Retry only if the error is related to how the tx was submitted
+          if (
+            isReplacementGasFeeTooLowError(error) ||
+            isWaitForReceiptTimeoutError(error) ||
+            isNonceAlreadyUsedError(error)
+          ) {
+            console.warn(
+              `${this.getWriteContractLogMessage(
+                localTxId,
+                args
+              )} Failed tx submission attempt ${attempt} with txId ${txAttemptId}. Resubmitting...`,
+              error
+            );
+
+            attempt++;
+            // Update previous gas fees for the next attempt
+            prevGasFees.maxFeePerGas = assertNotNull(
+              args.maxFeePerGas,
+              "maxFeePerGas is null. Can't update prevGasFees"
+            );
+            prevGasFees.maxPriorityFeePerGas = assertNotNull(
+              args.maxPriorityFeePerGas,
+              "maxPriorityFeePerGas is null. Can't update prevGasFees"
+            );
+
+            await new Promise((resolve) =>
+              setTimeout(resolve, this.writeContractRetryDelayMs)
+            );
+          } else {
+            const message = `${this.getWriteContractLogMessage(
+              localTxId,
+              args
+            )} Failed tx submission attempt ${attempt} with txId ${txAttemptId}. Not retrying. Tx submission error unrelated to gas pricing.`;
+            console.warn(message);
+            this.telemetry.recordClippy(message, "warn");
+            throw new Error(message);
+          }
+        }
+      }
+
+      return { txHash: finalTxHash, receipt: finalReceipt };
+    } finally {
+      this.txLock.release();
+    }
   }
 
   getFinalizedBlock = lazyCache(
@@ -305,7 +512,7 @@ export class ViemClient {
       return this.publicClient.getBlock({ blockTag: "finalized" });
     },
     2_000,
-    1_000,
+    1_000
   );
 }
 

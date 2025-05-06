@@ -4,7 +4,7 @@ import { SendDebugLogButton } from "../../common/useSendDebugLog";
 import { i18n } from "../../i18n";
 import { ButtonMed } from "../shared/Button";
 import Spacer from "../shared/Spacer";
-import { openSupportTG } from "../shared/error";
+import { contactSupport } from "../shared/error";
 import { TextH3, TextLight } from "../shared/text";
 import { useTheme } from "../style/theme";
 
@@ -23,7 +23,7 @@ export function DebugBottomSheet() {
       <ButtonMed
         type="primary"
         title={i18.helpButton()}
-        onPress={openSupportTG}
+        onPress={contactSupport}
       />
       <Spacer h={16} />
       <SendDebugLogButton />

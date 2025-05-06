@@ -93,7 +93,7 @@ export class BundlerClient {
 
     const beneficiary = viemClient.account.address;
     try {
-      const txHash = await viemClient.writeContract({
+      const { txHash } = await viemClient.writeContractAndGetReceipt({
         abi: entryPointV06Abi,
         address: entryPointV06Address as Address,
         functionName: "handleOps",
