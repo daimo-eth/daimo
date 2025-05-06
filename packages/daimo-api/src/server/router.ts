@@ -184,7 +184,15 @@ export function createRouter(
   return trpcT.router({
     health: publicProcedure.query(async () => {
       const ret = await healthCheck(db, watcher, startTimeS);
+
       console.log(`[API] health check: ${ret.status}`);
+      if (ret.status !== "healthy") {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "health check failed",
+          cause: ret,
+        });
+      }
       return ret;
     }),
 
