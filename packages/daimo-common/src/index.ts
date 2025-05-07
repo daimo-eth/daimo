@@ -4,7 +4,6 @@ export * from "./coin";
 export * from "./currencies";
 export * from "./daimoLink";
 export * from "./daimoLinkStatus";
-export * from "./daimoPay";
 export * from "./debug";
 export * from "./eAccount";
 export * from "./env";

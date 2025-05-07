@@ -180,8 +180,8 @@ function WagmiButton({
             {isPending
               ? i18.misc.sending()
               : isSuccess && !incrementStep
-              ? i18.misc.viewInExplorer()
-              : title}
+                ? i18.misc.viewInExplorer()
+                : title}
           </SecondaryButton>
           <div className="h-4" />
         </>

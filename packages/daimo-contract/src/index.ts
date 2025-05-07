@@ -24,15 +24,8 @@ export {
   daimoEphemeralNotesAbi,
   daimoEphemeralNotesV2Abi,
   daimoFlexSwapperAbi,
-  daimoPayAbi,
-  daimoPayAcrossBridgerAbi,
-  daimoPayAxelarBridgerAbi,
-  daimoPayBatchReadUtilsAbi,
-  daimoPayBridgerAbi,
-  daimoPayCctpBridgerAbi,
   daimoPaymasterV2Abi,
   daimoPaymasterV2Address,
-  daimoPayRelayerAbi,
   daimoRequestAbi,
   daimoRequestAddress,
   daimoRequestConfig,
@@ -64,25 +57,6 @@ export const daimoFastCctpAddrs: Address[] = [
   daimoFastCctpV1Address,
 ];
 
-// Daimo Pay
-export const daimoPayAddress = "0x9BD9caF29B76E98d57Fc3a228A39C7efe8ca0eAf";
-export const daimoPayBridgerAddress =
-  "0xB4418A1EcE96CF1F797fef3Ab2c0Afdf59701C38";
-export const daimoPayAxelarBridgerAddress =
-  "0x91052AEc686070bc8787fde3d530f21976302867";
-export const daimoPayAcrossBridgerAddress =
-  "0x4518f95Bd1aB24B73aeB6AeaFd1567e1e04894Ea";
-export const daimoPayCctpBridgerAddress =
-  "0xD9a2126f5d80f2dd56BDd6aFbea5cAb3f9705191";
-export const payIntentFactoryAddress =
-  "0x90498530e2FddcD937faB0Ab56cF6a7c1FB08b62";
-export const daimoPayRelayerAddress =
-  "0xC6f00FE98bD441b8B482781dc4721443eC645C0e";
-
-// Utils
-export const daimoPayBatchReadUtilsAddress =
-  "0xe554Fe204AF7b99E566fc86Ee9b4f34f8364b7B1";
-
 // DAv2
 export const entryPointV07Address =
   "0x0000000071727De22E5E9d8BAf0edAc6f37da032";
@@ -113,7 +87,6 @@ export * from "./external";
 // Supported chains and coins
 export * from "./chain";
 export * from "./chainConfig";
-export * from "./chainExplorer";
 
 export * from "./cctp";
 export * from "./viemClient";

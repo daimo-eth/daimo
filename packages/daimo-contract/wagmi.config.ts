@@ -3,16 +3,11 @@ import { foundry } from "@wagmi/cli/plugins";
 
 import latestAccountFactoryV2 from "../contract/broadcast/DeployAccountFactoryV2.s.sol/8453/run-latest.json";
 import latestCCTPBridger from "../contract/broadcast/DeployCCTPBridger.s.sol/8453/run-latest.json";
-import latestDaimoPay from "../contract/broadcast/DeployDaimoPay.s.sol/8453/run-latest.json";
-import latestDaimoPayBatchReadUtils from "../contract/broadcast/DeployDaimoPayBatchReadUtils.s.sol/8453/run-latest.json";
-import latestDaimoPayBridger from "../contract/broadcast/DeployDaimoPayBridger.s.sol/8453/run-latest.json";
-import latestDaimoPayRelayer from "../contract/broadcast/DeployDaimoPayRelayer.s.sol/8453/run-latest.json";
 import latestEphemeralNotes from "../contract/broadcast/DeployEphemeralNotes.s.sol/8453/run-latest.json";
 import latestEphemeralNotesV2 from "../contract/broadcast/DeployEphemeralNotesV2.s.sol/8453/run-latest.json";
 import latestFastCCTP from "../contract/broadcast/DeployFastCCTP.s.sol/8453/run-latest.json";
 import latestFlexSwapper from "../contract/broadcast/DeployFlexSwapper.s.sol/8453/run-latest.json";
 import latestNameReg from "../contract/broadcast/DeployNameRegistry.s.sol/8453/run-latest.json";
-import latestPayIntentFactory from "../contract/broadcast/DeployPayIntentFactory.s.sol/8453/run-latest.json";
 import latestRequest from "../contract/broadcast/DeployRequest.s.sol/8453/run-latest.json";
 import latestPaymaster from "../contract/broadcast/ManagePaymaster.s.sol/8453/deploy-latest.json";
 
@@ -31,11 +26,6 @@ const deployments = Object.fromEntries(
     ...latestFlexSwapper.transactions,
     ...latestCCTPBridger.transactions,
     ...latestFastCCTP.transactions,
-    ...latestPayIntentFactory.transactions,
-    ...latestDaimoPay.transactions,
-    ...latestDaimoPayBridger.transactions,
-    ...latestDaimoPayRelayer.transactions,
-    ...latestDaimoPayBatchReadUtils.transactions,
   ]
     .filter((t) => t.transactionType === "CREATE2")
     .map((r) => [r.contractName, r.contractAddress as `0x${string}`])
@@ -50,8 +40,6 @@ export default defineConfig({
       forge: { build: false },
       include: [
         "Daimo*.sol/*",
-        "Dummy*.sol/*",
-        "Pay*.sol/*",
         "ERC*.sol/*",
         "EntryPoint.sol/*",
         "AggregatorV2V3Interface.sol/*",
