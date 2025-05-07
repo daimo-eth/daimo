@@ -18,7 +18,10 @@ export class ProfileCache {
   private linkedAccounts: Map<Address, LinkedAccount[]> = new Map();
   private fidToAddress: Map<number, Address> = new Map();
 
-  constructor(private vc: ViemClient, private db: DB) {}
+  constructor(
+    private vc: ViemClient,
+    private db: DB
+  ) {}
 
   static getDispUsername(link: LinkedAccount): string {
     switch (link.type) {

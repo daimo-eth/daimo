@@ -249,7 +249,7 @@ export class ViemClient {
       "payable" | "nonpayable",
       TFunctionName
     >,
-    TChainOverride extends Chain | undefined = undefined
+    TChainOverride extends Chain | undefined = undefined,
   >(
     block: Block,
     args: WriteContractParameters<
@@ -295,7 +295,7 @@ export class ViemClient {
       "payable" | "nonpayable",
       TFunctionName
     >,
-    TChainOverride extends Chain | undefined = undefined
+    TChainOverride extends Chain | undefined = undefined,
   >(
     localTxId: number,
     args: WriteContractParameters<
@@ -368,7 +368,7 @@ export class ViemClient {
       "payable" | "nonpayable",
       TFunctionName
     >,
-    TChainOverride extends Chain | undefined = undefined
+    TChainOverride extends Chain | undefined = undefined,
   >(
     localTxId: number,
     args: WriteContractParameters<
@@ -394,7 +394,7 @@ export class ViemClient {
       "payable" | "nonpayable",
       TFunctionName
     >,
-    TChainOverride extends Chain | undefined = undefined
+    TChainOverride extends Chain | undefined = undefined,
   >(
     args: WriteContractParameters<
       TAbi,

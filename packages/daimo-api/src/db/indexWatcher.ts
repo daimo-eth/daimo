@@ -49,7 +49,10 @@ export class IndexWatcher {
   public readonly pg: Pool;
   public readonly kdb: Kysely<IndexDB>;
 
-  constructor(private rpcClient: PublicClient, dbUrl?: string) {
+  constructor(
+    private rpcClient: PublicClient,
+    dbUrl?: string
+  ) {
     const { poolConfig, dbConfig } = getIndexDBConfig(dbUrl);
     this.pg = new Pool(poolConfig);
     this.kdb = new Kysely<IndexDB>({

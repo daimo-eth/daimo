@@ -6,6 +6,7 @@ import {
 } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
 import { addEventListener } from "expo-linking";
+import * as React from "react";
 import {
   useCallback,
   useContext,
@@ -125,13 +126,16 @@ function HomeScreenPullToRefreshWrap({ account }: { account: Account }) {
 
   // Re-render HistoryListSwipe only transfer count or status changes.
   const statusCountsStr = JSON.stringify(
-    account.recentTransfers.reduce((counts, transfer) => {
-      let statusStr = getTransferClogStatus(transfer);
-      const { offchainTransfer } = transfer as TransferSwapClog;
-      statusStr += `-${offchainTransfer?.timeExpected}`;
-      counts[statusStr] = (counts[statusStr] || 0) + 1;
-      return counts;
-    }, {} as Record<string, number>)
+    account.recentTransfers.reduce(
+      (counts, transfer) => {
+        let statusStr = getTransferClogStatus(transfer);
+        const { offchainTransfer } = transfer as TransferSwapClog;
+        statusStr += `-${offchainTransfer?.timeExpected}`;
+        counts[statusStr] = (counts[statusStr] || 0) + 1;
+        return counts;
+      },
+      {} as Record<string, number>
+    )
   );
   const histListMini = useMemo(
     () => <HistoryListSwipe account={account} showDate={false} maxToShow={5} />,

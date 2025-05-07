@@ -37,7 +37,10 @@ interface GasPrice {
 export class BundlerClient {
   provider: BundlerJsonRpcProvider;
 
-  constructor(bundlerRpcUrl: string, private opIndexer?: OpIndexer) {
+  constructor(
+    bundlerRpcUrl: string,
+    private opIndexer?: OpIndexer
+  ) {
     this.provider = new BundlerJsonRpcProvider(bundlerRpcUrl);
   }
 

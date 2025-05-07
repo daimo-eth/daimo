@@ -24,10 +24,10 @@ import {
 } from "@daimo/contract";
 import { Address, Hex, getAddress } from "viem";
 
-import { env, getEnvMobile } from "../env";
 import { StoredV16Account } from "./storedAccount";
 import { migrateOldAccount } from "./storedAccountMigrations";
 import { StoredModel } from "./storedModel";
+import { env, getEnvMobile } from "../env";
 
 const appVariant = getEnvMobile().DAIMO_APP_VARIANT;
 

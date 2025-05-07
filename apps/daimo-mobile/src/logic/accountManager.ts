@@ -24,6 +24,9 @@ import { useEffect, useState } from "react";
 import { MMKV } from "react-native-mmkv";
 import { Address, Hex } from "viem";
 
+import { cacheEAccounts } from "./eAccountCache";
+import { cacheLandlineAccounts } from "./landlineAccountCache";
+import { getRpcFunc } from "./trpc";
 import { ActHandle } from "../action/actStatus";
 import {
   EnclaveKeyInfo,
@@ -39,9 +42,6 @@ import {
   parseAccount,
   serializeAccount,
 } from "../storage/account";
-import { cacheEAccounts } from "./eAccountCache";
-import { cacheLandlineAccounts } from "./landlineAccountCache";
-import { getRpcFunc } from "./trpc";
 
 /** Loads and saves Daimo account data from storage. Notifies listeners. */
 export function getAccountManager(): AccountManager {

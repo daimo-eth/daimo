@@ -395,9 +395,8 @@ export function createRouter(
         const { apiKey, sender } = opts.input;
         authorize(apiKey);
 
-        const inviteCode = await inviteCodeTracker.getBestInviteCodeForSender(
-          sender
-        );
+        const inviteCode =
+          await inviteCodeTracker.getBestInviteCodeForSender(sender);
         return inviteCode;
       }),
 

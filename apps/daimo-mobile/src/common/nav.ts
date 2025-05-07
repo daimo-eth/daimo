@@ -183,7 +183,7 @@ export function useNav<RouteName extends keyof AllRoutes = keyof AllRoutes>() {
 }
 
 export function useOnboardingNav<
-  RouteName extends keyof ParamListOnboarding = keyof ParamListOnboarding
+  RouteName extends keyof ParamListOnboarding = keyof ParamListOnboarding,
 >() {
   return useNavigation<
     NativeStackNavigationProp<ParamListOnboarding, RouteName>

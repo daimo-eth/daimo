@@ -4,14 +4,14 @@ import {
   DaimoNoteStatus,
   DaimoRequestState,
   DaimoRequestV2Status,
-  TransferClog,
   EAccount,
   OpStatus,
   ProposedSwap,
+  TransferClog,
   guessTimestampFromNum,
   now,
 } from "@daimo/common";
-import { daimoChainFromId, ForeignToken } from "@daimo/contract";
+import { ForeignToken, daimoChainFromId } from "@daimo/contract";
 import assert from "node:assert";
 import test from "node:test";
 import { Address, Hex, getAddress } from "viem";
@@ -485,10 +485,10 @@ function createTransfer(args: {
   const txHash = args.isRequestResponse
     ? "0x42"
     : args.memo
-    ? "0x43"
-    : args.isSwap
-    ? "0x44"
-    : "0x0";
+      ? "0x43"
+      : args.isSwap
+        ? "0x44"
+        : "0x0";
 
   return {
     address: "0x0",

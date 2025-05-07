@@ -8,6 +8,7 @@ import {
   timeAgo,
 } from "@daimo/common";
 import Octicons from "@expo/vector-icons/Octicons";
+import * as React from "react";
 import { useContext } from "react";
 import {
   TouchableHighlight,
@@ -144,8 +145,8 @@ function RequestNotificationMessage({
     otherAcc.label === AddrLabel.RequestLink
       ? i18.msgVerb.via()
       : type === "recipient"
-      ? i18.msgVerb.from()
-      : i18.msgVerb.for();
+        ? i18.msgVerb.from()
+        : i18.msgVerb.for();
 
   const otherAccText = (
     <TextBody color={color.midnight}>
