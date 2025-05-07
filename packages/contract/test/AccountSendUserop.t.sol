@@ -31,7 +31,7 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 0;
-        bytes32 expectedUserOpHash = hex"c52d138a0876842d675fbb699320618b3e5469fc83baf1e5f0012189d4cb9ef6";
+        bytes32 expectedUserOpHash = hex"d85d07248f1322e02b80328b1581926dc8525cc3a2e8913c184252e82842b2b6";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
@@ -46,14 +46,14 @@ contract AccountSendUseropTest is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x58ac9797b092eeb85c7662877fd6979ec527b491b65454e0f133e86a6e271114,
-                    s: 0x2381ce3cb719e7050a1281b8f19bb5a59b0986b94b30d3b27717780f93ef0f6b
+                    r: 0x4e1230ae096f92b4574d949da3729d0ac83b930fdb119f3ab23841817d8910cb,
+                    s: 0x05524609e42612db20d039a5e3ea6e7ef89b30d57738f1c14e8c2259974ab555
                 })
             )
         );
 
         // Create a new Daimo account
-        TestUSDC usdc = new TestUSDC{salt: 0}();
+        TestUSDC usdc = new TestUSDC();
         DaimoAccountV2 acc = factory.createAccount(
             8453, // home chain = Base
             usdc,
@@ -117,7 +117,7 @@ contract AccountSendUseropTest is Test {
         bytes32[2] memory key = [bytes32(key1u[0]), bytes32(key1u[1])];
 
         uint48 validUntil = 1e9; // validUntil unix timestamp 1e9
-        bytes32 expectedUserOpHash = hex"c52d138a0876842d675fbb699320618b3e5469fc83baf1e5f0012189d4cb9ef6";
+        bytes32 expectedUserOpHash = hex"d85d07248f1322e02b80328b1581926dc8525cc3a2e8913c184252e82842b2b6";
         bytes memory challengeToSign = abi.encodePacked(
             validUntil,
             expectedUserOpHash
@@ -131,14 +131,14 @@ contract AccountSendUseropTest is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: challengeToSign,
-                    r: 0x51565dff84fd1d9cde92304bdcd081703337b4b322aef4c1d1bcaa1196c5b389,
-                    s: 0x6a81d3a6b0bbaa66b1c6a9944ad47be017fc55b374788999b2000bc43ffa9581
+                    r: 0x8aba3085fdd6faa3041e9ced9d91c2dbb4154206ce3e0f21f247e406798fea51,
+                    s: 0x14d15b504a29dc13a2dd3ba56bea8d9e68cbe66b8ec1e44784134734fa6df0a9
                 })
             )
         );
 
         // Create a new Daimo account
-        TestUSDC usdc = new TestUSDC{salt: 0}();
+        TestUSDC usdc = new TestUSDC();
         DaimoAccountV2 acc = factory.createAccount(
             8453, // home chain = Base
             usdc,

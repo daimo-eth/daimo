@@ -9,6 +9,6 @@ solc = "0.8.26"
 via_ir = true
 optimizer = true
 optimizer_runs = 999_999
-evm_version = "london"
+evm_version = "cancun"
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config

@@ -20,17 +20,15 @@ contract DeployFlexSwapperScript is Script {
 
         vm.startBroadcast();
 
-        DaimoFlexSwapper implementation = new DaimoFlexSwapper{
-            salt: bytes32(uint256(17))
-        }();
+        DaimoFlexSwapper implementation = new DaimoFlexSwapper{salt: 0}();
         address swapper = CREATE3.deploy(
-            keccak256("DaimoFlexSwapper-17"),
+            keccak256("DaimoFlexSwapper-13"),
             abi.encodePacked(
                 type(ERC1967Proxy).creationCode,
                 abi.encode(address(implementation), initCall)
             )
         );
-        console2.log("swapper (with feeds) deployed at address:", swapper);
+        console2.log("swapper deployed at address:", swapper);
 
         vm.stopBroadcast();
     }
@@ -39,11 +37,13 @@ contract DeployFlexSwapperScript is Script {
         IERC20 usdc = IERC20(_getUSDCAddress(block.chainid));
         IERC20 dai = IERC20(_getDAIAddress(block.chainid));
         IERC20 usdt = IERC20(_getUSDTAddress(block.chainid));
-        IERC20 bridgedUsdc = IERC20(_getBridgedUSDCAddress(block.chainid));
-        IERC20 axlUsdc = IERC20(_getAxlUsdcAddress(block.chainid));
+        IERC20 bridgedUsdc = IERC20(address(0));
+        if (!_isTestnet(block.chainid) && !_isL1(block.chainid)) {
+            bridgedUsdc = IERC20(_getBridgedUSDCAddress(block.chainid));
+        }
 
         // Add priced tokens with Chainlink feeds
-        string memory file = "./script/data/chainlink-feeds.jsonl";
+        string memory file = "./chainlink-feeds.jsonl";
         while (true) {
             string memory vector = vm.readLine(file);
             if (bytes(vector).length == 0) {
@@ -62,8 +62,7 @@ contract DeployFlexSwapperScript is Script {
             bool isStablecoin = tokenAddr == address(usdc) ||
                 tokenAddr == address(dai) ||
                 tokenAddr == address(usdt) ||
-                tokenAddr == address(bridgedUsdc) ||
-                tokenAddr == address(axlUsdc);
+                tokenAddr == address(bridgedUsdc);
             if (isStablecoin) {
                 continue;
             }
@@ -82,9 +81,8 @@ contract DeployFlexSwapperScript is Script {
         uint256 numChainlinkTokens = _knownTokens.length;
 
         // Add known good stablecoins
-        if (usdc != IERC20(address(0))) {
-            _knownTokenAddrs.push(usdc);
-        }
+        assert(usdc != IERC20(address(0)));
+        _knownTokenAddrs.push(usdc);
         if (dai != IERC20(address(0))) {
             _knownTokenAddrs.push(dai);
         }
@@ -94,10 +92,6 @@ contract DeployFlexSwapperScript is Script {
         if (bridgedUsdc != IERC20(address(0))) {
             _knownTokenAddrs.push(bridgedUsdc);
         }
-        if (axlUsdc != IERC20(address(0))) {
-            _knownTokenAddrs.push(axlUsdc);
-        }
-        require(_knownTokenAddrs.length > 0, "No known tokens");
         for (uint256 i = numChainlinkTokens; i < _knownTokenAddrs.length; i++) {
             DaimoFlexSwapper.KnownToken memory knownToken = DaimoFlexSwapper
                 .KnownToken({
@@ -109,7 +103,7 @@ contract DeployFlexSwapperScript is Script {
         }
     }
 
-    function _getInitCall() private returns (bytes memory) {
+    function _getInitCall() private view returns (bytes memory) {
         uint24[] memory oracleFeeTiers = new uint24[](4);
         oracleFeeTiers[0] = 100;
         oracleFeeTiers[1] = 500;
@@ -145,12 +139,11 @@ contract DeployFlexSwapperScript is Script {
             );
     }
 
-    IERC20[] stablecoins;
-
     function _getAddrs(
         uint256 chainId
     )
         private
+        view
         returns (
             IERC20 wrappedNative,
             IERC20[] memory hopTokens,
@@ -162,30 +155,40 @@ contract DeployFlexSwapperScript is Script {
     {
         wrappedNative = IERC20(_getWrappedNativeToken(chainId));
         IERC20 weth = IERC20(_getWETH(chainId));
-        if (address(weth) != address(0) && weth != wrappedNative) {
+        if (weth == wrappedNative) {
+            hopTokens = new IERC20[](1);
+            hopTokens[0] = weth;
+        } else {
             hopTokens = new IERC20[](2);
             hopTokens[0] = weth;
             hopTokens[1] = wrappedNative;
-        } else {
-            hopTokens = new IERC20[](1);
-            hopTokens[0] = wrappedNative;
         }
 
         // Stablecoins
-        if (_getUSDCAddress(chainId) != address(0)) {
-            stablecoins.push(IERC20(_getUSDCAddress(chainId)));
-        }
-        if (_getUSDTAddress(chainId) != address(0)) {
-            stablecoins.push(IERC20(_getUSDTAddress(chainId)));
-        }
-        if (_getDAIAddress(chainId) != address(0)) {
-            stablecoins.push(IERC20(_getDAIAddress(chainId)));
-        }
-        if (_getBridgedUSDCAddress(chainId) != address(0)) {
-            stablecoins.push(IERC20(_getBridgedUSDCAddress(chainId)));
-        }
-        if (_getAxlUsdcAddress(chainId) != address(0)) {
-            stablecoins.push(IERC20(_getAxlUsdcAddress(chainId)));
+        IERC20 usdc = IERC20(_getUSDCAddress(chainId));
+        IERC20 dai = IERC20(_getDAIAddress(chainId));
+        IERC20 usdt = IERC20(_getUSDTAddress(chainId));
+
+        IERC20[] memory stablecoins;
+        if (_isTestnet(chainId)) {
+            // There is no swapping liquidity on testnets so no need for
+            // stablecoin options.
+            stablecoins = new IERC20[](1);
+            stablecoins[0] = usdc;
+        } else if (_isL1(chainId)) {
+            // No bridged USDC on L1
+            stablecoins = new IERC20[](3);
+            stablecoins[0] = usdc;
+            stablecoins[1] = usdt;
+            stablecoins[2] = dai;
+        } else {
+            IERC20 bridgedUsdc = IERC20(_getBridgedUSDCAddress(chainId));
+
+            stablecoins = new IERC20[](4);
+            stablecoins[0] = usdc;
+            stablecoins[1] = usdt;
+            stablecoins[2] = dai;
+            stablecoins[3] = bridgedUsdc;
         }
 
         // Supported output tokens (stablecoins + hopTokens)

@@ -66,8 +66,8 @@ contract AccountVerify1271Test is Test {
             Utils.rawSignatureToSignature({
                 keySlot: 0,
                 challenge: abi.encodePacked(address(accA), messageHash),
-                r: 0x827f3eac133f9c48222cf09280bcee3098aeebfc7869d2fa0ca01caeae962e0a,
-                s: 0x3acb7efc72598ffe60b00361b59975a8bfc6f9fd843b523be66b15f82ad4b5b9
+                r: 0x7661f9b644f774e56758b2d66818d91222e453d4291d621e96a244a81e1ba6dd,
+                s: 0x681ea91af48a7dbc352f0a66be6a6ba3d3c4ead531cccda78a45b5e5f640117a
             })
         );
 
@@ -84,8 +84,8 @@ contract AccountVerify1271Test is Test {
     /// Malleability: reject high-s signatures.
     function testSignatureMalleability() public view {
         // Malleable signature. s is > n/2
-        uint256 r = 0x827f3eac133f9c48222cf09280bcee3098aeebfc7869d2fa0ca01caeae962e0a;
-        uint256 s = 0xc53481028da670029f4ffc9e4a668a56fd2000b022dc4c490d4eb4cad18e6f98;
+        uint256 r = 0xf1c0397a62061ed61f23ef3c30f1cc3988e313ca08e6edfccb03ec9bada2d5f2;
+        uint256 s = 0xa3e4f42d1048b0cbefe3e0801302b9ef5cc675521796d873c7888c744db581e7;
         bytes memory sig = abi.encode(
             Utils.rawSignatureToSignature({
                 keySlot: 0,
@@ -123,8 +123,8 @@ contract AccountVerify1271Test is Test {
             Utils.rawSignatureToSignature({
                 keySlot: 0,
                 challenge: abi.encodePacked(address(accA), messageHash),
-                r: 0x827f3eac133f9c48222cf09280bcee3098aeebfc7869d2fa0ca01caeae962e0a,
-                s: 0x3acb7efc72598ffe60b00361b59975a8bfc6f9fd843b523be66b15f82ad4b5b9
+                r: 0xf1c0397a62061ed61f23ef3c30f1cc3988e313ca08e6edfccb03ec9bada2d5f2,
+                s: 0x5c1b0bd1efb74f35101c1f7fecfd46106020855b8f80c6112c313e4eaeada36a
             })
         );
 
@@ -143,8 +143,8 @@ contract AccountVerify1271Test is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: abi.encodePacked(address(accB), messageHash),
-                    r: 0x827f3eac133f9c48222cf09280bcee3098aeebfc7869d2fa0ca01caeae962e0a,
-                    s: 0x3acb7efc72598ffe60b00361b59975a8bfc6f9fd843b523be66b15f82ad4b5b9
+                    r: 0xf1c0397a62061ed61f23ef3c30f1cc3988e313ca08e6edfccb03ec9bada2d5f2,
+                    s: 0x5c1b0bd1efb74f35101c1f7fecfd46106020855b8f80c6112c313e4eaeada36a
                 })
             )
         );
@@ -157,8 +157,8 @@ contract AccountVerify1271Test is Test {
                 Utils.rawSignatureToSignature({
                     keySlot: 0,
                     challenge: abi.encodePacked(address(accB), messageHash),
-                    r: 0xc7817647cc621297c76ebaf2aefda18c92896c1a85559ec30e3e8bc4391ffed7,
-                    s: 0x67fdcd17ffb9cb5f306617a4b09661b95aebfdc59396b1501b806df809a1bd7b
+                    r: 0x2296e01d31cf115dd2ff9f83fd4153ebba9623ef84370fc534bbd42a79a6dc39,
+                    s: 0x0b59a463c05075247d49b74d3612c2e72b47c516214c560e2270b0d77ebe3a51
                 })
             )
         );

@@ -42,33 +42,39 @@ contract RequestTest is Test {
         daimoRequest.createRequest(id, ALICE, amount, metadata);
     }
 
-    function _fulfillRequestBob(uint256 id, uint256 amount) internal {
+    function _fulfillRequestBob(
+        uint256 id,
+        uint256 amount,
+        bool expectRevert
+    ) internal {
         vm.startPrank(BOB, BOB);
         token.approve(address(daimoRequest), amount);
-        vm.expectEmit(false, false, false, false);
-        emit DaimoRequest.RequestFulfilled(id, BOB);
+        if (expectRevert) {
+            vm.expectRevert();
+        } else {
+            vm.expectEmit(false, false, false, false);
+            emit DaimoRequest.RequestFulfilled(id, BOB);
+        }
         daimoRequest.fulfillRequest(id);
         vm.stopPrank();
     }
 
     function testRegularFlow() public {
-        token.mint(BOB, 1000);
+        token.mint(BOB, 567);
 
         // Creates a new request of 500 DAI to ALICE
         _createRequestAlice(1, 500);
+        assertEq(token.balanceOf(ALICE), 0);
 
         // Bob fulfills the request, emits event
-        _fulfillRequestBob(1, 500);
+        _fulfillRequestBob(1, 500, false);
 
         // Bob tries to fulfill the request again, fails
-        vm.startPrank(BOB, BOB);
-        vm.expectRevert();
-        _fulfillRequestBob(1, 500);
-        vm.stopPrank();
+        _fulfillRequestBob(1, 500, true);
 
         // Check transfer went through correctly
         assertEq(token.balanceOf(ALICE), 500);
-        assertEq(token.balanceOf(BOB), 0);
+        assertEq(token.balanceOf(BOB), 67);
         assertEq(token.balanceOf(address(daimoRequest)), 0);
     }
 
@@ -149,10 +155,10 @@ contract RequestTest is Test {
         _createRequestAlice(3, 42);
 
         // Bob fulfills the first request, emits event
-        _fulfillRequestBob(1, 500);
+        _fulfillRequestBob(1, 500, false);
 
         // Bob fulfills the second request, emits event
-        _fulfillRequestBob(2, 1000);
+        _fulfillRequestBob(2, 1000, false);
 
         // Alice marks the third request as paid independently, emits event
         vm.expectEmit(false, false, false, false);
