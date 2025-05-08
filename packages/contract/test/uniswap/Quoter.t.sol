@@ -97,42 +97,42 @@ contract QuoterTest is Test {
         // $3000.00 = 1 ETH, wrong price = block swap
         fakeFeedETHUSD.setPrice(300000, 2);
         vm.expectRevert(bytes("DFS: quote sanity check failed"));
-        swapper.swapToCoin(eth, 1 ether, usdc, emptySwapData());
+        swapper.swapToCoin{value: 1 ether}(eth, usdc, emptySwapData());
 
         // $3450.00 = 1 ETH, ~correct price = OK, attempt swap
         fakeFeedETHUSD.setPrice(345000, 2);
         vm.expectRevert(bytes("DFS: swap produced no output"));
-        swapper.swapToCoin{value: 1 ether}(eth, 1 ether, usdc, emptySwapData());
+        swapper.swapToCoin{value: 1 ether}(eth, usdc, emptySwapData());
 
         // Feed returning stale or missing price = block swap
         fakeFeedETHUSD.setPrice(0, 0);
         vm.expectRevert(bytes("DFS: CL price <= 0"));
-        swapper.swapToCoin{value: 1 ether}(eth, 1 ether, usdc, emptySwapData());
+        swapper.swapToCoin{value: 1 ether}(eth, usdc, emptySwapData());
 
         // No price feed = OK, attempt swap
         swapper.setKnownToken(weth, zeroToken);
         vm.expectRevert(bytes("DFS: swap produced no output"));
-        swapper.swapToCoin{value: 1 ether}(eth, 1 ether, usdc, emptySwapData());
+        swapper.swapToCoin{value: 1 ether}(eth, usdc, emptySwapData());
     }
 
     function testChainlinkSanityCheckERC20() public {
         deal(address(degen), address(this), 10e18);
-        degen.approve(address(swapper), 10e18);
+        degen.transfer(address(swapper), 1e18);
 
         // $0.50 = 1 DEGEN, wrong price = block swap
         fakeFeedDEGENUSD.setPrice(500, 3);
         vm.expectRevert(bytes("DFS: quote sanity check failed"));
-        swapper.swapToCoin(degen, 1e18, usdc, emptySwapData());
+        swapper.swapToCoin(degen, usdc, emptySwapData());
 
         // $0.0086 = 1 DEGEN, ~correct price = OK, attempt swap
         fakeFeedDEGENUSD.setPrice(8600, 6);
         vm.expectRevert(bytes("DFS: swap produced no output"));
-        swapper.swapToCoin(degen, 1 ether, usdc, emptySwapData());
+        swapper.swapToCoin(degen, usdc, emptySwapData());
 
         // No price = OK, attempt swap
         swapper.setKnownToken(degen, zeroToken);
         vm.expectRevert(bytes("DFS: swap produced no output"));
-        swapper.swapToCoin(degen, 1e18, usdc, emptySwapData());
+        swapper.swapToCoin(degen, usdc, emptySwapData());
     }
 
     function testFlexSwapperQuote() public view {
@@ -154,14 +154,14 @@ contract QuoterTest is Test {
     function testRebasingToken() public {
         IERC20 usdm = IERC20(0x28eD8909de1b3881400413Ea970ccE377a004ccA);
         deal(address(usdm), address(this), 123e18);
-        usdm.approve(address(swapper), 123e18);
+        usdm.transfer(address(swapper), 123e18);
 
         // Protocol lets you unwrap 123 USDM for 122 USDC = within 1% of 1:1
         bytes memory callData = fakeSwapData(usdm, usdc, 123e18, 122e6);
 
         // Initially, swap fails because USDM is a rebasing token, no Uni price.
         vm.expectRevert(bytes("DFS: no path found, amountOut 0"));
-        swapper.swapToCoin(usdm, 123e18, usdc, callData);
+        swapper.swapToCoin(usdm, usdc, callData);
 
         // Give USDM a price feed + skip Uniswap. Swap should succeed.
         FakeAggregator fakeFeedUSDM = new FakeAggregator();
@@ -174,7 +174,7 @@ contract QuoterTest is Test {
                 skipUniswap: true
             })
         );
-        swapper.swapToCoin(usdm, 123e18, usdc, callData);
+        swapper.swapToCoin(usdm, usdc, callData);
 
         assertEq(usdm.balanceOf(address(this)), 0);
         assertEq(usdc.balanceOf(address(this)), 122e6);
