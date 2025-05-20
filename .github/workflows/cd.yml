@@ -10,8 +10,7 @@ on:
 
 jobs:
   api-deploy:
-    # master and prod only, no tags
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/prod'
     name: API Deploy
     runs-on: ubuntu-latest
     steps:

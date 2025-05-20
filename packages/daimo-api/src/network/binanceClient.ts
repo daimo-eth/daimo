@@ -1,6 +1,6 @@
 import { PlatformType } from "@daimo/common";
 import { p256 } from "@noble/curves/p256";
-import { base64nopad, base64urlnopad } from "@scure/base";
+import { base64urlnopad } from "@scure/base";
 import { Address, getAddress } from "viem";
 
 import { chainConfig, getEnvApi } from "../env";
@@ -157,7 +157,9 @@ export class BinanceClient {
     } else if (platform === "android") {
       const deeplinkUrl = `bnc://app.binance.com/payment/secpay?extra_key_api_type=on-chain-transfer&transactionId=${transactionId}&nonce=${nonce}&sign=${sig}&timeStamp=${timestamp}&redirectUrl=${redirectUrl}`;
       console.log(`[BINANCE] created deeplink: ${deeplinkUrl}`);
-      const encodedDeeplinkUrl = base64nopad.encode(Buffer.from(deeplinkUrl));
+      const encodedDeeplinkUrl = base64urlnopad.encode(
+        Buffer.from(deeplinkUrl)
+      );
       return `${universalLinkUrl}?_dp=${encodedDeeplinkUrl}`;
     } else return undefined;
   }
