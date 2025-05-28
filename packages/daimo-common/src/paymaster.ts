@@ -13,7 +13,7 @@ export type ChainGasConstants = {
   /* Estimated fee in dollars (2 digits after decimal) */
   estimatedFee: number;
 
-  /* Actually paymasterAndData, named for for <=1.3.5 backcompat. */
+  /* Actually paymasterAndData, named for <=1.3.5 backcompat. */
   paymasterAddress: Hex;
 };
 
