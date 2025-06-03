@@ -138,7 +138,7 @@ automatically get some testnet USDC from the faucet.
 <summary><strong>Dev quickstart: Android</strong></summary>
 
 - **Ensure you have the correct Java version.** Version 20 doesn't work, Java 17 works.
-- You need to `ANDROID_HOME` to the local Android SDK.
+- You need to set `ANDROID_HOME` to the local Android SDK.
 - Install Android Studio, and create an emulator.
 - Download latest Android internal distribution build from Expo, and install it in the emulator.
 
