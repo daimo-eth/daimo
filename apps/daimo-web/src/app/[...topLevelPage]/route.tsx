@@ -24,11 +24,7 @@ export async function GET(request: Request) {
   // Rewrite /_next/... URLs to superSo/_next/...
   const contentType = res.headers.get("content-type") || "";
   let retBody: string | ArrayBuffer;
-  if (contentType.includes("text/html")) {
-    console.log(`[WEB] rewriting /_next/ URLs in ${upstreamUrl}`);
-    const initHtml = await resBody.text();
-    retBody = initHtml.replace(/\/_next\//g, `${superSo}/_next/`);
-  } else if (contentType.startsWith("text/")) {
+  if (contentType.startsWith("text/")) {
     retBody = await resBody.text();
   } else {
     retBody = await resBody.arrayBuffer();
