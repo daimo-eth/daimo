@@ -37,6 +37,7 @@ export async function GET(request: Request) {
   const headers = new Headers();
   for (const [key, value] of res.headers.entries()) {
     if (key === "content-encoding") continue;
+    if (key === "content-length") continue;
     if (key === "transfer-encoding") continue;
     if (key.startsWith("x-")) continue;
     headers.set(key, value);
@@ -46,7 +47,9 @@ export async function GET(request: Request) {
     typeof retBody === "string"
       ? `${retBody.length}ch string`
       : `${retBody.byteLength}b buffer`;
-  console.log(`[WEB] returning ${lengthStr}, ${headers.toString()}`);
+  console.log(
+    `[WEB] returning ${lengthStr}, ${[...headers.entries()].map(([k, v]) => `${k}:${v}`).join(", ")}`
+  );
 
   return new Response(retBody, {
     status: res.status,
