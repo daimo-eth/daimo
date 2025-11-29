@@ -6,8 +6,6 @@ import {
   Address,
   Block,
   Chain,
-  ContractFunctionArgs,
-  ContractFunctionName,
   EstimateContractGasParameters,
   GetContractReturnType,
   Hex,
@@ -33,6 +31,18 @@ import { chainConfig, getEnvApi } from "../env";
 import { Telemetry } from "../server/telemetry";
 import { lazyCache } from "../utils/cache";
 import { memoize } from "../utils/func";
+
+type ViemWriteContractParameters<
+  TAbi extends Abi | readonly unknown[],
+  TFunctionName extends string,
+  TChainOverride extends Chain | undefined = undefined,
+> = WriteContractParameters<
+  TAbi,
+  TFunctionName,
+  Chain,
+  Account,
+  TChainOverride
+>;
 
 const GAS_LIMIT_RESCALE_PERCENT = 150; // Scale gas limit to 150% of estimate
 const BASE_FEE_RESCALE_PERCENT = 200; // Scale base fee to 200% of original in maxFeePerGas calculation
@@ -107,14 +117,11 @@ export class ViemClient {
   ) {
     this.account = this.walletClient.account;
     const { waitForTransactionReceipt } = publicClient;
-    publicClient.waitForTransactionReceipt = (args) => {
-      // Viem's default is 6 = ~24s
-      return waitForTransactionReceipt({
+    publicClient.waitForTransactionReceipt = (args) =>
+      waitForTransactionReceipt({
         ...args,
-        retryCount: 10,
         timeout: 60_000, // Wait at most 1 minute for a tx to confirm
       });
-    };
   }
 
   getEnsAddress = memoize(
@@ -243,23 +250,11 @@ export class ViemClient {
   /** Estimate the gas limit for a tx with a defensive buffer. */
   async getGasLimit<
     const TAbi extends Abi | readonly unknown[],
-    TFunctionName extends ContractFunctionName<TAbi, "payable" | "nonpayable">,
-    TArgs extends ContractFunctionArgs<
-      TAbi,
-      "payable" | "nonpayable",
-      TFunctionName
-    >,
+    TFunctionName extends string,
     TChainOverride extends Chain | undefined = undefined,
   >(
     block: Block,
-    args: WriteContractParameters<
-      TAbi,
-      TFunctionName,
-      TArgs,
-      Chain,
-      Account,
-      TChainOverride
-    >
+    args: ViemWriteContractParameters<TAbi, TFunctionName, TChainOverride>
   ): Promise<bigint> {
     try {
       // Don't retry. estimateContractGas usually fails because of reverts
@@ -289,23 +284,11 @@ export class ViemClient {
    */
   async setOverrideParams<
     const TAbi extends Abi | readonly unknown[],
-    TFunctionName extends ContractFunctionName<TAbi, "payable" | "nonpayable">,
-    TArgs extends ContractFunctionArgs<
-      TAbi,
-      "payable" | "nonpayable",
-      TFunctionName
-    >,
+    TFunctionName extends string,
     TChainOverride extends Chain | undefined = undefined,
   >(
     localTxId: number,
-    args: WriteContractParameters<
-      TAbi,
-      TFunctionName,
-      TArgs,
-      Chain,
-      Account,
-      TChainOverride
-    >,
+    args: ViemWriteContractParameters<TAbi, TFunctionName, TChainOverride>,
     prevGasFees: { maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }
   ): Promise<void> {
     const block = await this.publicClient.getBlock({ blockTag: "latest" });
@@ -362,23 +345,11 @@ export class ViemClient {
 
   private getWriteContractLogMessage<
     const TAbi extends Abi | readonly unknown[],
-    TFunctionName extends ContractFunctionName<TAbi, "payable" | "nonpayable">,
-    TArgs extends ContractFunctionArgs<
-      TAbi,
-      "payable" | "nonpayable",
-      TFunctionName
-    >,
+    TFunctionName extends string,
     TChainOverride extends Chain | undefined = undefined,
   >(
     localTxId: number,
-    args: WriteContractParameters<
-      TAbi,
-      TFunctionName,
-      TArgs,
-      Chain,
-      Account,
-      TChainOverride
-    >
+    args: ViemWriteContractParameters<TAbi, TFunctionName, TChainOverride>
   ) {
     return `[VIEM] txId ${localTxId} from ${this.walletClient.account.address}: ${args.functionName} on ${args.address} chain ${this.publicClient.chain.id}`;
   }
@@ -388,22 +359,10 @@ export class ViemClient {
    */
   async writeContractAndGetReceipt<
     const TAbi extends Abi | readonly unknown[],
-    TFunctionName extends ContractFunctionName<TAbi, "payable" | "nonpayable">,
-    TArgs extends ContractFunctionArgs<
-      TAbi,
-      "payable" | "nonpayable",
-      TFunctionName
-    >,
+    TFunctionName extends string,
     TChainOverride extends Chain | undefined = undefined,
   >(
-    args: WriteContractParameters<
-      TAbi,
-      TFunctionName,
-      TArgs,
-      Chain,
-      Account,
-      TChainOverride
-    >
+    args: ViemWriteContractParameters<TAbi, TFunctionName, TChainOverride>
   ): Promise<{ txHash: Hex; receipt: TransactionReceipt }> {
     const startMs = performance.now();
     const localTxId = Math.floor(Math.random() * 1e6);

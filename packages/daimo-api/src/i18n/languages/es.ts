@@ -19,19 +19,10 @@ export const es: LanguageDefinition = {
 
   // SuggestedActions
   suggestedActions: {
-    upgrade: {
-      title: () => "Actualización Disponible",
-      subtitle: (latestVersion: string) =>
-        `Toca para actualizar a ${latestVersion}`,
-    },
-    backup: {
-      title: () => "Asegura Tu Cuenta",
+    shutdown: {
+      title: () => "Aviso de cierre",
       subtitle: () =>
-        "Mantén tu cuenta segura con una copia de seguridad de tu clave de acceso",
-    },
-    feedback: {
-      title: () => "¿Sugerencias? ¿Ideas?",
-      subtitle: () => "Únete a nuestro grupo de Telegram.",
+        "Cerramos la app Daimo el 31 de enero de 2026. Por favor retira tus fondos. Toca para más detalles.",
     },
   },
 };

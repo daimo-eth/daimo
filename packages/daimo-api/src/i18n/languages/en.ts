@@ -17,17 +17,10 @@ export const en = {
 
   // SuggestedActions
   suggestedActions: {
-    upgrade: {
-      title: () => "Upgrade Available",
-      subtitle: (latestVersion: string) => `Tap to update to ${latestVersion}`,
-    },
-    backup: {
-      title: () => "Secure Your Account",
-      subtitle: () => "Keep your account safe with a passkey backup",
-    },
-    feedback: {
-      title: () => "Feedback? Ideas?",
-      subtitle: () => "Join our Telegram group.",
+    shutdown: {
+      title: () => "Shutdown Notice",
+      subtitle: () =>
+        "We are sunsetting the Daimo app on Jan 31, 2026. Please withdraw funds. Tap for details.",
     },
   },
 };

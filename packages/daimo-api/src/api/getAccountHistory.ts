@@ -12,7 +12,6 @@ import {
   RecommendedExchange,
   SuggestedAction,
   TransferClog,
-  appStoreLinks,
   assert,
   assertNotNull,
   daimoDomainAddress,
@@ -22,7 +21,6 @@ import {
   hasAccountName,
 } from "@daimo/common";
 import semver from "semver";
-import semverLt from "semver/functions/lt";
 import { Address } from "viem";
 
 import { FeatFlag } from "./featureFlag";
@@ -48,7 +46,6 @@ import { addLandlineTransfers } from "../landline/landlineClogMatcher";
 import { ViemClient } from "../network/viemClient";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
-import { getAppVersionTracker } from "../server/appVersion";
 import { TrpcRequestContext } from "../server/trpc";
 
 export interface AccountHistoryResult {
@@ -310,28 +307,12 @@ function getSuggestedActions(
   const ret: SuggestedAction[] = [];
   const t = i18n(lang).suggestedActions;
 
-  // Not on latest version? Ask them to upgrade.
-  const latestVersion = getAppVersionTracker().getLatestVersion();
-  const { daimoPlatform, daimoVersion } = ctx;
-  const appVersion = daimoVersion.split(" ")[0];
-  if (appVersion && latestVersion && semverLt(appVersion, latestVersion)) {
-    ret.push({
-      id: `2024-02-update-${appVersion}-to-${latestVersion}`,
-      title: t.upgrade.title(),
-      subtitle: t.upgrade.subtitle(latestVersion),
-      url: appStoreLinks[daimoPlatform.startsWith("ios") ? "ios" : "android"],
-    });
-  }
-
-  // If account is not backed up, asked them to create a backup
-  if (hist.accountKeys.length === 1) {
-    ret.push({
-      id: "2024-02-passkey-backup",
-      title: t.backup.title(),
-      subtitle: t.backup.subtitle(),
-      url: `daimo://settings/add-passkey`,
-    });
-  }
+  ret.push({
+    id: "2025-11-shutdown",
+    title: t.shutdown.title(),
+    subtitle: t.shutdown.subtitle(),
+    url: "https://daimo.com/app-shutdown",
+  });
 
   return ret;
 }

@@ -1,3 +1,9 @@
+## The old Daimo app is shutting down
+
+Please withdraw funds. [For details, see this post.](https://daimo.com/app-shutdown)
+
+--
+
 <img alt="Screenshot" src="https://github.com/daimo-eth/daimo/assets/169280/3207b2bf-f93d-4c26-b56f-1545e4e7c182">
 
 ### Daimo is a universal cash app

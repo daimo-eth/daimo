@@ -23,11 +23,13 @@ export async function GET(request: Request) {
 
   // Rewrite /_next/... URLs to superSo/_next/...
   const ct = res.headers.get("content-type") || "";
-  let retBody = resBody as Blob | string;
+  let retBody: string | Uint8Array;
   if (ct.includes("text/html")) {
     console.log(`[WEB] rewriting /_next/ URLs in ${upstreamUrl}`);
     const initHtml = await resBody.text();
     retBody = initHtml.replace(/\/_next\//g, `${superSo}/_next/`);
+  } else {
+    retBody = await resBody.bytes();
   }
 
   const headers = new Headers();
@@ -37,7 +39,13 @@ export async function GET(request: Request) {
     headers.set(key, value);
   }
 
-  return new Response(retBody, {
+  const bodyLength =
+    typeof retBody === "string"
+      ? new TextEncoder().encode(retBody).byteLength
+      : retBody.byteLength;
+  console.log(`[WEB] response ${ct || "unknown"} ${bodyLength}b`);
+
+  return new Response(retBody as BodyInit, {
     status: res.status,
     statusText: res.statusText,
     headers,
