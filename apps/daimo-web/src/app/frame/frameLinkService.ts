@@ -146,7 +146,10 @@ export class FrameLinkService {
   ): Promise<string> {
     const apiKey = assertNotNull(envVarsWeb.DAIMO_API_KEY, "Set DAIMO_API_KEY");
     const preimage = `${frame.id}-${fid}-${apiKey}`;
-    const hash = await crypto.subtle.digest("SHA-256", Buffer.from(preimage));
+    const hash = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(preimage)
+    );
     const suffix = Buffer.from(hash).toString("hex").substring(0, 6);
     const code = `fc-${frame.id}-${fid}-${suffix}`;
 

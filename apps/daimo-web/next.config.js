@@ -1,3 +1,6 @@
+const path = require("path");
+const webpack = require("webpack");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   headers() {
@@ -28,6 +31,19 @@ const nextConfig = {
       loader: "ts-loader",
       exclude: /node_modules/,
     });
+    const portoShim = path.resolve(__dirname, "shims/porto-connector.ts");
+    config.plugins = config.plugins ?? [];
+    config.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(
+        /@wagmi\/connectors\/dist\/esm\/porto\.js$/,
+        portoShim
+      ),
+      new webpack.NormalModuleReplacementPlugin(
+        /@wagmi\/connectors\/dist\/cjs\/porto\.js$/,
+        portoShim
+      )
+    );
+
     return config;
   },
 };

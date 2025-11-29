@@ -1,4 +1,4 @@
-import { p256 } from "@noble/curves/p256";
+import { p256 } from "@noble/curves/nist.js";
 import {
   validateMnemonic as bip39ValidateMnemonic,
   generateMnemonic,
@@ -63,5 +63,5 @@ export async function signWithMnemonic(
   const msgHash = sha256(msg);
   const sig = p256.sign(msgHash.slice(2), privKey);
 
-  return `0x${sig.toDERHex(false)}`;
+  return bytesToHex(sig.toBytes("der"));
 }

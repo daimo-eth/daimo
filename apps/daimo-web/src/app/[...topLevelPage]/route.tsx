@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     typeof retBody === "string"
       ? new TextEncoder().encode(retBody).byteLength
       : retBody.byteLength;
-  console.log(`[WEB] response ${ct || "unknown"} ${bodyLength}b`);
+  console.log(`[WEB] response type ${ct || "unknown"}, ${bodyLength}b`);
 
   return new Response(retBody as BodyInit, {
     status: res.status,
