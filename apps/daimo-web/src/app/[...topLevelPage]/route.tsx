@@ -5,8 +5,24 @@ export async function GET(request: Request) {
 
   // Redirect daimo.xyz to daimo.com
   if (url.hostname === "daimo.xyz") {
+    console.log(`[WEB] redirecting ${url} to daimo.com`);
     url.hostname = "daimo.com";
     return Response.redirect(url, 301);
+  }
+
+  // Redirect /blog/* to blog.daimo.com
+  if (url.pathname.startsWith("/blog")) {
+    const pathname = url.pathname.substring("/blog".length);
+    const newUrl = new URL(`https://blog.daimo.com${pathname}`);
+    console.log(`[WEB] redirecting ${url} to ${newUrl}...`);
+    return Response.redirect(newUrl, 301);
+  }
+
+  // Redirect /app-shutdown to blog.daimo.com/app-shutdown
+  if (url.pathname === "/app-shutdown") {
+    const newUrl = new URL(`https://blog.daimo.com/app-shutdown`);
+    console.log(`[WEB] redirecting ${url} to ${newUrl}...`);
+    return Response.redirect(newUrl, 301);
   }
 
   // Otherwise proxy the request to our notion super.so
