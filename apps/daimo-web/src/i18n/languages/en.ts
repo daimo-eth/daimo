@@ -123,8 +123,8 @@ export const en = {
     },
     linkStatus: {
       // some of these are duplicated in this.link so those we reused
-      unhandeledLink: (linkType: any) => `Unhandled link type: ${linkType}`,
-      unhandeledLinkForType: (linkType: any) =>
+      unhandledLink: (linkType: any) => `Unhandled link type: ${linkType}`,
+      unhandledLinkForType: (linkType: any) =>
         `Unhandled link status for type: ${linkType}`,
     },
 
@@ -212,7 +212,7 @@ export const en = {
         whyDaimo: () => "Why Daimo?",
         text1: () => "Secure, audited, and fully open source.",
         text2: () => "The safest, fastest way to stablecoin.",
-        commingSoon: () => "COMING SOON",
+        comingSoon: () => "COMING SOON",
       },
     },
     testimonials: {
