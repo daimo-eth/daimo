@@ -1,19 +1,11 @@
-import {
-  LandlineAccount,
-  PlatformType,
-  daimoDomainAddress,
-  timeAgo,
-} from "@daimo/common";
+import { daimoDomainAddress } from "@daimo/common";
 import { daimoChainFromId } from "@daimo/contract";
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState, useEffect } from "react";
 import {
   ActivityIndicator,
   ImageSourcePropType,
-  Linking,
-  Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   TouchableHighlight,
@@ -21,23 +13,14 @@ import {
   useWindowDimensions,
 } from "react-native";
 
+import { DaimoPayWebView } from "./DaimoPayWebView";
 import IconDepositWallet from "../../../../assets/icon-deposit-wallet.png";
 import IconWithdrawWallet from "../../../../assets/icon-withdraw-wallet.png";
-import LandlineLogo from "../../../../assets/logos/landline-logo.png";
 import { DispatcherContext } from "../../../action/dispatch";
 import { useNav } from "../../../common/nav";
 import { env } from "../../../env";
-import { i18NLocale, i18n } from "../../../i18n";
-import { useAccount } from "../../../logic/accountManager";
-import {
-  DaimoContact,
-  getContactProfilePicture,
-  landlineAccountToContact,
-} from "../../../logic/daimoContacts";
-import { useTime } from "../../../logic/time";
-import { getRpcFunc } from "../../../logic/trpc";
+import { i18n } from "../../../i18n";
 import { Account } from "../../../storage/account";
-import { InfoBox } from "../../shared/InfoBox";
 import { ScreenHeader } from "../../shared/ScreenHeader";
 import Spacer from "../../shared/Spacer";
 import { TextBody, TextMeta } from "../../shared/text";
@@ -55,161 +38,49 @@ export default function DepositScreen() {
 // maybe is in here is the problem?
 function DepositScreenInner({ account }: { account: Account }) {
   const { ss } = useTheme();
+  const [showDaimoPay, setShowDaimoPay] = useState(false);
+  const nav = useNav();
+
+  // Automatically close Daimo Pay webview when the user navigates away.
+  useEffect(() => {
+    const unsubscribe = nav.addListener("blur", () => setShowDaimoPay(false));
+    return unsubscribe;
+  }, [nav]);
+
   return (
     <View style={{ flex: 1 }}>
       <View style={ss.container.padH16}>
         <ScreenHeader title={i18.screenHeader()} />
       </View>
       <ScrollView>
-        <LandlineList />
         <Spacer h={24} />
-        <DepositList account={account} />
+        <DepositList account={account} setShowDaimoPay={setShowDaimoPay} />
         <Spacer h={16} />
         <WithdrawList account={account} />
       </ScrollView>
+
+      <DaimoPayWebView
+        account={account}
+        visible={showDaimoPay}
+        onClose={() => setShowDaimoPay(false)}
+      />
     </View>
   );
 }
 
-function LandlineList() {
-  const account = useAccount();
-  if (account == null) return null;
-  const showLandline = !!account.landlineSessionURL;
-  if (!showLandline) return null;
-
-  const isLandlineConnected = account.landlineAccounts.length > 0;
-
-  return isLandlineConnected ? <LandlineAccountList /> : <LandlineConnect />;
-}
-
-function LandlineConnect() {
-  const account = useAccount();
-
-  const openLandline = useCallback(() => {
-    if (!account) return;
-    Linking.openURL(account.landlineSessionURL);
-  }, [account?.landlineSessionURL]);
-
-  if (account == null) return null;
-
-  return (
-    <LandlineOptionRow
-      cta={i18.landline.cta()}
-      title={i18.landline.title()}
-      logo={LandlineLogo}
-      onClick={openLandline}
-    />
-  );
-}
-
-function LandlineAccountList() {
-  const account = useAccount();
-  const nav = useNav();
-  const nowS = useTime();
-
-  if (account == null) return null;
-
-  const landlineAccounts = account.landlineAccounts;
-
-  const goToSendTransfer = (landlineAccount: LandlineAccount) => {
-    const recipient = landlineAccountToContact(landlineAccount);
-    nav.navigate("DepositTab", {
-      screen: "LandlineTransfer",
-      params: { recipient },
-    });
-  };
-
-  return (
-    <>
-      {landlineAccounts.map((acc, idx) => {
-        const accCreatedAtS = new Date(acc.createdAt).getTime() / 1000;
-        const recipient = landlineAccountToContact(acc) as DaimoContact;
-        return (
-          <LandlineOptionRow
-            key={`landline-account-${idx}`}
-            title={i18.landline.optionRowTitle(
-              timeAgo(accCreatedAtS, i18NLocale, nowS)
-            )}
-            cta={`${acc.bankName} ****${acc.accountNumberLastFour}`}
-            logo={getContactProfilePicture(recipient) as ImageSourcePropType}
-            isAccount
-            onClick={() => goToSendTransfer(acc)}
-          />
-        );
-      })}
-    </>
-  );
-}
-
-// An on-demand exchange is one that requires fetching a URL at the time of
-// user's interaction, rather than have it pre-fetched. These exchanges are
-// first fetched with a loading spinner, then the URL is opened.
-// Binance is the only on-demand exchange for now because generated links
-// expire quickly and 301 redirects don't work for opening universal links
-// in Binance app, so we can't include it in the recommendedExchanges API-side.
-function getOnDemandExchanges(
-  account: Account,
-  setProgress: (progress: Progress) => void
-) {
-  const rpcFunc = getRpcFunc(daimoChainFromId(account.homeChainId));
-
-  const platform = ["ios", "android"].includes(Platform.OS)
-    ? (Platform.OS as PlatformType)
-    : "other";
-
-  if (platform === "other") {
-    return [];
-  }
-
-  const progressId = "loading-binance-deposit";
-
-  const onClick = async () => {
-    setProgress(progressId);
-    const url = await rpcFunc.getExchangeURL.query({
-      addr: account.address,
-      platform,
-      exchange: "binance",
-      direction: "depositFromExchange",
-    });
-
-    if (url == null) {
-      console.error(`[DEPOSIT] no binance url for ${account.name}`);
-      setProgress("idle");
-    } else {
-      Linking.openURL(url);
-      setProgress("started");
-    }
-  };
-
-  return [
-    {
-      cta: i18.binance.cta(),
-      title: i18.binance.title(),
-      logo: {
-        uri: `${daimoDomainAddress}/assets/deposit/binance.png`,
-      },
-      loadingId: progressId,
-      isExternal: true,
-      sortId: 2,
-      onClick,
-    },
-  ];
-}
-
 type Progress = "idle" | "loading-binance-deposit" | "started";
 
-function DepositList({ account }: { account: Account }) {
+function DepositList({
+  account,
+  setShowDaimoPay,
+}: {
+  account: Account;
+  setShowDaimoPay: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const { color, ss } = useTheme();
   const styles = useMemo(() => getStyles(color, ss), [color, ss]);
   const { chainConfig } = env(daimoChainFromId(account.homeChainId));
   const isTestnet = chainConfig.chainL2.testnet;
-
-  const [progress, setProgress] = useState<Progress>("idle");
-
-  const openExchange = (url: string) => {
-    Linking.openURL(url);
-    setProgress("started");
-  };
 
   const dispatcher = useContext(DispatcherContext);
 
@@ -230,36 +101,23 @@ function DepositList({ account }: { account: Account }) {
   ];
 
   if (!isTestnet) {
-    options.push(
-      ...account.recommendedExchanges.map((rec) => ({
-        title: rec.title || i18.loading(),
-        cta: rec.cta,
-        logo: rec.logo || defaultLogo,
-        isExternal: true,
-        sortId: rec.sortId || 0,
-        onClick: () => openExchange(rec.url),
-      })),
-      ...getOnDemandExchanges(account, setProgress)
-    );
-    options.sort((a, b) => (a.sortId || 0) - (b.sortId || 0));
+    options.push({
+      cta: "Deposit with Daimo Pay",
+      title: "Daimo Pay",
+      logo: { uri: "https://pay.daimo.com/daimo-pay-logo.svg" },
+      sortId: 1,
+      onClick: () => {
+        setShowDaimoPay(true);
+      },
+    });
   }
 
   return (
     <View style={styles.section}>
       <TextBody color={color.gray3}>Deposit</TextBody>
-      {progress === "started" && (
-        <>
-          <Spacer h={16} />
-          <InfoBox
-            icon="check"
-            title={i18.initiated.title()}
-            subtitle={i18.initiated.subtitle()}
-          />
-        </>
-      )}
       <Spacer h={16} />
       {options.map((option) => (
-        <OptionRow key={option.cta} progress={progress} {...option} />
+        <OptionRow key={option.cta} progress="idle" {...option} />
       ))}
     </View>
   );
@@ -304,62 +162,6 @@ function WithdrawList({ account }: { account: Account }) {
         />
       )}
     </View>
-  );
-}
-
-type LandlineOptionRowProps = {
-  title: string;
-  cta: string;
-  logo: ImageSourcePropType;
-  isAccount?: boolean;
-  onClick: () => void;
-};
-
-function LandlineOptionRow({
-  title,
-  cta,
-  logo,
-  isAccount,
-  onClick,
-}: LandlineOptionRowProps) {
-  const { color, touchHighlightUnderlay, ss } = useTheme();
-  const styles = useMemo(() => getStyles(color, ss), [color, ss]);
-  const width = useWindowDimensions().width;
-
-  return (
-    <Pressable
-      onPress={onClick}
-      style={({ pressed }) => [
-        {
-          ...styles.checklistAction,
-          backgroundColor: pressed
-            ? touchHighlightUnderlay.subtle.underlayColor
-            : undefined,
-        },
-      ]}
-    >
-      <View style={{ ...styles.optionRowLeft, maxWidth: width - 200 }}>
-        <LogoBubble logo={logo} />
-        <View style={{ flexDirection: "column" }}>
-          <TextBody color={color.midnight}>{cta}</TextBody>
-          <Spacer h={2} />
-          <TextMeta color={color.gray3}>{title}</TextMeta>
-        </View>
-      </View>
-      <View style={styles.optionRowRight}>
-        {isAccount ? (
-          <TextBody color={color.primary}>
-            {i18.landline.startTransfer()}
-          </TextBody>
-        ) : (
-          <TextBody color={color.primary}>
-            {i18.go()}
-            {"  "}
-            <Octicons name="link-external" />
-          </TextBody>
-        )}
-      </View>
-    </Pressable>
   );
 }
 

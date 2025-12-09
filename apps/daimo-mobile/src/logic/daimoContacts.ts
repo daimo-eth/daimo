@@ -246,7 +246,7 @@ function eAccAddrToContact(addr: Address): EAccountContact {
   return eAccToContact(eAcc);
 }
 
-export function landlineAccountToContact(
+function landlineAccountToContact(
   landlineAccount: LandlineAccount
 ): LandlineBankAccountContact {
   return {
