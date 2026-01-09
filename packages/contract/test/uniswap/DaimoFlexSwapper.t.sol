@@ -82,8 +82,6 @@ contract SwapperTest is Test {
         deal(address(weth), alice, 1e18);
         deal(address(degen), alice, amountIn);
 
-        degen.approve(address(swapper), amountIn);
-
         bytes memory swapCallData = abi.encodeWithSignature(
             "exactInput((bytes,address,uint256,uint256))",
             ExactInputParams({
@@ -94,9 +92,9 @@ contract SwapperTest is Test {
             })
         );
 
+        degen.transfer(address(swapper), amountIn);
         uint256 amountOut = swapper.swapToCoin({
             tokenIn: degen,
-            amountIn: amountIn,
             tokenOut: usdc,
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
@@ -153,7 +151,6 @@ contract SwapperTest is Test {
         vm.expectRevert(bytes("DFS: insufficient output"));
         swapper.swapToCoin{value: 1 ether}({
             tokenIn: IERC20(address(0)),
-            amountIn: 1 ether,
             tokenOut: weth,
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
@@ -166,7 +163,6 @@ contract SwapperTest is Test {
         // 1:1 ETH to WETH = allowed
         uint256 amountOut = swapper.swapToCoin{value: 1 ether}({
             tokenIn: IERC20(address(0)),
-            amountIn: 1 ether,
             tokenOut: weth,
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
@@ -185,7 +181,6 @@ contract SwapperTest is Test {
         vm.expectRevert(bytes("DFS: input token = output token"));
         swapper.swapToCoin({
             tokenIn: weth,
-            amountIn: 1 ether,
             tokenOut: weth,
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({
@@ -221,7 +216,6 @@ contract SwapperTest is Test {
 
         amountOut = swapper.swapToCoin{value: amountIn}({
             tokenIn: IERC20(address(0)), // ETH
-            amountIn: amountIn,
             tokenOut: usdc,
             extraData: abi.encode(
                 DaimoFlexSwapper.DaimoFlexSwapperExtraData({

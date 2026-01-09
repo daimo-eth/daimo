@@ -17,6 +17,9 @@ import "./interfaces/IDaimoSwapper.sol";
 /// @author The Daimo team
 /// @custom:security-contact security@daimo.com
 ///
+/// For security, this contract never holds any tokens (except during a swap)
+/// and does not require any token approvals.
+///
 /// Starts by quoting an accurate reference price from any input (token, amount)
 /// to a list of supported output stablecoins using Uniswap V3 TWAP/TWALs. See
 /// https://uniswap.org/whitepaper-v3.pdf for more on TWAP and TWAL.
@@ -166,10 +169,11 @@ contract DaimoFlexSwapper is
     // ----- PUBLIC FUNCTIONS -----
 
     /// Swap input to output token at a fair price. Input token 0x0 refers to
-    /// the native token, eg ETH. Output token cannot be 0x0.
+    /// the native token, eg ETH. Output token cannot be 0x0. To call this, you
+    /// must first send the input amount to the contract. This must be done
+    /// within a single transaction. (Much like the Uniswap UniversalRouter.)
     function swapToCoin(
         IERC20 tokenIn,
-        uint256 amountIn,
         IERC20 tokenOut,
         bytes calldata extraData
     ) public payable returns (uint256 swapAmountOut) {
@@ -177,6 +181,16 @@ contract DaimoFlexSwapper is
         require(tokenIn != tokenOut, "DFS: input token = output token");
         require(address(tokenOut) != address(0), "DFS: output token = 0x0");
         require(isOutputToken[tokenOut], "DFS: unsupported output token");
+
+        // Get input amount
+        uint256 amountIn;
+        if (address(tokenIn) == address(0)) {
+            require(msg.value > 0, "DFS: missing msg.value");
+            amountIn = msg.value;
+        } else {
+            require(msg.value == 0, "DFS: unexpected msg.value");
+            amountIn = tokenIn.balanceOf(address(this));
+        }
         require(amountIn < _MAX_UINT128, "DFS: amountIn too large");
         DaimoFlexSwapperExtraData memory extra;
         extra = abi.decode(extraData, (DaimoFlexSwapperExtraData));
@@ -193,11 +207,9 @@ contract DaimoFlexSwapper is
         bytes memory callData = extra.callData;
         uint256 callValue = 0;
         if (address(tokenIn) == address(0)) {
-            require(msg.value == amountIn, "DFS: incorrect msg.value");
             callValue = amountIn;
         } else {
-            require(msg.value == 0, "DFS: unexpected msg.value");
-            tokenIn.safeTransferFrom(msg.sender, callDest, amountIn);
+            tokenIn.safeTransfer(callDest, amountIn);
         }
 
         // Execute swap

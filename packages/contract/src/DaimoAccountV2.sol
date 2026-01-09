@@ -447,11 +447,10 @@ contract DaimoAccountV2 is IAccount, Initializable, IERC1271, ReentrancyGuard {
         if (address(tokenIn) == address(0)) {
             value = amountIn; // native token
         } else {
-            tokenIn.forceApprove(address(swapper), amountIn);
+            tokenIn.safeTransfer(address(swapper), amountIn);
         }
         amountOut = swapper.swapToCoin{value: value}({
             tokenIn: tokenIn,
-            amountIn: amountIn,
             tokenOut: tokenOut,
             extraData: extraData
         });
