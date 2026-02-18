@@ -16,7 +16,6 @@ import { IndexWatcher } from "../db/indexWatcher";
 import { chainConfig } from "../env";
 import { InviteCodeTracker } from "../offchain/inviteCodeTracker";
 import { InviteGraph } from "../offchain/inviteGraph";
-import { AntiSpam } from "../server/antiSpam";
 import { Telemetry } from "../server/telemetry";
 import { TrpcRequestContext } from "../server/trpc";
 
@@ -95,13 +94,11 @@ export async function deployWallet(
   nameReg.onSuccessfulRegister(name, address);
   inviteGraph.processDeployWallet(address, inviteLinkStatus);
 
-  // Send starter USDC only for invite links, and check for spam.
+  // Send starter USDC for invite links.
   let sendFaucet = false;
   let faucetTransfer: TransferSwapClog | undefined;
   if (inviteLinkStatus.link.type === "invite") {
-    const { requestInfo } = ctx;
-    const isTestnet = chainConfig.chainL2.testnet;
-    sendFaucet = isTestnet || (await AntiSpam.shouldSendFaucet(requestInfo));
+    sendFaucet = true;
 
     const inviteResult = await inviteCodeTracker.useInviteCode(
       address,

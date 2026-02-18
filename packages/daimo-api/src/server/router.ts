@@ -3,7 +3,6 @@ import {
   DaimoLinkRequestV2,
   amountToDollars,
   assert,
-  assertNotNull,
   encodeRequestId,
   formatDaimoLink,
   generateRequestId,
@@ -21,7 +20,6 @@ import { TRPCError } from "@trpc/server";
 import { getAddress, hashMessage, hexToNumber } from "viem";
 import { z } from "zod";
 
-import { AntiSpam } from "./antiSpam";
 import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { TokenRegistry } from "./tokenRegistry";
@@ -148,36 +146,10 @@ export function createRouter(
     return opts.next();
   });
 
-  // API spam protection
-  const ipMap = new Map<string, { tsS: number; allowed: boolean }>();
-  const antiSpamMiddleware = trpcT.middleware(async (opts) => {
-    const { requestInfo } = opts.ctx;
-    const ip = assertNotNull(requestInfo["rpc.ip_addr"] as string);
-    let ipResult = ipMap.get(ip);
-    if (ipResult == null || ipResult.tsS < now() - 60) {
-      const allowed = await AntiSpam.shouldServeAPI(requestInfo);
-      ipResult = { tsS: now(), allowed };
-      ipMap.set(ip, ipResult);
-      if (!ipResult.allowed) {
-        console.log(`[API] request blocked: ${JSON.stringify(requestInfo)}`);
-      }
-    }
-
-    if (!ipResult.allowed) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Blocked" });
-    }
-    return opts.next();
-  });
-
-  // const sentryMiddleware = trpcT.middleware(
-  //   Sentry.Handlers.trpcMiddleware({ attachRpcInput: true }) as any
-  // );
-
   const publicProcedure = trpcT.procedure
     .use(corsMiddleware)
     .use(tracerMiddleware)
-    .use(readyMiddleware)
-    .use(antiSpamMiddleware);
+    .use(readyMiddleware);
 
   const startTimeS = now();
 
