@@ -11,4 +11,6 @@ optimizer = true
 optimizer_runs = 999_999
 evm_version = "cancun"
 
+[profile.ci]
+
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
