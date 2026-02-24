@@ -29,7 +29,7 @@ import { QRScreen } from "./screen/QRScreen";
 import { SeedPhraseScreen } from "./screen/SeedPhraseScreen";
 import { SettingsScreen } from "./screen/SettingsScreen";
 import { YourInvitesScreen } from "./screen/YourInvitesScreen";
-import { BitrefillWebView } from "./screen/deposit/BitrefillWebview";
+import { BitrefillWebView } from "./screen/deposit/BitrefillWebView";
 import DepositScreen from "./screen/deposit/DepositScreen";
 import { ErrorScreen } from "./screen/errorScreens";
 import { AddDeviceScreen } from "./screen/keyRotation/AddDeviceScreen";
