@@ -24,6 +24,7 @@ import { PushNotifier } from "./pushNotifier";
 import { Telemetry, zUserAction } from "./telemetry";
 import { TokenRegistry } from "./tokenRegistry";
 import { trpcT } from "./trpc";
+import { assertNoFastCctpCalls } from "../api/assertNoFastCctpCalls";
 import { claimEphemeralNoteSponsored } from "../api/claimEphemeralNoteSponsored";
 import { createRequestSponsored } from "../api/createRequestSponsored";
 import { deployWallet } from "../api/deployWallet";
@@ -442,6 +443,7 @@ export function createRouter(
       .input(z.object({ op: zUserOpHex }))
       .mutation(async (opts) => {
         const { op } = opts.input;
+        assertNoFastCctpCalls(op.callData);
         const span = opts.ctx.span!;
         const senderName = nameReg.resolveDaimoNameForAddr(op.sender);
         const h = hexToNumber;
@@ -471,6 +473,7 @@ export function createRouter(
       .input(z.object({ op: zUserOpHex, memo: z.string().optional() }))
       .mutation(async (opts) => {
         const { op, memo } = opts.input;
+        assertNoFastCctpCalls(op.callData);
         return sendUserOpV2(
           op,
           memo,
